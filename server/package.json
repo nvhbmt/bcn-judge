@@ -8,16 +8,29 @@
     "test": "vitest run",
     "test:sandbox": "DOCKER=1 vitest run src/judge/sandbox.test.ts",
     "images:build": "bash ../scripts/build-runner-images.sh",
-    "judge:demo": "node --import tsx src/judge/cli.ts"
+    "judge:demo": "node --import tsx src/judge/cli.ts",
+    "dev": "node --import tsx --watch src/index.ts",
+    "db:migrate": "node --import tsx src/db/migrate.ts",
+    "db:seed": "node --import tsx src/db/seed.ts",
+    "test:integration": "INTEGRATION=1 DATABASE_URL=postgres://bcn:bcn@localhost:5434/bcn_judge_test vitest run src/routes src/auth src/db",
+    "db:grants": "node --import tsx src/db/grants.ts"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@node-rs/argon2": "^2.2.0",
     "dockerode": "^5.0.1",
-    "tar-stream": "^3.2.1"
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.5",
+    "pg": "^8.23.0",
+    "tar-stream": "^3.2.1",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/dockerode": "^4.0.1",
     "@types/node": "^26.4.0",
+    "@types/pg": "^8.23.1",
     "@types/tar-stream": "^3.1.4",
+    "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
