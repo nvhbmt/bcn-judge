@@ -14,6 +14,22 @@ bash scripts/run-local.sh                   # Postgres + migrate + seed + API + 
 # → http://localhost:5174    admin@bcn.local / bcnjudge
 ```
 
+Seed mặc định chỉ có ngôn ngữ, settings và một admin, nên mọi màn hình đều rỗng.
+Để xem hệ thống lúc "có người dùng":
+
+```bash
+cd server && npm run db:seed:demo -- --reset
+```
+
+Tạo 3 mentor · 32 member · 5 nhóm có leader · 2 khoá học kèm giáo trình · 8 bài
+tập với testcase mẫu và ẩn · 3 contest (đã kết thúc / đang diễn ra / sắp diễn ra) ·
+333 bài nộp đã chấm trải đều AC/WA/TLE/RE/CE, nên tiến độ, bảng xếp hạng khoá và
+bảng xếp hạng contest đều có số thật. Mọi tài khoản mẫu: `matkhau123`.
+
+Thêm `--judge` để xếp thêm một ít bài ở trạng thái `pending` cho worker chấm thật —
+cách nhanh nhất để kiểm chứng hàng đợi và sandbox còn chạy đúng. Script từ chối
+chạy nếu `DATABASE_URL` không trông giống máy dev.
+
 Kiểm chứng toàn hệ thống qua HTTP (cần API + worker đang chạy):
 
 ```bash
