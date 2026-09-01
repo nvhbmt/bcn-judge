@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Button, EmptyState, Spinner } from '@/components/ui'
+import { Button, EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 
 interface JudgeStatus {
@@ -37,7 +37,7 @@ export function AdminPage() {
       <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </Link>
-      <h1 className="mb-4 text-xl font-semibold">Tình trạng chấm bài</h1>
+      <h1 className="mb-4 font-display text-[26px] text-ink-1">Tình trạng chấm bài</h1>
 
       {/* Hai băng tách bạch: backlog chạy thử chỉ cảnh báo, backlog nộp bài mới kéo chuông. */}
       {data.health.noLiveWorker ? <Alarm>Không có worker nào sống — bài nộp đang xếp hàng.</Alarm> : null}
@@ -59,7 +59,7 @@ export function AdminPage() {
       </div>
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold">Worker</h2>
+        <div className="mb-2"><SectionRule label="Worker" /></div>
         {data.workers.length === 0 ? (
           <p className="text-sm text-ink-5">Chưa worker nào đăng ký.</p>
         ) : (
@@ -79,7 +79,7 @@ export function AdminPage() {
       </section>
 
       <section className="mb-5">
-        <h2 className="mb-2 text-sm font-semibold">Bài lỗi hệ thống (IE) — 48 giờ qua</h2>
+        <div className="mb-2"><SectionRule label="Bài lỗi hệ thống (IE) — 48 giờ qua" /></div>
         <p className="mb-2 text-sm text-ink-5">
           {data.ieSubmissions.length} bài. IE không tính vào lượt của member và được chấm lại.
         </p>
@@ -89,7 +89,7 @@ export function AdminPage() {
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-semibold">Bảo trì</h2>
+        <div className="mb-2"><SectionRule label="Bảo trì" /></div>
         <p className="mb-2 text-sm text-ink-5">
           Tạm dừng nhận bài nộp mới; member vẫn đọc đề và lưu nháp bình thường.
         </p>

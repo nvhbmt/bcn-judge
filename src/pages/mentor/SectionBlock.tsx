@@ -34,7 +34,7 @@ export function SectionBlock({
   return (
     <section className="mb-4 border border-line bg-surface-2">
       <header className="flex items-center gap-2 border-b border-line px-3 py-2">
-        <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{section.title}</h2>
+        <h2 className="min-w-0 flex-1 truncate font-display text-[15px] text-ink-1">{section.title}</h2>
         <span className="text-xs text-ink-5">{section.items.length} mục</span>
         <Button
           onClick={() => onMoveSection(-1)}

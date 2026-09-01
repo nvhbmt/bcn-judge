@@ -75,7 +75,7 @@ export function Notice({
 export function Section({ title, hint, children }: { title: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <section className="mb-5 border border-line bg-surface-2 p-3">
-      <h2 className="mb-1 text-sm font-semibold">{title}</h2>
+      <h2 className="mb-1 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{title}</h2>
       {hint ? <p className="mb-3 text-xs text-ink-5">{hint}</p> : <div className="mb-2" />}
       {children}
     </section>

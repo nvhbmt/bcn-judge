@@ -7,7 +7,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
-import { EmptyState, Spinner } from '@/components/ui'
+import { EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import { describeFailure, type FailureNotice } from './conflicts'
 import { LanguageForm } from './LanguageForm'
@@ -38,7 +38,7 @@ export function LanguagesPanel() {
 
   return (
     <section className="mb-5">
-      <h2 className="mb-1 text-sm font-semibold">Ngôn ngữ chấm</h2>
+      <div className="mb-1"><SectionRule label="Ngôn ngữ chấm" /></div>
       <p className="mb-3 text-sm text-ink-5">
         Bật một ngôn ngữ là mentor thấy nó ngay trong danh sách ngôn ngữ cho phép của bài — không cần deploy lại. Image
         Docker phải có sẵn trên máy chấm trước khi bật.

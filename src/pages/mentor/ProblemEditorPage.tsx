@@ -97,7 +97,7 @@ export function ProblemEditorPage() {
         <Link to="/mentor/bai-tap" className="inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
           <ArrowLeft size={15} /> Bài tập
         </Link>
-        <h1 className="truncate text-sm font-semibold">{values.title || 'Bài chưa đặt tên'}</h1>
+        <h1 className="truncate font-display text-[16px] text-ink-1">{values.title || 'Bài chưa đặt tên'}</h1>
         <ValidationBadge state={validationState({ testcases: detail.testcases.length, validated })} />
         <span className="font-mono text-xs text-ink-6">bộ test #{detail.testcaseRev}</span>
 

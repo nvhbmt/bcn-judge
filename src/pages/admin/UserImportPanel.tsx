@@ -39,7 +39,7 @@ export function UserImportPanel({ onClose }: { onClose: () => void }) {
   return (
     <section className="border border-line bg-surface-2 p-4">
       <div className="mb-3 flex items-center gap-2">
-        <h2 className="text-sm font-semibold">Nhập hàng loạt từ CSV</h2>
+        <h2 className="font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">Nhập hàng loạt từ CSV</h2>
         <Button onClick={onClose} className="ml-auto">
           Đóng
         </Button>

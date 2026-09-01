@@ -22,7 +22,7 @@ export function ContestCard({
   return (
     <li className="border border-line bg-surface-2 p-3">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 className="min-w-0 flex-1 truncate font-medium">{row.title}</h2>
+        <h2 className="min-w-0 flex-1 truncate font-display text-[16px] text-ink-1">{row.title}</h2>
         <span className={`rounded-full px-2 py-0.5 text-xs ${PHASE_CLASS[phase]}`}>{PHASE_LABEL[phase]}</span>
         <span
           className={` px-1.5 py-0.5 text-xs ${

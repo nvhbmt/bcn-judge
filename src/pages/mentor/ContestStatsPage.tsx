@@ -4,7 +4,7 @@
  */
 import { ArrowLeft } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
-import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
+import { EmptyState, SectionRule, Spinner, VerdictBadge } from '@/components/ui'
 import { Notice } from './fields'
 import { groupByProblem, percent } from './contestStats'
 import { useContestStats } from './useContests'
@@ -32,7 +32,7 @@ export function ContestStatsPage() {
         <ArrowLeft size={15} /> Về contest
       </Link>
 
-      <h1 className="mb-4 text-xl font-semibold">Thống kê contest</h1>
+      <h1 className="mb-4 font-display text-[26px] text-ink-1">Thống kê contest</h1>
 
       {isError || !data ? (
         <Notice tone="error">Không đọc được thống kê — kiểm tra bạn có quyền với contest này không.</Notice>
@@ -47,7 +47,7 @@ export function ContestStatsPage() {
           </div>
 
           <section className="mb-5">
-            <h2 className="mb-2 text-sm font-semibold">Phân bố verdict theo bài</h2>
+            <div className="mb-2"><SectionRule label="Phân bố verdict theo bài" /></div>
             {byProblem.length === 0 ? (
               <EmptyState title="Contest chưa có bài nào" />
             ) : (
@@ -82,7 +82,7 @@ export function ContestStatsPage() {
           </section>
 
           <section>
-            <h2 className="mb-2 text-sm font-semibold">Đã mở contest nhưng chưa nộp bài nào</h2>
+            <div className="mb-2"><SectionRule label="Đã mở contest nhưng chưa nộp bài nào" /></div>
             {data.notSubmitted.length === 0 ? (
               <p className="text-sm text-ink-5">Mọi người đã mở contest đều đã nộp ít nhất một bài.</p>
             ) : (

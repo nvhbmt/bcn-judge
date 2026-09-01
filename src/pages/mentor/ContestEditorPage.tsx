@@ -57,7 +57,7 @@ export function ContestEditorPage() {
       </Link>
 
       <header className="mb-4 flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-semibold">{row.title}</h1>
+        <h1 className="font-display text-[26px] text-ink-1">{row.title}</h1>
         <span className={`rounded-full px-2 py-0.5 text-xs ${PHASE_CLASS[phase]}`}>{PHASE_LABEL[phase]}</span>
         <Link
           to={`/mentor/contest/${contestId}/thong-ke`}

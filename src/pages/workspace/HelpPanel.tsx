@@ -5,7 +5,7 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
   return (
     <div className="space-y-5 px-4 py-4 text-sm">
       <section>
-        <h2 className="mb-1 font-semibold">Làm bài thế nào</h2>
+        <h2 className="mb-1 font-display text-[16px] text-ink-1">Làm bài thế nào</h2>
         <ol className="list-decimal space-y-1 pl-5 text-ink-3">
           <li>Đọc đề ở khung giữa, chọn ngôn ngữ ở khung code bên phải.</li>
           <li>
@@ -18,7 +18,7 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
       </section>
 
       <section>
-        <h2 className="mb-1 font-semibold">Ý nghĩa các verdict</h2>
+        <h2 className="mb-1 font-display text-[16px] text-ink-1">Ý nghĩa các verdict</h2>
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
           {(Object.keys(VERDICT_LABEL) as Verdict[]).map((v) => (
             <div key={v} className="contents">
@@ -30,7 +30,7 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
       </section>
 
       <section>
-        <h2 className="mb-1 font-semibold">Đọc dữ liệu vào, ghi dữ liệu ra</h2>
+        <h2 className="mb-1 font-display text-[16px] text-ink-1">Đọc dữ liệu vào, ghi dữ liệu ra</h2>
         <p className="text-ink-3">
           Chương trình đọc từ <b>stdin</b> và in ra <b>stdout</b> — không đọc/ghi file. Kết quả so sánh bỏ qua khoảng
           trắng cuối dòng và dòng trống cuối, nên thừa một dấu xuống dòng không bị tính sai.
@@ -43,7 +43,7 @@ Python: a, b = map(int, input().split());  print(a + b)`}
       </section>
 
       <section>
-        <h2 className="mb-1 font-semibold">Phím tắt</h2>
+        <h2 className="mb-1 font-display text-[16px] text-ink-1">Phím tắt</h2>
         <ul className="list-disc space-y-1 pl-5 text-ink-3">
           <li>
             <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd> — chạy thử
@@ -60,7 +60,7 @@ Python: a, b = map(int, input().split());  print(a + b)`}
 
       {role !== 'member' ? (
         <section>
-          <h2 className="mb-1 font-semibold">Dành cho mentor</h2>
+          <h2 className="mb-1 font-display text-[16px] text-ink-1">Dành cho mentor</h2>
           <ul className="list-disc space-y-1 pl-5 text-ink-3">
             <li>
               Tải testcase hàng loạt bằng file zip theo quy ước <code>01.in</code> / <code>01.out</code>.

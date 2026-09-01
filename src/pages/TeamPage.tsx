@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Crown } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
+import { EmptyState, SectionRule, Spinner, VerdictBadge } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { Verdict } from '@/types/api'
 
@@ -56,7 +56,7 @@ export function TeamPage() {
   return (
     <Shell>
       <header className="mb-4">
-        <h1 className="text-xl font-semibold">{team.name}</h1>
+        <h1 className="font-display text-[26px] text-ink-1">{team.name}</h1>
         <p className="text-sm text-ink-5">{team.members.length} thành viên</p>
       </header>
 
@@ -105,7 +105,7 @@ function TeamProgress({ teamId, onPick }: { teamId: string; onPick: (userId: str
 
   return (
     <section className="mb-6">
-      <h2 className="mb-2 text-sm font-semibold">Tiến độ theo khoá</h2>
+      <div className="mb-2"><SectionRule label="Tiến độ theo khoá" /></div>
       <table className="w-full text-sm">
         <thead className="text-left text-xs text-ink-5">
           <tr>
@@ -147,7 +147,7 @@ function TeamSubmissions({ teamId, userId }: { teamId: string; userId: string })
 
   return (
     <section>
-      <h2 className="mb-2 text-sm font-semibold">Bài nộp — chỉ đọc</h2>
+      <div className="mb-2"><SectionRule label="Bài nộp — chỉ đọc" /></div>
       <ul className="space-y-2">
         {data.map((s) => (
           <li key={s.id} className="border border-line p-3 text-sm">

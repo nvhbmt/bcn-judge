@@ -68,7 +68,7 @@ export function AdminShell({
       </NavLink>
       <AdminNav />
       <header className="mb-4">
-        <h1 className="text-xl font-semibold">{title}</h1>
+        <h1 className="font-display text-[26px] text-ink-1">{title}</h1>
         {description ? <p className="mt-1 text-sm text-ink-5">{description}</p> : null}
       </header>
       {children}

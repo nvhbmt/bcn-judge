@@ -34,7 +34,7 @@ export function ContestListPage() {
 
       <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Contest</h1>
+          <h1 className="font-display text-[26px] text-ink-1">Contest</h1>
           <p className="text-sm text-ink-5">
             Trạng thái <i>Sắp diễn ra / Đang diễn ra / Đã kết thúc</i> suy ra từ khung thời gian (FR-I1).
           </p>

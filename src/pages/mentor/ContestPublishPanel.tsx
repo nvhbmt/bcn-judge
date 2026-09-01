@@ -1,7 +1,7 @@
 /** Xuất bản contest (FR-I2) — cùng luật cổng mềm/cứng với xuất bản mục (FR-D6). */
 import { useState } from 'react'
 import { Send } from 'lucide-react'
-import { Button } from '@/components/ui'
+import { Button, SectionRule } from '@/components/ui'
 import { PublishGateNotice } from './PublishGateNotice'
 import { Notice } from './fields'
 import type { PublishStatus } from './mentorTypes'
@@ -23,7 +23,7 @@ export function ContestPublishPanel({ contestId, status }: { contestId: string; 
 
   return (
     <section className="border border-line bg-surface-2 p-4">
-      <h2 className="mb-1 text-sm font-semibold">Xuất bản</h2>
+      <div className="mb-1"><SectionRule label="Xuất bản" /></div>
       <p className="mb-3 text-sm text-ink-5">
         Contest Nháp chưa member nào thấy (US-10). Xuất bản rồi thì member trong phạm vi thấy nó ở mục
         “Sắp diễn ra” kèm đếm ngược, nhưng chưa thấy đề trước giờ bắt đầu.

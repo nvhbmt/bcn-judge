@@ -30,7 +30,7 @@ export function CourseDetailPage() {
       <header className="mb-5 flex items-start justify-between gap-3">
         <div>
           <span className="font-mono text-xs text-ink-5">{course.code}</span>
-          <h1 className="text-xl font-semibold">{course.name}</h1>
+          <h1 className="font-display text-[26px] text-ink-1">{course.name}</h1>
         </div>
         {me && me.role !== 'member' ? (
           <Link

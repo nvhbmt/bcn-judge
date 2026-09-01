@@ -2,7 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui'
+import { Button, SectionRule } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { Role } from '@/types/api'
 import { describeFailure, type FailureNotice } from './conflicts'
@@ -49,7 +49,7 @@ export function UserCreateForm({
 
   return (
     <form onSubmit={submit} className="border border-line bg-surface-2 p-4">
-      <h2 className="mb-3 text-sm font-semibold">Tạo tài khoản</h2>
+      <div className="mb-3"><SectionRule label="Tạo tài khoản" /></div>
       <FailureBanner notice={notice} />
 
       <div className="grid gap-3 sm:grid-cols-2">

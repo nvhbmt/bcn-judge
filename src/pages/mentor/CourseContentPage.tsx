@@ -81,7 +81,7 @@ export function CourseContentPage() {
 
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Soạn nội dung khoá học</h1>
+          <h1 className="font-display text-[26px] text-ink-1">Soạn nội dung khoá học</h1>
           <p className="text-sm text-ink-5">
             Member chỉ thấy mục đã <b>Xuất bản</b>; mục Nháp là chỗ soạn dở (FR-C3).
           </p>

@@ -41,7 +41,7 @@ export function ProblemListPage() {
 
       <header className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold">Bài tập</h1>
+          <h1 className="font-display text-[26px] text-ink-1">Bài tập</h1>
           <p className="text-sm text-ink-5">
             Soạn đề, nạp testcase và kiểm bằng lời giải mẫu trước khi member thấy bài.
           </p>

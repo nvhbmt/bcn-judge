@@ -6,7 +6,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Button } from '@/components/ui'
+import { Button, SectionRule } from '@/components/ui'
 import { api } from '@/lib/api'
 import { describeFailure, type FailureNotice } from './conflicts'
 import type { AdminUser } from './types'
@@ -42,7 +42,7 @@ export function TeamCreateForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={submit} className="mb-5 border border-line bg-surface-2 p-4">
-      <h2 className="mb-3 text-sm font-semibold">Tạo team</h2>
+      <div className="mb-3"><SectionRule label="Tạo team" /></div>
       <FailureBanner notice={notice} />
 
       <div className="grid gap-3">

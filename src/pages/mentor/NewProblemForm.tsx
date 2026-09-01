@@ -10,7 +10,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui'
+import { Button, SectionRule } from '@/components/ui'
 import { api, ApiFailure } from '@/lib/api'
 import { Field, Notice, Select, TextInput } from './fields'
 import type { MentorCourseRow } from './types'
@@ -62,7 +62,7 @@ export function NewProblemForm({ onCancel }: { onCancel: () => void }) {
 
   return (
     <div className="mb-4 border border-line bg-surface-2 p-4">
-      <h2 className="mb-3 text-sm font-semibold">Bài tập mới</h2>
+      <div className="mb-3"><SectionRule label="Bài tập mới" /></div>
 
       <Field id="new-title" label="Tiêu đề">
         <TextInput

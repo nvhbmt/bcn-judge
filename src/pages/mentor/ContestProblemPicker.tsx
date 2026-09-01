@@ -4,7 +4,7 @@
  */
 import { useId, useState } from 'react'
 import { ArrowDown, ArrowUp, Plus, Save, X } from 'lucide-react'
-import { Button, EmptyState } from '@/components/ui'
+import { Button, EmptyState, SectionRule } from '@/components/ui'
 import { Field, Notice, Select, TextInput } from './fields'
 import type { ContestProblemDraft } from './mentorTypes'
 import { isValidated, type MentorProblemRow } from './types'
@@ -74,7 +74,7 @@ export function ContestProblemPicker({
 
   return (
     <section className="border border-line bg-surface-2 p-4">
-      <h2 className="mb-1 text-sm font-semibold">Bài trong contest</h2>
+      <div className="mb-1"><SectionRule label="Bài trong contest" /></div>
       {/* Không có API đọc danh sách bài hiện tại của contest, mà PUT thì THAY THẾ
           toàn bộ — nói thẳng để không ai vô tình gỡ sạch bài của contest đang chạy. */}
       <Notice tone="warn">
