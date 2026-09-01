@@ -95,6 +95,38 @@ harness thì **không một dòng mã harness nào** lọt ra ngoài; người h
 thuộc phần khung do người ra đề viết" thay vì bị đổ oan. Chi tiết ở `docs/design.md`,
 mục *Delta FR-D10*.
 
+## Cấu hình VPS cho 120 thành viên
+
+Đo bằng `server/src/testing/stress.ts` (năng lực chấm) và `stress-api.ts` (năng lực
+đọc). Số liệu đầy đủ ở `docs/design.md`, mục *Đo tải và cấu hình VPS*.
+
+**Khuyến nghị: 8 vCPU · 16 GB · 40 GB SSD · `WORKER_SLOTS=4`.**
+
+| | Tối thiểu | Khuyến nghị | Thoải mái |
+|---|---|---|---|
+| vCPU | 4 | **8** | 12 |
+| RAM | 8 GB | **16 GB** | 16 GB |
+| `WORKER_SLOTS` | 2 | **4** | 6 |
+| Nộp dồn 100 bài C++ | cạn sau 98 s | **51 s** | 39 s |
+| Người chờ lâu nhất | 95 s | **49 s** | 36 s |
+
+Ba con số chi phối:
+
+- **1 slot ≈ 1 nhân** (mỗi container đặt `NanoCpus = 1`). Đặt slot bằng **nửa số
+  vCPU** — trên máy 10 nhân, 4 slot còn 88 % hiệu suất, 8 slot rơi xuống 69 %.
+- **≈ 190 MB RAM mỗi slot** ở tải nặng thực tế, nhưng trần biên dịch là 1 GB mỗi
+  slot. Tính RAM theo trần: `slot × 1 GB + 1,5 GB` cho API, Postgres, Docker và OS.
+- **API không phải nút cổ chai**: 100 người bắn hết sức đạt 1 714 req/s, p95 121 ms,
+  không lỗi — gấp 17 lần tải thực tế. Nút cổ chai là số nhân CPU dành cho bộ chấm.
+
+**Đừng dùng vCPU burstable có hạn mức tín dụng** (t2/t3 khi cạn credit). TLE tính
+theo giờ CPU nên nhiễu thường không gây oan, nhưng vẫn có chốt chặn giờ tường ở
+`2T + 2s`: CPU bị bóp xuống 5–20 % sẽ giết oan bài làm đúng. vCPU chia sẻ loại tốt
+thì dùng được.
+
+Đĩa: 4 runner image chiếm 1,7 GB; mỗi bài nộp ≈ 30 KB, nên 120 người × 200 bài mỗi
+học kỳ ≈ 700 MB/kỳ. 40 GB đủ dùng nhiều năm.
+
 **Nợ kỹ thuật quan trọng nhất** (ghi trong `docs/design.md` §14): mọi số đo và toàn bộ bộ abuse
 mới chạy trên **máy dev (OrbStack)**. §11 của thiết kế yêu cầu chạy lại trên **đúng kernel/Docker
 của VPS đích** trước khi mở cho member — ba mục cần đo lại là `docker update --memory` shrink,

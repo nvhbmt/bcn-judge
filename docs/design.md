@@ -1056,3 +1056,81 @@ Nhưng phép đo lộ ra hai lỗi thật:
 
 `SourceFile.owner: 'member' | 'mentor'` là thứ tầng judge dùng để biết file nào của
 ai — khai tường minh, không đoán theo tên file.
+
+---
+
+## Đo tải và cấu hình VPS — 01/09/2026
+
+Đo trên **máy dev**: MacBook M2 Pro, VM OrbStack 10 CPU / 16 GB, cgroup v2. Con số
+tuyệt đối KHÔNG chuyển thẳng sang VPS (xem phần cảnh báo cuối). Con số chuyển được
+là **hình dạng**: mở rộng theo slot, RAM mỗi slot, tỉ lệ giữa các ngôn ngữ.
+
+### Thông lượng theo số slot (C, 10 testcase/bài)
+
+| Slot | bài/phút | mỗi slot | hiệu suất |
+|---|---|---|---|
+| 1 | 58,9 | 58,9 | 100 % |
+| 2 | 116,5 | 58,3 | 99 % |
+| 4 | 208,0 | 52,0 | 88 % |
+| 8 | 324,5 | 40,6 | 69 % |
+
+Mỗi container đặt `NanoCpus = 1 core`, nên **1 slot ≈ 1 nhân**. Hiệu suất rơi khi
+số slot vượt quá nửa số nhân — trên máy 10 nhân, 4 slot còn 88 %, 8 slot còn 69 %.
+Quy tắc: **slot ≈ nửa số vCPU**, để còn chỗ cho API, Postgres và chính Docker.
+
+### Theo ngôn ngữ, 4 slot, 10 testcase
+
+| | bài/phút | mỗi bài | RSS tiến trình |
+|---|---|---|---|
+| C | 208 | 1 084 ms | 2 MB |
+| Python | 178 | 1 281 ms | 9 MB |
+| C++ | 115 | 2 027 ms | 2 MB |
+| Java | 106 | 2 203 ms | 36 MB |
+
+C++ và Java chậm gấp đôi C, và **phần lớn là biên dịch** chứ không phải chạy —
+`bits/stdc++.h` và khởi động JVM. Tính cấu hình theo C++ chứ đừng theo C.
+
+### Nộp dồn 100 bài C++ 10 testcase (phút chót của contest)
+
+| Slot | cạn hàng đợi | chờ lâu nhất |
+|---|---|---|
+| 2 | 98 s | 95 s |
+| 4 | 51 s | 49 s |
+| 6 | 39 s | 36 s |
+
+### Bộ nhớ
+
+Đo bằng cách lấy mẫu `MemAvailable` mỗi 0,3 s trong lúc chạy tải liên tục:
+
+- 4 slot biên dịch C++ đồng loạt: **đỉnh 765 MB**
+- 4 slot chạy bài ăn 200 MB (chạm thật từng trang): **đỉnh 670 MB**
+- → **≈ 190 MB mỗi slot** ở tải nặng thực tế
+
+Trần cứng thì cao hơn nhiều: `compile_memory_mb = 1024` mỗi slot lúc biên dịch, và
+`memory_limit_mb + memoryExtraMb + 16` lúc chạy (272 MB cho C, 528 MB cho Java).
+Tính RAM theo trần biên dịch, vì một bài C++ đệ quy template có thể chạm thật tới đó.
+
+Nền: API 84 MB · Postgres 101 MB · DB 10 MB cho 333 bài nộp (≈ 30 KB/bài, chủ yếu
+là mã nguồn).
+
+### Năng lực đọc của API (100 người)
+
+| Kịch bản | req/s | p50 | p95 | p99 | lỗi |
+|---|---|---|---|---|---|
+| 100 người, nghỉ 1 s giữa hai lần bấm | 100 | 18 ms | 75 ms | 166 ms | 0 |
+| 100 người bắn hết sức | **1 714** | 52 ms | 121 ms | 203 ms | 0 |
+
+Gấp 17 lần tải thực tế. **API và Postgres không phải nút cổ chai** — kể cả bảng xếp
+hạng contest, vốn là truy vấn dẫn xuất quét lại bài nộp mỗi lần mở (§7). Nút cổ chai
+là bộ chấm, và nó bị chặn bởi số nhân CPU.
+
+### vCPU chia sẻ có dùng được không
+
+Được, và lý do nằm ở §3.4 dòng 3: **TLE tính theo giờ CPU** (`meta.cpu`), không phải
+giờ tường. Máy hàng xóm ồn ào làm bài chạy lâu hơn nhưng không tiêu thêm giờ CPU, nên
+không sinh TLE oan.
+
+Nhưng có một chốt chặn wall ở `2T + 2s`. Nếu CPU bị cướp quá nửa thì bài dùng đúng
+T giờ CPU vẫn có thể vượt `2T+2s` giờ tường và bị giết — TLE oan. Vì vậy: vCPU chia
+sẻ loại tốt thì được, còn loại burstable có hạn mức tín dụng (t2/t3 cạn credit) thì
+không, vì lúc cạn credit CPU bị bóp xuống 5–20 %.
