@@ -12,6 +12,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
+import type { CourseSummary } from '@/types/api'
+import type { SyllabusSection } from '../workspace/SyllabusPanel'
 import { workspaceLink, type RecentRow } from './recent'
 
 function pickUnfinished(rows: RecentRow[]): { row: RecentRow; href: string } | null {
@@ -28,18 +30,53 @@ export function ResumeCard() {
     queryKey: ['member', 'recent'],
     queryFn: () => api.get<RecentRow[]>('/api/member/submissions/recent?limit=12'),
   })
+  const { data: courses } = useQuery({
+    queryKey: ['member', 'courses'],
+    queryFn: () => api.get<CourseSummary[]>('/api/member/courses'),
+  })
 
   const found = data ? pickUnfinished(data) : null
+  // Hai truy vấn dưới dùng ĐÚNG queryKey mà danh sách khoá và các dòng khoá đã gọi,
+  // nên react-query trả từ cache — thẻ này không tự bắn thêm vòng mạng nào.
+  const { data: sections } = useQuery({
+    queryKey: ['member', 'syllabus', found?.row.courseId],
+    queryFn: () => api.get<SyllabusSection[]>(`/api/member/courses/${found!.row.courseId}/syllabus`),
+    enabled: Boolean(found?.row.courseId),
+  })
+  const { data: contests } = useQuery({
+    queryKey: ['member', 'contests', 'meta'],
+    queryFn: () => api.getWithMeta<{ id: string; title: string }[]>('/api/member/contests'),
+    enabled: Boolean(found?.row.contestId),
+  })
+
   if (!found) return null
   const { row, href } = found
+
+  // "CS101 · Chương 2 · 5 lần nộp · lần cuối TLE" — bản vẽ nói đủ chỗ đứng của bài
+  // trong khoá, không chỉ tên bài. Thiếu thứ nào thì bỏ thứ đó, không bịa.
+  const code = courses?.find((c) => c.id === row.courseId)?.code
+  const section = sections?.find((s) => s.items.some((i) => i.id === row.itemId))
+  const item = section?.items.find((i) => i.id === row.itemId)
+  // Bài trong CONTEST không có khoá/chương để nói, nên nói tên contest — chỗ đứng của
+  // bài vẫn rõ. Thiếu thứ nào thì bỏ thứ đó chứ không bịa.
+  const contest = contests?.data.find((c) => c.id === row.contestId)?.title
+  const meta = [
+    contest ?? code,
+    contest ? null : section?.title,
+    item && item.attempts > 0 ? `${item.attempts} lần nộp` : null,
+  ].filter(Boolean)
 
   return (
     <section className="mb-8 flex items-center gap-5 border border-line-strong bg-surface-2 p-5">
       <div className="min-w-0 flex-1">
         <h2 className="font-mono text-[11px] font-normal tracking-[0.1em] text-moss uppercase">Làm tiếp dở dang</h2>
         <p className="mt-2 truncate text-[18px] font-semibold text-ink-1">{row.problemTitle}</p>
-        <p className="num mt-1.5 font-mono text-[12px] text-ink-4">
-          lần cuối <span className={row.verdict === 'TLE' || row.verdict === 'MLE' ? 'text-earth' : 'text-clay'}>{row.verdict}</span>
+        <p className="num mt-1.5 truncate font-mono text-[12px] text-ink-4">
+          {meta.length > 0 ? `${meta.join(' · ')} · ` : ''}
+          lần cuối{' '}
+          <span className={row.verdict === 'TLE' || row.verdict === 'MLE' ? 'text-earth' : 'text-clay'}>
+            {row.verdict}
+          </span>
           {row.score !== null ? ` · ${row.score} đ` : null}
         </p>
       </div>

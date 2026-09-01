@@ -17,6 +17,8 @@ export interface CourseSummary {
   code: string
   name: string
   descriptionMd: string | null
+  /** Một mentor của khoá (người đầu theo tên) — dòng khoá ở trang chủ nói "mentor X". */
+  mentorName?: string | null
 }
 
 /** `GET /api/member/courses/:id` — bản chi tiết, có thêm mentor và ngôn ngữ của khoá. */

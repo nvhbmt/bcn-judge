@@ -51,8 +51,9 @@ export function CourseRow({ course }: { course: CourseSummary }) {
       <span className="min-w-0">
         <span className="block truncate text-[15px] font-semibold text-ink-1">{course.name}</span>
         {data ? (
-          <span className="num mt-[3px] block font-mono text-[11px] text-ink-5">
+          <span className="num mt-[3px] block truncate font-mono text-[11px] text-ink-5">
             {sections} chương · {total} bài
+            {course.mentorName ? ` · mentor ${course.mentorName}` : ''}
           </span>
         ) : null}
       </span>

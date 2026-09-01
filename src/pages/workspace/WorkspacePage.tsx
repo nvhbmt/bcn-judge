@@ -15,6 +15,7 @@ import { ContentHeader } from './ContentHeader'
 import { EditorPane } from './EditorPane'
 import { HelpPanel } from './HelpPanel'
 import { LeaderboardPanel } from './LeaderboardPanel'
+import { NoteBanner } from './NoteBanner'
 import { RAIL_ITEMS, RAIL_LABEL, type RailKey } from './rail'
 import { StatementPanel } from './StatementPanel'
 import { SubmissionsPanel } from './SubmissionsPanel'
@@ -130,6 +131,9 @@ export function WorkspacePage() {
         prev={rail === 'de-bai' || rail === 'bai-nop' ? siblings.prev : null}
         next={rail === 'de-bai' || rail === 'bai-nop' ? siblings.next : null}
       />
+
+      {/* Ghi chú leader gửi cho mình (FR-J6) — bản vẽ đặt nó ở đúng màn này. */}
+      <NoteBanner />
 
       <div className="min-h-0 flex-1 overflow-auto">
         {isLoading ? (

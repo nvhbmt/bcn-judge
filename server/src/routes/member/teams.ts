@@ -13,6 +13,7 @@ import { teamRole } from '../../auth/middleware'
 import { q } from '../../db/pool'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { parseBody } from '../../lib/http'
+import { iso } from '../../lib/time'
 import { toLeaderSubmission, type RawSubmissionRow } from '../../serialize/submission'
 
 export const memberTeamRoutes = new Hono()
@@ -20,8 +21,17 @@ export const memberTeamRoutes = new Hono()
 /** GET /api/member/teams/mine — team của tôi + danh sách thành viên (FR-J4). */
 memberTeamRoutes.get('/mine', async (c) => {
   const me = c.get('user')
-  const [team] = await q<{ id: string; name: string; descriptionMd: string | null; leaderId: string }>(sql`
-    SELECT t.id, t.name, t.description_md AS "descriptionMd", t.leader_id AS "leaderId"
+  const [team] = await q<{
+    id: string
+    name: string
+    descriptionMd: string | null
+    leaderId: string
+    createdAt: Date | string
+  }>(sql`
+    -- created_at cho dòng meta "lập 12.08.2026" ở màn team: một nhóm mới lập tuần
+    -- trước và một nhóm đã chạy nửa năm đọc tiến độ khác hẳn nhau.
+    SELECT t.id, t.name, t.description_md AS "descriptionMd", t.leader_id AS "leaderId",
+           t.created_at AS "createdAt"
     FROM team_members tm JOIN teams t ON t.id = tm.team_id
     WHERE tm.user_id = ${me.id}
   `)
@@ -33,7 +43,7 @@ memberTeamRoutes.get('/mine', async (c) => {
     WHERE tm.team_id = ${team.id}
     ORDER BY (u.id = ${team.leaderId}) DESC, u.display_name
   `)
-  return ok(c, { ...team, isLeader: team.leaderId === me.id, members })
+  return ok(c, { ...team, createdAt: iso(team.createdAt), isLeader: team.leaderId === me.id, members })
 })
 
 /** GET /api/member/teams/:id/progress — bảng tiến độ team (FR-J2, chỉ leader). */

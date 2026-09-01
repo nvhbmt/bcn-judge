@@ -5,21 +5,23 @@
  * lớp che. Chip "BẠN LÀ LEADER" nói rõ vì sao mình thấy được những thứ người khác
  * không thấy — không có nó thì phần dữ liệu thừa ra trông như lỗi phân quyền.
  *
- * KHÔNG có ô "ghi chú của leader" như bản vẽ: backend chưa có chỗ lưu ghi chú nào, mà
- * vẽ một ô soạn thảo rồi mất chữ khi tải lại trang thì tệ hơn hẳn là không có.
+ * Ô "ghi chú của leader" (FR-J6) nay có thật. Trước đó tôi ghi là "backend chưa có chỗ
+ * lưu" — SAI: ba endpoint đã nằm sẵn trong routes/member/teams.ts từ lâu, chỉ là
+ * frontend chưa gọi cái nào, nên cả tính năng nằm đó không ai dùng được.
  */
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { Avatar } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
+import { LeaderNote } from './team/LeaderNote'
 import { TeamProgress } from './team/TeamProgress'
 import { TeamSubmissions } from './team/TeamSubmissions'
 import type { TeamView } from './team/types'
 
 export function TeamPage() {
   const [openMember, setOpenMember] = useState<string | null>(null)
-  const { data: team, isLoading } = useQuery({
+  const { data: team, isLoading, isError } = useQuery({
     queryKey: ['team', 'mine'],
     queryFn: () => api.get<TeamView | null>('/api/member/teams/mine'),
   })
@@ -29,6 +31,18 @@ export function TeamPage() {
       <div className="grid h-full place-items-center">
         <Spinner />
       </div>
+    )
+  }
+
+  // Lỗi gọi API KHÁC hẳn "không có team", dù cả hai đều cho `team` rỗng. Gộp chung thì
+  // một sự cố máy chủ hiện ra thành "Bạn chưa thuộc team nào" — người dùng đi hỏi
+  // quản lý viên vì sao bị loại khỏi nhóm, trong khi thật ra chỉ cần tải lại trang.
+  if (isError) {
+    return (
+      <Shell>
+        <h1 className="font-display text-[28px] text-ink-1">Team</h1>
+        <EmptyState title="Không đọc được thông tin team" hint="Tải lại trang, hoặc báo mentor nếu vẫn lỗi." />
+      </Shell>
     )
   }
 
@@ -56,7 +70,10 @@ export function TeamPage() {
             </span>
           ) : null}
         </div>
-        <p className="num mt-2 font-mono text-[12px] text-ink-5">{team.members.length} thành viên</p>
+        <p className="num mt-2 font-mono text-[12px] text-ink-5">
+          {team.members.length} thành viên
+          {team.createdAt ? ` · lập ${new Date(team.createdAt).toLocaleDateString('vi-VN')}` : ''}
+        </p>
       </header>
 
       <section className="mb-8">
@@ -80,6 +97,7 @@ export function TeamPage() {
       {team.isLeader ? (
         <>
           <TeamProgress teamId={team.id} onPick={setOpenMember} />
+          <LeaderNote teamId={team.id} members={team.members} />
           {openMember ? (
             <TeamSubmissions teamId={team.id} userId={openMember} memberName={openName} />
           ) : (

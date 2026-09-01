@@ -38,24 +38,29 @@ export async function isEnrolledInOpenCourse(userId: string, courseId: string): 
 
 memberCourseRoutes.get('/', async (c) => {
   const me = c.get('user')
-  const rows = await db
-    .select({
-      id: courses.id,
-      code: courses.code,
-      name: courses.name,
-      descriptionMd: courses.descriptionMd,
-      enrolledAt: courseEnrollments.enrolledAt,
-    })
-    .from(courseEnrollments)
-    .innerJoin(courses, eq(courses.id, courseEnrollments.courseId))
-    .where(
-      and(
-        eq(courseEnrollments.userId, me.id),
-        eq(courseEnrollments.status, 'active'),
-        eq(courses.status, 'open'),
-      ),
-    )
-    .orderBy(asc(courses.name))
+  // Kèm tên MỘT mentor cho mỗi khoá (người có tên xếp trước). Dòng khoá ở trang chủ
+  // nói "4 chương · 18 bài · mentor Quốc Bảo" — biết hỏi ai là một nửa giá trị của
+  // dòng đó. Lấy bằng LATERAL nên vẫn một câu truy vấn, không N+1.
+  const rows = await q<{
+    id: string
+    code: string
+    name: string
+    descriptionMd: string | null
+    mentorName: string | null
+  }>(sql`
+    SELECT c.id, c.code, c.name, c.description_md AS "descriptionMd", m.display_name AS "mentorName"
+    FROM course_enrollments ce
+    JOIN courses c ON c.id = ce.course_id
+    LEFT JOIN LATERAL (
+      SELECT u.display_name
+      FROM course_mentors cm JOIN users u ON u.id = cm.user_id
+      WHERE cm.course_id = c.id AND u.disabled = false AND u.deleted_at IS NULL
+      ORDER BY u.display_name
+      LIMIT 1
+    ) m ON true
+    WHERE ce.user_id = ${me.id} AND ce.status = 'active' AND c.status = 'open'
+    ORDER BY c.name
+  `)
   return ok(c, rows)
 })
 

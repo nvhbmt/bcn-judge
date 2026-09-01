@@ -4,6 +4,7 @@ import type { Verdict } from '@/types/api'
 export interface TeamView {
   id: string
   name: string
+  createdAt: string
   descriptionMd: string | null
   leaderId: string
   isLeader: boolean
