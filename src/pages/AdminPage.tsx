@@ -15,7 +15,7 @@ import { api } from '@/lib/api'
 
 interface JudgeStatus {
   queue: { pendingSubmit: number; pendingRun: number; running: number; oldestPendingSubmitSec: number | null }
-  workers: { id: string; slots: number; alive: boolean; lastSeenAt: string }[]
+  workers: { id: string; slots: number; alive: boolean; lastSeenAt: string; running: number; silentSec: number }[]
   ieSubmissions: { id: string; ieReason: string | null; receivedAt: string }[]
   judgePaused: boolean
   health: { submitBacklogAlarm: boolean; runBacklogWarning: boolean; noLiveWorker: boolean }
@@ -38,6 +38,13 @@ function Banner({ level, children }: { level: 'alarm' | 'warn'; children: string
       {alarm ? null : <span className="mt-0.5 block font-mono text-[11px] text-ink-5">cảnh báo, chưa cần xử lý</span>}
     </p>
   )
+}
+
+/** "14 phút" dễ đọc hơn "847 giây" khi cần biết worker chết bao lâu rồi. */
+function phut(sec: number): string {
+  if (sec < 90) return `${Math.round(sec)} giây`
+  const m = Math.round(sec / 60)
+  return m < 90 ? `${m} phút` : `${Math.round(m / 60)} giờ`
 }
 
 export function AdminPage() {
@@ -105,7 +112,13 @@ export function AdminPage() {
                 <span aria-hidden className={`size-2 shrink-0 rounded-full ${w.alive ? 'bg-moss-fill' : 'bg-clay'}`} />
                 <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-ink-2">{w.id}</span>
                 <span className="num shrink-0 font-mono text-[11px] text-ink-5">
-                  {w.slots} slot{w.alive ? '' : ' · mất tín hiệu'}
+                  {w.alive ? (
+                    <>
+                      {w.slots} slot · {w.running} đang chạy
+                    </>
+                  ) : (
+                    <span className="text-clay">mất tín hiệu {phut(w.silentSec)}</span>
+                  )}
                 </span>
                 <span className="num shrink-0 font-mono text-[11px] text-ink-6">
                   {new Date(w.lastSeenAt).toLocaleTimeString('vi-VN')}

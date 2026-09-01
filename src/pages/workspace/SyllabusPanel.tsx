@@ -18,6 +18,8 @@ export interface SyllabusSection {
   id: string
   title: string
   position: number
+  /** Mốc mở của chương chưa tới giờ; null nghĩa là không hẹn giờ (đang soạn, hoặc đã mở). */
+  unlockAt?: string | null
   items: SyllabusItem[]
 }
 

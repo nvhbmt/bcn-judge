@@ -68,8 +68,11 @@ export function SyllabusList({ courseId, sections }: { courseId: string; section
         const done = problems.filter((i) => i.status === 'da-ac').length
         // Xong hết thì moss, còn dở thì earth — đúng nghĩa cố định của hai màu điểm
         // (moss = xong, earth = cần chú ý). Chương chỉ có bài đọc thì không có gì để đếm.
+        const khoa = section.items.length === 0 && section.unlockAt
         const xong =
-          problems.length > 0 ? (
+          khoa ? (
+            <span className="text-ink-6">chưa mở</span>
+          ) : problems.length > 0 ? (
             <span className={done === problems.length ? 'text-moss' : 'text-earth'}>
               {done}/{problems.length} xong
             </span>
@@ -81,7 +84,23 @@ export function SyllabusList({ courseId, sections }: { courseId: string; section
             {/* Chương chưa có mục nào thì KHÔNG dựng RowGroup: nhóm rỗng vẫn có viền
                 nên nó vẽ ra một khung dẹt trông như lỗi render. Nói thẳng ra chữ. */}
             {section.items.length === 0 ? (
-              <p className="mt-2.5 text-[13px] text-ink-5">Chương này chưa có nội dung.</p>
+              // Hai lý do rất khác nhau cho một chương rỗng, và người học cần phân
+              // biệt: hẹn giờ mở nghĩa là "cứ yên tâm, tới ngày sẽ có", còn không hẹn
+              // giờ nghĩa là mentor đang soạn dở. 🔒 là pictograph DUY NHẤT hệ thiết kế
+              // cho phép, đúng cho "khoá theo giờ".
+              section.unlockAt ? (
+                <p className="mt-2.5 font-mono text-[12px] text-ink-5">
+                  <span aria-hidden>🔒 </span>
+                  mở {new Date(section.unlockAt).toLocaleString('vi-VN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              ) : (
+                <p className="mt-2.5 text-[13px] text-ink-5">Chương này chưa có nội dung.</p>
+              )
             ) : (
               <RowGroup className="mt-2.5">
                 {section.items.map((item) => (

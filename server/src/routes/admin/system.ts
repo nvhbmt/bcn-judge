@@ -87,9 +87,15 @@ adminSystemRoutes.patch('/settings', async (c) => {
 adminSystemRoutes.get('/judge', async (c) => {
   const stats = await queueStats()
   const workers = await q(sql`
-    SELECT id, slots, version, started_at AS "startedAt", last_seen_at AS "lastSeenAt",
-           (last_seen_at > now() - interval '30 seconds') AS alive
-    FROM workers ORDER BY id
+    SELECT w.id, w.slots, w.version, w.started_at AS "startedAt", w.last_seen_at AS "lastSeenAt",
+           (w.last_seen_at > now() - interval '30 seconds') AS alive,
+           -- Số slot ĐANG chạy và số giây mất tín hiệu: "4 slot" một mình không nói
+           -- worker đó đang bận hay rảnh, mà đó mới là thứ admin nhìn để biết hàng đợi
+           -- ứ vì thiếu worker hay vì worker đang kẹt.
+           (SELECT count(*)::int FROM submissions sub
+            WHERE sub.worker_id = w.id AND sub.status = 'running') AS "running",
+           GREATEST(0, EXTRACT(EPOCH FROM (now() - w.last_seen_at))::int) AS "silentSec"
+    FROM workers w ORDER BY w.id
   `)
   const ie = await q(sql`
     SELECT s.id, s.user_id AS "userId", s.problem_id AS "problemId", s.ie_reason AS "ieReason",

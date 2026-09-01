@@ -8,6 +8,7 @@ import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { q } from '../../db/pool'
 import { errors, ok } from '../../lib/apiResponse'
+import { iso } from '../../lib/time'
 import { isEnrolledInOpenCourse } from './courses'
 
 export const memberSyllabusRoutes = new Hono()
@@ -41,6 +42,7 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
     sectionId: string
     sectionTitle: string
     sectionPosition: number
+    unlockAt: Date | string | null
     itemId: string | null
     itemTitle: string | null
     itemKind: string | null
@@ -50,6 +52,13 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
     points: number | null
   }>(sql`
     SELECT s.id AS "sectionId", s.title AS "sectionTitle", s.position AS "sectionPosition",
+           -- Mốc mở sớm nhất của chương: bài ĐÃ xuất bản nhưng chưa tới giờ hiện.
+           -- Chương rỗng có hai lý do rất khác nhau — mentor đang soạn dở, hay nội dung
+           -- đã sẵn và hẹn giờ mở — mà màn hình cũ nói cả hai bằng cùng một khoảng
+           -- trống. Chỉ trả MỐC GIỜ, không trả tên bài: hẹn giờ là để chưa lộ đề.
+           (SELECT min(i2.visible_from) FROM items i2
+            WHERE i2.section_id = s.id AND i2.status = 'published'
+              AND i2.visible_from IS NOT NULL AND i2.visible_from > now()) AS "unlockAt",
            i.id AS "itemId", i.title AS "itemTitle", i.kind AS "itemKind", i.position AS "itemPosition",
            CASE
              WHEN i.kind = 'lesson' THEN NULL
@@ -69,11 +78,20 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
     ORDER BY s.position, i.position
   `)
 
-  const sections = new Map<string, { id: string; title: string; position: number; items: unknown[] }>()
+  const sections = new Map<
+    string,
+    { id: string; title: string; position: number; unlockAt: string | null; items: unknown[] }
+  >()
   for (const row of rows) {
     let section = sections.get(row.sectionId)
     if (!section) {
-      section = { id: row.sectionId, title: row.sectionTitle, position: row.sectionPosition, items: [] }
+      section = {
+        id: row.sectionId,
+        title: row.sectionTitle,
+        position: row.sectionPosition,
+        unlockAt: iso(row.unlockAt),
+        items: [],
+      }
       sections.set(row.sectionId, section)
     }
     if (row.itemId) {

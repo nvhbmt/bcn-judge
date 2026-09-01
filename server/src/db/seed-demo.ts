@@ -545,14 +545,19 @@ async function makeCourses(
         }
         // Chương cuối của khoá 1 để nháp — kiểm chứng mục nháp không lộ với member.
         const draft = ci === 0 && si === course.sections.length - 1
+        // Chương cuối của khoá 2 đã XUẤT BẢN nhưng hẹn giờ mở — hai trạng thái rất
+        // khác nhau mà màn hình từng nói bằng cùng một khoảng trống. Có dòng này thì
+        // trạng thái "🔒 mở DD/MM HH:MM" mới xem được trên dữ liệu mẫu.
+        const hengio = ci === 1 && si === course.sections.length - 1
         const problemId = problemIds.get(item.problem)!
         const [it] = await q<{ id: string }>(sql`
-          INSERT INTO items (section_id, kind, title, position, status, problem_id)
+          INSERT INTO items (section_id, kind, title, position, status, problem_id, visible_from)
           VALUES (${sec!.id}, 'problem', ${problemByKey.get(item.problem)!.title}, ${ii + 1},
-                  ${draft ? 'draft' : 'published'}, ${problemId})
+                  ${draft ? 'draft' : 'published'}, ${problemId},
+                  ${hengio ? sql`now() + interval '5 days'` : sql`NULL`})
           RETURNING id
         `)
-        if (!draft) itemsByProblem.set(item.problem, it!.id)
+        if (!draft && !hengio) itemsByProblem.set(item.problem, it!.id)
       }
     }
     out.push({ courseId, name: course.name, itemsByProblem })
