@@ -76,6 +76,8 @@ async function accessByContestProblem(user: AuthUser, contestProblemId: string):
   const [row] = await q<{
     problem_id: string
     contest_id: string
+    position: number
+    sequential: boolean
     start_at: string
     end_at: string
     status: string
@@ -83,7 +85,7 @@ async function accessByContestProblem(user: AuthUser, contestProblemId: string):
     is_staff: boolean
     in_scope: boolean
   }>(sql`
-    SELECT cp.problem_id, cp.contest_id, ct.start_at, ct.end_at, ct.status, ct.course_id,
+    SELECT cp.problem_id, cp.contest_id, cp.position, ct.sequential, ct.start_at, ct.end_at, ct.status, ct.course_id,
            (${user.role === 'admin'} OR EXISTS (
               SELECT 1 FROM course_mentors cm WHERE cm.course_id = ct.course_id AND cm.user_id = ${user.id}
            )) AS is_staff,
@@ -109,6 +111,25 @@ async function accessByContestProblem(user: AuthUser, contestProblemId: string):
         status: 403,
         code: 'contest_not_started',
         message: 'Contest chưa bắt đầu.',
+      }
+    }
+    // FR-I8 (tuỳ chọn per contest, mặc định tắt): phải AC bài trước mới mở bài sau.
+    if (row.sequential && row.position > 1) {
+      const [prev] = await q<{ unlocked: boolean }>(sql`
+        SELECT EXISTS (
+          SELECT 1 FROM submissions s
+          JOIN contest_problems prev ON prev.id = s.contest_problem_id
+          WHERE s.user_id = ${user.id} AND s.verdict = 'AC' AND s.kind = 'submit'
+            AND prev.contest_id = ${row.contest_id} AND prev.position = ${row.position - 1}
+        ) AS unlocked
+      `)
+      if (!prev?.unlocked) {
+        return {
+          ok: false,
+          status: 403,
+          code: 'sequential_locked',
+          message: `Contest này mở tuần tự — phải AC bài ${row.position - 1} trước.`,
+        }
       }
     }
   }

@@ -128,6 +128,36 @@ memberContestRoutes.get('/:id/standings', async (c) => {
     cutoff: cutoffFor({ endAt: new Date(contest.endAt), freezeMinutes: contest.freezeMinutes }, contest.isStaff),
     meId: me.id,
   })
+
+  // FR-J5 (S): lọc bảng xếp hạng theo team — biến thể truy vấn, không đụng schema.
+  if (c.req.query('groupBy') === 'team') {
+    const members = await q<{ userId: string; teamId: string; teamName: string }>(sql`
+      SELECT tm.user_id AS "userId", t.id AS "teamId", t.name AS "teamName"
+      FROM team_members tm JOIN teams t ON t.id = tm.team_id
+    `)
+    const teamOf = new Map(members.map((m) => [m.userId, m]))
+    const byTeam = new Map<string, { teamId: string; teamName: string; totalPoints: number; acCount: number; members: number }>()
+    for (const row of rows) {
+      const team = teamOf.get(row.userId)
+      if (!team) continue
+      const entry = byTeam.get(team.teamId) ?? {
+        teamId: team.teamId,
+        teamName: team.teamName,
+        totalPoints: 0,
+        acCount: 0,
+        members: 0,
+      }
+      entry.totalPoints += row.totalPoints
+      entry.acCount += row.acCount
+      entry.members++
+      byTeam.set(team.teamId, entry)
+    }
+    const teams = [...byTeam.values()]
+      .sort((a, b) => b.totalPoints - a.totalPoints || b.acCount - a.acCount)
+      .map((t, i) => ({ ...t, rank: i + 1, totalPoints: Math.round(t.totalPoints * 100) / 100 }))
+    return ok(c, teams, { groupBy: 'team' })
+  }
+
   return ok(c, rows, {
     frozen: contest.freezeMinutes > 0 && phaseOf(contest) === 'dang-dien-ra' && !contest.isStaff,
     phase: phaseOf(contest),

@@ -184,6 +184,43 @@ describe.skipIf(!INTEGRATION)('contest (FR-I)', () => {
     expect(rows).toHaveLength(0) // nhưng ngoài cửa sổ nên không tính
   })
 
+  it('FR-I8: contest mở tuần tự — chưa AC bài trước thì bài sau khoá', async () => {
+    const { contestId, cpA, cpB } = await makeContest({ startOffsetMin: -10, endOffsetMin: 100 })
+    await q(sql`UPDATE contests SET sequential = true WHERE id = ${contestId}`)
+
+    // Bài 1 mở sẵn; bài 2 khoá.
+    expect((await call(`/api/member/problems?contestProblemId=${cpA}`, { as: member })).status).toBe(200)
+    const locked = await call(`/api/member/problems?contestProblemId=${cpB}`, { as: member })
+    expect(locked.status).toBe(403)
+
+    // AC bài 1 → bài 2 mở ra.
+    await scoreSubmission(member.id, contestId, cpA, problemA, { verdict: 'AC', passed: 1, total: 1, minutesAgo: 1 })
+    expect((await call(`/api/member/problems?contestProblemId=${cpB}`, { as: member })).status).toBe(200)
+  })
+
+  it('FR-I8: mentor không bị khoá tuần tự (xem trước được toàn bộ)', async () => {
+    const { contestId, cpB } = await makeContest({ startOffsetMin: -10, endOffsetMin: 100 })
+    await q(sql`UPDATE contests SET sequential = true WHERE id = ${contestId}`)
+    expect((await call(`/api/member/problems?contestProblemId=${cpB}`, { as: mentor })).status).toBe(200)
+  })
+
+  it('FR-J5: bảng xếp hạng gộp theo team', async () => {
+    const { contestId, cpA } = await makeContest({ startOffsetMin: -60, endOffsetMin: 60 })
+    await scoreSubmission(member.id, contestId, cpA, problemA, { verdict: 'AC', passed: 1, total: 1, minutesAgo: 10 })
+    await scoreSubmission(other.id, contestId, cpA, problemA, { verdict: 'WA', passed: 0, total: 1, minutesAgo: 5 })
+
+    const team = await call('/api/admin/teams', { as: admin, body: { name: 'Alpha', leaderId: member.id } })
+    await call(`/api/admin/teams/${team.body.data.id}/members`, { as: admin, body: { userId: other.id } })
+
+    const res = await call(`/api/member/contests/${contestId}/standings?groupBy=team`, { as: member })
+    expect(res.status).toBe(200)
+    expect(res.body.meta.groupBy).toBe('team')
+    expect(res.body.data).toHaveLength(1)
+    expect(res.body.data[0].teamName).toBe('Alpha')
+    expect(res.body.data[0].totalPoints).toBe(100)
+    expect(res.body.data[0].members).toBe(2)
+  })
+
   it('FR-I2: chỉ admin tạo được contest toàn CLB', async () => {
     const body = {
       title: 'Toàn CLB',
