@@ -1,5 +1,7 @@
 import { Markdown } from '@/components/markdown/Markdown'
 import { SectionRule } from '@/components/ui'
+import { StatStrip } from '@/components/ui/patterns'
+import { DIFFICULTY_LABEL } from '@/pages/mentor/types'
 import type { ProblemView } from '@/types/api'
 
 /** Tab "Đề bài" (FR-D1): đề, mô tả input/output, ràng buộc, ví dụ, giới hạn. */
@@ -7,12 +9,35 @@ export function StatementPanel({ problem }: { problem: ProblemView }) {
   return (
     <article className="space-y-5 px-5 py-5">
       <header>
+        {/* Độ khó và tag đứng TRÊN tiêu đề theo bản vẽ: chúng là thứ người học liếc để
+            quyết định có làm bài này bây giờ không, nên phải gặp trước cái tên. */}
+        {problem.difficulty || problem.tags.length > 0 ? (
+          <p className="mb-2.5 flex flex-wrap items-center gap-2.5">
+            {problem.difficulty ? (
+              <span className="border border-line-strong px-2 py-1 font-mono text-[10px] tracking-[0.1em] text-ink-4 uppercase">
+                {DIFFICULTY_LABEL[problem.difficulty] ?? problem.difficulty}
+              </span>
+            ) : null}
+            {problem.tags.length > 0 ? (
+              <span className="font-mono text-[11px] text-ink-6">{problem.tags.join(' · ')}</span>
+            ) : null}
+          </p>
+        ) : null}
+
         <h1 className="font-display text-[24px] text-ink-1">{problem.title}</h1>
-        {/* Mọi con số dùng mono + tabular-nums: hai bài cạnh nhau phải thẳng cột. */}
-        <p className="num mt-1.5 font-mono text-[11px] text-ink-5">
-          {problem.timeLimitMs} ms · {problem.memoryLimitMb} MB
-          {problem.hiddenTestcaseCount > 0 ? ` · ${problem.hiddenTestcaseCount} testcase ẩn` : ''}
-        </p>
+
+        {/* Dải số liệu có NHÃN thay cho một dòng số trần: bản vẽ tách thời gian · bộ
+            nhớ · test ẩn thành ba ô, vì "1000 ms · 256 MB · 3" đọc trần thì phải đoán
+            số nào là gì. Mọi con số dùng mono + tabular-nums. */}
+        <div className="mt-3.5">
+          <StatStrip
+            items={[
+              { label: 'Thời gian', value: `${problem.timeLimitMs} ms` },
+              { label: 'Bộ nhớ', value: `${problem.memoryLimitMb} MB` },
+              { label: 'Test ẩn', value: problem.hiddenTestcaseCount },
+            ]}
+          />
+        </div>
       </header>
 
       {/* Bài dạng function: người học phải biết đừng viết main, nếu không sẽ CE vì
@@ -38,11 +63,23 @@ export function StatementPanel({ problem }: { problem: ProblemView }) {
           <div className="space-y-3">
             {problem.samples.map((sample) => (
               <div key={sample.position} className="grid gap-2 sm:grid-cols-2">
-                <IoBox label="Input" text={sample.input} />
-                <IoBox label="Output" text={sample.expected ?? ''} />
+                <IoBox label="stdin" text={sample.input} />
+                <IoBox label="stdout" text={sample.expected ?? ''} />
               </div>
             ))}
           </div>
+
+          {/* Luật chấm nói thẳng ra. Người mới học mất hàng giờ đi tìm một lỗi không
+              tồn tại vì tưởng thừa một dòng trống là sai. */}
+          {problem.compareMode !== 'exact' ? (
+            <p className="mt-3 font-mono text-[11px] text-ink-6">
+              Thừa dấu cách cuối dòng hay một dòng trống ở cuối thì không bị tính sai.
+            </p>
+          ) : (
+            <p className="mt-3 font-mono text-[11px] text-earth">
+              Bài này so khớp CHÍNH XÁC từng ký tự — thừa một dấu cách cũng bị tính sai.
+            </p>
+          )}
         </section>
       ) : null}
     </article>

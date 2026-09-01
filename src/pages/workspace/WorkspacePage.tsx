@@ -1,37 +1,39 @@
 import { useQuery } from '@tanstack/react-query'
-import { useCallback, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { IconRail } from '@/components/layout/IconRail'
 import { Workspace } from '@/components/layout/Workspace'
-import { Markdown } from '@/components/markdown/Markdown'
-import { Spinner } from '@/components/ui'
+import { EmptyState, Spinner } from '@/components/ui'
 import { useSubmissionStream } from '@/hooks/useSubmissionStream'
 import { api, ApiFailure } from '@/lib/api'
 import { useDraft } from '@/lib/drafts'
 import { useAuth } from '@/stores/auth'
 import type { LanguageOption, ProblemView, SubmissionView } from '@/types/api'
+import type { ConsoleTab } from './ConsolePanel'
 import { ContestProblemList } from './ContestProblemList'
+import { ContentHeader } from './ContentHeader'
 import { EditorPane } from './EditorPane'
 import { HelpPanel } from './HelpPanel'
 import { LeaderboardPanel } from './LeaderboardPanel'
 import { RAIL_ITEMS, RAIL_LABEL, type RailKey } from './rail'
 import { StatementPanel } from './StatementPanel'
 import { SubmissionsPanel } from './SubmissionsPanel'
+import { useSiblings } from './siblings'
 import { SyllabusPanel } from './SyllabusPanel'
 
 /**
  * Màn hình làm bài (FR-E1): thanh icon · khung nội dung · khung code.
  *
- * Khung nội dung có HAI chế độ (FR-E7 v0.5): *chế độ mục* khi chọn một icon
- * (Mô tả/Giáo trình/BXH/Trợ giúp chiếm toàn khung, icon đó sáng), và *chế độ bài*
- * khi đang mở một bài (dải tab Đề bài/Bài nộp, KHÔNG icon nào sáng).
+ * Khung nội dung có MỘT lớp tab duy nhất (FR-E7 v0.5, bản v2): thanh icon chọn đang
+ * xem gì — Đề bài · Bài nộp · Giáo trình · BXH · Trợ giúp — và dòng tiêu đề 38px chỉ
+ * nói tên mục đó cùng nút nhảy sang bài kề. Bản trước có hai lớp (thanh icon CỘNG một
+ * dải tab Đề bài/Bài nộp), đúng thứ bản v2 đặt ra để bỏ.
  */
 export function WorkspacePage() {
   const { itemId, contestProblemId, courseId, contestId } = useParams()
   const { me } = useAuth()
-  const [rail, setRail] = useState<RailKey | null>(null)
-  const [problemTab, setProblemTab] = useState<'de-bai' | 'bai-nop'>('de-bai')
-  const [consoleTab, setConsoleTab] = useState<'chay-thu' | 'ket-qua'>('ket-qua')
+  const [rail, setRail] = useState<RailKey>('de-bai')
+  const [consoleTab, setConsoleTab] = useState<ConsoleTab>('ket-qua')
   const [languageId, setLanguageId] = useState('c11')
   const [customInput, setCustomInput] = useState('')
   const [busy, setBusy] = useState<'run' | 'submit' | null>(null)
@@ -107,41 +109,35 @@ export function WorkspacePage() {
     [languageId, setSource],
   )
 
-  const contentLabel = rail ? RAIL_LABEL[rail] : problemTab === 'de-bai' ? 'Đề bài' : 'Bài nộp'
+  // Đổi bài thì luôn quay về Đề bài. Không làm vậy thì bấm một bài ở Giáo trình sẽ
+  // nạp bài mới nhưng vẫn đứng ở panel Giáo trình — người dùng tưởng cú bấm không ăn.
+  const handle = contestProblemId ?? itemId
+  useEffect(() => {
+    setRail('de-bai')
+  }, [handle])
+
+  const siblings = useSiblings({ courseId, itemId, contestId, contestProblemId })
+  const contentLabel = RAIL_LABEL[rail]
   // FR-I6: sau giờ kết thúc contest vẫn nộp và chấm được, nhưng không tính BXH.
   const contestEndAt = meta?.contestEndAt as string | undefined
   const practiceMode = Boolean(contestEndAt && new Date(contestEndAt) <= new Date())
 
   const content = (
     <div className="flex h-full min-h-0 flex-col">
-      {rail === null ? (
-        <div role="tablist" className="flex shrink-0 gap-1 border-b border-line px-2 pt-1">
-          <ProblemTab id="de-bai" active={problemTab} onTab={setProblemTab}>
-            Đề bài
-          </ProblemTab>
-          <ProblemTab id="bai-nop" active={problemTab} onTab={setProblemTab}>
-            Bài nộp
-          </ProblemTab>
-          <Link to={courseId ? `/khoa-hoc/${courseId}` : '/'} className="ml-auto self-center px-2 text-xs text-ink-5 hover:underline">
-            ← Danh sách
-          </Link>
-        </div>
-      ) : null}
+      <ContentHeader
+        label={contentLabel}
+        position={rail === 'de-bai' || rail === 'bai-nop' ? siblings.position : undefined}
+        prev={rail === 'de-bai' || rail === 'bai-nop' ? siblings.prev : null}
+        next={rail === 'de-bai' || rail === 'bai-nop' ? siblings.next : null}
+      />
 
       <div className="min-h-0 flex-1 overflow-auto">
-        {/* Cột nội dung phải LUÔN có đúng một <h1>. Trước đây h1 duy nhất nằm trong
-            StatementPanel, mà panel đó chỉ hiện khi rail === null — nên ở bốn trạng
-            thái rail còn lại (trợ giúp, mô tả, giáo trình, bảng xếp hạng) cả trang
-            không có tiêu đề cấp 1 nào, và người dùng trình đọc màn hình mất mốc điều
-            hướng. Ở đây h1 ẩn về thị giác vì mỗi panel đã tự có nhan đề nhìn thấy. */}
-        {rail !== null ? <h1 className="sr-only">{contentLabel}</h1> : null}
-        {isLoading ? <div className="p-4"><Spinner /></div> : null}
-        {rail === 'tro-giup' ? <HelpPanel role={me?.role ?? 'member'} /> : null}
-        {rail === 'mo-ta' ? (
-          <div className="px-4 py-4">
-            <Markdown source={problem ? `## ${problem.title}\n\n${problem.statementMd}` : 'Đang tải…'} />
+        {isLoading ? (
+          <div className="p-4">
+            <Spinner />
           </div>
         ) : null}
+        {rail === 'tro-giup' ? <HelpPanel role={me?.role ?? 'member'} /> : null}
         {rail === 'giao-trinh' ? (
           courseId ? (
             <SyllabusPanel courseId={courseId} currentItemId={itemId} />
@@ -150,20 +146,28 @@ export function WorkspacePage() {
           )
         ) : null}
         {rail === 'bang-xep-hang' ? <LeaderboardPanel courseId={courseId} contestId={contestId} /> : null}
-        {rail === null && problem ? (
-          problemTab === 'de-bai' ? (
+        {rail === 'de-bai' ? (
+          problem ? (
             <StatementPanel problem={problem} />
-          ) : (
-            <SubmissionsPanel
-              handleQuery={handleQuery}
-              selectedId={watchedId}
-              onSelect={(id) => {
-                setWatchedId(id)
-                setConsoleTab('ket-qua')
-              }}
-              onLoadIntoEditor={loadIntoEditor}
+          ) : isLoading ? null : (
+            // Không có bài mà không nói gì thì khung nội dung trống trơn, trông như
+            // app treo. Gặp thật khi mở một link cũ sau lúc dữ liệu bị dựng lại.
+            <EmptyState
+              title="Không mở được bài này"
+              hint="Bài có thể đã bị gỡ, hoặc bạn chưa được ghi danh vào khoá chứa nó."
             />
           )
+        ) : null}
+        {rail === 'bai-nop' ? (
+          <SubmissionsPanel
+            handleQuery={handleQuery}
+            selectedId={watchedId}
+            onSelect={(id) => {
+              setWatchedId(id)
+              setConsoleTab('ket-qua')
+            }}
+            onLoadIntoEditor={loadIntoEditor}
+          />
         ) : null}
       </div>
     </div>
@@ -200,38 +204,11 @@ export function WorkspacePage() {
         <IconRail
           items={RAIL_ITEMS}
           activeKey={rail}
-          onSelect={(key) => setRail((cur) => (cur === key ? null : (key as RailKey)))}
+          onSelect={(key) => setRail(key as RailKey)}
         />
       }
       content={content}
       editor={editor}
     />
-  )
-}
-
-function ProblemTab({
-  id,
-  active,
-  onTab,
-  children,
-}: {
-  id: 'de-bai' | 'bai-nop'
-  active: string
-  onTab: (t: 'de-bai' | 'bai-nop') => void
-  children: string
-}) {
-  return (
-    <button
-      role="tab"
-      aria-selected={active === id}
-      onClick={() => onTab(id)}
-      className={`px-3 py-1.5 text-sm font-medium ${
-        active === id
-          ? 'bg-surface-1 shadow-[inset_0_-2px_0_var(--color-primary)]'
-          : 'text-ink-5'
-      }`}
-    >
-      {children}
-    </button>
   )
 }

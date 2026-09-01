@@ -1,9 +1,8 @@
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { HSplit } from '@/components/layout/HSplit'
 import { Button, VerdictBadge } from '@/components/ui'
-import { KeyHint } from '@/components/ui/patterns'
 import type { LanguageOption, SubmissionView } from '@/types/api'
-import { ConsolePanel } from './ConsolePanel'
+import { ConsolePanel, type ConsoleTab } from './ConsolePanel'
 
 /** Khung phải của FR-E1: chọn ngôn ngữ + nút chạy/nộp, editor, bảng điều khiển. */
 export function EditorPane({
@@ -37,8 +36,8 @@ export function EditorPane({
   error: string | null
   onRun: () => void
   onSubmit: () => void
-  consoleTab: 'chay-thu' | 'ket-qua'
-  onConsoleTab: (t: 'chay-thu' | 'ket-qua') => void
+  consoleTab: ConsoleTab
+  onConsoleTab: (t: ConsoleTab) => void
   customInput: string
   onCustomInput: (v: string) => void
   runResult: SubmissionView | null
@@ -81,17 +80,12 @@ export function EditorPane({
               Luyện tập — không tính BXH
             </span>
           ) : null}
-          {/* Chip phím tắt theo bản vẽ. Hai tổ hợp này CÓ THẬT (FR-E8, đăng ký ở
-              CodeEditor), nên nói ra là đúng — khác ô "⌘K tìm bài" của bản vẽ mà app
-              chưa có nên không vẽ. Ẩn ở khung hẹp: chỗ đó đã chật. */}
-          <span className="hidden xl:flex xl:items-center xl:gap-1.5">
-            <KeyHint>⌘↵ chạy thử</KeyHint>
-            <KeyHint>⇧⌘↵ nộp</KeyHint>
-          </span>
-          <Button onClick={onRun} disabled={busy !== null}>
+          {/* Phím tắt nói ngay trên chính nút (FR-E8). Bản trước để chúng thành hai
+              chip riêng đứng cạnh — trông y như hai cái nút nữa mà bấm không được. */}
+          <Button onClick={onRun} disabled={busy !== null} title="Chạy thử (⌘↵ / Ctrl+↵)">
             {busy === 'run' ? 'Đang chạy…' : 'Chạy thử'}
           </Button>
-          <Button variant="primary" onClick={onSubmit} disabled={busy !== null}>
+          <Button variant="primary" onClick={onSubmit} disabled={busy !== null} title="Nộp bài (⇧⌘↵ / Ctrl+Shift+↵)">
             {busy === 'submit' ? 'Đang nộp…' : 'Nộp bài'}
           </Button>
         </div>

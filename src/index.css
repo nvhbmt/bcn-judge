@@ -31,6 +31,7 @@
   --color-surface-1: var(--surface-1);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
+  --color-surface-editor: var(--surface-editor);
   --color-surface-sel: var(--surface-sel);
   --color-surface-code: var(--surface-code);
   --color-line: var(--line);

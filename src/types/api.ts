@@ -45,6 +45,8 @@ export interface ProblemView {
   memoryLimitMb: number
   difficulty: string | null
   tags: string[]
+  /** 'exact' | 'trim' | 'float' — quyết định có bỏ qua khoảng trắng cuối dòng không. */
+  compareMode: string
   allowedLanguageIds: string[] | null
   starterCode: Record<string, string>
   samples: SampleIO[]

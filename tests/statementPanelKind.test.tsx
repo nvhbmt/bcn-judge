@@ -23,6 +23,7 @@ const problem = (over: Partial<ProblemView> = {}): ProblemView => ({
   memoryLimitMb: 256,
   difficulty: 'easy',
   tags: [],
+  compareMode: 'trim',
   allowedLanguageIds: null,
   starterCode: {},
   samples: [{ position: 1, input: '1 2\n', expected: '3\n' }],
@@ -46,7 +47,13 @@ describe('StatementPanel — dạng bài', () => {
   it('cả hai dạng đều hiện testcase mẫu và số test ẩn', () => {
     render(<StatementPanel problem={problem()} />)
 
-    expect(screen.getByText('Input')).toBeInTheDocument()
-    expect(screen.getByText(/2 testcase ẩn/)).toBeInTheDocument()
+    // Nhãn ô ví dụ là 'stdin'/'stdout' theo bản vẽ (trước là 'Input'/'Output'): người
+    // học nộp bài đọc từ stdin nên gọi đúng tên kênh, không gọi tên chung chung.
+    expect(screen.getByText('stdin')).toBeInTheDocument()
+    // Số test ẩn nay nằm trong dải số liệu có NHÃN (bản vẽ tách thời gian · bộ nhớ ·
+    // test ẩn thành ba ô) nên khẳng định cả nhãn lẫn con số, thay cho chuỗi ghép cũ
+    // "2 testcase ẩn".
+    expect(screen.getByText('Test ẩn')).toBeInTheDocument()
+    expect(screen.getByText('2')).toBeInTheDocument()
   })
 })

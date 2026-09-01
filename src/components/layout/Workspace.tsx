@@ -165,7 +165,17 @@ export function Workspace({ rail, content, editor, contentLabel, storageKey, col
         </div>
       ) : (
         <div className="min-w-0 flex-1">
-          <SplitPane left={content} right={editor} storageKey={storageKey} collapsed={collapsed} />
+          {/* 0.474 chứ không phải 0.5: bản vẽ chia `56px | 656px | 1fr` trên khung 1440,
+              tức khung nội dung chiếm 656/1384 chiều ngang còn lại. Lệch lưới cố ý —
+              khung code cần rộng hơn khung đề. Người dùng kéo được, và nhấp đúp vào
+              vạch chia đưa về đúng tỉ lệ này (FR-E2). */}
+          <SplitPane
+            left={content}
+            right={editor}
+            storageKey={storageKey}
+            defaultRatio={656 / 1384}
+            collapsed={collapsed}
+          />
         </div>
       )}
     </div>

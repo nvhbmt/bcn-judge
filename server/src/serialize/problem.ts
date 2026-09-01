@@ -64,6 +64,13 @@ export interface MemberProblemView {
   memoryLimitMb: number
   difficulty: string | null
   tags: string[]
+  /**
+   * Cách so output. Member CẦN biết: ở chế độ `trim` thì thừa dấu cách cuối dòng hay
+   * một dòng trống ở cuối KHÔNG bị tính sai, còn `exact` thì có — và không nói ra thì
+   * người mới học mất hàng giờ đi tìm một lỗi không tồn tại. Không phải dữ liệu ẩn:
+   * nó là luật chấm, không phải đáp án.
+   */
+  compareMode: string
   allowedLanguageIds: string[] | null
   starterCode: unknown
   /** Chỉ testcase MẪU. Test ẩn chỉ lộ ra dưới dạng con số. */
@@ -98,6 +105,7 @@ export function toMemberProblem(
     timeLimitMs: problem.timeLimitMs ?? defaults.timeLimitMs,
     memoryLimitMb: problem.memoryLimitMb ?? defaults.memoryLimitMb,
     difficulty: problem.difficulty,
+    compareMode: problem.compareMode,
     tags: problem.tags,
     allowedLanguageIds: problem.allowedLanguageIds,
     starterCode: problem.starterCode,

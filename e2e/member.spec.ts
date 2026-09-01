@@ -71,8 +71,9 @@ test('thanh icon đổi panel bên trái (FR-E7)', async ({ page }) => {
   await rail.getByRole('button', { name: 'Bảng xếp hạng' }).click()
   await expect(page.getByText(/Bảng xếp hạng|Chưa có/).first()).toBeVisible()
 
-  // "Mô tả" đưa về đề bài — nhãn của thanh icon, xem pages/workspace/rail.tsx.
-  await rail.getByRole('button', { name: 'Mô tả' }).click()
+  // Bản v2 gộp về MỘT lớp tab: "Đề bài" và "Bài nộp" nay cũng là icon trên rail, nên
+  // mục đưa về đề bài đổi tên từ "Mô tả" thành "Đề bài" (pages/workspace/rail.tsx).
+  await rail.getByRole('button', { name: 'Đề bài' }).click()
   await expect(page.getByRole('heading', { name: 'Tổng hai số' })).toBeVisible()
 })
 
@@ -101,8 +102,10 @@ test('nộp bài đúng → AC, nộp bài sai → WA, cả hai vào lịch sử
     expect(await waitForVerdict(page)).toBe('WA')
   }).toPass({ timeout: 60_000 })
 
-  // Tab "Bài nộp" phải thấy cả hai lần.
-  await page.getByRole('tab', { name: /Bài nộp/ }).click()
+  // "Bài nộp" phải thấy cả hai lần. Bản v2 gộp về một lớp tab nên nó là một icon trên
+  // rail chứ không còn là tab riêng dưới khung nội dung.
+  const rail = page.getByRole('navigation').filter({ hasNot: page.getByText('~/khoá-học') })
+  await rail.getByRole('button', { name: 'Bài nộp' }).click()
   await expect(page.getByText('AC', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('WA', { exact: true }).first()).toBeVisible()
   expect(errors).toEqual([])

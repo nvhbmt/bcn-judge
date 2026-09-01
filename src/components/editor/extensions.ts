@@ -69,11 +69,11 @@ const synHighlight = HighlightStyle.define([
  */
 const makeSurfaceTheme = (dark: boolean) =>
   EditorView.theme({
-    '&': { backgroundColor: 'var(--surface-3)', color: 'var(--ink-2)' },
+    '&': { backgroundColor: 'var(--surface-editor)', color: 'var(--ink-2)' },
     '.cm-content': { caretColor: 'var(--moss)' },
     '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--moss)' },
     '.cm-gutters': {
-      backgroundColor: 'var(--surface-3)',
+      backgroundColor: 'var(--surface-editor)',
       color: 'var(--ink-6)',
       border: 'none',
       borderRight: '1px solid var(--line)',

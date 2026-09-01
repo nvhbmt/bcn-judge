@@ -79,7 +79,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
       aria-label="Điều hướng khu làm bài"
       data-testid="icon-rail"
       // 48px cố định (w-12) — FR-E1 tính phần còn lại cho hai khung dựa trên con số này.
-      className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface-2 py-2"
+      className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface-2 py-2"
     >
       <ul className="flex flex-col items-center gap-1">
         {items.map((item) => {

@@ -6,7 +6,13 @@
   --surface-0:   #131110;  /* nền màn hình */
   --surface-1:   #171512;  /* thanh trên, khung phụ */
   --surface-2:   #1a1714;  /* dòng bảng, ô thông tin */
-  --surface-3:   #151310;  /* cột bên, editor */
+  --surface-3:   #151310;  /* cột bên, thanh icon */
+  /* Editor có mặt phẳng RIÊNG, không dùng chung --surface-3.
+     Ở nền tối hai giá trị trùng nhau nên nhìn thì tưởng là một; ở nền sáng thì bản vẽ
+     tách hẳn: thanh icon xuống #f2efe6 còn khung code lên #fcfaf5 — sáng nhất màn
+     hình, như một tờ giấy. Dùng chung --surface-3 làm vùng code xỉn đi một bậc, và đó
+     đúng là chỗ người ta nhìn lâu nhất. */
+  --surface-editor: #151310;
   --surface-sel: #221f19;  /* dòng đang chọn */
   --surface-code:#1f1c17;  /* code inline */
 
@@ -69,6 +75,7 @@
   --surface-1:   #f5f2ea;
   --surface-2:   #fcfaf5;
   --surface-3:   #f2efe6;
+  --surface-editor: #fcfaf5;
   --surface-sel: #ece9dc;
   --surface-code:#ebe6db;
 

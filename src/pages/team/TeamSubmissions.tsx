@@ -52,8 +52,10 @@ export function TeamSubmissions({
                 </span>
               </div>
 
+              {/* Khối code dùng `--surface-editor`, KHÔNG phải `--surface-3`: bản vẽ cho mọi
+                  vùng mã nguồn cùng một mặt phẳng, và ở nền sáng nó là mặt sáng NHẤT. */}
               {s.source ? (
-                <pre className="max-h-56 overflow-auto bg-surface-3 px-4 py-3 font-mono text-[12px] leading-[1.7] text-ink-3">
+                <pre className="max-h-56 overflow-auto bg-surface-editor px-4 py-3 font-mono text-[12px] leading-[1.7] text-ink-3">
                   {s.source}
                 </pre>
               ) : (

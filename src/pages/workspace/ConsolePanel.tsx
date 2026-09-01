@@ -2,9 +2,27 @@ import { VerdictBadge } from '@/components/ui'
 import type { ResultView, SubmissionView } from '@/types/api'
 
 /**
- * Bảng điều khiển dưới editor (FR-E5): tab Chạy thử và tab Kết quả.
- * "Lần nộp đang xem" do trang cha quyết định (FR-E5 v0.5).
+ * Bảng điều khiển dưới editor (FR-E5).
+ *
+ * BA tab theo bản vẽ, không phải hai: `kết quả` · `chạy thử` · `stdin tự nhập`. Ô nhập
+ * stdin trước đây nằm LỒNG trong tab "chạy thử", nên mỗi lần muốn sửa input là phải rời
+ * khỏi kết quả vừa xem. Tách ra thành tab riêng đúng như thiết kế: input là dữ liệu bạn
+ * soạn, kết quả là thứ bạn đọc, hai việc khác nhau.
+ *
+ * "Lần nộp đang xem" do trang cha quyết định (FR-E5 v0.5) và hiện ở mép phải dải tab.
  */
+export type ConsoleTab = 'ket-qua' | 'chay-thu' | 'stdin'
+
+const TABS: { id: ConsoleTab; label: string }[] = [
+  { id: 'ket-qua', label: 'kết quả' },
+  { id: 'chay-thu', label: 'chạy thử' },
+  { id: 'stdin', label: 'stdin tự nhập' },
+]
+
+function hhmmss(iso: string): string {
+  return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
 export function ConsolePanel({
   tab,
   onTab,
@@ -13,71 +31,61 @@ export function ConsolePanel({
   runResult,
   submission,
 }: {
-  tab: 'chay-thu' | 'ket-qua'
-  onTab: (t: 'chay-thu' | 'ket-qua') => void
+  tab: ConsoleTab
+  onTab: (t: ConsoleTab) => void
   customInput: string
   onCustomInput: (v: string) => void
   runResult: SubmissionView | null
   submission: SubmissionView | null
 }) {
+  const dangXem = tab === 'chay-thu' ? runResult : submission
+
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div role="tablist" className="flex shrink-0 gap-1 border-b border-line px-2 pt-1">
-        <Tab id="chay-thu" active={tab} onTab={onTab}>
-          Chạy thử
-        </Tab>
-        <Tab id="ket-qua" active={tab} onTab={onTab}>
-          Kết quả
-        </Tab>
+    <div className="flex h-full min-h-0 flex-col bg-surface-1">
+      <div role="tablist" className="flex shrink-0 items-center border-b border-line">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={tab === t.id}
+            onClick={() => onTab(t.id)}
+            className={`border-b-2 px-3.5 py-2.5 font-mono text-[11px] transition-colors duration-[120ms] ease-linear ${
+              tab === t.id ? 'border-moss text-ink-1' : 'border-transparent text-ink-5 hover:text-ink-2'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+
+        {/* Mép phải: đang xem lần nộp nào. Bản vẽ đặt nó ở đây thay vì trong thân panel
+            để dòng đầu tiên của kết quả không bị đẩy xuống. */}
+        {dangXem ? (
+          <span className="num ml-auto px-3.5 font-mono text-[11px] text-ink-6">
+            {tab === 'chay-thu' ? 'lượt chạy thử' : 'lần nộp'} · {hhmmss(dangXem.receivedAt)}
+          </span>
+        ) : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto px-3 py-2">
-        {tab === 'chay-thu' ? (
-          <div className="space-y-2">
-            <label className="block text-xs font-medium text-ink-5" htmlFor="custom-input">
-              Input tự nhập (bỏ trống để chạy với testcase mẫu)
+      <div className="min-h-0 flex-1 overflow-auto px-3.5 py-3">
+        {tab === 'stdin' ? (
+          <div className="flex h-full flex-col gap-2">
+            <label className="font-mono text-[11px] text-ink-5" htmlFor="custom-input">
+              Bỏ trống thì chạy với testcase mẫu.
             </label>
             <textarea
               id="custom-input"
               value={customInput}
               onChange={(e) => onCustomInput(e.target.value)}
-              rows={3}
-              className="w-full border border-line-strong px-2 py-1 font-mono text-xs"
+              className="min-h-0 flex-1 resize-none border border-line-strong bg-surface-editor px-2.5 py-2 font-mono text-[12px] text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-moss"
             />
-            <ResultTable submission={runResult} emptyText="Chưa chạy thử lần nào." />
           </div>
+        ) : tab === 'chay-thu' ? (
+          <ResultTable submission={runResult} emptyText="Chưa chạy thử lần nào." />
         ) : (
           <ResultTable submission={submission} emptyText="Chưa có bài nộp nào." />
         )}
       </div>
     </div>
-  )
-}
-
-function Tab({
-  id,
-  active,
-  onTab,
-  children,
-}: {
-  id: 'chay-thu' | 'ket-qua'
-  active: string
-  onTab: (t: 'chay-thu' | 'ket-qua') => void
-  children: string
-}) {
-  return (
-    <button
-      role="tab"
-      aria-selected={active === id}
-      onClick={() => onTab(id)}
-      className={`px-3 py-1 text-xs font-medium ${
-        active === id
-          ? 'bg-surface-1 text-ink-1 shadow-[inset_0_-2px_0_var(--color-primary)]'
-          : 'text-ink-5'
-      }`}
-    >
-      {children}
-    </button>
   )
 }
 
