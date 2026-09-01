@@ -1,13 +1,18 @@
-import { VerdictBadge } from '@/components/ui'
-import type { ResultView, SubmissionView } from '@/types/api'
+import type { SampleIO, SubmissionView } from '@/types/api'
+import { ResultTable } from './ResultTable'
+import { StdinPane } from './StdinPane'
 
 /**
  * Bảng điều khiển dưới editor (FR-E5).
  *
  * BA tab theo bản vẽ, không phải hai: `kết quả` · `chạy thử` · `stdin tự nhập`. Ô nhập
  * stdin trước đây nằm LỒNG trong tab "chạy thử", nên mỗi lần muốn sửa input là phải rời
- * khỏi kết quả vừa xem. Tách ra thành tab riêng đúng như thiết kế: input là dữ liệu bạn
- * soạn, kết quả là thứ bạn đọc, hai việc khác nhau.
+ * khỏi kết quả vừa xem.
+ *
+ * Ba tab là ba câu hỏi khác nhau, nên không tab nào trả lời hộ tab nào:
+ *   - kết quả       — lần NỘP gần nhất chấm ra sao
+ *   - chạy thử      — chạy testcase MẪU thì đúng được mấy test
+ *   - stdin tự nhập — đưa input này vào thì chương trình in ra gì (có nút chạy riêng)
  *
  * "Lần nộp đang xem" do trang cha quyết định (FR-E5 v0.5) và hiện ở mép phải dải tab.
  */
@@ -28,17 +33,34 @@ export function ConsolePanel({
   onTab,
   customInput,
   onCustomInput,
-  runResult,
+  onRunCustom,
+  busy,
+  sampleRun,
+  customRun,
+  customRunPending,
   submission,
+  samples,
+  compareMode,
 }: {
   tab: ConsoleTab
   onTab: (t: ConsoleTab) => void
   customInput: string
   onCustomInput: (v: string) => void
-  runResult: SubmissionView | null
+  onRunCustom: () => void
+  busy: 'run' | 'submit' | null
+  /** Lượt chạy testcase mẫu gần nhất — chỉ tab "chạy thử" đọc nó. */
+  sampleRun: SubmissionView | null
+  /** Lượt chạy với input tự nhập gần nhất — chỉ tab "stdin tự nhập" đọc nó. */
+  customRun: SubmissionView | null
+  /** Đã bấm chạy nhưng kết quả chưa về — khoảng này `customRun` vẫn còn null. */
+  customRunPending: boolean
   submission: SubmissionView | null
+  /** Testcase mẫu của bài, để dựng bảng so output khi sai. */
+  samples: SampleIO[]
+  /** Luật so của bài — bảng diff phải chuẩn hoá giống hệt máy chấm. */
+  compareMode: string
 }) {
-  const dangXem = tab === 'chay-thu' ? runResult : submission
+  const dangXem = tab === 'chay-thu' ? sampleRun : tab === 'ket-qua' ? submission : null
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface-1">
@@ -68,96 +90,30 @@ export function ConsolePanel({
 
       <div className="min-h-0 flex-1 overflow-auto px-3.5 py-3">
         {tab === 'stdin' ? (
-          <div className="flex h-full flex-col gap-2">
-            <label className="font-mono text-[11px] text-ink-5" htmlFor="custom-input">
-              Bỏ trống thì chạy với testcase mẫu.
-            </label>
-            <textarea
-              id="custom-input"
-              value={customInput}
-              onChange={(e) => onCustomInput(e.target.value)}
-              className="min-h-0 flex-1 resize-none border border-line-strong bg-surface-editor px-2.5 py-2 font-mono text-[12px] text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-moss"
-            />
-          </div>
+          <StdinPane
+            value={customInput}
+            onChange={onCustomInput}
+            onRun={onRunCustom}
+            busy={busy}
+            pending={customRunPending}
+            result={customRun}
+          />
         ) : tab === 'chay-thu' ? (
-          <ResultTable submission={runResult} emptyText="Chưa chạy thử lần nào." />
+          <ResultTable
+            submission={sampleRun}
+            samples={samples}
+            compareMode={compareMode}
+            emptyText="Chưa chạy thử lần nào."
+          />
         ) : (
-          <ResultTable submission={submission} emptyText="Chưa có bài nộp nào." />
+          <ResultTable
+            submission={submission}
+            samples={samples}
+            compareMode={compareMode}
+            emptyText="Chưa có bài nộp nào."
+          />
         )}
       </div>
     </div>
-  )
-}
-
-function ResultTable({ submission, emptyText }: { submission: SubmissionView | null; emptyText: string }) {
-  if (!submission) return <p className="py-4 text-center text-xs text-ink-5">{emptyText}</p>
-
-  if (submission.compileOutput) {
-    return (
-      <div>
-        <p className="mb-1 text-xs font-medium text-[var(--color-wa)]">Lỗi biên dịch</p>
-        <pre className="max-h-60 overflow-auto border border-line bg-[var(--surface-code)] p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
-          {submission.compileOutput}
-        </pre>
-      </div>
-    )
-  }
-
-  const results = submission.results ?? []
-  if (results.length === 0) {
-    return (
-      <p className="py-4 text-center text-xs text-ink-5">
-        {submission.status === 'done' ? 'Không có kết quả.' : 'Đang chấm…'}
-      </p>
-    )
-  }
-
-  return (
-    <table className="w-full text-xs">
-      <thead className="text-left text-ink-5">
-        <tr>
-          <th className="py-1">Test</th>
-          <th>Verdict</th>
-          <th className="text-right">Thời gian</th>
-          <th className="text-right">Bộ nhớ</th>
-        </tr>
-      </thead>
-      <tbody className="font-mono">
-        {results.map((r) => (
-          <ResultRow key={r.position} result={r} />
-        ))}
-      </tbody>
-    </table>
-  )
-}
-
-function ResultRow({ result }: { result: ResultView }) {
-  return (
-    <>
-      <tr className="border-t border-line">
-        <td className="py-1">
-          #{result.position} {result.isSample ? <span className="text-ink-6">mẫu</span> : <span className="text-ink-6">ẩn</span>}
-        </td>
-        <td>
-          <VerdictBadge verdict={result.verdict} />
-          {result.detail ? <span className="ml-1 text-ink-6">{result.detail}</span> : null}
-        </td>
-        <td className="text-right tabular-nums">{result.timeMs ?? '—'} ms</td>
-        <td className="text-right tabular-nums">
-          {result.memoryKb ? `${Math.round(result.memoryKb / 1024)} MB` : '—'}
-        </td>
-      </tr>
-      {/* Diff chỉ có ở testcase MẪU — test ẩn không bao giờ trả stdout (NFR-2). */}
-      {result.isSample && result.verdict === 'WA' && result.stdout !== undefined ? (
-        <tr>
-          <td colSpan={4} className="pb-2">
-            <pre className="overflow-x-auto bg-surface-1 p-2 whitespace-pre-wrap">
-              Output của bạn: {result.stdout || '(rỗng)'}
-              {result.firstDiffLine ? `\nKhác từ dòng ${result.firstDiffLine}` : ''}
-            </pre>
-          </td>
-        </tr>
-      ) : null}
-    </>
   )
 }

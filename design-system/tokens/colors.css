@@ -44,6 +44,13 @@
   --tint-earth: oklch(0.30 0.05 68 / 0.26);
   --tint-clay:  oklch(0.30 0.06 30 / 0.26);
 
+  /* Khoảng ký tự lệch trong bảng so output. KHÔNG dùng lại --tint-* ở đây: tint là nền
+     của cả một dải băng, nơi một lớp wash rất nhạt là vừa đủ; còn chỗ này tô một hai ký
+     tự giữa dòng, mà cả công dụng của nó là mắt phải bắt được ngay. Đặc chứ không phủ
+     alpha, để không phụ thuộc nền bên dưới. */
+  --diff-got:  oklch(0.40 0.09 30);   /* output của mình */
+  --diff-want: oklch(0.40 0.08 128);  /* đáp án đúng */
+
   /* verdict — ánh xạ 1:1 với VERDICT_TONE trong src/types/api.ts */
   --verdict-ac:  var(--moss);
   --verdict-wa:  var(--clay);
@@ -104,6 +111,9 @@
 
   --tint-earth: oklch(0.90 0.05 80 / 0.65);
   --tint-clay:  oklch(0.88 0.06 30 / 0.45);
+
+  --diff-got:  oklch(0.86 0.09 30);
+  --diff-want: oklch(0.87 0.10 128);
 
   --syn-comment: var(--ink-5);
   --syn-keyword: oklch(0.43 0.09 305);

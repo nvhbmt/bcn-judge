@@ -1,7 +1,7 @@
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { HSplit } from '@/components/layout/HSplit'
 import { Button, VerdictBadge } from '@/components/ui'
-import type { LanguageOption, SubmissionView } from '@/types/api'
+import type { LanguageOption, SampleIO, SubmissionView } from '@/types/api'
 import { ConsolePanel, type ConsoleTab } from './ConsolePanel'
 
 /** Khung phải của FR-E1: chọn ngôn ngữ + nút chạy/nộp, editor, bảng điều khiển. */
@@ -16,13 +16,18 @@ export function EditorPane({
   busy,
   error,
   onRun,
+  onRunCustom,
   onSubmit,
   consoleTab,
   onConsoleTab,
   customInput,
   onCustomInput,
-  runResult,
+  sampleRun,
+  customRun,
+  customRunPending,
   submission,
+  samples,
+  compareMode,
   practiceMode,
 }: {
   languages: LanguageOption[]
@@ -35,13 +40,18 @@ export function EditorPane({
   busy: 'run' | 'submit' | null
   error: string | null
   onRun: () => void
+  onRunCustom: () => void
   onSubmit: () => void
   consoleTab: ConsoleTab
   onConsoleTab: (t: ConsoleTab) => void
   customInput: string
   onCustomInput: (v: string) => void
-  runResult: SubmissionView | null
+  sampleRun: SubmissionView | null
+  customRun: SubmissionView | null
+  customRunPending: boolean
   submission: SubmissionView | null
+  samples: SampleIO[]
+  compareMode: string
   practiceMode: boolean
 }) {
   return (
@@ -82,7 +92,7 @@ export function EditorPane({
           ) : null}
           {/* Phím tắt nói ngay trên chính nút (FR-E8). Bản trước để chúng thành hai
               chip riêng đứng cạnh — trông y như hai cái nút nữa mà bấm không được. */}
-          <Button onClick={onRun} disabled={busy !== null} title="Chạy thử (⌘↵ / Ctrl+↵)">
+          <Button onClick={onRun} disabled={busy !== null} title="Chạy với testcase mẫu (⌘↵ / Ctrl+↵)">
             {busy === 'run' ? 'Đang chạy…' : 'Chạy thử'}
           </Button>
           <Button variant="primary" onClick={onSubmit} disabled={busy !== null} title="Nộp bài (⇧⌘↵ / Ctrl+Shift+↵)">
@@ -117,8 +127,14 @@ export function EditorPane({
               onTab={onConsoleTab}
               customInput={customInput}
               onCustomInput={onCustomInput}
-              runResult={runResult}
+              onRunCustom={onRunCustom}
+              busy={busy}
+              sampleRun={sampleRun}
+              customRun={customRun}
+              customRunPending={customRunPending}
               submission={submission}
+              samples={samples}
+              compareMode={compareMode}
             />
           }
         />

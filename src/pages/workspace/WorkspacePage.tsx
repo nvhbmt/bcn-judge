@@ -40,7 +40,11 @@ export function WorkspacePage() {
   const [busy, setBusy] = useState<'run' | 'submit' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [watchedId, setWatchedId] = useState<string | null>(null)
-  const [runId, setRunId] = useState<string | null>(null)
+  // Hai lượt chạy được theo dõi RIÊNG, vì chúng trả lời hai câu hỏi khác nhau và hiện
+  // ở hai tab khác nhau. Dùng chung một id thì chạy stdin sẽ xoá mất bảng kết quả
+  // testcase mẫu vừa xem — đúng lúc người ta đang lấy nó làm mốc để dò.
+  const [sampleRunId, setSampleRunId] = useState<string | null>(null)
+  const [customRunId, setCustomRunId] = useState<string | null>(null)
 
   const handleQuery = contestProblemId ? `contestProblemId=${contestProblemId}` : `itemId=${itemId}`
 
@@ -62,7 +66,8 @@ export function WorkspacePage() {
   const [source, setSource, draftStatus, draftSavedAt] = useDraft(draftKey, problem?.starterCode?.[languageId] ?? '')
 
   const { submission } = useSubmissionStream(watchedId)
-  const { submission: runResult } = useSubmissionStream(runId)
+  const { submission: sampleRun } = useSubmissionStream(sampleRunId)
+  const { submission: customRun } = useSubmissionStream(customRunId)
 
   const allowed = useMemo(
     () => (languages ?? []).filter((l) => !problem?.allowedLanguageIds || problem.allowedLanguageIds.includes(l.id)),
@@ -70,7 +75,7 @@ export function WorkspacePage() {
   )
 
   const send = useCallback(
-    async (kind: 'run' | 'submit') => {
+    async (kind: 'run' | 'submit', target: 'samples' | 'custom' = 'samples') => {
       setBusy(kind)
       setError(null)
       try {
@@ -78,9 +83,10 @@ export function WorkspacePage() {
           ...(contestProblemId ? { contestProblemId } : { itemId }),
           languageId,
           source,
-          ...(kind === 'run'
-            ? { target: customInput.trim() ? 'custom' : 'samples', customInput: customInput || undefined }
-            : {}),
+          // Đích của lượt chạy do NÚT quyết định, không suy từ chỗ ô stdin có chữ hay
+          // không: nút trên thanh luôn chạy testcase mẫu, nút trong tab stdin luôn chạy
+          // input tự nhập. Kiểu đoán ý cũ làm một cú bấm có hai nghĩa mà không báo gì.
+          ...(kind === 'run' ? { target, customInput: target === 'custom' ? customInput : undefined } : {}),
         }
         const res = await api.post<{ id: string }>(
           kind === 'submit' ? '/api/member/submissions' : '/api/member/submissions/runs',
@@ -89,8 +95,11 @@ export function WorkspacePage() {
         if (kind === 'submit') {
           setWatchedId(res.id)
           setConsoleTab('ket-qua')
+        } else if (target === 'custom') {
+          setCustomRunId(res.id)
+          setConsoleTab('stdin')
         } else {
-          setRunId(res.id)
+          setSampleRunId(res.id)
           setConsoleTab('chay-thu')
         }
       } catch (err) {
@@ -191,14 +200,19 @@ export function WorkspacePage() {
       draftSavedAt={draftSavedAt}
       busy={busy}
       error={error}
-      onRun={() => void send('run')}
+      onRun={() => void send('run', 'samples')}
+      onRunCustom={() => void send('run', 'custom')}
       onSubmit={() => void send('submit')}
       consoleTab={consoleTab}
       onConsoleTab={setConsoleTab}
       customInput={customInput}
       onCustomInput={setCustomInput}
-      runResult={runResult}
+      sampleRun={sampleRun}
+      customRun={customRun}
+      customRunPending={customRunId !== null && customRun === null}
       submission={submission}
+      samples={problem?.samples ?? []}
+      compareMode={problem?.compareMode ?? 'trim'}
       practiceMode={practiceMode}
     />
   )

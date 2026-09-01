@@ -20,17 +20,34 @@ export function useSubmissionStream(submissionId: string | null): {
   const gotEvent = useRef(false)
 
   useEffect(() => {
-    if (!submissionId) {
-      setSubmission(null)
-      return
-    }
+    // Xoá kết quả cũ ở MỌI lần đổi id, không chỉ khi về null: giữ lại thì trong khoảng
+    // giữa lúc bấm và lúc phản hồi đầu tiên về, màn hình đang hiện kết quả của một bài
+    // nộp KHÁC — mà nó trông y hệt kết quả của cú bấm vừa rồi.
+    setSubmission(null)
+    if (!submissionId) return
     let cancelled = false
     gotEvent.current = false
+
+    let source: EventSource | null = null
+    let poll: ReturnType<typeof setInterval> | null = null
 
     const refetch = async () => {
       try {
         const data = await api.get<SubmissionView>(`/api/member/submissions/${submissionId}`)
         if (!cancelled) setSubmission(data)
+        // Chấm xong thì đóng kết nối, thay vì để nó treo tới lúc rời trang. Máy chủ
+        // KHÔNG tự khép luồng (`sseStream` giữ kênh mở vô hạn), nên nếu client không
+        // đóng thì không ai đóng. Màn làm bài mở tới ba luồng — lần nộp, lượt chạy mẫu,
+        // lượt chạy tự nhập — và mỗi lượt bấm để lại thêm một kết nối sống: chỉ vài lần
+        // là chạm trần 6 kết nối/tên miền của HTTP/1.1, rồi mọi request sau đứng chờ.
+        //
+        // Đánh đổi: bài đã "done" mà mentor cho chấm lại thì màn hình không tự cập
+        // nhật nữa. Chấp nhận được vì đường lùi polling vốn đã dừng ở 'done' từ trước,
+        // nên đóng SSE chỉ là làm hai đường xử sự giống nhau.
+        if (data.status === 'done') {
+          source?.close()
+          if (poll) clearInterval(poll)
+        }
         return data.status
       } catch {
         return null
@@ -39,7 +56,7 @@ export function useSubmissionStream(submissionId: string | null): {
 
     void refetch()
 
-    const source = new EventSource(`/api/member/submissions/${submissionId}/events`, { withCredentials: true })
+    source = new EventSource(`/api/member/submissions/${submissionId}/events`, { withCredentials: true })
     source.onmessage = () => {
       gotEvent.current = true
       setLive(true)
@@ -48,7 +65,6 @@ export function useSubmissionStream(submissionId: string | null): {
     source.onerror = () => setLive(false)
 
     // Đường lùi: nếu sau vài giây SSE chưa nói gì thì bật polling song song.
-    let poll: ReturnType<typeof setInterval> | null = null
     const grace = setTimeout(() => {
       if (gotEvent.current) return
       poll = setInterval(async () => {
@@ -61,7 +77,7 @@ export function useSubmissionStream(submissionId: string | null): {
       cancelled = true
       clearTimeout(grace)
       if (poll) clearInterval(poll)
-      source.close()
+      source?.close()
     }
   }, [submissionId])
 

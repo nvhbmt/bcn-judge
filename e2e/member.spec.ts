@@ -83,8 +83,51 @@ test('chạy thử trên testcase mẫu, không tính vào lịch sử nộp (FR
   await typeCode(page, AC_SOURCE)
 
   await page.getByRole('button', { name: 'Chạy thử' }).click()
-  // Chạy thử in stdout của testcase mẫu; "8" là kết quả của test mẫu đầu (3 5).
-  await expect(page.getByText('8', { exact: true }).first()).toBeVisible({ timeout: 60_000 })
+
+  // Bám vào chính BẢNG kết quả, không phải vào một con số nào đó có trên màn hình:
+  // bản trước khẳng định "thấy chữ 8" trong khi 8 đã nằm sẵn ở khối ví dụ của đề từ
+  // trước lúc bấm, nên nó xanh kể cả khi nút Chạy thử không làm gì cả.
+  const console_ = page.locator('[role="tablist"]').last()
+  await expect(console_.getByRole('tab', { name: 'chạy thử' })).toHaveAttribute('aria-selected', 'true')
+  const row = page.getByRole('row').filter({ hasText: '#1' }).first()
+  await expect(row).toContainText('mẫu')
+  await expect(row.getByText('AC')).toBeVisible({ timeout: 60_000 })
+})
+
+test('tab stdin tự nhập: gõ input, chạy và đọc output ngay tại chỗ', async ({ page }) => {
+  await page.goto('/')
+  await openFirstProblem(page)
+  await typeCode(page, AC_SOURCE)
+
+  await page.getByRole('tab', { name: 'stdin tự nhập' }).click()
+  // Input KHÁC hẳn testcase mẫu (3 5 → 8), để output không thể trùng thứ đã có sẵn
+  // trên màn hình — 111 + 222 = 333 không xuất hiện ở đâu khác trong trang.
+  await page.getByLabel(/Chương trình đọc đúng những gì bạn gõ/).fill('111 222\n')
+  await page.getByRole('button', { name: 'Chạy với input này' }).click()
+
+  // Ở lại đúng tab đó — cả vòng gõ-chạy-đọc không phải rời chỗ nào.
+  await expect(page.getByRole('tab', { name: 'stdin tự nhập' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByText('333')).toBeVisible({ timeout: 60_000 })
+})
+
+test('testcase mẫu sai thì chỉ ra đúng chỗ lệch, không bắt tự dò', async ({ page }) => {
+  await page.goto('/')
+  await openFirstProblem(page)
+  await typeCode(page, WA_SOURCE)
+
+  await page.getByRole('button', { name: 'Chạy thử' }).click()
+
+  // Bài mẫu có HAI testcase mẫu và cả hai đều sai, nên trên màn hình có hai bảng so
+  // giống hệt nhau — chỉ đích danh bảng của test #1 bằng tên trợ năng của nó.
+  const diff = page.getByRole('group', { name: 'So output testcase mẫu #1' })
+  await expect(diff).toBeVisible({ timeout: 60_000 })
+  await expect(diff.getByText('khác từ dòng 1')).toBeVisible()
+  await expect(diff.getByText('output của bạn')).toBeVisible()
+  await expect(diff.getByText('đáp án đúng')).toBeVisible()
+
+  // 3 - 5 = -2, đáp án đúng là 8: khoảng được tô phải đúng bằng hai giá trị đó chứ
+  // không phải cả dòng. Đây mới là thứ chứng minh phần tô sáng chạy thật.
+  await expect(diff.locator('mark')).toHaveText(['-2', '8'])
 })
 
 test('nộp bài đúng → AC, nộp bài sai → WA, cả hai vào lịch sử', async ({ page }) => {
