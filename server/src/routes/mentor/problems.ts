@@ -10,6 +10,7 @@ import { created, errors, ok } from '../../lib/apiResponse'
 import { audit } from '../../lib/audit'
 import { parseBody } from '../../lib/http'
 import { getSettings } from '../../lib/settings'
+import { iso } from '../../lib/time'
 import { ZipImportError, parseTestcaseZip } from '../../lib/zipImport'
 import { toMentorProblem, type RawProblemRow, type RawTestcaseRow } from '../../serialize/problem'
 
@@ -116,7 +117,8 @@ mentorProblemRoutes.get('/:id', async (c) => {
     WHERE problem_id = ${problemId} ORDER BY position
   `)
   const s = await getSettings()
-  const [validation] = await q<{ validated_testcase_rev: number | null; validated_at: Date | null }>(sql`
+  // validated_at về đây là CHUỖI chứ không phải Date (xem lib/time.ts).
+  const [validation] = await q<{ validated_testcase_rev: number | null; validated_at: Date | string | null }>(sql`
     SELECT validated_testcase_rev, validated_at FROM problems WHERE id = ${problemId}
   `)
   return ok(
@@ -127,7 +129,7 @@ mentorProblemRoutes.get('/:id', async (c) => {
     }),
     {
       validated: validation?.validated_testcase_rev === problem.testcaseRev,
-      validatedAt: validation?.validated_at?.toISOString() ?? null,
+      validatedAt: iso(validation?.validated_at),
     },
   )
 })

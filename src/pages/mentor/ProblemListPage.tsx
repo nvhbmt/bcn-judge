@@ -3,11 +3,9 @@
  *
  * Cột quan trọng nhất là trạng thái kiểm, không phải tiêu đề: một bài "chưa kiểm"
  * là một bài chưa xuất bản được, và đó là lý do mentor mở trang này. Trạng thái
- * suy ra từ `validated_testcase_rev === testcase_rev` — cùng phép so sánh mà
+ * suy ra từ `validatedTestcaseRev === testcaseRev` — cùng phép so sánh mà
  * `GET /:id` trả trong `meta.validated`, đặt trong `isValidated()` để hai màn hình
  * không bao giờ nói hai điều khác nhau.
- *
- * Lưu ý về đặt tên trường: route này trả **snake_case** (xem `types.ts`).
  */
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Plus } from 'lucide-react'
@@ -80,7 +78,7 @@ export function ProblemListPage() {
                   </span>
                 ) : null}
                 <span className="ml-auto text-xs text-slate-400">
-                  {new Date(row.updated_at).toLocaleString('vi-VN', {
+                  {new Date(row.updatedAt).toLocaleString('vi-VN', {
                     hour: '2-digit',
                     minute: '2-digit',
                     day: '2-digit',
@@ -90,9 +88,9 @@ export function ProblemListPage() {
               </div>
 
               <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                <span className="font-mono">{courseCode(row.scope_course_id)}</span>
+                <span className="font-mono">{courseCode(row.scopeCourseId)}</span>
                 <span>{row.testcases} testcase</span>
-                <span className="font-mono">bộ test #{row.testcase_rev}</span>
+                <span className="font-mono">bộ test #{row.testcaseRev}</span>
                 {(row.tags ?? []).length > 0 ? <span>{(row.tags ?? []).join(' · ')}</span> : null}
               </div>
             </Link>

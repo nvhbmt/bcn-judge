@@ -2,31 +2,33 @@
  * Bản sao kiểu của API mentor (mẫu `src/types/api.ts`: FE giữ bản sao, không import
  * từ server).
  *
- * ĐỌC KỸ trước khi sửa — hai endpoint của `server/src/routes/mentor/problems.ts`
- * đặt tên trường KHÁC NHAU và đó là sự thật của API, không phải nhầm lẫn ở đây:
+ * Cả hai endpoint của `server/src/routes/mentor/problems.ts` đều alias đầy đủ và
+ * trả **camelCase**.
  *
- *   - `GET /api/mentor/problems` SELECT thẳng cột, không alias → trả **snake_case**
- *     (`scope_course_id`, `testcase_rev`, `validated_testcase_rev`, `updated_at`).
- *   - `GET /api/mentor/problems/:id` alias đầy đủ → trả **camelCase**.
- *
- * Giữ nguyên hai lối đặt tên thay vì "dọn cho đẹp" một bên: đổi tên ở FE thì người
- * sau đọc route sẽ không tìm ra trường đang hiện trên màn hình.
+ * Chú thích cũ ở đây từng ghi rằng `GET /api/mentor/problems` trả snake_case. Điều
+ * đó đúng vào lúc viết, rồi route được sửa cho khớp `GET /:id` mà bản sao kiểu này
+ * không đổi theo — nên FE đọc `row.updated_at`, `row.testcase_rev`,
+ * `row.validated_testcase_rev`, `row.scope_course_id` và nhận `undefined` hết.
+ * TypeScript không bắt được vì kiểu ở đây tự khai snake_case: bản sao kiểu sai thì
+ * nó hợp thức hoá chính cái sai đó. Hậu quả trên màn hình: ngày thành "Invalid
+ * Date", số bộ test biến mất, bài của ngân hàng chung bị gán nhầm "Khoá khác", và
+ * nặng nhất là MỌI bài đều đeo huy hiệu xanh "Đã kiểm" (xem `isValidated` bên dưới).
  */
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 export type CompareMode = 'trim' | 'exact' | 'float'
 export type TestcaseKind = 'sample' | 'hidden'
 
-/** Một dòng của `GET /api/mentor/problems` — snake_case, xem chú thích đầu file. */
+/** Một dòng của `GET /api/mentor/problems`. */
 export interface MentorProblemRow {
   id: string
   title: string
-  scope_course_id: string | null
+  scopeCourseId: string | null
   difficulty: string | null
   tags: string[] | null
-  testcase_rev: number
-  validated_testcase_rev: number | null
-  updated_at: string
+  testcaseRev: number
+  validatedTestcaseRev: number | null
+  updatedAt: string
   testcases: number
 }
 
@@ -93,9 +95,16 @@ export const COMPARE_MODE_LABEL: Record<CompareMode, string> = {
 
 /**
  * FR-D6: "đã kiểm" nghĩa là lần kiểm gần nhất chạy trên ĐÚNG bộ test hiện tại.
- * `PUT`/zip đều bump `testcase_rev`, nên mọi lần đổi testcase tự đẩy bài về "chưa kiểm"
+ * `PUT`/zip đều bump `testcaseRev`, nên mọi lần đổi testcase tự đẩy bài về "chưa kiểm"
  * — không cần ai nhớ bấm gì.
+ *
+ * So sánh bằng `typeof === 'number'` chứ không phải `!== null`: bản trước dùng
+ * `!== null`, nên khi hai trường về `undefined` (tên trường lệch với API) thì
+ * `undefined !== null` là true và `undefined === undefined` cũng true — hàm trả
+ * true cho MỌI bài, dán nhãn "đã kiểm" lên cả bài chưa hề kiểm. Huy hiệu này là
+ * thứ mentor nhìn để quyết định có publish hay không, nên nó phải sai về phía
+ * "chưa kiểm" khi dữ liệu không rõ ràng.
  */
-export function isValidated(row: Pick<MentorProblemRow, 'testcase_rev' | 'validated_testcase_rev'>): boolean {
-  return row.validated_testcase_rev !== null && row.validated_testcase_rev === row.testcase_rev
+export function isValidated(row: Pick<MentorProblemRow, 'testcaseRev' | 'validatedTestcaseRev'>): boolean {
+  return typeof row.validatedTestcaseRev === 'number' && row.validatedTestcaseRev === row.testcaseRev
 }

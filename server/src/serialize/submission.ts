@@ -7,6 +7,7 @@
  * thành lỗi biên dịch chứ không phải lỗi runtime ai đó phải phát hiện.
  */
 import type { Verdict } from '../judge/types'
+import { iso } from '../lib/time'
 
 /** Dòng thô từ DB — chỉ tầng serialize được chạm vào. */
 export interface RawResultRow {
@@ -49,11 +50,6 @@ export interface RawSubmissionRow {
   queuedMs: number | null
   judgeMs: number | null
   attempt: number
-}
-
-function iso(value: Date | string | null): string | null {
-  if (value === null) return null
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString()
 }
 
 /** FR-F2 v0.5: điểm bài chuẩn hoá 0–100, làm tròn 2 chữ số — dẫn xuất MỘT chỗ. */
