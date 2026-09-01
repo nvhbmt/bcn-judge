@@ -127,6 +127,9 @@ export function WorkspacePage() {
     <div className="flex h-full min-h-0 flex-col">
       <ContentHeader
         label={contentLabel}
+        // Panel Đề bài tự mang <h1> (tên bài) — nhãn ở đây lùi về chữ thường để màn
+        // hình chỉ có đúng MỘT tiêu đề cấp 1.
+        asHeading={rail !== 'de-bai'}
         position={rail === 'de-bai' || rail === 'bai-nop' ? siblings.position : undefined}
         prev={rail === 'de-bai' || rail === 'bai-nop' ? siblings.prev : null}
         next={rail === 'de-bai' || rail === 'bai-nop' ? siblings.next : null}

@@ -75,7 +75,11 @@ export function CourseForm({ course, onDone }: { course: AdminCourse | null; onD
           <TextInput
             required
             minLength={2}
-            pattern="[\w-]+"
+            // Dấu gạch PHẢI escape. Trình duyệt biên dịch `pattern` bằng cờ `v`
+            // (unicodeSets), mà ở đó `[\w-]` là lỗi cú pháp — Chrome bỏ qua luật này
+            // và chỉ log ra console, nên ô mã khoá trông như có kiểm mà thật ra không
+            // kiểm gì. Xem tests/htmlPattern.test.ts.
+            pattern="[\w\-]+"
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
             className="font-mono"

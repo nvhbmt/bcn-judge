@@ -21,16 +21,26 @@ export function ContentHeader({
   position,
   prev,
   next,
+  asHeading = true,
 }: {
   label: string
   /** Ví dụ "bài 4/6 · Tuần 2". Không suy ra được thì bỏ trống. */
   position?: string
   prev?: SiblingLink | null
   next?: SiblingLink | null
+  /**
+   * Nhãn này có phải `<h1>` của màn hay không.
+   *
+   * Panel "Đề bài" TỰ có `<h1>` là tên bài, nên ở đó nhãn phải là chữ thường: hai thẻ
+   * `<h1>` trên một màn làm hỏng cây tiêu đề y như khi không có cái nào. Các panel còn
+   * lại (Giáo trình, BXH, Trợ giúp, Bài nộp) không có `<h1>` nên nhãn này đảm nhiệm.
+   */
+  asHeading?: boolean
 }) {
+  const Label = asHeading ? 'h1' : 'span'
   return (
     <div className="flex h-[38px] shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-5">
-      <h1 className="font-mono text-[11px] font-semibold tracking-[0.14em] text-ink-1 uppercase">{label}</h1>
+      <Label className="font-mono text-[11px] font-semibold tracking-[0.14em] text-ink-1 uppercase">{label}</Label>
       {position ? <span className="num font-mono text-[11px] text-ink-5">{position}</span> : null}
 
       {prev || next ? (

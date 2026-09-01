@@ -22,12 +22,17 @@ export const ACCOUNTS = {
 export const authFile = (role: 'admin' | 'mentor' | 'leader' | 'member') => `e2e/.auth/${role}.json`
 
 /**
- * Đăng nhập bằng form. CHỈ dùng cho auth.spec — các spec khác nạp sẵn cookie qua
- * `storageState`, vì `/auth/login` chặn 10 lần mỗi phút mỗi IP.
+ * Điền form đăng nhập và gửi, có chịu được giới hạn tần suất.
+ *
+ * `/auth/login` chặn 10 lần mỗi phút mỗi IP để chống dò mật khẩu. Cả bộ E2E dùng
+ * chung một IP, nên chạy đủ spec là chạm ngưỡng — và khi chạm, màn hình báo "Thử lại
+ * sau N giây" chứ không phải "sai mật khẩu", rất dễ đọc nhầm thành lỗi sản phẩm.
+ * Cách sống chung là ĐỢI HẾT cửa sổ rồi thử lại, KHÔNG nới giới hạn.
+ *
+ * Hàm này KHÔNG khẳng định đã vào được màn nào: người đăng nhập lần đầu bị đẩy sang
+ * màn đổi mật khẩu chứ không vào thẳng, nên việc đó để nơi gọi quyết định.
  */
-export async function login(page: Page, who: keyof typeof ACCOUNTS): Promise<void> {
-  const { email, password } = ACCOUNTS[who]
-
+export async function submitLogin(page: Page, email: string, password: string): Promise<void> {
   const attempt = async () => {
     await page.goto('/dang-nhap')
     await page.getByLabel('Email hoặc username').fill(email)
@@ -36,18 +41,22 @@ export async function login(page: Page, who: keyof typeof ACCOUNTS): Promise<voi
   }
 
   await attempt()
-  const nav = page.getByRole('navigation', { name: 'Điều hướng chính' })
-
-  // Chạm giới hạn 10 lần đăng nhập/phút/IP thì ĐỢI HẾT cửa sổ rồi thử lại, chứ
-  // không nới giới hạn: nó là lớp chống dò mật khẩu, bài kiểm phải sống chung.
   const rateLimited = page.getByText(/Thử lại sau \d+ giây/)
-  if (await rateLimited.isVisible().catch(() => false)) {
+  if (await rateLimited.isVisible({ timeout: 3_000 }).catch(() => false)) {
     await page.waitForTimeout(61_000)
     await attempt()
   }
+}
 
+/**
+ * Đăng nhập bằng form rồi chờ vào hẳn bên trong. CHỈ dùng cho auth.spec — các spec
+ * khác nạp sẵn cookie qua `storageState`, vì lý do giới hạn tần suất ở trên.
+ */
+export async function login(page: Page, who: keyof typeof ACCOUNTS): Promise<void> {
+  const { email, password } = ACCOUNTS[who]
+  await submitLogin(page, email, password)
   // Thanh trên chỉ vẽ khi đã đăng nhập — dùng nó làm mốc "vào được rồi".
-  await expect(nav).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Điều hướng chính' })).toBeVisible()
 }
 
 export async function logout(page: Page): Promise<void> {
