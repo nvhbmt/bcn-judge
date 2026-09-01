@@ -34,7 +34,15 @@ Kiểm chứng toàn hệ thống qua HTTP (cần API + worker đang chạy):
 
 ```bash
 node scripts/smoke.mjs      # 29 kiểm tra: cấp tài khoản → soạn bài → nộp → chấm → verdict
+node scripts/judge-e2e.mjs  # 79 kiểm tra, chỉ soi luồng chấm nhưng soi tới đáy (~50 s)
 ```
+
+`judge-e2e.mjs` cần một database **còn trống** (nó tạo tài khoản, khoá, bài mới và
+không dọn sau khi chạy) và bật cả 5 ngôn ngữ. Phủ: AC trên cả năm ngôn ngữ, cả sáu
+verdict sinh từ hành vi thật của chương trình, điểm từng phần, hai canary chứng
+minh testcase ẩn không rò, chạy thử (mẫu và input tự nhập), giới hạn tần suất, bốn
+người nộp đồng thời, contest và bảng xếp hạng, chấm lại hai chiều kèm vết kiểm
+toán, và các cổng chặn quanh luồng nộp.
 
 ## Trạng thái
 
