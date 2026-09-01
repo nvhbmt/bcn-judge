@@ -135,6 +135,10 @@ describe.skipIf(!INTEGRATION)('mentor · bài tập giữ đủ trường (FR-D1
     expect(got.body.data.starterCode).toEqual(FULL.starterCode)
     expect(got.body.data.solutionVisibility).toBe('after_ac')
     expect(got.body.data.compareMode).toBe('float')
+    // floatEps nằm trong danh sách "sáu trường từng bị INSERT bỏ quên" ở docstring
+    // nhưng chưa từng được khẳng định — và cũng không quan sát được qua API, nên
+    // mất nó thì không ai biết.
+    expect(got.body.data.floatEps).toBe(0.001)
   })
 
   it('sửa tags trả 200 và ghi đúng, không phải 500', async () => {

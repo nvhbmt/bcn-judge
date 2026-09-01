@@ -168,7 +168,7 @@ describe.skipIf(!INTEGRATION)('canary — dữ liệu ẩn không bao giờ tớ
         id: 'p', title: 't', kind: 'function', harness: { c11: CANARY_HARNESS },
         statementMd: 's', inputDescMd: null, outputDescMd: null, constraintsMd: null,
         examples: [], timeLimitMs: null, memoryLimitMb: null, difficulty: null, tags: [],
-        allowedLanguageIds: null, compareMode: 'trim', starterCode: {},
+        allowedLanguageIds: null, compareMode: 'trim', floatEps: null, starterCode: {},
         solutionLanguageId: 'c11', solutionSource: CANARY_SOLUTION, solutionVisibility: 'mentor', testcaseRev: 1,
       },
       [

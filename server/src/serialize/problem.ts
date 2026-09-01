@@ -24,6 +24,7 @@ export interface RawProblemRow {
   tags: string[]
   allowedLanguageIds: string[] | null
   compareMode: string
+  floatEps: number | null
   starterCode: unknown
   solutionLanguageId: string | null
   solutionSource: string | null
@@ -129,6 +130,8 @@ export interface MentorProblemView extends Omit<MemberProblemView, 'solutionSour
   /** {languageId: harness} — chỉ có ở đường mentor. */
   harness: unknown
   compareMode: string
+  /** Chỉ có nghĩa khi compareMode = 'float'; null nghĩa là dùng mặc định 1e-6. */
+  floatEps: number | null
   testcaseRev: number
   solutionLanguageId: string | null
   solutionSource: string | null
@@ -157,6 +160,11 @@ export function toMentorProblem(
     ...member,
     harness: problem.harness,
     compareMode: problem.compareMode,
+    // Trước đây float_eps ghi được mà KHÔNG đọc lại được ở đâu: không nằm trong
+    // SELECT nào, không nằm trong view nào. Mentor đặt dung sai rồi không có cách
+    // nào xác nhận nó đã vào, và mất nó thì mọi bài so số thực tụt về mặc định
+    // 1e-6 — người học làm đúng vẫn WA, không dấu hiệu nào.
+    floatEps: problem.floatEps,
     testcaseRev: problem.testcaseRev,
     solutionLanguageId: problem.solutionLanguageId,
     solutionSource: problem.solutionSource,

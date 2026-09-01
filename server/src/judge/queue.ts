@@ -480,7 +480,13 @@ export async function finishRejudge(
           total_weight = ${payload.totalWeight}, time_ms_max = ${payload.timeMsMax},
           memory_kb_max = ${payload.memoryKbMax}, compile_output = ${payload.compileOutput || null},
           judge_ms = ${payload.judgeMs}, testcase_rev = ${payload.testcaseRev},
-          attempt = ${shadowAttempt}, finished_at = now()
+          attempt = ${shadowAttempt}, finished_at = now(),
+          -- Xoá dấu vết IE của lượt TRƯỚC. Bỏ sót hai cột này thì một bài IE được
+          -- chấm lại thành AC vẫn mang ie_reason cũ, và ie_retry vẫn bật nên nút
+          -- "chấm lại IE" của admin còn nhặt nó lên lần nữa — một bài đã xong hẳn.
+          -- (Không dùng dấu backtick trong chú thích SQL: nó nằm trong template
+          --  literal của JS nên backtick sẽ kết thúc chuỗi giữa chừng.)
+          ie_reason = NULL, ie_retry = false
       WHERE id = ${submissionId}
     `)
 
@@ -498,7 +504,32 @@ export async function finishRejudge(
   })
 }
 
-/** Nhả claim của worker đã chết — chấm lại không biến mất không dấu vết (§2.6). */
+/**
+ * Nhả claim của CHÍNH worker này khi việc chấm lại ném lỗi.
+ *
+ * Đường lỗi trước gọi `reapRejudge()` với ý "nhả claim cho lượt sau nhặt lại", nhưng
+ * reaper đòi claim phải cũ hơn 5 phút VÀ worker giữ nó phải mất tích 60 giây — worker
+ * vừa claim xong và đang đập nhịp thì cả hai điều kiện đều sai, nên nó nhả được 0 việc.
+ * `claimRejudge` chỉ nhặt dòng `claimed_by IS NULL`, nên dòng đó nằm lại vĩnh viễn và
+ * verdict sai đứng nguyên, không tín hiệu nào ngoài `rejudgeQueueDepth()` khác 0.
+ *
+ * (Lỗi này từng tự khỏi một cách tình cờ: khi `last_seen_at` còn đứng yên vì nhịp tim
+ * hỏng, worker "trông như đã chết" sau 60 giây nên reaper vẫn nhả được. Sửa nhịp tim
+ * đã bịt mất lối thoát đó — đây là cái giá phải trả kèm, nay trả nốt.)
+ *
+ * Vẫn fencing theo `claimed_by` để một worker không nhả claim của worker khác.
+ */
+export async function releaseRejudge(submissionId: string, workerId: string): Promise<boolean> {
+  const rows = await q<{ submission_id: string }>(sql`
+    UPDATE rejudge_queue
+    SET claimed_by = NULL, claimed_at = NULL, shadow_attempt = NULL
+    WHERE submission_id = ${submissionId} AND claimed_by = ${workerId}
+    RETURNING submission_id
+  `)
+  return rows.length > 0
+}
+
+/** Nhả claim của worker đã CHẾT THẬT — chấm lại không biến mất không dấu vết (§2.6). */
 export async function reapRejudge(): Promise<number> {
   const rows = await q<{ submission_id: string }>(sql`
     UPDATE rejudge_queue rq

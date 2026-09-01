@@ -18,6 +18,7 @@ import {
   heartbeat,
   purgeOld,
   reapRejudge,
+  releaseRejudge,
   reapStale,
   requeue,
   type ClaimedSubmission,
@@ -112,6 +113,13 @@ function buildFiles(
   const harnessSource = harness[language.id]
   if (!harnessSource) throw new Error('harness_missing')
   if (!language.functionSourceFilename) throw new Error('language_no_function_support')
+  // Hai tên này đi từ bảng `languages` — admin sửa được ở trang quản trị. Đặt trùng
+  // nhau thì `prepare` ghi tuần tự và mã người học ĐÈ LÊN harness, rồi chẩn đoán của
+  // chính họ bị lọc như của mentor: bài hỏng theo cách không ai đọc ra được. Thà IE
+  // với một lý do gọi đúng tên vấn đề.
+  if (language.functionSourceFilename === language.sourceFilename) {
+    throw new Error('function_source_filename_collision')
+  }
   return [
     // owner:'mentor' → chẩn đoán biên dịch thuộc file này bị giấu khỏi người học,
     // vì trình biên dịch in lại dòng nguồn gây lỗi (compileOutput.ts).
@@ -212,16 +220,27 @@ async function loadJob(job: ClaimedSubmission): Promise<JobContext> {
 
 const MENTOR_STDOUT_CAP = 4096
 
-/** Ai được xem stdout nào — xem ADR-10; giới hạn 4 KB mỗi testcase. */
+/**
+ * Ai được xem stdout nào — xem ADR-10; giới hạn 4 KB mỗi testcase.
+ *
+ * Đọc `result.mentorStdout`, KHÔNG phải `result.stdout`. `runner.ts` cố ý đặt
+ * `stdout: null` cho mọi testcase ẩn (đó là cột member đọc được) và để bản đầy đủ ở
+ * `mentorStdout`. Bản trước đọc nhầm cột nên điều kiện `!result.stdout` đúng với
+ * MỌI testcase ẩn → `mentor_stdout` luôn null, và cột `mentorStdout` mà runner tính
+ * ở dòng 212 chưa từng được dùng. US-2 ("báo rõ testcase 7 kèm diff") vì thế không
+ * hoạt động ngày nào: mentor điều tra một verdict đáng ngờ mà không có gì để nhìn.
+ */
 function mentorStdoutFor(
-  result: { position: number; isSample: boolean; verdict: string; stdout: string | null },
+  result: { position: number; isSample: boolean; verdict: string; mentorStdout: string | null },
   job: ClaimedSubmission,
   all: { position: number; isSample: boolean; verdict: string }[],
 ): string | null {
-  if (result.verdict === 'AC' || !result.stdout) return null
-  if (job.runTarget === 'validate') return result.stdout.slice(0, MENTOR_STDOUT_CAP)
+  if (result.verdict === 'AC' || !result.mentorStdout) return null
+  if (job.runTarget === 'validate') return result.mentorStdout.slice(0, MENTOR_STDOUT_CAP)
   const firstHiddenFail = all.find((r) => !r.isSample && r.verdict !== 'AC')
-  return firstHiddenFail?.position === result.position ? result.stdout.slice(0, MENTOR_STDOUT_CAP) : null
+  return firstHiddenFail?.position === result.position
+    ? result.mentorStdout.slice(0, MENTOR_STDOUT_CAP)
+    : null
 }
 
 async function runJob(job: ClaimedSubmission, slot: number): Promise<void> {
@@ -400,8 +419,12 @@ export async function processOneRejudge(slot = 0): Promise<RejudgeJob | null> {
     return job
   } catch (err) {
     console.error(`[worker:${slot}] chấm lại ${job.id} lỗi:`, err)
-    // Nhả claim để reaper hoặc lượt sau nhặt lại — không mất việc.
-    await reapRejudge()
+    // Nhả claim của CHÍNH mình, không đi qua reaper: reaper chỉ nhả claim quá 5 phút
+    // của worker đã mất tích, mà worker này vừa claim xong và đang sống — nó nhả được
+    // 0 việc, và dòng chấm lại kẹt vĩnh viễn. Xem releaseRejudge().
+    await releaseRejudge(job.id, WORKER_ID).catch((e) =>
+      console.error(`[worker:${slot}] nhả claim chấm lại ${job.id} hỏng:`, e),
+    )
     return job
   }
 }
@@ -504,15 +527,22 @@ export async function startWorker(): Promise<void> {
     // thenable LƯỜI, chỉ gửi câu lệnh khi có ai gọi `.then()`. `void` vứt object
     // đi nên query không bao giờ tới Postgres — và vì không ai chờ, cũng không có
     // lỗi nào để mà thấy. Xem touchWorker() bên dưới.
+    //
+    // Cả bốn lời gọi trong hai interval này đều PHẢI có `.catch()`. Node 22 mặc định
+    // `--unhandled-rejections=throw`: một lỗi DB thoáng qua ở bất kỳ dòng nào dưới
+    // đây là giết cả tiến trình worker, và cả cụm mất một slot chấm cho tới khi có
+    // người dựng lại. `slotLoop` đã phòng thủ kỹ chuyện này; riêng interval thì chưa.
     touchWorker().catch((err) => console.error('[worker] nhịp tim hỏng:', err))
-    void reapStale()
-    void reapRejudge()
+    reapStale().catch((err) => console.error('[worker] reapStale hỏng:', err))
+    reapRejudge().catch((err) => console.error('[worker] reapRejudge hỏng:', err))
   }, 10_000)
 
   const hourly = setInterval(() => {
-    void purgeOld().then((r) => {
-      if (r.runs || r.events) console.log(`[worker] dọn ${r.runs} run, ${r.events} event`)
-    })
+    purgeOld()
+      .then((r) => {
+        if (r.runs || r.events) console.log(`[worker] dọn ${r.runs} run, ${r.events} event`)
+      })
+      .catch((err) => console.error('[worker] dọn dữ liệu cũ hỏng:', err))
   }, 3_600_000)
 
   const slots = Array.from({ length: config.workerSlots }, (_, i) => slotLoop(i))

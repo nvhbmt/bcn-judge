@@ -43,8 +43,46 @@ function basename(path: string): string {
 
 export interface SanitizeResult {
   text: string
-  /** true khi đã giấu ít nhất một khối chẩn đoán thuộc file của mentor. */
+  /** true khi đã bỏ ít nhất một DÒNG thuộc file của mentor — kể cả dòng phụ. */
   hidMentorDiagnostics: boolean
+  /** true khi dòng bị bỏ có `error:` thật. CHỈ khi đó mới được nói "lỗi của mentor". */
+  hidMentorErrors: boolean
+  /** Giải thích cụ thể suy ra từ chẩn đoán đã giấu, không lộ một byte harness nào. */
+  hint: string | null
+}
+
+/**
+ * Dòng mở đầu một khối chẩn đoán ĐỘC LẬP, không thuộc file nào. Gặp nó thì ngữ cảnh
+ * phải reset về null, nếu không lỗi chung sẽ bị nuốt theo khối của mentor ngay trước.
+ * Đo được: `cc1plus: out of memory` và `collect2: error: ld returned 1 exit status`
+ * đứng sau một khối lỗi trong harness đều biến mất, và người học chỉ còn thấy câu
+ * đổ lỗi mentor — không biết là máy hết bộ nhớ.
+ */
+const DONG_DOC_LAP = /^(cc1|cc1plus|collect2|lto1|as|ld|\/usr\/bin\/ld|make|javac|\d+ (?:error|warning)s?\b)/
+
+/** Chỉ `error:` mới là lỗi thật; `note:`/`warning:` là dòng phụ đi kèm. */
+const LA_LOI = /\b(?:error|fatal error):/
+
+/**
+ * Chẩn đoán bị giấu vẫn nói được điều gì đó CÓ ÍCH mà không lộ harness: tên hàm mà
+ * đề yêu cầu người học viết vốn nằm sẵn trong đề bài, không phải bí mật.
+ *
+ * Đây là ca hỏng phổ biến nhất của bài dạng function — người học đặt sai tên hàm hoặc
+ * sai chữ ký. Trình biên dịch báo lỗi ở CHỖ GỌI, tức trong harness, nên toàn bộ chẩn
+ * đoán thuộc file mentor và bản trước trả về đúng một câu "lỗi của người ra đề". Người
+ * học đi báo mentor, mentor đi tìm một lỗi không tồn tại.
+ */
+const CHU_KY: { re: RegExp; ten: (m: RegExpExecArray) => string }[] = [
+  { re: /undefined reference to [`'"]([A-Za-z_]\w*)/, ten: (m) => m[1]! },
+  { re: /implicit declaration of function [`'"\u2018]([A-Za-z_]\w*)/, ten: (m) => m[1]! },
+  { re: /symbol:\s+method\s+([A-Za-z_]\w*)/, ten: (m) => m[1]! },
+]
+
+function hintChoHam(ten: string): string {
+  return (
+    `Trình biên dịch không tìm thấy hàm \`${ten}\` mà đề yêu cầu bạn viết. ` +
+    'Kiểm tra lại tên hàm, số tham số và kiểu trả về cho khớp mô tả trong đề.'
+  )
 }
 
 /**
@@ -54,30 +92,64 @@ export function sanitizeCompileOutput(raw: string, mentorFiles: string[]): Sanit
   const hidden = new Set(mentorFiles.map(basename))
   const kept: string[] = []
   let hidMentorDiagnostics = false
+  let hidMentorErrors = false
+  let hint: string | null = null
   // null = chưa biết thuộc file nào; giữ lại, vì có thể là lỗi chung (hết bộ nhớ,
   // linker không tìm thấy symbol) mà người học vẫn cần thấy.
   let context: string | null = null
 
   for (const line of raw.split('\n')) {
+    // Reset TRƯỚC khi đọc tên file: dòng độc lập có thể vẫn nhắc tên file của mentor
+    // (`/usr/bin/ld: ... main.c:(.text+0x34): undefined reference to 'f'`), nhưng nó
+    // mở một khối mới chứ không thuộc khối cũ.
+    if (line.trim() === '' || DONG_DOC_LAP.test(line)) context = null
+
     const mentioned = fileMentionedIn(line)
     if (mentioned) context = mentioned
+
     if (context !== null && hidden.has(context)) {
       hidMentorDiagnostics = true
+      if (LA_LOI.test(line)) hidMentorErrors = true
+      if (!hint) {
+        for (const { re, ten } of CHU_KY) {
+          const m = re.exec(line)
+          if (m) {
+            hint = hintChoHam(ten(m))
+            break
+          }
+        }
+      }
       continue
     }
     kept.push(line.replaceAll('/w/', ''))
   }
 
-  return { text: kept.join('\n').replace(/\n{3,}/g, '\n\n').trim(), hidMentorDiagnostics }
+  return {
+    text: kept.join('\n').replace(/\n{3,}/g, '\n\n').trim(),
+    hidMentorDiagnostics,
+    hidMentorErrors,
+    hint,
+  }
 }
 
 const MENTOR_FAULT =
   'Lỗi nằm ở phần khung do người ra đề viết, không phải ở bài của bạn. Hãy báo lại cho mentor.'
 
-/** Ghép thông điệp cuối cùng cho người học. */
+/**
+ * Ghép thông điệp cuối cùng cho người học.
+ *
+ * Ba nhánh, theo thứ tự hữu ích giảm dần. Bản trước chỉ có một: hễ giấu bất kỳ dòng
+ * nào của mentor là dán câu đổ lỗi — mà ở C/C++ dạng function, harness BUỘC phải
+ * `#include "solution.c"` nên GCC luôn mở đầu bằng `In file included from main.c:2:`.
+ * Hệ quả: MỌI bài CE, kể cả thiếu dấu chấm phẩy hoàn toàn của người học, đều kèm câu
+ * "lỗi của người ra đề" — và mentor nhận báo lỗi rác từ mọi bài function.
+ */
 export function compileMessageForMember(raw: string, mentorFiles: string[]): string {
-  const { text, hidMentorDiagnostics } = sanitizeCompileOutput(raw, mentorFiles)
-  if (!hidMentorDiagnostics) return text
-  // Giấu hết mà không còn gì: đừng để người học nhìn màn hình trống rồi tự trách.
-  return text.length === 0 ? MENTOR_FAULT : `${text}\n\n${MENTOR_FAULT}`
+  const { text, hidMentorErrors, hint } = sanitizeCompileOutput(raw, mentorFiles)
+  // 1. Giải thích được cụ thể thì luôn hơn: nói đúng việc người học cần sửa.
+  if (hint) return text.length === 0 ? hint : `${text}\n\n${hint}`
+  // 2. Giấu một `error:` thật của mentor mà không giải thích nổi — đổ lỗi đúng chỗ.
+  if (hidMentorErrors) return text.length === 0 ? MENTOR_FAULT : `${text}\n\n${MENTOR_FAULT}`
+  // 3. Chỉ giấu dòng phụ (`In file included from`) — không nói gì thêm.
+  return text
 }

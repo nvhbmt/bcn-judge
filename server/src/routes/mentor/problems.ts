@@ -1,5 +1,6 @@
 /** FR-D1…D7: soạn bài tập, testcase (tay + zip), kiểm tra bằng lời giải mẫu. */
 import { sql } from 'drizzle-orm'
+import { languageAllowed } from '../../judge/languageAllowed'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { createHash } from 'node:crypto'
@@ -149,7 +150,7 @@ mentorProblemRoutes.get('/:id', async (c) => {
     SELECT id, title, kind, harness, statement_md AS "statementMd", input_desc_md AS "inputDescMd",
            output_desc_md AS "outputDescMd", constraints_md AS "constraintsMd", examples,
            time_limit_ms AS "timeLimitMs", memory_limit_mb AS "memoryLimitMb", difficulty, tags,
-           allowed_language_ids AS "allowedLanguageIds", compare_mode AS "compareMode",
+           allowed_language_ids AS "allowedLanguageIds", compare_mode AS "compareMode", float_eps AS "floatEps",
            starter_code AS "starterCode", solution_language_id AS "solutionLanguageId",
            solution_source AS "solutionSource", solution_visibility AS "solutionVisibility",
            testcase_rev AS "testcaseRev"
@@ -379,6 +380,16 @@ mentorProblemRoutes.post('/:id/validate', async (c) => {
     SELECT count(*)::int AS n FROM testcases WHERE problem_id = ${problemId}
   `)
   if ((count?.n ?? 0) === 0) return errors.badRequest(c, 'Bài chưa có testcase nào.')
+
+  // Cùng chốt chặn mà đường member đã có. Thiếu nó, bài dạng function mà lời giải
+  // mẫu viết bằng ngôn ngữ chưa có harness sẽ được xếp hàng rồi chết ở worker với
+  // `harness_missing` — mentor chỉ thấy "IE" và không biết thiếu gì (FR-D6).
+  if (!(await languageAllowed(problemId, problem.solution_language_id))) {
+    return errors.badRequest(
+      c,
+      'Ngôn ngữ của lời giải mẫu chưa dùng được cho bài này — bài dạng function cần harness viết cho đúng ngôn ngữ đó.',
+    )
+  }
 
   const result = await enqueue({
     kind: 'run',

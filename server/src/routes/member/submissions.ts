@@ -1,5 +1,6 @@
 /** FR-F1/F2/F4, FR-G1: chạy thử, nộp bài, lịch sử của chính mình. */
 import { sql } from 'drizzle-orm'
+import { languageAllowed } from '../../judge/languageAllowed'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { q } from '../../db/pool'
@@ -21,32 +22,6 @@ const handleSchema = z.object({
   languageId: z.string().min(1).max(40),
   source: z.string().max(2_000_000),
 })
-
-/**
- * Ngôn ngữ có nộp được cho bài này không.
- *
- * Với bài dạng function còn hai điều kiện nữa, và cả hai phải chặn TẠI ĐÂY chứ
- * không phải lúc chấm: thiếu thì worker ném ra IE, mà IE hiện lên như lỗi hệ
- * thống nên người học tưởng mình bị oan còn mentor không biết bài mình thiếu gì.
- *   - ngôn ngữ phải biết ghép hai file (`function_source_filename`)
- *   - bài phải có harness viết cho đúng ngôn ngữ đó
- */
-async function languageAllowed(problemId: string, languageId: string): Promise<boolean> {
-  const [row] = await q<{ allowed: boolean }>(sql`
-    SELECT (
-      l.enabled
-      AND (p.allowed_language_ids IS NULL OR ${languageId} = ANY (p.allowed_language_ids))
-      AND (
-        p.kind <> 'function'
-        OR (l.function_source_filename IS NOT NULL
-            AND coalesce(btrim(p.harness ->> l.id), '') <> '')
-      )
-    ) AS allowed
-    FROM problems p, languages l
-    WHERE p.id = ${problemId} AND l.id = ${languageId}
-  `)
-  return row?.allowed === true
-}
 
 /** POST /api/member/submissions — nộp bài (chấm TOÀN BỘ testcase). */
 memberSubmissionRoutes.post('/', async (c) => {
@@ -128,7 +103,10 @@ memberSubmissionRoutes.post('/runs', async (c) => {
  */
 memberSubmissionRoutes.get('/recent', async (c) => {
   const me = c.get('user')
-  const limit = Math.min(20, Math.max(1, Number(c.req.query('limit') ?? 8)))
+  // Number('abc') là NaN, và Math.max(1, NaN) cũng là NaN — kẹp min/max KHÔNG lọc
+  // rác. Trước đây `LIMIT NaN` xuống thẳng Postgres và trả 500 kèm stack trace.
+  const rawLimit = Number(c.req.query('limit') ?? 8)
+  const limit = Number.isFinite(rawLimit) ? Math.min(20, Math.max(1, Math.trunc(rawLimit))) : 8
 
   const rows = await q<{
     id: string

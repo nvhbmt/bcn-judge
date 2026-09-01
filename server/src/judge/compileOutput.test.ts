@@ -36,8 +36,14 @@ describe('sanitizeCompileOutput', () => {
     expect(text).toContain('int solve(int n)')
     expect(text).not.toContain('main.c')
     // Dòng "In file included from" thuộc harness nên bị bỏ — nhưng đó là dòng phụ,
-    // không phải chẩn đoán thật, nên không tính là đã giấu lỗi của mentor.
+    // không phải chẩn đoán thật, nên không tính là đã giấu LỖI của mentor.
+    //
+    // Chú thích trên có từ đầu, còn khẳng định thì trước đây chỉ có `hidMentorDiagnostics`
+    // — và chính nó là thứ dán câu đổ lỗi. Tức là chú thích mô tả ý ĐỊNH, khẳng định
+    // chốt hành vi NGƯỢC lại, và không ai thấy vì cả hai đều "xanh". Nay tách hai
+    // khái niệm và chốt cả hai.
     expect(hidMentorDiagnostics).toBe(true)
+    expect(sanitizeCompileOutput(GCC_LOI_CUA_NGUOI_HOC, ['main.c']).hidMentorErrors).toBe(false)
   })
 
   it('KHÔNG để lộ một dòng nguồn nào của harness khi lỗi nằm trong harness', () => {
@@ -83,7 +89,70 @@ describe('sanitizeCompileOutput', () => {
 
     expect(sanitizeCompileOutput(raw, ['main.c']).text).toBe(raw)
   })
+
+  it('lỗi chung đứng SAU một khối của mentor không bị nuốt theo', () => {
+    // `context` dính là lỗi tinh vi nhất của bộ lọc: nó không bao giờ reset ở dòng
+    // không nêu tên file, nên mọi thứ sau một khối harness đều bị coi là của harness.
+    // Người học chỉ thấy câu đổ lỗi mentor, không biết máy hết bộ nhớ.
+    const raw = [
+      "main.c: In function 'main':",
+      "main.c:5:10: note: in expansion of macro 'X'",
+      'cc1plus: out of memory allocating 65536 bytes',
+    ].join('\n')
+
+    const { text } = sanitizeCompileOutput(raw, ['main.c'])
+
+    expect(text).toBe('cc1plus: out of memory allocating 65536 bytes')
+    expect(text).not.toContain('main.c')
+  })
 })
+
+describe('đổ lỗi đúng người', () => {
+  // Output THẬT của gcc 14 cho ca hỏng phổ biến nhất của bài dạng function: người học
+  // đặt sai tên hàm. Trình biên dịch báo ở CHỖ GỌI, tức trong harness của mentor.
+  const GCC_SAI_TEN_HAM = [
+    "main.c: In function 'main':",
+    "main.c:5:71: warning: implicit declaration of function 'f' [-Wimplicit-function-declaration]",
+    "/usr/bin/ld: /tmp/ccQ7LORo.o: in function `main':",
+    "main.c:(.text.startup+0x34): undefined reference to `f'",
+    'collect2: error: ld returned 1 exit status',
+  ].join('\n')
+
+  it('người học sai tên hàm: nói rõ hàm nào, KHÔNG đổ cho mentor', () => {
+    const msg = compileMessageForMember(GCC_SAI_TEN_HAM, ['main.c'])
+
+    expect(msg).toContain('`f`')
+    expect(msg).toMatch(/không tìm thấy hàm/)
+    expect(msg).not.toMatch(/khung do người ra đề viết/)
+    // Vẫn không lộ một dòng nguồn nào của harness.
+    expect(msg).not.toContain('implicit declaration')
+  })
+
+  it('người học thiếu dấu chấm phẩy: không dính câu đổ lỗi mentor', () => {
+    // GCC dạng function LUÔN mở đầu bằng "In file included from main.c:2:" vì harness
+    // buộc phải #include mã người học. Dòng phụ đó từng bật cờ đổ lỗi, nên MỌI bài CE
+    // của C/C++ dạng function đều kèm câu "lỗi của người ra đề" — kể cả lỗi 100 % của
+    // người học như ca này. Mentor nhận báo lỗi rác từ mọi bài function.
+    const raw = [
+      'In file included from main.c:2:',
+      "solution.c: In function 'solve':",
+      "solution.c:3:3: error: expected ',' or ';' before 'return'",
+      '    3 |   return x;',
+      '      |   ^~~~~~',
+    ].join('\n')
+
+    const msg = compileMessageForMember(raw, ['main.c'])
+
+    expect(msg).toContain('solution.c:3:3')
+    expect(msg).not.toMatch(/khung do người ra đề viết/)
+  })
+
+  it('lỗi THẬT trong harness thì vẫn đổ cho mentor', () => {
+    // Đối chứng: nới lỏng không được nới quá tay.
+    expect(compileMessageForMember(GCC_LOI_CUA_MENTOR, ['main.c'])).toMatch(/khung do người ra đề viết/)
+  })
+})
+
 
 describe('compileMessageForMember', () => {
   it('giấu hết thì nói rõ lỗi thuộc về người ra đề, không để màn hình trống', () => {
