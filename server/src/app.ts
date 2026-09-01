@@ -13,7 +13,9 @@ import { ok } from './lib/apiResponse'
 import { adminCourseRoutes } from './routes/admin/courses'
 import { adminUserRoutes } from './routes/admin/users'
 import { memberCourseRoutes } from './routes/member/courses'
+import { memberProblemRoutes, memberSubmissionRoutes } from './routes/member/submissions'
 import { mentorCourseRoutes } from './routes/mentor/courses'
+import { mentorProblemRoutes } from './routes/mentor/problems'
 
 export function createApp(): Hono {
   const app = new Hono()
@@ -39,11 +41,14 @@ export function createApp(): Hono {
   const mentor = new Hono()
   mentor.use('*', requireAuth, requireStaff)
   mentor.route('/courses', mentorCourseRoutes)
+  mentor.route('/problems', mentorProblemRoutes)
   app.route('/api/mentor', mentor)
 
   const member = new Hono()
   member.use('*', requireAuth)
   member.route('/courses', memberCourseRoutes)
+  member.route('/problems', memberProblemRoutes)
+  member.route('/submissions', memberSubmissionRoutes)
   app.route('/api/member', member)
 
   app.notFound((c) => {

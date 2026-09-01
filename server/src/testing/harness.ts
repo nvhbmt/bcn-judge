@@ -4,12 +4,14 @@
  * AN TOÀN: truncate MỌI bảng nên bắt buộc tên database phải chứa "test" — đúng
  * kỷ luật của imath-test/server.
  */
+import { createHash } from 'node:crypto'
+import { sql } from 'drizzle-orm'
 import type { Hono } from 'hono'
 import { createApp } from '../app'
 import { config } from '../config'
 import { hashPassword } from '../auth/hash'
 import { createSession } from '../auth/session'
-import { db, pool } from '../db/pool'
+import { db, pool, q } from '../db/pool'
 import { migrate } from '../db/migrate'
 import { seed } from '../db/seed'
 import { courseEnrollments, courseMentors, courses, users } from '../db/schema'
@@ -97,6 +99,61 @@ export async function assignMentor(courseId: string, userId: string): Promise<vo
 
 export async function enroll(courseId: string, userId: string): Promise<void> {
   await db.insert(courseEnrollments).values({ courseId, userId }).onConflictDoNothing()
+}
+
+export async function makeProblem(
+  createdBy: string,
+  overrides: {
+    title?: string
+    solutionSource?: string
+    solutionLanguageId?: string
+    timeLimitMs?: number
+    scopeCourseId?: string
+  } = {},
+): Promise<string> {
+  counter++
+  const [row] = await q<{ id: string }>(sql`
+    INSERT INTO problems (title, statement_md, time_limit_ms, solution_source, solution_language_id,
+                          scope_course_id, created_by)
+    VALUES (${overrides.title ?? `Bài ${counter}`}, ${'Đề bài mẫu'}, ${overrides.timeLimitMs ?? 2000},
+            ${overrides.solutionSource ?? null}, ${overrides.solutionLanguageId ?? null},
+            ${overrides.scopeCourseId ?? null}, ${createdBy})
+    RETURNING id
+  `)
+  return row!.id
+}
+
+export async function addTestcases(
+  problemId: string,
+  list: { input: string; expected: string | null; kind?: 'sample' | 'hidden'; weight?: number }[],
+): Promise<void> {
+  for (const [i, tc] of list.entries()) {
+    const input = Buffer.from(tc.input, 'utf8')
+    const expected = tc.expected === null ? null : Buffer.from(tc.expected, 'utf8')
+    await q(sql`
+      INSERT INTO testcases (problem_id, position, kind, weight, input, expected,
+                             input_bytes, expected_bytes, input_sha256)
+      VALUES (${problemId}, ${i + 1}, ${tc.kind ?? 'hidden'}, ${tc.weight ?? 1}, ${input}, ${expected},
+              ${input.length}, ${expected?.length ?? null}, ${createHash('sha256').update(input).digest()})
+    `)
+  }
+}
+
+/** Tạo chương + mục trỏ tới bài (P4 sẽ có API; test P2 dựng thẳng ở DB). */
+export async function makeItem(
+  courseId: string,
+  problemId: string,
+  overrides: { status?: 'draft' | 'published' } = {},
+): Promise<string> {
+  const [section] = await q<{ id: string }>(sql`
+    INSERT INTO sections (course_id, title, position) VALUES (${courseId}, 'Chương 1', 1) RETURNING id
+  `)
+  const [item] = await q<{ id: string }>(sql`
+    INSERT INTO items (section_id, kind, title, position, status, problem_id)
+    VALUES (${section!.id}, 'problem', 'Bài tập', 1, ${overrides.status ?? 'published'}, ${problemId})
+    RETURNING id
+  `)
+  return item!.id
 }
 
 export interface CallOptions {

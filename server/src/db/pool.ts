@@ -24,3 +24,19 @@ export async function tx<T>(fn: (t: Tx) => Promise<T>): Promise<T> {
 export async function closePool(): Promise<void> {
   await pool.end()
 }
+
+/**
+ * `execute()` của drizzle trả về QueryResult (có `.rows`) chứ không phải mảng.
+ * Hai helper này trả thẳng mảng dòng đã gõ kiểu, để chỗ gọi khỏi lặp `.rows`.
+ */
+type AnySql = Parameters<Db['execute']>[0]
+
+export async function q<T = Record<string, unknown>>(query: AnySql): Promise<T[]> {
+  const res = (await db.execute(query)) as unknown as { rows?: T[] } | T[]
+  return Array.isArray(res) ? res : (res.rows ?? [])
+}
+
+export async function qt<T = Record<string, unknown>>(t: Tx, query: AnySql): Promise<T[]> {
+  const res = (await t.execute(query)) as unknown as { rows?: T[] } | T[]
+  return Array.isArray(res) ? res : (res.rows ?? [])
+}

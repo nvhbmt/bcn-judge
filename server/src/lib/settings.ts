@@ -1,0 +1,68 @@
+/** Đọc bảng `settings` (FR-H2) với cache ngắn — mọi giới hạn đều cấu hình được. */
+import { eq } from 'drizzle-orm'
+import { db } from '../db/pool'
+import { settings } from '../db/schema'
+
+export interface JudgeSettings {
+  default_time_limit_ms: number
+  default_memory_limit_mb: number
+  max_source_bytes: number
+  max_custom_input_bytes: number
+  submissions_per_minute: number
+  runs_per_minute: number
+  max_pending_submissions_per_user: number
+  max_output_bytes: number
+  compile_time_limit_ms: number
+  compile_memory_mb: number
+  max_testcase_file_bytes: number
+  max_testcases_total_bytes_per_problem: number
+  max_zip_bytes: number
+  tle_skip_threshold: number
+  judge_paused: boolean
+}
+
+const DEFAULTS: JudgeSettings = {
+  default_time_limit_ms: 1000,
+  default_memory_limit_mb: 256,
+  max_source_bytes: 65_536,
+  max_custom_input_bytes: 65_536,
+  submissions_per_minute: 6,
+  runs_per_minute: 6,
+  max_pending_submissions_per_user: 3,
+  max_output_bytes: 8_388_608,
+  compile_time_limit_ms: 15_000,
+  compile_memory_mb: 1024,
+  max_testcase_file_bytes: 10_485_760,
+  max_testcases_total_bytes_per_problem: 134_217_728,
+  max_zip_bytes: 67_108_864,
+  tle_skip_threshold: 0,
+  judge_paused: false,
+}
+
+let cache: { at: number; value: JudgeSettings } | null = null
+const TTL_MS = 5_000
+
+export async function getSettings(): Promise<JudgeSettings> {
+  if (cache && Date.now() - cache.at < TTL_MS) return cache.value
+  const rows = await db.select().from(settings)
+  const merged = { ...DEFAULTS }
+  for (const row of rows) {
+    if (row.key in merged && row.value !== null) {
+      ;(merged as Record<string, unknown>)[row.key] = row.value
+    }
+  }
+  cache = { at: Date.now(), value: merged }
+  return merged
+}
+
+export async function setSetting(key: string, value: unknown, actorId: string | null): Promise<void> {
+  await db
+    .insert(settings)
+    .values({ key, value: value as never, updatedBy: actorId })
+    .onConflictDoUpdate({ target: settings.key, set: { value: value as never, updatedBy: actorId } })
+  cache = null
+}
+
+export function invalidateSettingsCache(): void {
+  cache = null
+}
