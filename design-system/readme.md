@@ -97,3 +97,65 @@ mới thì kiểm bằng:
 ```bash
 npm run build && grep -c "\.font-display" dist/assets/index-*.css   # phải > 0
 ```
+
+---
+
+## Phụ lục: những điểm CHỈ đúng với repo bcn-judge
+
+Phần trên là tài liệu gốc của hệ thiết kế. Phần này ghi chỗ repo cố ý làm khác, và
+những cái bẫy đã thật sự cắn khi triển khai — để người sau đọc bản gốc không tưởng là
+code sai.
+
+### Theme mặc định là SÁNG, không phải tối
+
+Tài liệu trên chốt **mặc định tối**. Repo này chọn **mặc định sáng**, nút đổi nằm ở
+thanh trên. Đây là quyết định của người dùng, không phải sơ suất. Xem `src/lib/theme.ts`.
+
+### `design-system/` phải nạp vào `@layer base`
+
+`src/index.css` viết `@import '../design-system/styles.css' layer(base)` — chữ
+`layer(base)` là bắt buộc. CSS không nằm trong layer nào luôn thắng mọi `@layer`, mà
+class tiện ích của Tailwind v4 nằm trong `@layer utilities`. Để nguyên thì
+`a { color: var(--moss) }` của `tokens/base.css` nuốt luôn `text-on-accent` đặt trên
+một `<a>`, và mọi nút-dạng-link thành chữ xanh rêu trên nền xanh rêu.
+
+### Lệnh quét `slate-` / `dark:` phải neo ranh giới
+
+```bash
+grep -rnE '(^|[^a-z-])(slate-|dark:)' src --include='*.ts' --include='*.tsx'
+```
+
+`grep "slate-"` trần khớp cả `-translate-y-1/2` (tran**slate-**y) và cho bốn kết quả
+rác mỗi lần quét; `dark:` trần khớp tham số TypeScript `(dark: boolean)`. Nhớ quét cả
+`*.ts` chứ không riêng `*.tsx` — đã từng bỏ sót `src/pages/mentor/contestPhase.ts` đúng
+vì vậy.
+
+### Logo là SVG, không phải `assets/logo-bcn.png`
+
+File PNG trong project thiết kế **cụt** (196608 byte, không có chunk IEND) nên nửa dưới
+không vẽ được, và kéo lại qua công cụ cũng chỉ nhận đúng chừng đó byte. Logo nay dựng
+bằng chữ ở `src/components/BcnLogo.tsx`, tô `currentColor` nên không cần
+`mix-blend-mode` nữa. Có bản vector gốc thì thay thẳng vào đó.
+
+Hai bẫy khi dựng, cả hai đều im lặng:
+- `textLength`/`lengthAdjust` phân bố lại khoảng cách giữa các glyph, mà dấu tổ hợp
+  tiếng Việt có advance width bằng 0 nên bị đẩy văng khỏi chữ cái.
+- `viewBox` bắt đầu từ `y=0` cắt mất dấu mũ (dấu vươn lên trên đường cao chữ hoa), cho
+  ra "BAN CONG NGHẸ" trong khi dấu nặng dưới chữ E vẫn còn.
+
+### Ba thứ trong bản vẽ CỐ Ý không dựng
+
+Hợp đồng nội dung ở trên nói: chức năng chưa có thì bỏ khỏi màn hình, đừng viết "đang
+được phát triển". Áp đúng vậy cho ba chỗ:
+- ô `⌘K tìm bài` ở thanh trên — app chưa có tìm kiếm toàn cục;
+- ô ghi chú của leader ở màn 06 — backend chưa có chỗ lưu;
+- các con số vận hành vẽ sẵn ở màn đăng nhập ("4 worker · 16 slot · hàng đợi rỗng") —
+  chỉ đọc được qua `/api/admin/judge`, tức phải đăng nhập bằng quyền admin mới có.
+  `SystemLog` thay bằng sự thật tĩnh về sandbox cộng một dòng động lấy từ `/healthz`.
+
+### Ngữ pháp bố cục dùng chung
+
+Tám mẫu lặp trên cả 8 màn nằm ở `src/components/ui/patterns.tsx`: `RowGroup`/`Row`
+(nhóm dòng ngăn nhau bằng khe 1px — cách trình bày danh sách DUY NHẤT của hệ),
+`Segments`, `StatStrip`, `KeyHint`, `Avatar`, `Divider`, `SideColumn`, `SideLabel`.
+Dựng danh sách mới thì dùng lại chúng, đừng viết class rời.
