@@ -1,22 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { CodeEditor } from '@/components/editor/CodeEditor'
-import { HSplit } from '@/components/layout/HSplit'
 import { IconRail } from '@/components/layout/IconRail'
 import { Workspace } from '@/components/layout/Workspace'
 import { Markdown } from '@/components/markdown/Markdown'
-import { Button, Spinner, VerdictBadge } from '@/components/ui'
+import { Spinner } from '@/components/ui'
 import { useSubmissionStream } from '@/hooks/useSubmissionStream'
 import { api, ApiFailure } from '@/lib/api'
 import { useDraft } from '@/lib/drafts'
 import { useAuth } from '@/stores/auth'
 import type { LanguageOption, ProblemView, SubmissionView } from '@/types/api'
-import { ConsolePanel } from './ConsolePanel'
+import { ContestProblemList } from './ContestProblemList'
+import { EditorPane } from './EditorPane'
 import { HelpPanel } from './HelpPanel'
+import { LeaderboardPanel } from './LeaderboardPanel'
 import { RAIL_ITEMS, RAIL_LABEL, type RailKey } from './rail'
 import { StatementPanel } from './StatementPanel'
 import { SubmissionsPanel } from './SubmissionsPanel'
+import { SyllabusPanel } from './SyllabusPanel'
 
 /**
  * Màn hình làm bài (FR-E1): thanh icon · khung nội dung · khung code.
@@ -26,7 +27,7 @@ import { SubmissionsPanel } from './SubmissionsPanel'
  * khi đang mở một bài (dải tab Đề bài/Bài nộp, KHÔNG icon nào sáng).
  */
 export function WorkspacePage() {
-  const { itemId, contestProblemId, courseId } = useParams()
+  const { itemId, contestProblemId, courseId, contestId } = useParams()
   const { me } = useAuth()
   const [rail, setRail] = useState<RailKey | null>(null)
   const [problemTab, setProblemTab] = useState<'de-bai' | 'bai-nop'>('de-bai')
@@ -40,10 +41,12 @@ export function WorkspacePage() {
 
   const handleQuery = contestProblemId ? `contestProblemId=${contestProblemId}` : `itemId=${itemId}`
 
-  const { data: problem, isLoading } = useQuery({
+  const { data: problemResult, isLoading } = useQuery({
     queryKey: ['problem', handleQuery],
-    queryFn: () => api.get<ProblemView>(`/api/member/problems?${handleQuery}`),
+    queryFn: () => api.getWithMeta<ProblemView>(`/api/member/problems?${handleQuery}`),
   })
+  const problem = problemResult?.data
+  const meta = problemResult?.meta
   const { data: languages } = useQuery({
     queryKey: ['languages'],
     queryFn: () => api.get<LanguageOption[]>('/api/member/languages'),
@@ -105,6 +108,9 @@ export function WorkspacePage() {
   )
 
   const contentLabel = rail ? RAIL_LABEL[rail] : problemTab === 'de-bai' ? 'Đề bài' : 'Bài nộp'
+  // FR-I6: sau giờ kết thúc contest vẫn nộp và chấm được, nhưng không tính BXH.
+  const contestEndAt = meta?.contestEndAt as string | undefined
+  const practiceMode = Boolean(contestEndAt && new Date(contestEndAt) <= new Date())
 
   const content = (
     <div className="flex h-full min-h-0 flex-col">
@@ -131,11 +137,13 @@ export function WorkspacePage() {
           </div>
         ) : null}
         {rail === 'giao-trinh' ? (
-          <p className="p-4 text-sm text-slate-500">Cây chương/mục của khoá — hoàn thiện ở phase nội dung khoá học.</p>
+          courseId ? (
+            <SyllabusPanel courseId={courseId} currentItemId={itemId} />
+          ) : (
+            <ContestProblemList contestId={contestId} currentId={contestProblemId} />
+          )
         ) : null}
-        {rail === 'bang-xep-hang' ? (
-          <p className="p-4 text-sm text-slate-500">Bảng xếp hạng — hoàn thiện ở phase contest.</p>
-        ) : null}
+        {rail === 'bang-xep-hang' ? <LeaderboardPanel courseId={courseId} contestId={contestId} /> : null}
         {rail === null && problem ? (
           problemTab === 'de-bai' ? (
             <StatementPanel problem={problem} />
@@ -156,67 +164,25 @@ export function WorkspacePage() {
   )
 
   const editor = (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 px-2 py-1.5 dark:border-slate-700">
-        <select
-          aria-label="Ngôn ngữ"
-          value={languageId}
-          onChange={(e) => setLanguageId(e.target.value)}
-          className="rounded border border-slate-300 px-2 py-1 font-mono text-xs dark:border-slate-600 dark:bg-slate-800"
-        >
-          {allowed.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.name} {l.versionLabel ?? ''}
-            </option>
-          ))}
-        </select>
-        {submission ? <VerdictBadge verdict={submission.verdict} pending={submission.status !== 'done'} /> : null}
-        <span className="text-xs text-slate-400" aria-live="polite">
-          {draftStatus === 'saving' ? 'Đang lưu nháp…' : draftStatus === 'error' ? 'Không lưu được nháp' : ''}
-        </span>
-        <div className="ml-auto flex items-center gap-2">
-          <Button onClick={() => void send('run')} disabled={busy !== null}>
-            {busy === 'run' ? 'Đang chạy…' : 'Chạy thử'}
-          </Button>
-          <Button variant="primary" onClick={() => void send('submit')} disabled={busy !== null}>
-            {busy === 'submit' ? 'Đang nộp…' : 'Nộp bài'}
-          </Button>
-        </div>
-      </div>
-
-      {error ? (
-        <p role="alert" className="shrink-0 bg-red-50 px-3 py-1.5 text-xs text-[var(--color-wa)] dark:bg-red-950/40">
-          {error}
-        </p>
-      ) : null}
-
-      <div className="min-h-0 flex-1">
-        <HSplit
-          storageKey="bcn:console"
-          defaultRatio={0.62}
-          top={
-            <CodeEditor
-              value={source}
-              onChange={setSource}
-              languageId={languageId}
-              onRun={() => void send('run')}
-              onSubmit={() => void send('submit')}
-              ariaLabel="Ô soạn code"
-            />
-          }
-          bottom={
-            <ConsolePanel
-              tab={consoleTab}
-              onTab={setConsoleTab}
-              customInput={customInput}
-              onCustomInput={setCustomInput}
-              runResult={runResult}
-              submission={submission}
-            />
-          }
-        />
-      </div>
-    </div>
+    <EditorPane
+      languages={allowed}
+      languageId={languageId}
+      onLanguage={setLanguageId}
+      source={source}
+      onSource={setSource}
+      draftStatus={draftStatus}
+      busy={busy}
+      error={error}
+      onRun={() => void send('run')}
+      onSubmit={() => void send('submit')}
+      consoleTab={consoleTab}
+      onConsoleTab={setConsoleTab}
+      customInput={customInput}
+      onCustomInput={setCustomInput}
+      runResult={runResult}
+      submission={submission}
+      practiceMode={practiceMode}
+    />
   )
 
   return (

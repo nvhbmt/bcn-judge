@@ -1,0 +1,52 @@
+import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
+import { EmptyState, Spinner } from '@/components/ui'
+import { api } from '@/lib/api'
+
+interface ContestDetail {
+  id: string
+  title: string
+  phase: 'sap-dien-ra' | 'dang-dien-ra' | 'da-ket-thuc'
+  problems: { id: string; label: string | null; position: number; title: string; maxScore: number }[]
+}
+
+/** Mục "Giáo trình" khi đang ở trong contest: danh sách bài của contest (FR-E7). */
+export function ContestProblemList({ contestId, currentId }: { contestId?: string; currentId?: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['contest', contestId],
+    queryFn: () => api.get<ContestDetail>(`/api/member/contests/${contestId}`),
+    enabled: Boolean(contestId),
+  })
+
+  if (!contestId) return <EmptyState title="Không có danh sách bài ở đây" />
+  if (isLoading) return <div className="p-4"><Spinner /></div>
+  if (!data) return <EmptyState title="Không tìm thấy contest" />
+  if (data.phase === 'sap-dien-ra') {
+    return <EmptyState title="Contest chưa bắt đầu" hint="Đề sẽ mở đúng giờ, không cần tải lại trang." />
+  }
+
+  return (
+    <nav className="px-2 py-3" aria-label="Bài trong contest">
+      <h3 className="px-2 pb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{data.title}</h3>
+      <ul>
+        {data.problems.map((p) => (
+          <li key={p.id}>
+            <Link
+              to={`/contest/${contestId}/bai/${p.id}`}
+              aria-current={p.id === currentId ? 'page' : undefined}
+              className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm ${
+                p.id === currentId
+                  ? 'bg-[var(--color-primary-soft)] font-medium dark:bg-slate-800'
+                  : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <span className="w-4 shrink-0 font-mono text-xs text-slate-500">{p.label}</span>
+              <span className="truncate">{p.title}</span>
+              <span className="ml-auto shrink-0 font-mono text-xs text-slate-400">{p.maxScore}đ</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}

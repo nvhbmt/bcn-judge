@@ -1,9 +1,12 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Spinner } from '@/components/ui'
+import { ContestPage } from '@/pages/ContestPage'
+import { CourseDetailPage } from '@/pages/CourseDetailPage'
 import { CoursesPage } from '@/pages/CoursesPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
+import { TeamPage } from '@/pages/TeamPage'
 import { WorkspacePage } from '@/pages/workspace/WorkspacePage'
 import { useAuth } from '@/stores/auth'
 
@@ -44,8 +47,11 @@ export function App() {
   return (
     <Routes>
       <Route path="/" element={<CoursesPage />} />
+      <Route path="/khoa-hoc/:courseId" element={<CourseDetailPage />} />
       <Route path="/khoa-hoc/:courseId/bai/:itemId" element={<WorkspacePage />} />
+      <Route path="/contest/:contestId" element={<ContestPage />} />
       <Route path="/contest/:contestId/bai/:contestProblemId" element={<WorkspacePage />} />
+      <Route path="/team" element={<TeamPage />} />
       <Route path="/dang-nhap" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

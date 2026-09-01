@@ -11,11 +11,18 @@ import { authRoutes } from './auth/routes'
 import { pool } from './db/pool'
 import { ok } from './lib/apiResponse'
 import { adminCourseRoutes } from './routes/admin/courses'
+import { adminTeamRoutes } from './routes/admin/teams'
 import { adminUserRoutes } from './routes/admin/users'
-import { memberCourseRoutes } from './routes/member/courses'
+import { memberContestRoutes } from './routes/member/contests'
+import { memberCourseRoutes, memberLanguageRoutes } from './routes/member/courses'
 import { memberProblemRoutes, memberSubmissionRoutes } from './routes/member/submissions'
+import { memberSyllabusRoutes } from './routes/member/syllabus'
+import { memberTeamRoutes } from './routes/member/teams'
+import { mentorContentRoutes } from './routes/mentor/content'
+import { mentorContestRoutes } from './routes/mentor/contests'
 import { mentorCourseRoutes } from './routes/mentor/courses'
 import { mentorProblemRoutes } from './routes/mentor/problems'
+import { mentorProgressRoutes } from './routes/mentor/progress'
 
 export function createApp(): Hono {
   const app = new Hono()
@@ -36,17 +43,27 @@ export function createApp(): Hono {
   admin.use('*', requireAuth, requireAdmin)
   admin.route('/users', adminUserRoutes)
   admin.route('/courses', adminCourseRoutes)
+  admin.route('/teams', adminTeamRoutes)
   app.route('/api/admin', admin)
 
   const mentor = new Hono()
   mentor.use('*', requireAuth, requireStaff)
+  // Prefix cụ thể trước prefix chung: /courses/:id/progress phải khớp trước
+  // handler /courses/:id của mentorCourseRoutes (§5, thứ tự mount có ý nghĩa).
+  mentor.route('/courses', mentorContentRoutes)
+  mentor.route('/courses', mentorProgressRoutes)
   mentor.route('/courses', mentorCourseRoutes)
   mentor.route('/problems', mentorProblemRoutes)
+  mentor.route('/contests', mentorContestRoutes)
   app.route('/api/mentor', mentor)
 
   const member = new Hono()
   member.use('*', requireAuth)
+  member.route('/courses', memberSyllabusRoutes)
   member.route('/courses', memberCourseRoutes)
+  member.route('/languages', memberLanguageRoutes)
+  member.route('/teams', memberTeamRoutes)
+  member.route('/contests', memberContestRoutes)
   member.route('/problems', memberProblemRoutes)
   member.route('/submissions', memberSubmissionRoutes)
   app.route('/api/member', member)

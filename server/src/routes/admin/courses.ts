@@ -6,6 +6,7 @@ import { db, tx } from '../../db/pool'
 import { courseEnrollments, courseMentors, courses, users } from '../../db/schema'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { audit } from '../../lib/audit'
+import { isConstraintViolation } from '../../lib/dbError'
 import { parseBody } from '../../lib/http'
 
 export const adminCourseRoutes = new Hono()
@@ -49,7 +50,7 @@ adminCourseRoutes.post('/', async (c) => {
     await audit(me.id, 'course.create', 'course', row!.id, null, { code: row!.code })
     return created(c, row)
   } catch (err) {
-    if (String(err).includes('courses_code_key')) {
+    if (isConstraintViolation(err, 'courses_code_key')) {
       return errors.conflict(c, 'code_taken', 'Mã khoá đã tồn tại.')
     }
     throw err

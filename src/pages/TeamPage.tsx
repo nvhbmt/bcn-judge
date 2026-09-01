@@ -1,0 +1,177 @@
+import { useQuery } from '@tanstack/react-query'
+import { ArrowLeft, Crown } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
+import { api } from '@/lib/api'
+import type { Verdict } from '@/types/api'
+
+interface TeamView {
+  id: string
+  name: string
+  descriptionMd: string | null
+  leaderId: string
+  isLeader: boolean
+  members: { id: string; displayName: string; isLeader: boolean }[]
+}
+
+interface ProgressRow {
+  userId: string
+  displayName: string
+  courseId: string
+  courseName: string
+  acCount: number
+  totalItems: number
+  lastSubmittedAt: string | null
+}
+
+interface TeamSubmission {
+  id: string
+  userId: string
+  languageId: string
+  verdict: Verdict | null
+  score: number | null
+  receivedAt: string
+  source: string | null
+  sourceEmbargoedUntil: string | null
+}
+
+/** FR-J2/J3/J4: trang team; phần tiến độ và bài nộp chỉ leader thấy. */
+export function TeamPage() {
+  const [openMember, setOpenMember] = useState<string | null>(null)
+  const { data: team, isLoading } = useQuery({
+    queryKey: ['team', 'mine'],
+    queryFn: () => api.get<TeamView | null>('/api/member/teams/mine'),
+  })
+
+  if (isLoading) return <div className="grid h-full place-items-center"><Spinner /></div>
+  if (!team) {
+    return (
+      <Shell>
+        <EmptyState title="Bạn chưa thuộc team nào" hint="Quản lý viên sẽ xếp bạn vào team." />
+      </Shell>
+    )
+  }
+
+  return (
+    <Shell>
+      <header className="mb-4">
+        <h1 className="text-xl font-semibold">{team.name}</h1>
+        <p className="text-sm text-slate-500">{team.members.length} thành viên</p>
+      </header>
+
+      <ul className="mb-6 flex flex-wrap gap-2">
+        {team.members.map((m) => (
+          <li
+            key={m.id}
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1 text-sm dark:border-slate-700"
+          >
+            {m.isLeader ? <Crown size={14} className="text-[var(--color-tle)]" aria-label="Leader" /> : null}
+            {m.displayName}
+          </li>
+        ))}
+      </ul>
+
+      {team.isLeader ? (
+        <>
+          <TeamProgress teamId={team.id} onPick={setOpenMember} />
+          {openMember ? <TeamSubmissions teamId={team.id} userId={openMember} /> : null}
+        </>
+      ) : (
+        <p className="text-sm text-slate-500">Chỉ leader xem được tiến độ và bài nộp của cả team.</p>
+      )}
+    </Shell>
+  )
+}
+
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-6">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+        <ArrowLeft size={15} /> Trang chủ
+      </Link>
+      {children}
+    </div>
+  )
+}
+
+function TeamProgress({ teamId, onPick }: { teamId: string; onPick: (userId: string) => void }) {
+  const { data } = useQuery({
+    queryKey: ['team', teamId, 'progress'],
+    queryFn: () => api.get<ProgressRow[]>(`/api/member/teams/${teamId}/progress`),
+  })
+  if (!data) return <Spinner />
+  if (data.length === 0) return <EmptyState title="Chưa thành viên nào ghi danh khoá đang mở" />
+
+  return (
+    <section className="mb-6">
+      <h2 className="mb-2 text-sm font-semibold">Tiến độ theo khoá</h2>
+      <table className="w-full text-sm">
+        <thead className="text-left text-xs text-slate-500">
+          <tr>
+            <th className="py-1">Thành viên</th>
+            <th>Khoá</th>
+            <th className="text-right">Đã AC</th>
+            <th className="text-right">Nộp gần nhất</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row) => (
+            <tr key={`${row.userId}:${row.courseId}`} className="border-t border-slate-100 dark:border-slate-800">
+              <td className="py-1.5">
+                <button onClick={() => onPick(row.userId)} className="text-[var(--color-primary)] hover:underline">
+                  {row.displayName}
+                </button>
+              </td>
+              <td>{row.courseName}</td>
+              <td className="text-right tabular-nums">
+                {row.acCount}/{row.totalItems}
+              </td>
+              <td className="text-right text-xs text-slate-500">
+                {row.lastSubmittedAt ? new Date(row.lastSubmittedAt).toLocaleDateString('vi-VN') : 'chưa nộp'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
+}
+
+function TeamSubmissions({ teamId, userId }: { teamId: string; userId: string }) {
+  const { data } = useQuery({
+    queryKey: ['team', teamId, 'submissions', userId],
+    queryFn: () => api.get<TeamSubmission[]>(`/api/member/teams/${teamId}/submissions?userId=${userId}`),
+  })
+  if (!data) return <Spinner />
+
+  return (
+    <section>
+      <h2 className="mb-2 text-sm font-semibold">Bài nộp — chỉ đọc</h2>
+      <ul className="space-y-2">
+        {data.map((s) => (
+          <li key={s.id} className="rounded-md border border-slate-200 p-3 text-sm dark:border-slate-700">
+            <div className="flex items-center gap-2">
+              <VerdictBadge verdict={s.verdict} />
+              <span className="tabular-nums">{s.score ?? '—'} đ</span>
+              <span className="font-mono text-xs text-slate-500">{s.languageId}</span>
+              <span className="ml-auto text-xs text-slate-400">
+                {new Date(s.receivedAt).toLocaleString('vi-VN')}
+              </span>
+            </div>
+            {s.source ? (
+              <pre className="mt-2 max-h-48 overflow-auto rounded bg-slate-100 p-2 font-mono text-xs dark:bg-slate-800">
+                {s.source}
+              </pre>
+            ) : (
+              <p className="mt-2 text-xs text-slate-500">
+                Contest đang diễn ra — xem được code sau{' '}
+                {s.sourceEmbargoedUntil ? new Date(s.sourceEmbargoedUntil).toLocaleString('vi-VN') : 'khi kết thúc'}.
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}

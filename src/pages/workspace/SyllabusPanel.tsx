@@ -1,0 +1,72 @@
+import { useQuery } from '@tanstack/react-query'
+import { BookText, Check, CircleDot, Circle } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { EmptyState, Spinner } from '@/components/ui'
+import { api } from '@/lib/api'
+
+export interface SyllabusItem {
+  id: string
+  title: string
+  kind: 'lesson' | 'problem'
+  position: number
+  status: 'chua-lam' | 'da-thu' | 'da-ac' | null
+  attempts: number
+  points: number | null
+}
+
+export interface SyllabusSection {
+  id: string
+  title: string
+  position: number
+  items: SyllabusItem[]
+}
+
+/** Mục "Giáo trình" của thanh icon (FR-E7): cây chương/mục kèm trạng thái từng bài. */
+export function SyllabusPanel({ courseId, currentItemId }: { courseId: string; currentItemId?: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['syllabus', courseId],
+    queryFn: () => api.get<SyllabusSection[]>(`/api/member/courses/${courseId}/syllabus`),
+  })
+
+  if (isLoading) return <div className="p-4"><Spinner /></div>
+  if (!data || data.length === 0) return <EmptyState title="Khoá học chưa có nội dung" />
+
+  return (
+    <nav className="px-2 py-3" aria-label="Giáo trình">
+      {data.map((section) => (
+        <section key={section.id} className="mb-4">
+          <h3 className="px-2 pb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{section.title}</h3>
+          <ul>
+            {section.items.map((item) => (
+              <li key={item.id}>
+                <Link
+                  to={`/khoa-hoc/${courseId}/bai/${item.id}`}
+                  aria-current={item.id === currentItemId ? 'page' : undefined}
+                  className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm ${
+                    item.id === currentItemId
+                      ? 'bg-[var(--color-primary-soft)] font-medium dark:bg-slate-800'
+                      : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <StatusIcon item={item} />
+                  <span className="truncate">{item.title}</span>
+                  {item.attempts > 0 ? (
+                    <span className="ml-auto shrink-0 font-mono text-xs text-slate-400">{item.attempts} lần</span>
+                  ) : null}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </nav>
+  )
+}
+
+function StatusIcon({ item }: { item: SyllabusItem }) {
+  if (item.kind === 'lesson') return <BookText size={15} className="shrink-0 text-slate-400" aria-label="Bài đọc" />
+  if (item.status === 'da-ac') return <Check size={15} className="shrink-0 text-[var(--color-ac)]" aria-label="Đã AC" />
+  if (item.status === 'da-thu')
+    return <CircleDot size={15} className="shrink-0 text-[var(--color-tle)]" aria-label="Đã thử" />
+  return <Circle size={15} className="shrink-0 text-slate-300" aria-label="Chưa làm" />
+}

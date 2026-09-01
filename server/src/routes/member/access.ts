@@ -32,7 +32,7 @@ async function accessByItem(user: AuthUser, itemId: string): Promise<AccessResul
   const [row] = await q<{
     problem_id: string
     status: string
-    visible_from: Date | null
+    visible_from: string | null
     course_id: string
     is_staff: boolean
     is_enrolled: boolean
@@ -53,7 +53,7 @@ async function accessByItem(user: AuthUser, itemId: string): Promise<AccessResul
   if (!isStaff) {
     if (!row.is_enrolled || row.course_status !== 'open') return NOT_FOUND
     if (row.status !== 'published') return NOT_FOUND
-    if (row.visible_from && row.visible_from > new Date()) return NOT_FOUND
+    if (row.visible_from && new Date(row.visible_from) > new Date()) return NOT_FOUND
   }
   return {
     ok: true,
@@ -71,11 +71,13 @@ async function accessByItem(user: AuthUser, itemId: string): Promise<AccessResul
 
 /** Đường contest: chưa tới giờ bắt đầu thì server KHÔNG BAO GIỜ trả đề (FR-I3). */
 async function accessByContestProblem(user: AuthUser, contestProblemId: string): Promise<AccessResult> {
+  // drizzle `execute()` trả timestamptz dạng CHUỖI — phải ép Date trước khi so sánh,
+  // nếu không `now < row.start_at` so Date với string và luôn cho kết quả rác.
   const [row] = await q<{
     problem_id: string
     contest_id: string
-    start_at: Date
-    end_at: Date
+    start_at: string
+    end_at: string
     status: string
     course_id: string | null
     is_staff: boolean
@@ -96,10 +98,12 @@ async function accessByContestProblem(user: AuthUser, contestProblemId: string):
   if (!row) return NOT_FOUND
 
   const now = new Date()
+  const startAt = new Date(row.start_at)
+  const endAt = new Date(row.end_at)
   const isStaff = row.is_staff
   if (!isStaff) {
     if (row.status !== 'published' || !row.in_scope) return NOT_FOUND
-    if (now < row.start_at) {
+    if (now < startAt) {
       return {
         ok: false,
         status: 403,
@@ -115,9 +119,9 @@ async function accessByContestProblem(user: AuthUser, contestProblemId: string):
       itemId: null,
       contestId: row.contest_id,
       contestProblemId,
-      contestEndAt: row.end_at,
-      contestStartAt: row.start_at,
-      inContestWindow: now >= row.start_at && now < row.end_at,
+      contestEndAt: endAt,
+      contestStartAt: startAt,
+      inContestWindow: now >= startAt && now < endAt,
     },
   }
 }

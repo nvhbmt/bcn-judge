@@ -9,6 +9,7 @@ import { courseEnrollments, courses, users } from '../../db/schema'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { parseBody } from '../../lib/http'
 import { audit } from '../../lib/audit'
+import { isConstraintViolation } from '../../lib/dbError'
 
 export const adminUserRoutes = new Hono()
 
@@ -74,7 +75,7 @@ adminUserRoutes.post('/', async (c) => {
     // Mật khẩu ban đầu chỉ trả về ĐÚNG MỘT LẦN cho admin đọc rồi chuyển cho member.
     return created(c, { ...row, initialPassword: password })
   } catch (err) {
-    if (String(err).includes('users_email_key')) {
+    if (isConstraintViolation(err, 'users_email_key')) {
       return errors.conflict(c, 'email_taken', 'Email đã tồn tại.')
     }
     throw err
@@ -125,7 +126,7 @@ adminUserRoutes.post('/import', async (c) => {
       })
       results.push({ line: lineNo, email, status: 'created', password })
     } catch (err) {
-      const message = String(err).includes('users_email_key') ? 'Email đã tồn tại.' : String(err).slice(0, 200)
+      const message = isConstraintViolation(err, 'users_email_key') ? 'Email đã tồn tại.' : String(err).slice(0, 200)
       results.push({ line: lineNo, email, status: 'failed', message })
     }
   }
