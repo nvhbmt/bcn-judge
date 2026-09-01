@@ -41,18 +41,42 @@ export function Row({
   children,
   accent = null,
   interactive = false,
+  cols,
   className = '',
 }: {
   children: ReactNode
   accent?: RowAccent
   interactive?: boolean
+  /**
+   * `grid-template-columns` khi dòng cần cột THẲNG HÀNG với một hàng tiêu đề (bảng
+   * bài tập của mentor, chẳng hạn). Không đặt thì dòng dùng flex như mặc định — phần
+   * lớn danh sách không có hàng tiêu đề nên không cần khoá bề rộng cột.
+   */
+  cols?: string
   className?: string
 }) {
   return (
     <div
-      className={`flex items-center gap-3.5 px-4 py-3 ${accent ? `bg-surface-sel ${ACCENT_BORDER[accent]}` : 'bg-surface-2'} ${
-        interactive ? 'transition-colors duration-[120ms] ease-linear hover:bg-surface-sel' : ''
-      } ${className}`}
+      style={cols ? { gridTemplateColumns: cols } : undefined}
+      className={`${cols ? 'grid gap-3.5' : 'flex gap-3.5'} items-center px-4 py-3 ${
+        accent ? `bg-surface-sel ${ACCENT_BORDER[accent]}` : 'bg-surface-2'
+      } ${interactive ? 'transition-colors duration-[120ms] ease-linear hover:bg-surface-sel' : ''} ${className}`}
+    >
+      {children}
+    </div>
+  )
+}
+
+/**
+ * Hàng tiêu đề cột đứng TRÊN một `RowGroup`, dùng chung `cols` với các dòng bên dưới
+ * để mọi cột thẳng hàng. Mono 10px ALL-CAPS theo bản vẽ — nhỏ hơn nhãn mục một bậc,
+ * vì nó là chú thích cho bảng chứ không phải một đầu mục.
+ */
+export function RowHead({ cols, children }: { cols: string; children: ReactNode }) {
+  return (
+    <div
+      style={{ gridTemplateColumns: cols }}
+      className="grid gap-3.5 border-b border-line px-4 pb-2 font-mono text-[10px] tracking-[0.06em] text-ink-5 uppercase"
     >
       {children}
     </div>
@@ -80,7 +104,7 @@ export function Segments({
       {Array.from({ length: count }, (_, i) => (
         <span
           key={i}
-          className={`flex-1 ${i < filled ? 'bg-moss' : 'bg-line-strong'}`}
+          className={`flex-1 ${i < filled ? 'bg-moss-fill' : 'bg-line-strong'}`}
           style={{ height: `${height}px` }}
         />
       ))}

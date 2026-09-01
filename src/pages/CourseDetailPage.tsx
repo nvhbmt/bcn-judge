@@ -43,7 +43,7 @@ export function CourseDetailPage() {
   if (!course) return <p className="p-6 text-[13px] text-ink-5">Không tìm thấy khoá học.</p>
 
   return (
-    <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="grid h-full lg:grid-cols-[minmax(0,1fr)_380px]">
       <main className="min-w-0 overflow-y-auto px-7 py-8">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div className="min-w-0">

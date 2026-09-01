@@ -72,7 +72,7 @@ export function ContestPage() {
     data.freezeMinutes > 0 ? new Date(new Date(data.endAt).getTime() - data.freezeMinutes * 60_000) : null
 
   return (
-    <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_520px]">
+    <div className="grid h-full lg:grid-cols-[minmax(0,1fr)_520px]">
       <main className="min-w-0 overflow-y-auto px-7 py-8">
         <Link to="/contest" className="mb-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-ink-5 hover:text-ink-2">
           <ArrowLeft size={13} /> ~/contest

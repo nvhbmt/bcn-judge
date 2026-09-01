@@ -94,5 +94,5 @@ export function TeamPage() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto min-h-0 w-full max-w-5xl overflow-y-auto px-7 py-8">{children}</div>
+  return <div className="mx-auto h-full w-full max-w-5xl overflow-y-auto px-7 py-8">{children}</div>
 }

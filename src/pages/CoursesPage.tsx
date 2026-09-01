@@ -44,7 +44,7 @@ export function CoursesPage() {
   const primary = data?.[0]
 
   return (
-    <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_400px]">
+    <div className="grid h-full lg:grid-cols-[minmax(0,1fr)_400px]">
       <main className="min-w-0 overflow-y-auto px-7 py-8">
         <p className="num font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{today()}</p>
         <h1 className="mt-1.5 mb-1 font-display text-[28px] text-ink-1">

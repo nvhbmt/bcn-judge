@@ -65,7 +65,7 @@ export function TopBar() {
       {/* Chữ ký thứ hai của hệ: khối 14×7px moss ngay sau chữ BCN, chân chữ thẳng hàng. */}
       <span className="flex shrink-0 items-end gap-2">
         <span className="font-mono text-[13px] font-bold tracking-[0.06em] text-ink-1">BCN</span>
-        <span aria-hidden className="mb-[3px] h-[7px] w-[14px] bg-moss" />
+        <span aria-hidden className="mb-[3px] h-[7px] w-[14px] bg-moss-fill" />
       </span>
 
       <nav aria-label="Điều hướng chính" className="flex min-w-0 items-center gap-0.5 overflow-x-auto">

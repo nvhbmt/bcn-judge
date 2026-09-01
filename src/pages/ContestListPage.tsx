@@ -30,7 +30,7 @@ const PHASE_LABEL: Record<Phase, string> = {
 
 /** Đang diễn ra dùng moss (đang mở), sắp diễn ra dùng earth (cần chú ý), xong thì mực nhạt. */
 const PHASE_COLOR: Record<Phase, string> = {
-  'dang-dien-ra': 'var(--moss)',
+  'dang-dien-ra': 'var(--moss-fill)',
   'sap-dien-ra': 'var(--earth)',
   'da-ket-thuc': 'var(--ink-6)',
 }

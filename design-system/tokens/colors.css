@@ -24,7 +24,12 @@
   --ink-7: #6f6759;  /* 3.4:1 — CHỈ trang trí. Không đặt chữ ở bậc này. */
 
   /* hai màu điểm: xanh rêu (xong / đang mở) và nâu đất (cần chú ý) */
-  --moss:  oklch(0.74 0.10 128);
+  /* Ba VAI TRÒ của xanh rêu. Ở nền tối cả ba bằng nhau, nên trước giờ một token là
+     đủ; ở nền kem thì không: chữ phải đậm hơn mới đủ tương phản, còn khối đặc phải
+     nhạt hơn mới không thành một mảng tối bẩn. Xem khối [data-theme=light]. */
+  --moss:       oklch(0.74 0.10 128);  /* chữ, viền, vạch mảnh */
+  --moss-solid: oklch(0.74 0.10 128);  /* nền nút primary */
+  --moss-fill:  oklch(0.74 0.10 128);  /* khối đặc: chấm, ô tiến độ, khối motif */
   --earth: oklch(0.72 0.10 68);
   --clay:  oklch(0.64 0.13 30);  /* 5.0–5.3:1 trên mọi tầng nền tối */
   --brass: oklch(0.74 0.09 86);
@@ -78,13 +83,17 @@
   --ink-6: #6b6355;  /* 4.8:1 — nhãn mục ALL-CAPS, gợi ý Field */
   --ink-7: #98907d;  /* 2.8:1 — CHỈ trang trí (đường phân cách, chấm). Không đặt chữ ở đây. */
 
-  --moss:  oklch(0.48 0.08 128);
+  /* Ba bậc, đo từ bản vẽ màn sáng (mỗi bậc dùng ~57 lần nên không phải sai sót lẻ):
+       0.42  chữ · viền · vạch chọn dòng — đậm hơn để đủ tương phản trên nền kem
+       0.48  nền nút primary, đi với chữ --on-accent
+       0.56  khối đặc trang trí — nhạt hơn, nếu dùng bậc 0.42 thì chấm và ô tiến độ
+             thành mảng tối bẩn chứ không còn ra màu xanh rêu */
+  --moss:       oklch(0.42 0.08 128);
+  --moss-solid: oklch(0.48 0.08 128);
+  --moss-fill:  oklch(0.56 0.09 128);
   --earth: oklch(0.47 0.09 70);
   --clay:  oklch(0.46 0.12 30);
   --brass: oklch(0.51 0.08 86);
-
-  /* nền đặc của nút: sáng hơn màu chữ cùng tông để chữ tối đọc được */
-  --moss-solid: oklch(0.50 0.09 128);  /* 5.4:1 với --on-accent */
 
   --tint-earth: oklch(0.90 0.05 80 / 0.65);
   --tint-clay:  oklch(0.88 0.06 30 / 0.45);

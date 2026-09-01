@@ -40,7 +40,9 @@ test('soạn bài mới → nạp testcase → kiểm bằng lời giải mẫu 
 
   const title = `E2E Tổng hai số ${Date.now()}`
   await page.getByRole('button', { name: 'Bài tập mới' }).click()
-  await page.getByLabel('Tiêu đề').fill(title)
+  // `exact` là bắt buộc từ khi màn 07 có thêm ô tìm: aria-label của nó ("Tìm bài tập
+  // theo tiêu đề hoặc tag") chứa chuỗi "tiêu đề" nên getByLabel không exact khớp cả hai.
+  await page.getByLabel('Tiêu đề', { exact: true }).fill(title)
   await page.getByRole('button', { name: 'Tạo và soạn' }).click()
 
   // Vào thẳng trình soạn bài của bài vừa tạo.

@@ -3,7 +3,19 @@
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: var(--canvas);
+  /* `--surface-0` chứ KHÔNG phải `--canvas`.
+     Trong bản vẽ, `--canvas` là vùng NGOÀI KHUNG — nền của trang mockup bao quanh
+     mấy ảnh màn hình 1440×900, không phải nền của app. Nền màn hình là `--surface-0`,
+     và mọi khung màn trong bản vẽ đều mở đầu bằng đúng giá trị đó.
+
+     Sơn `--canvas` lên body làm cả app tối hơn một bậc so với thiết kế, và ở theme
+     SÁNG thì lệch thấy rõ: nền trang thành xám ấm (#efece5) trong khi dòng bảng là
+     #fcfaf5, nên bảng "nổi" lên như thẻ — ngược hẳn ý thiết kế, vốn để nền trang và
+     dòng bảng BẰNG nhau rồi tách nhau bằng đường kẻ 1px. Ở theme tối thì hai giá trị
+     gần nhau nên gần như không ai thấy, và lỗi sống sót.
+
+     `--canvas` giữ lại cho chỗ nào thật sự cần vùng ngoài khung. */
+  background: var(--surface-0);
   color: var(--ink-2);
   font-family: var(--font-ui);
   font-size: var(--text-base);

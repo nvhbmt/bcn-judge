@@ -54,7 +54,7 @@ export function SystemLog() {
   return (
     <div className="flex h-full flex-col justify-between overflow-hidden border-line px-14 py-12 md:border-r">
       <p className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">
-        <span aria-hidden className="size-[7px] rounded-full bg-moss" />
+        <span aria-hidden className="size-[7px] rounded-full bg-moss-fill" />
         judge.bancongnghe.dev
       </p>
 
@@ -65,7 +65,7 @@ export function SystemLog() {
           {/* Motif nhận diện, bản dài: đường kẻ chạy hết chiều ngang, khối đặc ở cuối. */}
           <div aria-hidden className="flex items-end">
             <div className="h-px flex-1 bg-line-strong" />
-            <div className="h-[9px] w-[26px] bg-moss" />
+            <div className="h-[9px] w-[26px] bg-moss-fill" />
           </div>
 
           <div>

@@ -67,7 +67,7 @@ export function AdminPage() {
 
   const cho = data.queue.oldestPendingSubmitSec
   return (
-    <div className="mx-auto min-h-0 w-full max-w-5xl overflow-y-auto px-7 py-8">
+    <div className="mx-auto h-full w-full max-w-5xl overflow-y-auto px-7 py-8">
       <h1 className="font-display text-[26px] text-ink-1">Tình trạng chấm bài</h1>
       <p className="mt-1.5 mb-6 text-[14px] text-ink-4">
         Cập nhật mỗi 5 giây. Bài nộp chờ quá 2 phút là báo động.
@@ -102,7 +102,7 @@ export function AdminPage() {
           <RowGroup className="mt-3">
             {data.workers.map((w) => (
               <Row key={w.id}>
-                <span aria-hidden className={`size-2 shrink-0 rounded-full ${w.alive ? 'bg-moss' : 'bg-clay'}`} />
+                <span aria-hidden className={`size-2 shrink-0 rounded-full ${w.alive ? 'bg-moss-fill' : 'bg-clay'}`} />
                 <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-ink-2">{w.id}</span>
                 <span className="num shrink-0 font-mono text-[11px] text-ink-5">
                   {w.slots} slot{w.alive ? '' : ' · mất tín hiệu'}
