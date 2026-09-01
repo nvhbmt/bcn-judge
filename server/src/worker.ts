@@ -27,6 +27,7 @@ import {
 import { judgeSubmission } from './judge/runner'
 import { reapOrphanSandboxes } from './judge/sandbox'
 import { DEFAULT_LIMITS, type JudgeLimits, type SourceFile, type TestcaseInput } from './judge/types'
+import { startJobWake, wakeAll, waitForJob } from './judge/wake'
 import { getSettings } from './lib/settings'
 
 export const WORKER_ID = `${hostname()}-${process.pid}`
@@ -440,7 +441,7 @@ async function slotLoop(slot: number): Promise<void> {
     if (!job) {
       // Rảnh mới đụng tới hàng đợi chấm lại (§2.6).
       const rejudged = await processOneRejudge(slot).catch(() => null)
-      if (!rejudged) await sleep(IDLE_POLL_MS)
+      if (!rejudged) await waitForJob(IDLE_POLL_MS)
       continue
     }
     if (stopping) {
@@ -545,6 +546,10 @@ export async function startWorker(): Promise<void> {
       .catch((err) => console.error('[worker] dọn dữ liệu cũ hỏng:', err))
   }, 3_600_000)
 
+  // Nối chuông "có việc mới" trước khi mở slot: nối sau thì những lượt nộp trong khoảng
+  // đó không đánh thức được ai và phải chờ hết một nhịp poll.
+  const unwake = await startJobWake()
+
   const slots = Array.from({ length: config.workerSlots }, (_, i) => slotLoop(i))
 
   for (const signal of ['SIGTERM', 'SIGINT'] as const) {
@@ -554,6 +559,9 @@ export async function startWorker(): Promise<void> {
       console.log(`[worker] ${signal} — chấm nốt testcase hiện tại rồi thoát`)
       clearInterval(beat)
       clearInterval(hourly)
+      // Đánh thức mọi slot đang ngủ để chúng thấy `stopping` ngay, thay vì nằm chờ hết
+      // nhịp poll rồi mới chịu thoát.
+      wakeAll()
       setTimeout(() => process.exit(0), 90_000).unref()
     })
   }
@@ -561,6 +569,7 @@ export async function startWorker(): Promise<void> {
   await Promise.all(slots)
   clearInterval(beat)
   clearInterval(hourly)
+  unwake()
   await closePool()
 }
 

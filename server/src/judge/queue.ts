@@ -6,6 +6,7 @@
 import { sql } from 'drizzle-orm'
 import { db, pool, q, qt } from '../db/pool'
 import { getSettings } from '../lib/settings'
+import { signalJobReady } from './wake'
 
 export type SubmissionKind = 'submit' | 'run'
 export type RunTarget = 'samples' | 'custom' | 'validate'
@@ -32,6 +33,14 @@ export type EnqueueResult =
 const USER_LOCK = (userId: string) => sql`SELECT pg_advisory_xact_lock(hashtext(${userId}))`
 
 export async function enqueue(req: EnqueueRequest): Promise<EnqueueResult> {
+  const result = await enqueueInTx(req)
+  // Rung chuông SAU khi commit, không phải trong transaction: trước commit thì worker
+  // thức dậy và không thấy dòng nào — thành một nhịp poll bỏ phí đúng lúc cần nhanh.
+  if (result.ok) void signalJobReady()
+  return result
+}
+
+async function enqueueInTx(req: EnqueueRequest): Promise<EnqueueResult> {
   const s = await getSettings()
   if (s.judge_paused && req.kind === 'submit') {
     return { ok: false, code: 'judge_paused', message: 'Hệ thống chấm đang bảo trì, thử lại sau.' }
