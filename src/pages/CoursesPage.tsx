@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { LogOut, PencilRuler } from 'lucide-react'
+import { LogOut, PencilRuler, Trophy, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button, EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
@@ -24,6 +24,20 @@ export function CoursesPage() {
         <div className="flex items-center gap-2">
           {/* Lối vào duy nhất tới màn soạn bài (FR-D). Trang chủ của mentor cũng là
               trang này, nên link phải đứng đây; member không thấy vì route cũng không có. */}
+          <Link
+            to="/team"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+          >
+            <Users size={16} /> Team
+          </Link>
+          {me && me.role !== 'member' ? (
+            <Link
+              to="/mentor/contest"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+            >
+              <Trophy size={16} /> Contest
+            </Link>
+          ) : null}
           {me && me.role !== 'member' ? (
             <Link
               to="/mentor/bai-tap"

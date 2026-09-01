@@ -1,15 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, PencilRuler } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { Markdown } from '@/components/markdown/Markdown'
 import { Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
+import { useAuth } from '@/stores/auth'
 import type { CourseSummary } from '@/types/api'
 import { SyllabusPanel } from './workspace/SyllabusPanel'
 
 /** Trang khoá học: mô tả + giáo trình (FR-B5, FR-C1). */
 export function CourseDetailPage() {
   const { courseId } = useParams()
+  const { me } = useAuth()
   const { data: course, isLoading } = useQuery({
     queryKey: ['course', courseId],
     queryFn: () => api.get<CourseSummary>(`/api/member/courses/${courseId}`),
@@ -25,9 +27,19 @@ export function CourseDetailPage() {
         <ArrowLeft size={15} /> Khoá học của tôi
       </Link>
 
-      <header className="mb-5">
-        <span className="font-mono text-xs text-slate-500">{course.code}</span>
-        <h1 className="text-xl font-semibold">{course.name}</h1>
+      <header className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <span className="font-mono text-xs text-slate-500">{course.code}</span>
+          <h1 className="text-xl font-semibold">{course.name}</h1>
+        </div>
+        {me && me.role !== 'member' ? (
+          <Link
+            to={`/mentor/khoa-hoc/${courseId}`}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+          >
+            <PencilRuler size={16} /> Soạn nội dung
+          </Link>
+        ) : null}
       </header>
 
       {course.descriptionMd ? (
