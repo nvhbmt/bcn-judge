@@ -19,9 +19,28 @@ declare module 'hono' {
   }
 }
 
+/**
+ * FR-A2 chỉ được mở đúng ba đường này khi mật khẩu tạm chưa đổi: xem mình là ai,
+ * đổi mật khẩu, và đăng xuất.
+ */
+const PATHS_KHI_CHUA_DOI_MAT_KHAU = new Set(['/auth/me', '/auth/change-password', '/auth/logout'])
+
 export const requireAuth = createMiddleware(async (c, next) => {
   const user = await resolveSession(readSessionCookie(c))
   if (!user) return errors.unauthorized(c)
+
+  // FR-A2 là cổng chặn CỨNG, và trước đây nó chỉ tồn tại ở router React
+  // (src/App.tsx). Server cho qua vô điều kiện, nên mật khẩu một lần do admin cấp —
+  // thường gửi qua chat CLB — dùng được vô thời hạn với toàn bộ API bằng bất kỳ
+  // HTTP client nào. Đúng thứ NFR-3 nói không được xảy ra: "guard thật ở server,
+  // UI chỉ là lớp che". Đặt ở ĐÂY chứ không phải ở từng nhóm route trong app.ts:
+  // mọi nhóm /api/* đều đi qua requireAuth, nên nhóm mới thêm sau này được bảo vệ
+  // sẵn thay vì phải nhớ gắn thêm — repo này đã dính đúng lớp lỗi "guard đặt một
+  // chỗ rồi quên chỗ khác" nhiều lần.
+  if (user.mustChangePassword && !PATHS_KHI_CHUA_DOI_MAT_KHAU.has(c.req.path)) {
+    return errors.forbidden(c, 'Cần đổi mật khẩu lần đầu trước khi dùng hệ thống.')
+  }
+
   c.set('user', user)
   await next()
 })

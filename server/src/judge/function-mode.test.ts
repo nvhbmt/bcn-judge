@@ -303,6 +303,42 @@ int main(void) { int BI_MAT_CUA_MENTOR = 1 return 0; }
     expect(out.compileOutput).toMatch(/khung do người ra đề viết/)
   }, 120_000)
 
+  it('mã người học KHÔNG đọc được harness lúc CHẠY (NFR-2)', async () => {
+    // Bộ lọc log biên dịch chỉ chặn đường BIÊN DỊCH. Đường CHẠY từng để ngỏ: harness
+    // nằm ở /w/main.c mode 0644, chương trình người học chạy với WorkingDir /w, nên
+    // một `fopen` là đọc trọn. Với testcase MẪU thì stdout được trả về cho chính
+    // member, nên không cần lượt nộp nào — "chạy thử" với input tự nhập là đủ.
+    //
+    // Đây là ca kiểm chạy THẬT qua judgeSubmission, khác với serialize/leak.test.ts:
+    // bộ canary đó chỉ grep phản hồi API dựng từ dòng DB nó tự gieo, nên nó xanh suốt
+    // trong khi lỗ này vẫn mở.
+    const lang = langFor('c11')
+    const BI_MAT = 'MENTOR_SECRET_BANG_TRA_CUU'
+    const harness = CASES.c11!.harness.replace(
+      '#include "solution.c"',
+      `#include "solution.c"\n/* ${BI_MAT}: dap an la {11,22,33} */`,
+    )
+    const doLen = `int *twoSum(int *nums, int n, int target, int *returnSize) {
+    FILE *fp = fopen("/w/main.c", "r");
+    if (fp) { int ch; while ((ch = fgetc(fp)) != EOF) putchar(ch); fclose(fp); }
+    static int r[2]; r[0] = 0; r[1] = 1; *returnSize = 2; return r;
+}
+`
+    const out = await judgeSubmission({
+      language: lang,
+      files: filesFor(lang, harness, doLen),
+      testcases: TESTCASES,
+      limits: { ...DEFAULT_LIMITS, timeLimitMs: 5000 },
+    })
+
+    // Biên dịch phải THÀNH CÔNG — nếu CE thì test này không chứng minh được gì.
+    expect(out.verdict).not.toBe('CE')
+    expect(out.verdict).not.toBe('IE')
+    const stdout = out.results.map((r) => r.stdout ?? '').join('\n')
+    expect(stdout).not.toContain(BI_MAT)
+    expect(stdout).not.toContain('int main(void)')
+  }, 120_000)
+
   it('tên file nguồn có đường dẫn bị từ chối, không ghi ra ngoài /w', async () => {
     const lang = langFor('c11')
     await expect(

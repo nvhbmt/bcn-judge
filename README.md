@@ -102,14 +102,33 @@ Ba điều đáng biết trước khi soạn:
   máy chủ quyết ở ngoài — cùng lý do `run.sh` in dòng đo bằng root ngoài `setpriv`.
 - **Ngôn ngữ chưa có harness thì không nộp được bằng ngôn ngữ đó**, và bị chặn ngay
   lúc nộp chứ không để thành IE lúc chấm.
-- **Harness không bao giờ tới member** — cấm ở tầng kiểu trong serializer, và đường
-  member cũng không SELECT cột đó ra khỏi DB.
+- **Harness không đi ra qua API** — cấm ở tầng kiểu trong serializer, và đường member
+  cũng không SELECT cột đó ra khỏi DB.
 
 Thông báo lỗi biên dịch chỉ đúng file và đúng dòng **người học** viết
 (`solution.c:3`, không phải file đã ghép) — đã đo trên cả 5 ngôn ngữ. Lỗi nằm trong
-harness thì **không một dòng mã harness nào** lọt ra ngoài; người học nhận câu "lỗi
-thuộc phần khung do người ra đề viết" thay vì bị đổ oan. Chi tiết ở `docs/design.md`,
-mục *Delta FR-D10*.
+harness thì mã harness không lọt ra qua log biên dịch; người học sai tên hàm thì nhận
+câu chỉ đúng tên hàm còn thiếu, chứ không bị đổ oan mà cũng không đổ oan ngược lại cho
+mentor. Chi tiết ở `docs/design.md`, mục *Delta FR-D10*.
+
+### Harness bí mật tới đâu — phạm vi thật
+
+Nói cho đúng, vì bản trước README hứa rộng hơn thứ hệ thống làm được:
+
+- **Ngôn ngữ biên dịch (C/C++/Java): kín.** File nguồn của mentor bị xoá khỏi `/w`
+  ngay sau khi biên dịch xong, trước khi một dòng mã nào của người học chạy — nên
+  `fopen("/w/main.c")` không đọc được gì. Có test chạy thật canh điều này.
+- **Ngôn ngữ thông dịch (Python/Node): KHÔNG kín.** Harness chính là điểm vào nên buộc
+  phải ở lại trong container, và mã người học chạy trong cùng interpreter thì đọc được
+  nó bằng `open()`, `inspect.getsource`, hay chỉ một traceback. Đây là giới hạn của
+  kiến trúc một-container-chung, không vá được ở tầng ứng dụng.
+- **Bộ lọc log biên dịch chống TAI NẠN, không chống CỐ Ý.** Nó lọc theo file được quy
+  trách, không theo nội dung — nên `#pragma message` với macro của mentor vẫn moi được
+  thân macro trong một chẩn đoán mang tên file của chính người học. Chặn hẳn lớp này
+  phải tách translation unit (biên dịch harness riêng rồi link object).
+
+Nói ngắn: coi harness là **khó lấy**, không phải **không thể lấy** — đừng đặt đáp án
+vào harness cho bài Python/Node.
 
 ## Cấu hình VPS cho 120 thành viên
 

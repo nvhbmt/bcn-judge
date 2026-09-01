@@ -115,6 +115,28 @@ describe.skipIf(!RUN_DOCKER)('P0 — sandbox trên Docker thật', () => {
     expect(out.score).toBe(66.67)
   })
 
+  it('trọng số KHÁC 1 thật sự được tính (FR-F2 v0.5)', async () => {
+    // Ca trên tên là "theo trọng số" nhưng cả ba testcase đều weight 1, nên nó không
+    // kiểm trọng số một chút nào — mọi test trong repo đều hardcode weight 1. Thay
+    // `passedWeight += tc.weight` bằng `+= 1` và `totalWeight` bằng số testcase thì
+    // 209 test vẫn xanh, trong khi mentor đặt trọng số 1–1000 ở giao diện và điểm
+    // contest cùng bảng xếp hạng đều dựa vào hai con số đó.
+    const nang = (position: number, input: string, expected: string, weight: number): TestcaseInput => ({
+      ...tc(position, input, expected),
+      weight,
+    })
+    const out = await judge('c11', 'sum.c', [
+      nang(1, '1 1\n', '2', 1),
+      nang(2, '2 2\n', '4', 3),
+      nang(3, '3 3\n', '7', 6), // sai — trọng số nặng nhất
+    ])
+
+    expect(out.verdict).toBe('WA')
+    expect(out.passedWeight).toBe(4)
+    expect(out.totalWeight).toBe(10)
+    expect(out.score).toBe(40)
+  })
+
   // ---- Bảng verdict trên hành vi thật.
   it('lỗi cú pháp → CE kèm CHẨN ĐOÁN THẬT của compiler', async () => {
     const out = await judge('c11', 'syntax_error.c', [tc(1, '', 'x')])
@@ -206,6 +228,21 @@ describe.skipIf(!RUN_DOCKER)('P0 — sandbox trên Docker thật', () => {
   it('giả mạo dòng __JUDGE_META__ không lừa được worker', async () => {
     const out = await judge('c11', 'fake_meta.c', [tc(1, '', null)], { timeLimitMs: 1000 })
     expect(out.verdict).toBe('TLE')
+  })
+
+  it('giả mạo __JUDGE_META__ KÈM xả tràn stderr cũng không lừa được worker', async () => {
+    // Ca trên xanh suốt mà lỗ vẫn mở: fake_meta.c không xả rác nên dòng thật vẫn về
+    // tới nơi. Chỉ thêm 9 KB stderr là dòng thật rơi ra ngoài ngân sách thu và dòng
+    // giả thắng — người học tự chọn verdict cho mọi bài, kể cả trong contest.
+    const out = await judge('c11', 'fake_meta_flood.c', [tc(1, '', null)], { timeLimitMs: 1000 })
+    expect(out.verdict).toBe('TLE')
+  })
+
+  it('bài ĐÚNG in nhiều stderr vẫn AC, không bị IE oan', async () => {
+    // Mặt không ác ý của cùng một lỗi: `fprintf(stderr, ...)` gỡ lỗi để quên trong
+    // vòng lặp làm mất dòng meta thật → IE, thứ giao diện gọi là "lỗi hệ thống".
+    const out = await judge('c11', 'noisy_ok.c', [tc(1, '', 'ok\n')], { timeLimitMs: 5000 })
+    expect(out.verdict).toBe('AC')
   })
 
   // ---- Lớp siết an ninh phải áp được trên MỌI runner image, không im lặng hỏng.

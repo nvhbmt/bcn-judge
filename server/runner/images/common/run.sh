@@ -80,15 +80,31 @@ oom1=$(read_oom)
 pids=$(cat /sys/fs/cgroup/pids.current 2>/dev/null || echo 0)
 [ -n "$pids" ] || pids=0
 
-# stderr của member (đã cắt), rồi tới dòng meta thật. Member có thể in ra một dòng
-# __JUDGE_META__ giả, nhưng nó luôn nằm TRƯỚC dòng này — worker chỉ đọc dòng cuối.
+# stderr của member (đã cắt), rồi tới dòng meta thật.
 #
-# THỨ TỰ CHUYỂN HƯỚNG LÀ QUAN TRỌNG. Bản trước viết `2>/dev/null >&2`: shell đặt
+# LẬP LUẬN "dòng giả luôn nằm TRƯỚC dòng thật nên worker chỉ đọc dòng cuối" LÀ SAI.
+# Nó đúng về thứ tự nhưng bỏ qua việc dòng thật có tới nơi hay không: ngân sách thu
+# stderr của worker đúng bằng 8 KB mà `head` dưới đây cho member đẩy ra, nên member
+# xả đủ 8 KB là dòng thật bị cắt mất, chỉ còn dòng GIẢ là dòng __JUDGE_META__ cuối
+# cùng. Đo được: cùng một chương trình đốt 1,5 s CPU với giới hạn 1 s, không giả mạo
+# ra TLE, có giả mạo ra AC với timeMs=10. Qua được cả MLE ("oom") và RE ("st").
+#
+# Nay chặn ở hai lớp độc lập:
+#   1. Ở ĐÂY: bẻ token trong phần của member, nên trong luồng không thể tồn tại một
+#      dòng __JUDGE_META__ nào khác ngoài dòng do root in bên dưới. `sed` chạy SAU
+#      `head` nên chỉ phải xử lý tối đa 8 KB, không phải luồng vô hạn.
+#   2. Ở worker: sandbox.ts giữ riêng phần ĐUÔI luồng, nên dòng thật luôn về tới nơi
+#      dù member xả bao nhiêu. Lớp này còn sửa một lỗi làm phiền người học ngay thẳng:
+#      bài ĐÚNG mà in > 8 KB log gỡ lỗi cũng từng mất dòng meta và ăn IE oan.
+#
+# Hai lớp cố ý không dựa vào nhau: lớp 1 chống cố ý, lớp 2 chống tai nạn, và không
+# lớp nào cần hai hằng số ở hai file khác ngôn ngữ phải khớp nhau mới đúng.
+#
+# THỨ TỰ CHUYỂN HƯỚNG cũng quan trọng. Bản trước viết `2>/dev/null >&2`: shell đặt
 # fd2 vào /dev/null TRƯỚC, rồi `>&2` nhân bản fd2 hiện tại vào fd1 — tức là cả hai
 # cùng trỏ /dev/null. Hệ quả: stderr của trình biên dịch bị nuốt sạch, mọi bài CE
-# chỉ hiện "Biên dịch thất bại." mà không nói lỗi ở đâu. Phải `>&2` trước (nhân
-# bản stderr THẬT vào fd1) rồi mới `2>/dev/null` (im lặng lỗi của chính head).
-head -c 8192 "$ERR" >&2 2>/dev/null
+# chỉ hiện "Biên dịch thất bại." mà không nói lỗi ở đâu.
+head -c 8192 "$ERR" 2>/dev/null | sed 's/__JUDGE_META__/__judge_meta__/g' >&2
 
 awk -v st="$st" -v oom0="$oom0" -v oom1="$oom1" -v pids="$pids" -v bset="$BSET" '
   NF == 4 && $1 ~ /^[0-9.]+$/ { e = $1; u = $2; s = $3; m = $4 }

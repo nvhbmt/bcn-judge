@@ -39,6 +39,30 @@ describe.skipIf(!INTEGRATION)('ma trận quyền — API', () => {
     await enroll(courseA.id, member.id)
   })
 
+  describe('FR-A2 · chưa đổi mật khẩu lần đầu', () => {
+    it('mọi route /api đều 403, chỉ /auth/me và đổi mật khẩu đi được', async () => {
+      // Guard này trước đây CHỈ tồn tại ở router React (src/App.tsx) — server cho qua
+      // vô điều kiện. Nghĩa là mật khẩu một lần do admin cấp, thường gửi qua chat CLB,
+      // dùng được vô thời hạn với toàn bộ API bằng bất kỳ HTTP client nào. Đúng thứ
+      // NFR-3 nói không được xảy ra: "guard thật ở server, UI chỉ là lớp che".
+      const moi = await makeUser('member', { mustChangePassword: true })
+
+      for (const path of ['/api/member/courses', '/api/member/submissions/recent']) {
+        const res = await call(path, { as: moi })
+        expect(res.status, path).toBe(403)
+      }
+
+      // Ba đường phải mở, nếu không thì chính việc đổi mật khẩu cũng kẹt.
+      expect((await call('/auth/me', { as: moi })).status).toBe(200)
+    })
+
+    it('đổi mật khẩu xong thì vào được bình thường', async () => {
+      // Đối chứng: chốt chặn không được khoá nhầm người đã đổi.
+      const thuong = await makeUser('member')
+      expect((await call('/api/member/courses', { as: thuong })).status).toBe(200)
+    })
+  })
+
   describe('chưa đăng nhập', () => {
     it('mọi route /api đều 401', async () => {
       for (const path of ['/api/admin/users', '/api/admin/courses', '/api/mentor/courses', '/api/member/courses']) {
@@ -92,6 +116,11 @@ describe.skipIf(!INTEGRATION)('ma trận quyền — API', () => {
         body: { descriptionMd: 'Mô tả mới' },
       })
       expect(res.status).toBe(200)
+      // ĐỌC LẠI, không chỉ kiểm status. Bỏ `descriptionMd` khỏi `.set()` của route
+      // vẫn trả 200 và audit vẫn ghi "đã đổi" trong khi DB không đổi gì — đúng họ lỗi
+      // mà problems.test.ts ghi là "đã xảy ra hai lần".
+      const got = await call(`/api/mentor/courses/${courseA.id}`, { as: mentorA })
+      expect(got.body.data.descriptionMd).toBe('Mô tả mới')
     })
 
     it('mentor NGOÀI khoá không sửa được (404, không lộ sự tồn tại)', async () => {

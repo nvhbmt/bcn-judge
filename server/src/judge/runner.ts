@@ -50,7 +50,13 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
   const { language, limits } = req
   const effectiveTimeSec = (limits.timeLimitMs * language.timeFactor) / 1000
   const runMemoryMb = limits.memoryLimitMb + language.memoryExtraMb + 16
-  const memoryLimitKb = limits.memoryLimitMb * 1024
+  // Ngưỡng MLE phải cộng `memoryExtraMb` y như trần container. Bản trước so RSS với
+  // `memoryLimitMb` trần trụi, tức là bắt người học trả bằng hạn mức của mình cho
+  // chi phí cố định của runtime. Đo "hello world" trên chính image thật: C 1,6 MB,
+  // Python 9,3 MB, Java 33,4 MB. Mentor đặt 32 MB (hợp lý cho bài C nhập môn) là
+  // MỌI bài Java ăn MLE trước khi chạy một dòng — trong khi container được cấp
+  // 32+256+16 MB nên cgroup không hề OOM. Verdict sai thuần do luật so sánh.
+  const memoryLimitKb = (limits.memoryLimitMb + language.memoryExtraMb) * 1024
   const testcases = [...req.testcases].sort((a, b) => a.position - b.position)
   const totalWeight = testcases.reduce((sum, tc) => sum + tc.weight, 0)
 
@@ -117,6 +123,27 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
     const text = compileMessageForMember(rawText, mentorFiles).slice(0, COMPILE_STDERR_BYTES)
     if (outcome.timedOut || !outcome.meta) return { ok: false, output: text, ie: 'compile_no_meta' }
     if (outcome.meta.st !== 0) return { ok: false, output: text || 'Biên dịch thất bại.', ie: null }
+
+    // Biên dịch xong thì mã harness không còn việc gì trong container nữa, mà nó lại
+    // nằm ở /w mode 0644 cạnh chương trình của người học — `fopen("/w/main.c")` đọc
+    // trọn. Xoá ngay tại đây, TRƯỚC khi bất kỳ dòng mã nào của người học được chạy.
+    //
+    // Điều kiện là "runtime CÒN CẦN file này không", chứ không phải "ngôn ngữ có bước
+    // biên dịch không". Hai thứ đó khác nhau: `compileArgv` của Python/Node chỉ là
+    // `py_compile` / `--check` để lỗi cú pháp thành CE thay vì RE — nguồn vẫn chính
+    // là chương trình. Lấy nhầm điều kiện thì Python và Node hỏng sạch (đã đo: 4 test
+    // function-mode đỏ). Java thì runArgv nêu tên CLASS `Main`, không nêu `Main.java`,
+    // nên file nguồn xoá được và `Main.class` ở lại — đúng ý.
+    //
+    // GIỚI HẠN, ghi rõ để không ai tưởng đã kín: với ngôn ngữ thông dịch, harness là
+    // điểm vào nên buộc phải ở lại, và mã người học chạy trong CÙNG interpreter thì
+    // đọc được nó bằng `open()`, `inspect.getsource`, hay chỉ một traceback. Đó là
+    // giới hạn của kiến trúc một-container-chung, không vá được ở tầng này.
+    for (const f of req.files) {
+      if (f.owner !== 'mentor') continue
+      if (language.runArgv.some((arg) => arg.includes(f.name))) continue
+      await sb.removeSource(f.name)
+    }
     return { ok: true, output: text, ie: null }
   }
 

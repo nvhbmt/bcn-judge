@@ -16,6 +16,21 @@ import type { JudgeMeta } from './types'
 export const docker = new Docker()
 
 const META_PREFIX = '__JUDGE_META__ '
+
+/**
+ * Phần ĐUÔI stderr luôn được giữ lại, dù member xả bao nhiêu đi nữa.
+ *
+ * Bộ thu bên dưới cắt theo ĐẦU luồng: đủ `maxStderrBytes` là bỏ hết phần sau. Dòng
+ * `__JUDGE_META__` thật lại do run.sh in SAU CÙNG, nên chính nó là thứ bị vứt đầu
+ * tiên. Hai hệ quả đã đo được: member xả rác cho tràn ngân sách thì dòng giả của họ
+ * thành dòng cuối và họ tự chọn verdict; còn bài ĐÚNG in nhiều log gỡ lỗi thì mất
+ * dòng meta và ăn IE oan (8000 byte → AC, 9000 byte → IE).
+ *
+ * Giữ đuôi làm bất biến "dòng cuối luôn về tới nơi" thành đúng theo cấu trúc, không
+ * phụ thuộc vào việc hằng số ở đây có khớp `head -c` trong run.sh hay không — hai
+ * con số ở hai file khác ngôn ngữ, khớp được một lần không có nghĩa là khớp mãi.
+ */
+const META_TAIL_BYTES = 1024
 /** Baseline pids trong container sạch (tini + sleep + chuỗi run.sh). Vượt ngưỡng
  *  này sau khi pkill ⇒ namespace nhiễm độc, phải thay container (§3.2). */
 export const PIDS_POISON_THRESHOLD = 24
@@ -208,6 +223,35 @@ export class Sandbox {
     }
   }
 
+  /**
+   * Xoá một file nguồn khỏi /w sau khi đã biên dịch xong.
+   *
+   * NFR-2 dựa trên bất biến "không secret nào nằm trong container" (design.md §mô
+   * hình đe doạ) — nên bảo vệ harness bằng quyền file được ghi rõ là KHÔNG dùng tới.
+   * Bài dạng function phá đúng bất biến đó: harness của mentor được ghi ra /w cạnh mã
+   * người học, /w là tmpfs mode 0775 và file là 0644, còn chương trình của người học
+   * chạy với WorkingDir /w. `fopen("/w/main.c")` đọc trọn harness, và với testcase MẪU
+   * thì stdout được trả thẳng về cho member — không tốn lượt nộp nào nếu dùng "chạy
+   * thử" với input tự nhập.
+   *
+   * Với ngôn ngữ BIÊN DỊCH, file nguồn không còn cần thiết sau khi có binary, nên xoá
+   * là đóng hẳn đường này. Với ngôn ngữ THÔNG DỊCH thì không xoá được — harness chính
+   * là điểm vào, và mã người học chạy trong cùng interpreter nên đọc được nó bằng
+   * `open()`, `inspect.getsource`, hay đơn giản là một traceback. Đó là giới hạn của
+   * kiến trúc một-container-chung, không phải lỗi vá được ở đây; README ghi đúng phạm
+   * vi bảo đảm thay vì hứa suông.
+   */
+  async removeSource(filename: string): Promise<void> {
+    if (!/^[A-Za-z0-9._-]+$/.test(filename) || filename.startsWith('.')) {
+      throw new Error(`tên file nguồn không hợp lệ: ${filename}`)
+    }
+    await this.exec(['rm', '-f', `/w/${filename}`], {
+      maxOutputBytes: 1024,
+      wallDeadlineMs: 15_000,
+      maxStderrBytes: 1024,
+    })
+  }
+
   /** Thu hẹp lồng bộ nhớ sau biên dịch (§3.2 phase 3). */
   async updateMemory(memoryMb: number): Promise<void> {
     const bytes = memoryMb * 1024 * 1024
@@ -250,6 +294,7 @@ export class Sandbox {
     const errChunks: Buffer[] = []
     let outBytes = 0
     let errBytes = 0
+    let errTail = Buffer.alloc(0)
     let truncated = false
     let killIssued = false
 
@@ -274,10 +319,21 @@ export class Sandbox {
     })
 
     stderrPipe.on('data', (chunk: Buffer) => {
-      if (errBytes >= maxStderr) return
-      const slice = chunk.subarray(0, maxStderr - errBytes)
-      errChunks.push(slice)
-      errBytes += slice.length
+      const room = maxStderr - errBytes
+      const taken = room > 0 ? Math.min(room, chunk.length) : 0
+      if (taken > 0) {
+        errChunks.push(chunk.subarray(0, taken))
+        errBytes += taken
+      }
+      // Phần vượt ngân sách không bị vứt hẳn: giữ lại đúng META_TAIL_BYTES byte cuối
+      // để dòng meta thật (luôn là dòng sau chót) không bao giờ bị cắt mất.
+      const rest = chunk.subarray(taken)
+      if (rest.length > 0) {
+        errTail = Buffer.concat([errTail, rest])
+        if (errTail.length > META_TAIL_BYTES) {
+          errTail = errTail.subarray(errTail.length - META_TAIL_BYTES)
+        }
+      }
     })
 
     const timedOut = await new Promise<boolean>((resolve) => {
@@ -311,7 +367,13 @@ export class Sandbox {
       execExitCode = null
     }
 
-    const rawStderr = Buffer.concat(errChunks).toString('utf8')
+    // Đuôi nối sau phần đầu, có '\n' ngăn giữa để một dòng bị cắt dở ở ranh giới
+    // ngân sách không dính liền vào dòng meta và làm hỏng `startsWith`.
+    const rawStderr = (
+      errTail.length > 0
+        ? Buffer.concat([Buffer.concat(errChunks), Buffer.from('\n'), errTail])
+        : Buffer.concat(errChunks)
+    ).toString('utf8')
     return {
       meta: timedOut ? null : parseMeta(rawStderr),
       stdout: Buffer.concat(outChunks),

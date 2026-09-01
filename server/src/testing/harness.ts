@@ -52,7 +52,7 @@ let counter = 0
 
 export async function makeUser(
   role: TestUser['role'],
-  overrides: { email?: string; password?: string; disabled?: boolean } = {},
+  overrides: { email?: string; password?: string; disabled?: boolean; mustChangePassword?: boolean } = {},
 ): Promise<TestUser> {
   counter++
   const email = overrides.email ?? `${role}${counter}@test.local`
@@ -65,7 +65,7 @@ export async function makeUser(
       role,
       passwordHash: hash,
       hashAlgo: algo,
-      mustChangePassword: false,
+      mustChangePassword: overrides.mustChangePassword ?? false,
       disabled: overrides.disabled ?? false,
     })
     .returning({ id: users.id })
