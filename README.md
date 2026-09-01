@@ -4,91 +4,125 @@ Hệ thống chấm bài tập lập trình nội bộ của câu lạc bộ: qu
 thành viên code trên trình duyệt, chấm tự động bằng testcase, contest theo tuần có bảng xếp hạng.
 
 - Yêu cầu: [`docs/requirements.md`](docs/requirements.md) (v0.7)
-- Thiết kế: [`docs/design.md`](docs/design.md) (13 ADR + delta Team/Leader + delta P0)
+- Thiết kế: [`docs/design.md`](docs/design.md) — 14 ADR, delta Team/Leader, delta P0
 
-## Trạng thái
+## Chạy thử trong 3 lệnh
+
+```bash
+bash scripts/build-runner-images.sh   # hai runner image: gcc 455 MB, python 204 MB
+bash scripts/run-local.sh             # Postgres + migrate + seed + API + worker + SPA
+# → http://localhost:5174   admin@bcn.local / bcnjudge
+```
+
+Kiểm chứng toàn hệ thống qua HTTP (cần API + worker đang chạy):
+
+```bash
+node scripts/smoke.mjs        # 29 kiểm tra: cấp tài khoản → soạn bài → nộp → chấm → verdict
+```
+
+## Trạng thái từng phase
 
 | Phase | Nội dung | Trạng thái |
 |---|---|---|
-| **P0** | Nguyên mẫu sandbox + bộ abuse test | ✅ **xanh** — 20/20 ca trên Docker thật |
-| P1 | Khung repo, schema, auth, khoá học | chưa bắt đầu |
-| P2 | Queue + worker + API chấm bài | chưa bắt đầu |
-| P3 | Workspace UI (icon rail, split pane, CodeMirror) | chưa bắt đầu |
-| P4–P7 | Nội dung khoá, team/leader, contest, vận hành | chưa bắt đầu |
+| **P0** | Nguyên mẫu sandbox + bộ abuse | ✅ 20 ca xanh trên Docker thật |
+| **P1** | Schema, auth, khoá học, ma trận quyền | ✅ API + test đầy đủ |
+| **P2** | Hàng đợi, worker, API nộp bài, chống rò dữ liệu ẩn | ✅ chấm end-to-end thật |
+| **P3** | Workspace: thanh icon, split, CodeMirror, verdict trực tiếp | ✅ |
+| **P4** | Nội dung khoá, tiến độ, BXH khoá, team & leader | ✅ API đủ · UI member đủ · **UI soạn bài của mentor chưa có** |
+| **P5** | Contest tuần, bảng xếp hạng, đóng băng, luyện tập | ✅ API đủ · UI member đủ · **UI tạo contest chưa có** |
+| **P6** | API quản trị, compose, deploy, sao lưu | ✅ · **chưa deploy lên VPS thật** |
+| **P7** | Kiểm chứng end-to-end | ✅ smoke 29/29 |
 
-P0 là **cổng go/no-go** của cả dự án (design.md §11): phần chạy code không tin cậy là thứ
-duy nhất chưa có tiền lệ trong workspace. Cổng này đã mở.
+**231 test xanh**: 148 server (gồm 20 ca abuse trên Docker và 3 ca chấm thật qua hàng đợi) +
+83 SPA. Cộng 29 kiểm tra smoke qua HTTP.
 
-## Chạy thử
+## Còn thiếu — nói thẳng
 
-```bash
-# 1. Build hai runner image (gcc 455 MB, python 204 MB)
-bash scripts/build-runner-images.sh
+Những thứ này **có API đầy đủ và có test**, nhưng **chưa có màn hình**; hiện phải gọi API trực tiếp:
 
-# 2. Chấm thử một bài bằng tay — không cần DB, không cần API
-cd server && npm install
-npm run judge:demo                      # "Tổng hai số", C11, 4 testcase
-npm run judge:demo -- --lang python3
-npm run judge:demo -- --lang c11 --source ../runner/abuse/infinite_loop.c
+- Mentor soạn bài tập, tải zip testcase, bấm "kiểm tra bằng lời giải mẫu", soạn chương/mục
+- Mentor tạo contest, chọn bài, xuất bản, xem thống kê
+- Admin quản lý tài khoản, khoá học, team (mới có trang tình trạng chấm)
 
-# 3. Bộ test
-npm test                                # đơn vị (compare + bảng verdict), không cần Docker
-npm run test:sandbox                    # bộ abuse trên Docker thật
-```
+Chưa làm, đều là mức **S** hoặc **C** trong requirements:
+
+- Image Java 17 / Node 20 (đã có dòng cấu hình, chưa build image)
+- FR-I8 mở bài tuần tự · FR-J5 lọc BXH theo team · FR-J6 ghi chú của leader
+- FR-D5 so sánh số thực · checker tự viết · FR-G7 phát hiện trùng code
+
+**Nợ kỹ thuật quan trọng nhất** (đã ghi trong `docs/design.md` §14): mọi số đo và toàn bộ bộ
+abuse mới chạy trên **máy dev (OrbStack)**. §11 của thiết kế yêu cầu chạy lại trên **đúng
+kernel/Docker của VPS đích** trước khi mở cho member — ba mục cần đo lại là `docker update
+--memory` shrink, `memory.events` trong namespace, và half-close của exec stdin.
+`server/deploy/provision-vps.sh` in ra nhắc nhở này ở bước cuối.
 
 ## Bộ abuse chứng minh được gì
 
-Mỗi ca ánh xạ thẳng tới một yêu cầu; chạy trên Docker thật, không mock.
+Chạy trên Docker thật, không mock. Mỗi ca ánh xạ thẳng tới một yêu cầu.
 
 | Nhóm | Ca | Yêu cầu |
 |---|---|---|
 | Ca số 0 | C, C++, Python biên dịch + chạy end-to-end | §3.2 phase 1 |
-| Nhập/xuất | stdin nhận EOF thật (half-close), tổng hai số, WA báo đúng dòng lệch | FR-F1, FR-D5 |
-| Chấm điểm | điểm chuẩn hoá 0–100 theo trọng số (66.67 khi 2/3 test đúng) | FR-F2 v0.5 |
+| Nhập/xuất | stdin nhận EOF thật, WA báo đúng dòng lệch | FR-F1, FR-D5 |
+| Chấm điểm | điểm chuẩn hoá 0–100 (66.67 khi 2/3 test đúng) | FR-F2 v0.5 |
 | Verdict | CE, TLE, MLE, RE(SIGSEGV) trên hành vi thật | §3.4 |
-| Chống phá hoại | fork bomb → **testcase sau vẫn chấm được**; tràn output → RE(output_limit); ghi 200 MB bị chặn | US-9, NFR-1 |
-| Cách ly | không mạng (connect + DNS đều fail); không đọc được `/etc/shadow`, `run.sh`, file đo; rootfs read-only; `/w` chỉ có source — **không có thư mục testcase nào để đọc** | US-6, NFR-1, NFR-2 |
-| Chống giả mạo | chương trình in dòng `__JUDGE_META__` giả vẫn nhận TLE | §3.2 |
-| Siết an ninh | bounding set của capability hạ được trên **cả hai** image | §3.2 |
-| Vệ sinh | không sót container mồ côi sau toàn bộ suite | §3.2 phase 5 |
+| Chống phá hoại | fork bomb → **testcase sau vẫn chấm**; tràn output → RE; ghi 200 MB bị chặn | US-9 |
+| Cách ly | không mạng; không đọc được `/etc/shadow`, `run.sh`, file đo; `/w` chỉ có source | US-6, NFR-1 |
+| Chống giả mạo | in dòng `__JUDGE_META__` giả vẫn nhận TLE | §3.2 |
+| Siết an ninh | hạ được bounding set capability trên **cả hai** image | §3.2 |
+| Vệ sinh | không sót container mồ côi | §3.2 phase 5 |
 
-Đo trên máy dev (OrbStack, cgroup v2), hàng đợi rỗng, bài 4 testcase:
-**C 620 ms · C++ 627 ms · Python 487 ms** — ngưỡng NFR-4 là ≤ 3 s (C++ kể cả biên dịch ≤ 10 s).
+Độ trễ trên máy dev, hàng đợi rỗng, bài 4 testcase: **C 620 ms · C++ 627 ms · Python 487 ms**
+(ngưỡng NFR-4 là ≤ 3 s; C++ kể cả biên dịch ≤ 10 s).
 
-## Năm điều thiết kế nói đúng nhưng thực tế khác — P0 bắt được
+## Năm điều thiết kế nói đúng nhưng Docker làm khác — P0 bắt được
 
-Đây chính là lý do P0 phải chạy trước mọi thứ khác. Cả năm đều **im lặng**: không lỗi, không
-cảnh báo, chỉ là mọi bài nộp trả verdict sai.
+Cả năm đều **hỏng im lặng**: không exception, chỉ là mọi bài nộp trả verdict sai.
 
-1. **`putArchive` không dùng được với `--read-only`.** Docker daemon từ chối nạp tar vào bất kỳ
-   container nào có `ReadonlyRootfs`, kể cả khi đích là tmpfs ghi được. → Source đi vào bằng
-   **stdin của một exec**, đúng nguyên tắc thiết kế đã chọn cho testcase; giữ nguyên rootfs read-only.
-2. **Root trong container không ghi nổi `/w`.** Đã `--cap-drop ALL` nên root không có
-   `CAP_DAC_OVERRIDE`; `/w` do uid 1000 sở hữu mode 0755 chặn cả root. → mount `/w` với
-   `gid=0,mode=0775` (rẻ và hẹp hơn nhiều so với cấp thêm capability).
-3. **Docker mặc định mount mọi `--tmpfs` là `noexec`.** Danh sách cờ trong thiết kế không ghi
-   `exec`, nên binary biên dịch xong nằm ở `/w` không chạy được → **mọi bài C/C++ nhận RE(126)**.
-   → `/w` ghi rõ `exec`; `/tmp` giữ `noexec` như thiết kế.
-4. **`prlimit` không nâng được hard limit.** `run.sh` suy `fsize` từ trần output (64 KB lúc biên
-   dịch → ~1 MB), nhỏ hơn binary tĩnh; mà tiến trình không đặc quyền cũng không nâng lên được.
-   → hard limit ở mức container nới đủ cho biên dịch, `run.sh` chỉ **hạ** trần chặt cho lượt chạy.
-5. **`setpriv --bounding-set=-all` phụ thuộc phiên bản util-linux.** 2.38 (bookworm — image gcc)
-   bỏ qua êm; 2.41 (trixie — image python) đòi `CAP_SETPCAP`, không có thì exit 127 ⇒ **mọi bài
-   Python thành CE**. → cấp `CAP_SETPCAP` (không nới quyền cho member), `run.sh` thăm dò trước
-   và **báo `bset` ra dòng meta** để lớp siết an ninh hỏng thì nhìn thấy được; bộ test khoá lại
-   trên cả hai image. Cùng lớp lỗi: thiết kế đặt `PATH=/usr/bin:/bin` trong khi image python để
-   interpreter ở `/usr/local/bin`.
+1. **`putArchive` không dùng được với `--read-only`** → nạp source qua stdin của exec.
+2. **Root trong container không ghi nổi `/w`** (đã drop `CAP_DAC_OVERRIDE`) → `/w` mount `gid=0,mode=0775`.
+3. **Docker mặc định mount mọi tmpfs là `noexec`** → thiếu chữ `exec`, **mọi bài C/C++ nhận RE(126)**.
+4. **`prlimit` không nâng được hard limit** → trần `fsize` lúc biên dịch nhỏ hơn binary tĩnh.
+5. **`setpriv --bounding-set` phụ thuộc phiên bản util-linux** — 2.38 bỏ qua êm, 2.41 (image
+   python) đòi `CAP_SETPCAP` và exit 127 ⇒ **mọi bài Python thành CE**. Đã cấp cap, cho run.sh
+   thăm dò trước, và **báo `bset` ra dòng meta** để lần sau lớp siết an ninh hỏng thì nhìn thấy được.
 
-Chi tiết và lý do chọn phương án nằm trong `docs/design.md` §14 (Delta P0) và trong comment
-tại chính chỗ code lệch khỏi thiết kế.
+Chi tiết và lý do chọn phương án: `docs/design.md` §14 (Delta P0) và comment tại chính chỗ code lệch.
 
 ## Bố cục
 
 ```
+src/                     SPA: components/{layout,editor,markdown,ui}, pages/, hooks/, lib/
+tests/                   test SPA (vitest + jsdom)
 server/
-  src/judge/         languages · sandbox · runner · verdict · compare  (+ test)
-  runner/images/     gcc/ python/ Dockerfile + common/run.sh
-  runner/abuse/      fixture cho bộ abuse
-scripts/             build-runner-images.sh
-docs/                requirements.md · design.md
+  src/
+    auth/                session token mờ (không JWT), argon2id, guard 3 vai trò
+    db/                  schema Drizzle, migrate, seed, 3 role Postgres
+    judge/               languages · sandbox · runner · queue · verdict · compare
+    serialize/           cổng chặn dữ liệu ẩn (NFR-2) — trường cấm khai kiểu never
+    routes/{admin,mentor,member}/   cây route tách theo vai trò
+    contest/standings.ts truy vấn xếp hạng dẫn xuất
+    realtime/            LISTEN/NOTIFY + SSE có replay
+    worker.ts            judge worker
+  runner/                Dockerfile theo ngôn ngữ + run.sh + fixture abuse
+  drizzle/               SQL migration (viết tay: FK deferrable, partial index, trigger)
+  deploy/                deploy · provision · backup · cổng migration
+scripts/                 build image · run-local · smoke · ràng buộc nguồn
+docs/                    requirements.md · design.md
+```
+
+## Lệnh hay dùng
+
+```bash
+# SPA
+npm run dev · build · test · lint · typecheck
+
+# Server
+cd server
+npm run dev                  # API :8099
+node --import tsx src/worker.ts
+npm test                     # đơn vị
+npm run test:sandbox         # bộ abuse (cần Docker)
+npm run test:integration     # cần Postgres, tên DB phải chứa "test"
+npm run db:migrate · db:seed · db:grants
 ```

@@ -8,7 +8,8 @@
     "preview": "vite preview",
     "lint": "node scripts/check-source-rules.mjs",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.0",
