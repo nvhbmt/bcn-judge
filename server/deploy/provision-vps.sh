@@ -34,9 +34,13 @@ Còn lại làm tay:
   1. Sao .env.example thành .env.api / .env.worker / .env.migrate, đổi mật khẩu
   2. bash scripts/build-runner-images.sh
   3. docker compose run --rm migrate && docker compose run --rm --entrypoint node migrate --import tsx src/db/grants.ts
-  4. docker compose up -d
-  5. Cron: 0 3 * * * bash deploy/backup.sh
-  6. Chạy bộ abuse TRÊN CHÍNH VPS NÀY trước khi mở cho member:
+  4. Seed nền — TẠO ngôn ngữ, settings và admin đầu tiên. Thiếu bước này thì hệ
+     thống dựng lên nhưng không đăng nhập được và không có ngôn ngữ nào để nộp:
+       SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... \
+         docker compose run --rm --entrypoint node migrate --import tsx src/db/seed.ts
+  5. docker compose up -d
+  6. Cron: 0 3 * * * bash deploy/backup.sh
+  7. Chạy bộ abuse TRÊN CHÍNH VPS NÀY trước khi mở cho member:
        cd server && DOCKER=1 npm run test:sandbox
      — đây là nợ P0 có tên trong design §14: mọi số đo hiện tại đo trên máy dev.
 EOF

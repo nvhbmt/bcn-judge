@@ -2,11 +2,23 @@
 # Deploy blue/green lên VPS (design.md §9). Chạy TRÊN VPS, trong thư mục server/.
 #
 #   bash deploy/deploy.sh            # deploy đầy đủ (API + worker + SPA)
-#   bash deploy/deploy.sh --spa-only # chỉ SPA: zero-downtime, không đụng judge
+#   bash deploy/deploy.sh --spa-only # chỉ dựng lại giao diện, không đụng judge/DB
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 SPA_ONLY=${1:-}
+
+# Chỉ SPA: image caddy chứa luôn bản build giao diện, nên dựng lại mỗi nó là xong.
+# KHÔNG đụng migration, không lật blue/green, không khởi động lại worker — bài đang
+# chấm chạy tiếp bình thường. Caddy có gián đoạn dưới một giây lúc thay container;
+# kết nối SSE đang mở sẽ tự nối lại.
+if [ "$SPA_ONLY" = "--spa-only" ]; then
+  echo "==> Chỉ SPA: dựng lại image caddy"
+  docker compose build caddy
+  docker compose up -d caddy
+  echo "==> Xong."
+  exit 0
+fi
 
 echo "==> Kiểm tra migration an toàn"
 bash deploy/check-migrations-safe.sh
@@ -38,7 +50,11 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-echo "==> Trỏ Caddy sang api-$TARGET"
+# `BCN_API_UPSTREAM` đi vào ENV CỦA CONTAINER caddy (compose khai nó ở service), chứ
+# không phải chỉ là biến shell: Caddyfile đọc bằng cú pháp `{$VAR}` của Caddy, tức đọc
+# từ tiến trình caddy. Thiếu bước này thì upstream mãi là api-blue và lật màu xong là
+# trỏ vào container vừa tắt.
+echo "==> Trỏ Caddy sang api-$TARGET (và cập nhật SPA)"
 BCN_API_UPSTREAM="api-$TARGET:8099" docker compose up -d caddy
 sleep 3
 docker compose stop "api-$CURRENT"
@@ -51,3 +67,5 @@ if [ "$SPA_ONLY" != "--spa-only" ]; then
 fi
 
 echo "==> Xong. Kiểm tra: curl -s localhost/healthz"
+echo "    Lưu ý: lần deploy sau phải chạy với BCN_API_UPSTREAM=api-$TARGET:8099 trong .env,"
+echo "    hoặc để deploy.sh tự dò như vừa rồi."

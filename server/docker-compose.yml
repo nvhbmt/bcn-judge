@@ -92,9 +92,19 @@ services:
 
   caddy:
     build:
-      context: .
-      dockerfile: deploy/Caddy.Dockerfile
+      # Context là GỐC REPO, không phải server/: image này build cả SPA, mà SPA nằm ở
+      # cây npm gốc.
+      context: ..
+      dockerfile: server/deploy/Caddy.Dockerfile
     restart: unless-stopped
+    # Caddyfile đọc HAI biến này từ env của CHÍNH CONTAINER (cú pháp `{$VAR}` của
+    # Caddy), nên chúng phải được khai ở đây. Thiếu chúng thì Caddy im lặng rơi về mặc
+    # định: proxy mãi vào api-blue — tức lật blue/green xong là trỏ vào container vừa
+    # tắt — và phục vụ trên `localhost`, nên không bao giờ xin nổi chứng chỉ cho tên
+    # miền thật.
+    environment:
+      BCN_API_UPSTREAM: ${BCN_API_UPSTREAM:-api-blue:8099}
+      BCN_DOMAIN: ${BCN_DOMAIN:-localhost}
     ports: ['80:80', '443:443']
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro

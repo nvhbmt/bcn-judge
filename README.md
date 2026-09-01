@@ -5,6 +5,7 @@ thành viên code trên trình duyệt, chấm tự động bằng testcase, con
 
 - Yêu cầu: [`docs/requirements.md`](docs/requirements.md) (v0.7)
 - Thiết kế: [`docs/design.md`](docs/design.md) — 14 ADR, delta Team/Leader, delta P0, delta FR-D10
+- **Deploy: [`docs/deploy.md`](docs/deploy.md)** — từ VPS trắng tới lúc member đăng nhập được
 
 ## Chạy thử trong 3 lệnh
 
@@ -40,7 +41,7 @@ node scripts/judge-e2e.mjs  # 93 kiểm tra, chỉ soi luồng chấm nhưng soi
 Và bộ E2E lái **trình duyệt thật** qua toàn bộ luồng giao diện:
 
 ```bash
-npm run e2e         # 31 kiểm tra Playwright, tự dựng cả stack (~2,5 phút)
+npm run e2e         # 39 kiểm tra Playwright, tự dựng cả stack (~2,5 phút)
 npm run e2e:ui      # chế độ xem từng bước
 ```
 
@@ -73,8 +74,10 @@ toán, bài dạng function, và các cổng chặn quanh luồng nộp.
 | **P6** | API quản trị, compose, deploy, sao lưu | ✅ · **chưa deploy lên VPS thật** |
 | **P7** | Kiểm chứng end-to-end | ✅ smoke 29/29 |
 
-**253 test xanh**: 164 server (gồm 23 ca abuse trên Docker và 3 ca chấm thật qua hàng đợi) +
-89 SPA. Cộng 29 kiểm tra smoke qua HTTP với worker và container thật.
+**415 test xanh**: 87 server (đơn vị) + 157 server (integration, cần Postgres — gồm 23 ca
+abuse trên Docker và các ca chấm thật qua hàng đợi) + 171 SPA. Cộng 39 kiểm tra
+Playwright lái trình duyệt thật, và 29 kiểm tra smoke qua HTTP với worker và container
+thật.
 
 Mọi yêu cầu mức **M** và mức **S** của `requirements.md` đã hiện thực hoá, gồm cả những mục
 lắt léo nhất: chấm lại có shadow attempt và audit (FR-D9), contest mở tuần tự (FR-I8), đóng
@@ -187,6 +190,29 @@ Chạy trên Docker thật, không mock. Mỗi ca ánh xạ thẳng tới một 
 Độ trễ trên máy dev, hàng đợi rỗng: **C 620 ms · C++ 627 ms · Python 487 ms · Java 883 ms ·
 Node 433 ms** (ngưỡng NFR-4 là ≤ 3 s; C++ kể cả biên dịch ≤ 10 s).
 
+### Đường đi của một lượt nộp, đo đầu-tới-cuối
+
+Ba khoản dưới đây từng cộng lại thành **~6,7 giây** kể từ lúc bấm, dù bản thân việc
+chấm chỉ mất nửa giây. Cả ba đều hỏng im lặng — không lỗi, không log, chỉ là chậm:
+
+| | trước | sau |
+|---|---|---|
+| chờ được worker nhặt | ~495 ms | ~15 ms |
+| chấm (C, 4 testcase) | ~648 ms | ~504 ms |
+| chờ giao diện biết verdict | ~6 000 ms | ~90 ms |
+| **bấm → verdict hiện** | **~6 700 ms** | **~640 ms** |
+
+- **Hàng đợi**: worker rảnh thì ngủ hết một nhịp poll 1 giây. Nay xếp việc xong là rung
+  chuông qua LISTEN/NOTIFY; nhịp poll giữ nguyên làm lưới an toàn, vì mất chuông chỉ
+  chậm lại như cũ còn bỏ poll là hàng đợi đứng im vĩnh viễn.
+- **Chấm**: `docker create` + `start` tốn ~155 ms mà chẳng có mili giây nào là code
+  người học. Nay container dựng sẵn thành pool ấm — vẫn một container mới mỗi lượt, vẫn
+  huỷ sau khi xong, chỉ là tạo sớm hơn.
+- **Giao diện**: máy chủ gửi sự kiện SSE **có tên**, client lại chỉ gắn
+  `EventSource.onmessage` — thứ chỉ nổ với sự kiện không tên. Nên FR-F4 chưa từng chạy
+  trên trình duyệt, và verdict về bằng đường lùi polling: 4 giây chờ ân hạn cộng một
+  nhịp 2 giây. Không test nào đỏ vì kết quả vẫn đúng, chỉ chậm mười lần.
+
 ## Bảy điều thiết kế nói đúng nhưng Docker làm khác
 
 Cả bảy đều **hỏng im lặng**: không exception, chỉ là mọi bài nộp trả verdict sai. Đây là lý do
@@ -223,6 +249,47 @@ Test cũ không bắt được vì chúng gọi đúng những gì server chờ 
 
 Chi tiết đầy đủ nằm trong commit `P4/P5 UI`.
 
+## Deploy
+
+Toàn hệ thống chạy trên **một VPS** bằng `docker compose`: Caddy → api-blue/api-green
+(blue/green) · worker → docker-proxy → socket Docker · Postgres là service có trạng
+thái duy nhất. Runbook đầy đủ ở **[`docs/deploy.md`](docs/deploy.md)**.
+
+Lần đầu:
+
+```bash
+sudo bash server/deploy/provision-vps.sh     # Docker, sysctl siết userns, chrony
+cd server && cp .env.example .env            # rồi tạo .env.api/.env.worker/.env.migrate
+bash ../scripts/build-runner-images.sh --all
+docker compose run --rm migrate
+docker compose run --rm --entrypoint node migrate --import tsx src/db/grants.ts
+SEED_ADMIN_EMAIL=... SEED_ADMIN_PASSWORD=... \
+  docker compose run --rm --entrypoint node migrate --import tsx src/db/seed.ts
+docker compose up -d
+```
+
+Cập nhật:
+
+```bash
+bash deploy/deploy.sh              # API lật blue/green + worker + giao diện
+bash deploy/deploy.sh --spa-only   # chỉ giao diện, không đụng judge/DB
+```
+
+Bốn điều dễ vấp nhất, cả bốn đều **hỏng im lặng**:
+
+- **Quên `db:seed`** → không có ngôn ngữ chấm, không có admin. Hệ thống lên nhưng không
+  ai vào được.
+- **Quên `db:grants`** → bảng mới không có grant; migrate im re, chỉ nổ lúc có người
+  dùng thật chạm vào.
+- **`BCN_DOMAIN` / `BCN_API_UPSTREAM` phải nằm trong `environment:` của service caddy**,
+  không phải chỉ là biến shell — Caddyfile đọc chúng từ env của chính tiến trình Caddy.
+  Thiếu thì lật blue/green xong Caddy vẫn trỏ vào container vừa tắt.
+- **`VITE_API_BASE_URL` phải RỖNG** trong bản build production (Dockerfile đã ghim), nếu
+  không bundle sẽ gọi thẳng một host cụ thể và bỏ qua reverse proxy.
+
+**Chưa deploy lên VPS thật.** Nợ P0 bắt buộc trả trước khi mở cho member: chạy lại bộ
+abuse trên đúng kernel/Docker của máy đích (`docs/deploy.md` §9).
+
 ## Bố cục
 
 ```
@@ -233,6 +300,7 @@ server/
     auth/                session token mờ (không JWT), argon2id, guard 3 vai trò
     db/                  schema Drizzle, migrate, seed, 3 role Postgres
     judge/               languages · sandbox · runner · queue (+ chấm lại) · verdict · compare
+                         pool (container ấm) · wake (đánh thức worker) · reap (dọn mồ côi)
     serialize/           cổng chặn dữ liệu ẩn (NFR-2) — trường cấm khai kiểu never
     routes/{admin,mentor,member}/   cây route tách theo vai trò
     contest/standings.ts truy vấn xếp hạng dẫn xuất
@@ -240,9 +308,9 @@ server/
     worker.ts            judge worker
   runner/                Dockerfile 4 ngôn ngữ + run.sh + fixture abuse
   drizzle/               SQL migration viết tay (FK deferrable, partial index, trigger)
-  deploy/                deploy · provision · backup · cổng migration
+  deploy/                deploy · provision · backup · cổng migration · Caddy+SPA image
 scripts/                 build image · run-local · smoke · ràng buộc nguồn
-docs/                    requirements.md · design.md
+docs/                    requirements.md · design.md · deploy.md
 ```
 
 ## Lệnh hay dùng
