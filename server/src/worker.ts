@@ -28,7 +28,7 @@ import { reapOrphanSandboxes } from './judge/sandbox'
 import { DEFAULT_LIMITS, type JudgeLimits, type SourceFile, type TestcaseInput } from './judge/types'
 import { getSettings } from './lib/settings'
 
-const WORKER_ID = `${hostname()}-${process.pid}`
+export const WORKER_ID = `${hostname()}-${process.pid}`
 const HEARTBEAT_MS = 15_000
 const IDLE_POLL_MS = 1_000
 
@@ -432,6 +432,20 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms))
 }
 
+/**
+ * Cập nhật nhịp tim của worker này.
+ *
+ * Tách thành hàm riêng để kiểm được: bản trước gọi thẳng `void db.execute(...)`
+ * trong callback của `setInterval`, và vì builder của drizzle chỉ chạy khi được
+ * `await`/`.then()`, câu UPDATE KHÔNG BAO GIỜ được gửi. Hệ quả: `last_seen_at`
+ * đứng yên ở lúc đăng ký, nên sau 30 giây trang /quan-tri báo "Không có worker
+ * nào sống" trong khi worker vẫn chấm bài bình thường — báo động giả trên đúng
+ * cái bảng điều khiển mà người trực nhìn để quyết định có khởi động lại hay không.
+ */
+export async function touchWorker(id = WORKER_ID): Promise<void> {
+  await db.execute(sql`UPDATE workers SET last_seen_at = now() WHERE id = ${id}`)
+}
+
 async function registerWorker(): Promise<void> {
   await db.execute(sql`
     INSERT INTO workers (id, slots, version) VALUES (${WORKER_ID}, ${config.workerSlots}, 'p2')
@@ -486,7 +500,11 @@ export async function startWorker(): Promise<void> {
   if (process.env.SKIP_LANGUAGE_PROBE !== '1') await probeLanguages()
 
   const beat = setInterval(() => {
-    void db.execute(sql`UPDATE workers SET last_seen_at = now() WHERE id = ${WORKER_ID}`)
+    // KHÔNG viết `void touchWorker()` cho câu drizzle: builder của drizzle là
+    // thenable LƯỜI, chỉ gửi câu lệnh khi có ai gọi `.then()`. `void` vứt object
+    // đi nên query không bao giờ tới Postgres — và vì không ai chờ, cũng không có
+    // lỗi nào để mà thấy. Xem touchWorker() bên dưới.
+    touchWorker().catch((err) => console.error('[worker] nhịp tim hỏng:', err))
     void reapStale()
     void reapRejudge()
   }, 10_000)

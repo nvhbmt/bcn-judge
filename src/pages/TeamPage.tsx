@@ -48,6 +48,9 @@ export function TeamPage() {
   if (!team) {
     return (
       <Shell>
+        {/* Vẫn phải có h1: màn hình không tiêu đề thì người dùng trình đọc màn
+            hình không biết mình đang ở đâu, và tab trình duyệt cũng vô danh. */}
+        <h1 className="font-display text-[26px] text-ink-1">Team</h1>
         <EmptyState title="Bạn chưa thuộc team nào" hint="Quản lý viên sẽ xếp bạn vào team." />
       </Shell>
     )

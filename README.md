@@ -37,6 +37,22 @@ node scripts/smoke.mjs      # 29 kiểm tra: cấp tài khoản → soạn bài 
 node scripts/judge-e2e.mjs  # 93 kiểm tra, chỉ soi luồng chấm nhưng soi tới đáy (~60 s)
 ```
 
+Và bộ E2E lái **trình duyệt thật** qua toàn bộ luồng giao diện:
+
+```bash
+npm run e2e         # 31 kiểm tra Playwright, tự dựng cả stack (~2,5 phút)
+npm run e2e:ui      # chế độ xem từng bước
+```
+
+`npm run e2e` tự lo mọi thứ: database riêng `bcn_judge_e2e_ui`, migrate, seed dữ
+liệu mẫu, API, worker, vite. Phủ: đăng nhập/đăng xuất/tài khoản bị khoá/bắt đổi mật
+khẩu lần đầu, mọi route theo từng vai trò, gõ code → chạy thử → nộp → verdict qua
+Docker thật, contest và bảng xếp hạng, team của leader, soạn bài của mentor, cấp
+tài khoản và tình trạng chấm của admin, đổi theme và nhớ qua lần tải lại.
+
+Đây là bộ duy nhất bắt được lớp lỗi ở giữa: route không ai link tới, class Tailwind
+không sinh ra CSS, form không submit, panel không đổi khi bấm thanh icon.
+
 `judge-e2e.mjs` cần một database **còn trống** (nó tạo tài khoản, khoá, bài mới và
 không dọn sau khi chạy) và bật cả 5 ngôn ngữ. Phủ: AC trên cả năm ngôn ngữ, cả sáu
 verdict sinh từ hành vi thật của chương trình, điểm từng phần, hai canary chứng

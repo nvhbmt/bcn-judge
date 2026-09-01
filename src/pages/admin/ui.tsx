@@ -9,7 +9,7 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTML
 import type { FailureNotice } from './conflicts'
 
 const CONTROL =
-  'w-full  border border-line-strong bg-surface-2 px-2.5 py-1.5 text-sm ' +
+  'w-full border border-line-strong bg-surface-2 px-2.5 py-1.5 text-sm ' +
   'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)] ' +
   'disabled:cursor-not-allowed disabled:opacity-60'
 
