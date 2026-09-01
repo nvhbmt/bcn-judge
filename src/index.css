@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary: #2b4fbf;
+  --color-primary-soft: #e3e9fa;
+  --color-ac: #1e8e5a;
+  --color-wa: #c63b3b;
+  --color-tle: #b7791f;
+  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: #f4f6f9;
+  color: #1a2233;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #0f1319;
+    color: #e4e9f1;
+  }
+}
+
+/* Vạch chia kéo được (FR-E1) — con trỏ phải nói rõ nó kéo được. */
+.split-handle {
+  cursor: col-resize;
+  touch-action: none;
+}
+.split-handle-h {
+  cursor: row-resize;
+  touch-action: none;
+}
