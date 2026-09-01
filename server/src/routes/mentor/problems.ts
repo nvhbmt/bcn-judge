@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { createHash } from 'node:crypto'
 import type { AuthUser } from '../../auth/session'
 import { db, q, qt, tx } from '../../db/pool'
-import { enqueue } from '../../judge/queue'
+import { enqueue, enqueueRejudgeForProblem } from '../../judge/queue'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { audit } from '../../lib/audit'
 import { parseBody } from '../../lib/http'
@@ -56,9 +56,12 @@ const problemSchema = z.object({
 
 mentorProblemRoutes.get('/', async (c) => {
   const me = c.get('user')
-  const rows = await q<{ id: string; title: string; scope_course_id: string | null; testcases: number }>(sql`
-    SELECT p.id, p.title, p.scope_course_id, p.difficulty, p.tags, p.testcase_rev,
-           p.validated_testcase_rev, p.updated_at,
+  // camelCase như route /:id — hai route cùng tài nguyên mà khác quy ước đặt tên
+  // là cái bẫy client phải nhớ, không phải lựa chọn thiết kế.
+  const rows = await q(sql`
+    SELECT p.id, p.title, p.scope_course_id AS "scopeCourseId", p.difficulty, p.tags,
+           p.testcase_rev AS "testcaseRev", p.validated_testcase_rev AS "validatedTestcaseRev",
+           p.updated_at AS "updatedAt",
            (SELECT count(*)::int FROM testcases t WHERE t.problem_id = p.id) AS testcases
     FROM problems p
     WHERE p.deleted_at IS NULL AND (
@@ -152,6 +155,13 @@ mentorProblemRoutes.patch('/:id', async (c) => {
       solution_source = COALESCE(${d.solutionSource ?? null}, solution_source),
       solution_visibility = COALESCE(${d.solutionVisibility ?? null}, solution_visibility),
       allowed_language_ids = COALESCE(${d.allowedLanguageIds ?? null}, allowed_language_ids),
+      -- Năm cột dưới đây từng bị zod cho qua rồi UPDATE bỏ quên: dữ liệu mất im
+      -- lặng còn audit thì ghi như đã đổi (agent UI phát hiện). FR-D1 bắt buộc tags.
+      tags = COALESCE(${d.tags ?? null}::text[], tags),
+      examples = COALESCE(${d.examples ? JSON.stringify(d.examples) : null}::jsonb, examples),
+      starter_code = COALESCE(${d.starterCode ? JSON.stringify(d.starterCode) : null}::jsonb, starter_code),
+      float_eps = COALESCE(${d.floatEps ?? null}, float_eps),
+      scope_course_id = COALESCE(${d.scopeCourseId ?? null}, scope_course_id),
       updated_at = now()
     WHERE id = ${problemId}
   `)
@@ -236,7 +246,10 @@ mentorProblemRoutes.post('/:id/testcases/zip', async (c) => {
     if (!(file instanceof File)) return errors.badRequest(c, 'Thiếu file zip (trường "file").')
     zipBuffer = Buffer.from(await file.arrayBuffer())
     generate = form.get('generate') === 'true'
-    sampleCount = Number(form.get('sampleCount') ?? 0)
+    // Kẹp cứng: giá trị âm/NaN làm mọi test thành ẩn, còn giá trị lớn biến TOÀN BỘ
+    // testcase thành mẫu — tức lộ sạch bộ test cho member (NFR-2). Không tin client.
+    const rawSampleCount = Number(form.get('sampleCount') ?? 0)
+    sampleCount = Number.isFinite(rawSampleCount) ? Math.max(0, Math.floor(rawSampleCount)) : 0
   } catch {
     return errors.badRequest(c, 'Không đọc được form tải lên.')
   }
@@ -256,10 +269,11 @@ mentorProblemRoutes.post('/:id/testcases/zip', async (c) => {
 
   await tx(async (t) => {
     await t.execute(sql`DELETE FROM testcases WHERE problem_id = ${problemId}`)
+    const sampleLimit = Math.min(sampleCount, Math.max(0, parsed.testcases.length - 1))
     for (const tc of parsed.testcases) {
       // `sampleCount` testcase đầu là MẪU (member thấy được), còn lại ẩn — đúng
-      // luồng US-2: tải zip rồi đánh dấu hai cái đầu là mẫu.
-      const kind = tc.position <= sampleCount ? 'sample' : 'hidden'
+      // luồng US-2. Luôn chừa ít nhất một testcase ẩn.
+      const kind = tc.position <= sampleLimit ? 'sample' : 'hidden'
       await t.execute(sql`
         INSERT INTO testcases (problem_id, position, kind, weight, input, expected,
                                input_bytes, expected_bytes, input_sha256)
@@ -271,8 +285,9 @@ mentorProblemRoutes.post('/:id/testcases/zip', async (c) => {
     await t.execute(sql`UPDATE problems SET testcase_rev = testcase_rev + 1, updated_at = now() WHERE id = ${problemId}`)
   })
 
+  const sampleLimitApplied = Math.min(sampleCount, Math.max(0, parsed.testcases.length - 1))
   await audit(me.id, 'problem.testcases.zip', 'problem', problemId, null, { count: parsed.testcases.length })
-  return ok(c, { count: parsed.testcases.length, sampleCount, warnings: parsed.warnings })
+  return ok(c, { count: parsed.testcases.length, sampleCount: sampleLimitApplied, warnings: parsed.warnings })
 })
 
 /**
@@ -305,4 +320,90 @@ mentorProblemRoutes.post('/:id/validate', async (c) => {
   })
   if (!result.ok) return errors.badRequest(c, result.message, { code: result.code })
   return created(c, { id: result.id })
+})
+
+/**
+ * FR-D6 / US-2: kết quả một lượt validate, qua serializer MENTOR.
+ *
+ * Đường /api/member/submissions/:id đi qua toMemberResult nên tước diff của
+ * testcase ẩn — đúng cho member, nhưng làm tiêu chí US-2 ("báo rõ testcase 7 kèm
+ * diff") không đạt được. Route này là đường mentor cho đúng lượt validate của
+ * chính bài mình quản.
+ */
+mentorProblemRoutes.get('/:id/validate/:submissionId', async (c) => {
+  const me = c.get('user')
+  const problemId = c.req.param('id')
+  if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
+
+  const [row] = await q<{ id: string; status: string; verdict: string | null; attempt: number; compile_output: string | null }>(sql`
+    SELECT id, status, verdict, attempt, compile_output FROM submissions
+    WHERE id = ${c.req.param('submissionId')} AND problem_id = ${problemId} AND run_target = 'validate'
+  `)
+  if (!row) return errors.notFound(c, 'Không tìm thấy lượt kiểm.')
+
+  const results = await q(sql`
+    SELECT position, is_sample AS "isSample", verdict, time_ms AS "timeMs", memory_kb AS "memoryKb",
+           exit_code AS "exitCode", term_signal AS "termSignal", detail, stdout, stderr,
+           mentor_stdout AS "mentorStdout", first_diff_line AS "firstDiffLine"
+    FROM submission_results WHERE submission_id = ${row.id} AND attempt = ${row.attempt}
+    ORDER BY position
+  `)
+  return ok(c, { id: row.id, status: row.status, verdict: row.verdict, compileOutput: row.compile_output, results })
+})
+
+/**
+ * Nội dung ĐẦY ĐỦ của một testcase — bản xem trước ở route /:id cắt 2 KB, mà
+ * PUT lại thay bằng đúng thứ client gửi: sửa vòng qua bản cắt là mất dữ liệu.
+ */
+mentorProblemRoutes.get('/:id/testcases/:testcaseId', async (c) => {
+  const me = c.get('user')
+  const problemId = c.req.param('id')
+  if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
+  const [row] = await q<{ id: string; position: number; kind: string; weight: number; input: Buffer; expected: Buffer | null }>(sql`
+    SELECT id, position, kind, weight, input, expected FROM testcases
+    WHERE id = ${c.req.param('testcaseId')} AND problem_id = ${problemId}
+  `)
+  if (!row) return errors.notFound(c, 'Không tìm thấy testcase.')
+  return ok(c, {
+    id: row.id,
+    position: row.position,
+    kind: row.kind,
+    weight: row.weight,
+    input: row.input.toString('utf8'),
+    expected: row.expected?.toString('utf8') ?? null,
+  })
+})
+
+/**
+ * FR-D9: chấm lại toàn bộ bài nộp của một bài sau khi sửa testcase.
+ * Kết quả cũ được giữ nguyên trong lịch sử (attempt nằm trong PK của
+ * submission_results), và bảng xếp hạng tính lại theo (ADR-9).
+ */
+mentorProblemRoutes.post('/:id/rejudge', async (c) => {
+  const me = c.get('user')
+  const problemId = c.req.param('id')
+  if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
+  const body = await parseBody(c, z.object({ confirm: z.boolean().optional(), reason: z.string().max(200).optional() }))
+  if (!body.ok) return body.response
+
+  const [count] = await q<{ n: number }>(sql`
+    SELECT count(*)::int AS n FROM submissions
+    WHERE problem_id = ${problemId} AND kind = 'submit' AND status = 'done'
+  `)
+  const total = count?.n ?? 0
+  if (total === 0) return ok(c, { queued: 0 })
+
+  // Chấm lại đổi điểm của người khác — bắt xác nhận, đừng để lỡ tay.
+  if (!body.data.confirm) {
+    return errors.conflict(
+      c,
+      'rejudge_confirm_required',
+      `Sẽ chấm lại ${total} bài nộp và điểm có thể thay đổi. Xác nhận để tiếp tục.`,
+      { total },
+    )
+  }
+
+  const queued = await enqueueRejudgeForProblem(problemId, me.id, body.data.reason ?? 'rejudge:testcase_rev')
+  await audit(me.id, 'problem.rejudge', 'problem', problemId, null, { queued })
+  return ok(c, { queued })
 })

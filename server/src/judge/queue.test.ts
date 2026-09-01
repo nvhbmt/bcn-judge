@@ -17,9 +17,23 @@ import {
   makeUser,
   resetDb,
   setupDb,
+  assignMentor,
   type TestUser,
 } from '../testing/harness'
-import { claimNext, enqueue, finish, heartbeat, purgeOld, queueStats, reapStale } from './queue'
+import {
+  claimNext,
+  claimRejudge,
+  enqueue,
+  enqueueRejudgeForProblem,
+  finish,
+  finishRejudge,
+  heartbeat,
+  purgeOld,
+  queueStats,
+  reapRejudge,
+  reapStale,
+  rejudgeQueueDepth,
+} from './queue'
 
 const DOCKER = process.env.DOCKER === '1'
 
@@ -42,6 +56,7 @@ describe.skipIf(!INTEGRATION)('hàng đợi chấm bài', () => {
     mentor = await makeUser('mentor')
     member = await makeUser('member')
     const course = await makeCourse(mentor.id)
+    await assignMentor(course.id, mentor.id)
     await enroll(course.id, member.id)
     problemId = await makeProblem(mentor.id)
     await addTestcases(problemId, [
@@ -184,6 +199,123 @@ describe.skipIf(!INTEGRATION)('hàng đợi chấm bài', () => {
     expect(purged.runs).toBe(1)
     const [remaining] = await q<{ n: number }>(sql`SELECT count(*)::int AS n FROM submissions`)
     expect(remaining?.n).toBe(1)
+  })
+
+  describe('chấm lại (FR-D9)', () => {
+    async function doneSubmission(verdict = 'WA', passed = 1) {
+      const [row] = await q<{ id: string }>(sql`
+        INSERT INTO submissions (kind, user_id, problem_id, item_id, language_id, source, source_bytes,
+                                 status, verdict, passed_weight, total_weight, attempt, testcase_rev)
+        VALUES ('submit', ${member.id}, ${problemId}, ${itemId}, 'c11', ${AC_SOURCE}, 100,
+                'done', ${verdict}, ${passed}, 2, 1, 1)
+        RETURNING id
+      `)
+      await q(sql`
+        INSERT INTO submission_results (submission_id, attempt, position, is_sample, verdict)
+        VALUES (${row!.id}, 1, 1, true, ${verdict})
+      `)
+      return row!.id
+    }
+
+    it('chỉ xếp hàng bài nộp đã chấm xong, không đụng run hay bài đang chờ', async () => {
+      const done = await doneSubmission()
+      await enqueue({ kind: 'run', userId: member.id, problemId, itemId, languageId: 'c11', source: AC_SOURCE, runTarget: 'samples' })
+      await submit()
+
+      const queued = await enqueueRejudgeForProblem(problemId, mentor.id, 'test')
+      expect(queued).toBe(1)
+      expect(await rejudgeQueueDepth()).toBe(1)
+      const [row] = await q<{ submission_id: string }>(sql`SELECT submission_id FROM rejudge_queue`)
+      expect(row?.submission_id).toBe(done)
+    })
+
+    it('KHÔNG nhận việc chấm lại khi còn bài nộp/chạy thử đang chờ', async () => {
+      await doneSubmission()
+      await enqueueRejudgeForProblem(problemId, mentor.id, 'test')
+      await submit() // có việc của member đang chờ
+      expect(await claimRejudge('w1')).toBeNull()
+    })
+
+    it('nhận việc khi rảnh, cấp shadow attempt = attempt hiện tại + 1', async () => {
+      const id = await doneSubmission()
+      await enqueueRejudgeForProblem(problemId, mentor.id, 'test')
+      const job = await claimRejudge('w1')
+      expect(job?.id).toBe(id)
+      expect(job?.shadowAttempt).toBe(2)
+      // Bài nộp KHÔNG rời trạng thái done — bảng xếp hạng không mất dòng.
+      const [row] = await q<{ status: string }>(sql`SELECT status FROM submissions WHERE id = ${id}`)
+      expect(row?.status).toBe('done')
+    })
+
+    it('chốt hạ: hoán đổi verdict, GIỮ kết quả cũ, ghi audit', async () => {
+      const id = await doneSubmission('WA', 1)
+      await enqueueRejudgeForProblem(problemId, mentor.id, 'rejudge:testcase_rev 1→2')
+      const job = await claimRejudge('w1')
+
+      const ok = await finishRejudge(id, 'w1', job!.shadowAttempt, {
+        verdict: 'AC', passedWeight: 2, totalWeight: 2, timeMsMax: 5, memoryKbMax: 1024,
+        compileOutput: '', judgeMs: 10, ieReason: null, testcaseRev: 2,
+        results: [{ position: 1, testcaseId: null, isSample: true, verdict: 'AC', timeMs: 5, memoryKb: 1024,
+                    exitCode: 0, termSignal: null, detail: null, stdout: null, stderr: null,
+                    mentorStdout: null, firstDiffLine: null }],
+      })
+      expect(ok).toBe(true)
+
+      const [after] = await q<{ verdict: string; attempt: number; status: string }>(sql`
+        SELECT verdict, attempt, status FROM submissions WHERE id = ${id}
+      `)
+      expect(after?.verdict).toBe('AC')
+      expect(after?.attempt).toBe(2)
+      expect(after?.status).toBe('done')
+
+      // FR-D9: kết quả TRƯỚC rejudge còn nguyên trong lịch sử.
+      const attempts = await q<{ attempt: number; verdict: string }>(sql`
+        SELECT attempt, verdict FROM submission_results WHERE submission_id = ${id} ORDER BY attempt
+      `)
+      expect(attempts.map((a) => `${a.attempt}:${a.verdict}`)).toEqual(['1:WA', '2:AC'])
+
+      const [audit] = await q<{ verdict_before: string; verdict_after: string; reason: string }>(sql`
+        SELECT verdict_before, verdict_after, reason FROM submission_score_audit WHERE submission_id = ${id}
+      `)
+      expect(audit?.verdict_before).toBe('WA')
+      expect(audit?.verdict_after).toBe('AC')
+      expect(audit?.reason).toContain('testcase_rev')
+      expect(await rejudgeQueueDepth()).toBe(0)
+    })
+
+    it('fencing: worker khác không chốt hạ hộ được', async () => {
+      const id = await doneSubmission()
+      await enqueueRejudgeForProblem(problemId, mentor.id, 'test')
+      const job = await claimRejudge('w1')
+      const stolen = await finishRejudge(id, 'w2', job!.shadowAttempt, {
+        verdict: 'AC', passedWeight: 2, totalWeight: 2, timeMsMax: 1, memoryKbMax: 1,
+        compileOutput: '', judgeMs: 1, ieReason: null, testcaseRev: 2, results: [],
+      })
+      expect(stolen).toBe(false)
+    })
+
+    it('reaper nhả claim của worker đã chết', async () => {
+      await doneSubmission()
+      await enqueueRejudgeForProblem(problemId, mentor.id, 'test')
+      await claimRejudge('worker-da-chet')
+      await q(sql`UPDATE rejudge_queue SET claimed_at = now() - interval '10 minutes'`)
+
+      expect(await reapRejudge()).toBe(1)
+      const job = await claimRejudge('w2')
+      expect(job).not.toBeNull() // nhặt lại được, không mất việc
+    })
+
+    it('API: chấm lại đòi xác nhận vì nó đổi điểm của người khác', async () => {
+      await doneSubmission()
+      const first = await call(`/api/mentor/problems/${problemId}/rejudge`, { as: mentor, body: {} })
+      expect(first.status).toBe(409)
+      expect(first.body.error.code).toBe('rejudge_confirm_required')
+      expect(first.body.error.details.total).toBe(1)
+
+      const confirmed = await call(`/api/mentor/problems/${problemId}/rejudge`, { as: mentor, body: { confirm: true } })
+      expect(confirmed.status).toBe(200)
+      expect(confirmed.body.data.queued).toBe(1)
+    })
   })
 
   describe.skipIf(!DOCKER)('chấm thật qua hàng đợi (Docker)', () => {

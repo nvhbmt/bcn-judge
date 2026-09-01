@@ -32,6 +32,8 @@ const COMPILE_STDERR_BYTES = 64 * 1024
 /** stdout/stderr lưu cho testcase mẫu (ADR-10). */
 const SAMPLE_STDOUT_BYTES = 64 * 1024
 const SAMPLE_STDERR_BYTES = 8 * 1024
+/** Chỉ mentor đọc được — dùng cho diff của FR-D6/US-2 (§2.6). */
+const MENTOR_STDOUT_BYTES = 4 * 1024
 
 function ceilSec(ms: number): number {
   return Math.max(1, Math.ceil(ms / 1000))
@@ -192,9 +194,12 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
       exitCode: decision.exitCode,
       termSignal: decision.termSignal,
       detail: decision.detail,
-      // ADR-10: stdout/stderr chỉ ghi cho testcase MẪU. Test ẩn để null theo cấu trúc.
+      // ADR-10: cột stdout/stderr có thể được serve cho member nên CHỈ ghi cho
+      // testcase mẫu — test ẩn để null theo cấu trúc, không phải theo trí nhớ.
       stdout: tc.isSample ? (outcome?.stdout.subarray(0, SAMPLE_STDOUT_BYTES).toString('utf8') ?? null) : null,
       stderr: tc.isSample ? (outcome?.stderr.slice(0, SAMPLE_STDERR_BYTES) ?? null) : null,
+      // Bản sao RIÊNG cho mentor (serializer member khai kiểu never cho cột này).
+      mentorStdout: outcome?.stdout.subarray(0, MENTOR_STDOUT_BYTES).toString('utf8') ?? null,
       firstDiffLine: decision.firstDiffLine,
     }
     results.push(result)

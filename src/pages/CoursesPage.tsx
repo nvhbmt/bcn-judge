@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { LogOut } from 'lucide-react'
+import { LogOut, PencilRuler } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button, EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
@@ -21,9 +21,21 @@ export function CoursesPage() {
           <h1 className="text-xl font-semibold">Khoá học của tôi</h1>
           <p className="text-sm text-slate-500">{me?.displayName}</p>
         </div>
-        <Button onClick={() => void logout()}>
-          <LogOut size={16} /> Đăng xuất
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Lối vào duy nhất tới màn soạn bài (FR-D). Trang chủ của mentor cũng là
+              trang này, nên link phải đứng đây; member không thấy vì route cũng không có. */}
+          {me && me.role !== 'member' ? (
+            <Link
+              to="/mentor/bai-tap"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+            >
+              <PencilRuler size={16} /> Soạn bài
+            </Link>
+          ) : null}
+          <Button onClick={() => void logout()}>
+            <LogOut size={16} /> Đăng xuất
+          </Button>
+        </div>
       </header>
 
       {isLoading ? <Spinner /> : null}

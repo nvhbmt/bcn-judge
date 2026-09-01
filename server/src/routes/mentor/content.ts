@@ -29,10 +29,13 @@ mentorContentRoutes.get('/:courseId/syllabus', async (c) => {
     item_position: number | null
     item_status: string | null
     problem_id: string | null
+    lesson_body_md: string | null
+    visible_from: string | null
   }>(sql`
     SELECT s.id AS section_id, s.title AS section_title, s.position AS section_position,
            i.id AS item_id, i.title AS item_title, i.kind AS item_kind,
-           i.position AS item_position, i.status AS item_status, i.problem_id
+           i.position AS item_position, i.status AS item_status, i.problem_id,
+           i.lesson_body_md, i.visible_from
     FROM sections s
     LEFT JOIN items i ON i.section_id = s.id
     WHERE s.course_id = ${courseId}
@@ -52,6 +55,8 @@ export function groupSyllabus(
     item_position: number | null
     item_status: string | null
     problem_id: string | null
+    lesson_body_md?: string | null
+    visible_from?: string | null
   }[],
 ) {
   const sections = new Map<string, { id: string; title: string; position: number; items: unknown[] }>()
@@ -69,6 +74,8 @@ export function groupSyllabus(
         position: row.item_position,
         status: row.item_status,
         problemId: row.problem_id,
+        lessonBodyMd: row.lesson_body_md ?? null,
+        visibleFrom: row.visible_from ?? null,
       })
     }
   }
@@ -185,7 +192,9 @@ mentorContentRoutes.patch('/:courseId/items/:itemId', async (c) => {
   const [row] = await q<{ id: string }>(sql`
     UPDATE items SET
       title = COALESCE(${d.title ?? null}, title),
-      lesson_body_md = COALESCE(${d.lessonBodyMd ?? null}, lesson_body_md),
+      -- undefined = giữ nguyên; chuỗi rỗng = XOÁ. COALESCE đơn thuần thì không
+      -- bao giờ xoá được nội dung đã viết (mismatch #4 do agent UI phát hiện).
+      lesson_body_md = ${d.lessonBodyMd === undefined ? sql`lesson_body_md` : sql`NULLIF(${d.lessonBodyMd}, '')`},
       status = COALESCE(${d.status ?? null}, status),
       visible_from = ${d.visibleFrom === undefined ? sql`visible_from` : sql`${d.visibleFrom}::timestamptz`},
       section_id = COALESCE(${d.sectionId ?? null}, section_id),

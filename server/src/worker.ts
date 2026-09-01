@@ -12,12 +12,16 @@ import { closePool, db, q } from './db/pool'
 import type { LanguageConfig } from './judge/languages'
 import {
   claimNext,
+  claimRejudge,
   finish,
+  finishRejudge,
   heartbeat,
   purgeOld,
+  reapRejudge,
   reapStale,
   requeue,
   type ClaimedSubmission,
+  type RejudgeJob,
 } from './judge/queue'
 import { judgeSubmission } from './judge/runner'
 import { reapOrphanSandboxes } from './judge/sandbox'
@@ -156,6 +160,20 @@ async function loadJob(job: ClaimedSubmission): Promise<JobContext> {
   }
 }
 
+const MENTOR_STDOUT_CAP = 4096
+
+/** Ai được xem stdout nào — xem ADR-10; giới hạn 4 KB mỗi testcase. */
+function mentorStdoutFor(
+  result: { position: number; isSample: boolean; verdict: string; stdout: string | null },
+  job: ClaimedSubmission,
+  all: { position: number; isSample: boolean; verdict: string }[],
+): string | null {
+  if (result.verdict === 'AC' || !result.stdout) return null
+  if (job.runTarget === 'validate') return result.stdout.slice(0, MENTOR_STDOUT_CAP)
+  const firstHiddenFail = all.find((r) => !r.isSample && r.verdict !== 'AC')
+  return firstHiddenFail?.position === result.position ? result.stdout.slice(0, MENTOR_STDOUT_CAP) : null
+}
+
 async function runJob(job: ClaimedSubmission, slot: number): Promise<void> {
   const beat = setInterval(() => {
     void heartbeat(job.id, WORKER_ID, job.attempt)
@@ -227,8 +245,10 @@ async function runJob(job: ClaimedSubmission, slot: number): Promise<void> {
         // ADR-10: stdout/stderr chỉ ghi cho testcase MẪU — kỷ luật không-bao-giờ-ghi.
         stdout: r.stdout,
         stderr: r.stderr,
-        // Mentor thấy stdout của testcase ẩn FAIL ĐẦU TIÊN, không phải mọi test.
-        mentorStdout: null,
+        // ADR-10: với run VALIDATE mentor thấy stdout của MỌI testcase fail (đó là
+        // cách US-2 "báo rõ testcase 7 kèm diff" thành hiện thực); với submit chỉ
+        // testcase ẩn FAIL ĐẦU TIÊN. Cột này chỉ mentor đọc được (serializer).
+        mentorStdout: mentorStdoutFor(r, job, outcome.results),
         firstDiffLine: r.firstDiffLine,
       })),
     })
@@ -279,6 +299,63 @@ export async function processOneJob(slot = 0): Promise<ClaimedSubmission | null>
   return job
 }
 
+/**
+ * Chấm lại một bài nộp (FR-D9). Chạy như việc NỀN: `claimRejudge` chỉ trả việc
+ * khi cả hai băng run/submit trống, nên chấm lại không bao giờ chen trước member.
+ * Bài nộp không rời `status='done'` suốt quá trình — bảng xếp hạng không mất dòng.
+ */
+export async function processOneRejudge(slot = 0): Promise<RejudgeJob | null> {
+  const job = await claimRejudge(WORKER_ID)
+  if (!job) return null
+
+  try {
+    const ctx = await loadJob(job)
+    const outcome = await judgeSubmission({
+      language: ctx.language,
+      source: ctx.source,
+      testcases: ctx.testcases,
+      limits: ctx.limits,
+      labels: { 'bcnjudge.rejudge': job.id, 'bcnjudge.worker': WORKER_ID },
+    })
+    const ok = await finishRejudge(job.id, WORKER_ID, job.shadowAttempt, {
+      verdict: outcome.verdict,
+      passedWeight: outcome.passedWeight,
+      totalWeight: outcome.totalWeight,
+      timeMsMax: outcome.timeMsMax,
+      memoryKbMax: outcome.memoryKbMax,
+      compileOutput: outcome.compileOutput,
+      judgeMs: outcome.judgeMs,
+      ieReason: outcome.ieReason,
+      testcaseRev: ctx.testcaseRev,
+      results: outcome.results.map((r) => ({
+        position: r.position,
+        testcaseId: null,
+        isSample: r.isSample,
+        verdict: r.verdict,
+        timeMs: r.timeMs,
+        memoryKb: r.memoryKb,
+        exitCode: r.exitCode,
+        termSignal: r.termSignal,
+        detail: r.detail,
+        stdout: r.stdout,
+        stderr: r.stderr,
+        mentorStdout: null,
+        firstDiffLine: r.firstDiffLine,
+      })),
+    })
+    if (ok) {
+      console.log(`[worker:${slot}] chấm lại ${job.id} → ${outcome.verdict}`)
+      if (job.contestId) await emit(`contest:${job.contestId}`, { kind: 'standings.changed' })
+    }
+    return job
+  } catch (err) {
+    console.error(`[worker:${slot}] chấm lại ${job.id} lỗi:`, err)
+    // Nhả claim để reaper hoặc lượt sau nhặt lại — không mất việc.
+    await reapRejudge()
+    return job
+  }
+}
+
 async function slotLoop(slot: number): Promise<void> {
   while (!stopping) {
     let job: ClaimedSubmission | null = null
@@ -288,7 +365,9 @@ async function slotLoop(slot: number): Promise<void> {
       console.error(`[worker:${slot}] claim lỗi:`, err)
     }
     if (!job) {
-      await sleep(IDLE_POLL_MS)
+      // Rảnh mới đụng tới hàng đợi chấm lại (§2.6).
+      const rejudged = await processOneRejudge(slot).catch(() => null)
+      if (!rejudged) await sleep(IDLE_POLL_MS)
       continue
     }
     if (stopping) {
@@ -359,6 +438,7 @@ export async function startWorker(): Promise<void> {
   const beat = setInterval(() => {
     void db.execute(sql`UPDATE workers SET last_seen_at = now() WHERE id = ${WORKER_ID}`)
     void reapStale()
+    void reapRejudge()
   }, 10_000)
 
   const hourly = setInterval(() => {

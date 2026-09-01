@@ -19,6 +19,7 @@ adminCourseRoutes.get('/', async (c) => {
       id: courses.id,
       code: courses.code,
       name: courses.name,
+      descriptionMd: courses.descriptionMd,
       status: courses.status,
       selfEnroll: courses.selfEnroll,
       createdAt: courses.createdAt,
@@ -113,12 +114,20 @@ adminCourseRoutes.delete('/:id/mentors/:userId', async (c) => {
 // ── Ghi danh (FR-B3) — dùng chung cho admin và mentor của khoá ─────────────
 
 export const enrollSchema = z.object({
-  /** Dán danh sách email; email không tồn tại được trả về để xử lý (US-1). */
-  emails: z.array(z.string().email()).min(1).max(1000),
+  /**
+   * Dán danh sách email. KHÔNG validate từng email bằng zod: US-1 là dán 40 dòng
+   * từ Excel, và một dòng lỗi định dạng mà 400 cả lô thì admin không biết dòng nào
+   * sai. Email không hợp lệ và email không tồn tại đều được TRẢ VỀ để admin sửa.
+   */
+  emails: z.array(z.string().min(1).max(320)).min(1).max(1000),
 })
 
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export async function enrollByEmails(courseId: string, emails: string[], actorId: string) {
-  const wanted = [...new Set(emails.map((e) => e.trim().toLowerCase()))]
+  const cleaned = [...new Set(emails.map((e) => e.trim().toLowerCase()).filter(Boolean))]
+  const invalid = cleaned.filter((e) => !EMAIL_SHAPE.test(e))
+  const wanted = cleaned.filter((e) => EMAIL_SHAPE.test(e))
   const found = await db
     .select({ id: users.id, email: users.email, role: users.role })
     .from(users)
@@ -146,6 +155,7 @@ export async function enrollByEmails(courseId: string, emails: string[], actorId
   return {
     enrolled: enrollable.length,
     missing,
+    invalid,
     notMember: found.filter((u) => u.role !== 'member').map((u) => u.email),
   }
 }

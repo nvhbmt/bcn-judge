@@ -77,15 +77,54 @@ mentorContestRoutes.post('/', async (c) => {
   return created(c, row)
 })
 
+/**
+ * Chi tiết một contest KÈM danh sách bài hiện tại.
+ *
+ * Thiếu route này thì editor phải mò contest trong danh sách (không có
+ * descriptionMd/sequential/scoring) và picker luôn khởi đầu rỗng, trong khi
+ * `PUT /:id/problems` thay thế cả bộ — tức mở form ra rồi lưu là mất bài.
+ */
+mentorContestRoutes.get('/:id', async (c) => {
+  const contestId = c.req.param('id')
+  if (!(await canEdit(c, contestId))) return errors.notFound(c, 'Không tìm thấy contest.')
+
+  const [contest] = await q(sql`
+    SELECT id, title, description_md AS "descriptionMd", course_id AS "courseId",
+           start_at AS "startAt", end_at AS "endAt", status, scoring,
+           penalty_minutes AS "penaltyMinutes", sequential, freeze_minutes AS "freezeMinutes"
+    FROM contests WHERE id = ${contestId} AND deleted_at IS NULL
+  `)
+  if (!contest) return errors.notFound(c, 'Không tìm thấy contest.')
+
+  const problems = await q(sql`
+    SELECT cp.id, cp.problem_id AS "problemId", cp.position, cp.label, cp.max_score AS "maxScore",
+           p.title,
+           EXISTS (SELECT 1 FROM submissions s WHERE s.contest_problem_id = cp.id) AS "hasSubmissions"
+    FROM contest_problems cp JOIN problems p ON p.id = cp.problem_id
+    WHERE cp.contest_id = ${contestId} ORDER BY cp.position
+  `)
+  return ok(c, { ...contest, problems })
+})
+
 mentorContestRoutes.patch('/:id', async (c) => {
   if (!(await canEdit(c, c.req.param('id')))) return errors.notFound(c, 'Không tìm thấy contest.')
   const body = await parseBody(c, contestSchema.partial().extend({ confirm: z.boolean().optional() }))
   if (!body.ok) return body.response
   const d = body.data
 
+  // Đổi phạm vi contest (khoá ↔ toàn CLB) là quyết định của admin, không phải
+  // mentor một khoá. Trước đây zod cho qua rồi UPDATE bỏ quên — im lặng không đổi.
+  if (d.courseId !== undefined && c.get('user').role !== 'admin') {
+    return errors.forbidden(c, 'Chỉ admin đổi được phạm vi của contest.')
+  }
+  if (d.startAt && d.endAt && new Date(d.endAt) <= new Date(d.startAt)) {
+    return errors.badRequest(c, 'Giờ kết thúc phải sau giờ bắt đầu.')
+  }
+
   await q(sql`
     UPDATE contests SET
       title = COALESCE(${d.title ?? null}, title),
+      course_id = ${d.courseId === undefined ? sql`course_id` : sql`${d.courseId}`},
       description_md = COALESCE(${d.descriptionMd ?? null}, description_md),
       start_at = COALESCE(${d.startAt ?? null}::timestamptz, start_at),
       end_at = COALESCE(${d.endAt ?? null}::timestamptz, end_at),
@@ -195,6 +234,9 @@ mentorContestRoutes.get('/:id/stats', async (c) => {
     LEFT JOIN submissions s ON s.contest_problem_id = cp.id AND s.kind = 'submit' AND s.status = 'done'
     WHERE cp.contest_id = ${contestId}
     GROUP BY cp.id, p.title, s.verdict
+    -- Bỏ dòng verdict NULL do LEFT JOIN sinh ra: bài chưa ai nộp không được đếm
+    -- thành "1 bài nộp" (agent UI phát hiện).
+    HAVING s.verdict IS NOT NULL
     ORDER BY cp.id
   `)
 

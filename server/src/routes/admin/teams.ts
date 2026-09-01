@@ -27,6 +27,20 @@ adminTeamRoutes.get('/', async (c) => {
   return ok(c, rows)
 })
 
+/** Danh sách thành viên — thiếu endpoint này thì admin không thấy ai đang ở team nào. */
+adminTeamRoutes.get('/:id/members', async (c) => {
+  const rows = await q(sql`
+    SELECT u.id, u.email, u.display_name AS "displayName",
+           (u.id = t.leader_id) AS "isLeader", tm.added_at AS "addedAt"
+    FROM team_members tm
+    JOIN users u ON u.id = tm.user_id
+    JOIN teams t ON t.id = tm.team_id
+    WHERE tm.team_id = ${c.req.param('id')}
+    ORDER BY (u.id = t.leader_id) DESC, u.display_name
+  `)
+  return ok(c, rows)
+})
+
 const teamSchema = z.object({
   name: z.string().min(1).max(120),
   descriptionMd: z.string().max(20_000).optional(),

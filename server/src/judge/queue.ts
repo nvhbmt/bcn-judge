@@ -89,11 +89,16 @@ export async function enqueue(req: EnqueueRequest): Promise<EnqueueResult> {
         }
       }
     } else {
-      // Lượt chạy thử mới THAY THẾ lượt đang chờ của chính mình (§4.2).
-      await t.execute(sql`
-        DELETE FROM submissions
-        WHERE user_id = ${req.userId} AND kind = 'run' AND status = 'pending'
-      `)
+      // Lượt chạy thử mới THAY THẾ lượt đang chờ của chính mình (§4.2) — nhưng
+      // KHÔNG đụng lượt validate: hai lần bấm "kiểm tra" mà lần đầu bị xoá thì nó
+      // không bao giờ tới `done` và mentor chờ mãi (agent UI phát hiện).
+      if (req.runTarget !== 'validate') {
+        await t.execute(sql`
+          DELETE FROM submissions
+          WHERE user_id = ${req.userId} AND kind = 'run' AND status = 'pending'
+            AND (run_target IS NULL OR run_target <> 'validate')
+        `)
+      }
     }
 
     const [row] = await qt<{ id: string; seq: number }>(t, sql`
@@ -353,4 +358,163 @@ export async function queueStats(): Promise<{
     running: Number(row?.running ?? 0),
     oldestPendingSubmitSec: row?.oldest === null || row?.oldest === undefined ? null : Number(row.oldest),
   }
+}
+
+// ── Chấm lại (FR-D9, ADR-9, §2.6) ────────────────────────────────────────────
+
+export interface RejudgeJob extends ClaimedSubmission {
+  shadowAttempt: number
+}
+
+/** Xếp hàng chấm lại. Không đụng `submissions` — bài vẫn ở `done` suốt quá trình. */
+export async function enqueueRejudge(
+  submissionIds: string[],
+  actorId: string,
+  reason: string,
+): Promise<number> {
+  if (submissionIds.length === 0) return 0
+  const rows = await q<{ submission_id: string }>(sql`
+    INSERT INTO rejudge_queue (submission_id, actor, reason)
+    SELECT id, ${actorId}, ${reason} FROM submissions
+    WHERE id = ANY (${submissionIds}) AND kind = 'submit' AND status = 'done'
+    ON CONFLICT (submission_id) DO NOTHING
+    RETURNING submission_id
+  `)
+  return rows.length
+}
+
+/** Mọi bài nộp của một bài tập — dùng khi mentor sửa testcase (FR-D9). */
+export async function enqueueRejudgeForProblem(problemId: string, actorId: string, reason: string): Promise<number> {
+  const rows = await q<{ submission_id: string }>(sql`
+    INSERT INTO rejudge_queue (submission_id, actor, reason)
+    SELECT id, ${actorId}, ${reason} FROM submissions
+    WHERE problem_id = ${problemId} AND kind = 'submit' AND status = 'done'
+    ON CONFLICT (submission_id) DO NOTHING
+    RETURNING submission_id
+  `)
+  return rows.length
+}
+
+/**
+ * Nhận một việc chấm lại — CHỈ khi cả hai băng run/submit đều trống (§2.6):
+ * chấm lại là việc nền, không bao giờ được chen trước bài nộp của member.
+ *
+ * `shadow_attempt` cấp NGAY tại claim nên hai slot không bao giờ va PK
+ * `(submission_id, attempt, position)`. Transaction ngắn — không giữ row lock
+ * suốt lượt chấm, và KHÔNG delete-on-claim để worker chết còn nhặt lại được.
+ */
+export async function claimRejudge(workerId: string): Promise<RejudgeJob | null> {
+  const [busy] = await q<{ busy: boolean }>(sql`
+    SELECT EXISTS (SELECT 1 FROM submissions WHERE status IN ('pending', 'running')) AS busy
+  `)
+  if (busy?.busy) return null
+
+  const rows = await q<RejudgeJob & { shadow_attempt: number; queued_ms: number }>(sql`
+    WITH candidate AS (
+      SELECT rq.submission_id
+      FROM rejudge_queue rq
+      WHERE rq.claimed_by IS NULL
+      ORDER BY rq.requested_at
+      FOR UPDATE SKIP LOCKED
+      LIMIT 1
+    )
+    UPDATE rejudge_queue rq
+    SET claimed_by = ${workerId}, claimed_at = now(),
+        shadow_attempt = (SELECT max(attempt) + 1 FROM submissions s WHERE s.id = rq.submission_id)
+    FROM candidate c
+    JOIN submissions s ON s.id = c.submission_id
+    WHERE rq.submission_id = c.submission_id
+    RETURNING s.id, s.kind, s.user_id AS "userId", s.problem_id AS "problemId",
+              s.language_id AS "languageId", s.source, s.custom_input AS "customInput",
+              s.run_target AS "runTarget", s.contest_id AS "contestId",
+              rq.shadow_attempt, 0 AS queued_ms
+  `)
+  const row = rows[0]
+  if (!row) return null
+  return { ...row, attempt: Number(row.shadow_attempt), shadowAttempt: Number(row.shadow_attempt), queuedMs: 0 }
+}
+
+/**
+ * Chốt hạ một lượt chấm lại: ghi kết quả shadow, hoán đổi verdict/điểm và ghi
+ * audit TRONG CÙNG MỘT transaction, rồi xoá dòng hàng đợi.
+ *
+ * Fencing dùng `rejudge_queue.claimed_by`, KHÔNG dùng predicate `status='running'`
+ * của attempt thường — bài đang rejudge nằm ở `done`, áp predicate kia thì mọi
+ * câu ghi khớp 0 hàng và chấm lại không bao giờ chạy được (§2.6 sửa vòng 2).
+ */
+export async function finishRejudge(
+  submissionId: string,
+  workerId: string,
+  shadowAttempt: number,
+  payload: FinishPayload,
+): Promise<boolean> {
+  return db.transaction(async (t) => {
+    const claimed = await qt<{ submission_id: string }>(t, sql`
+      SELECT submission_id FROM rejudge_queue
+      WHERE submission_id = ${submissionId} AND claimed_by = ${workerId} AND shadow_attempt = ${shadowAttempt}
+      FOR UPDATE
+    `)
+    if (claimed.length === 0) return false
+
+    for (const r of payload.results) {
+      await t.execute(sql`
+        INSERT INTO submission_results
+          (submission_id, attempt, position, testcase_id, is_sample, verdict, time_ms, memory_kb,
+           exit_code, term_signal, detail, stdout, stderr, mentor_stdout, first_diff_line)
+        VALUES
+          (${submissionId}, ${shadowAttempt}, ${r.position}, ${r.testcaseId}, ${r.isSample}, ${r.verdict},
+           ${r.timeMs}, ${r.memoryKb}, ${r.exitCode}, ${r.termSignal}, ${r.detail}, ${r.stdout},
+           ${r.stderr}, ${r.mentorStdout}, ${r.firstDiffLine})
+        ON CONFLICT (submission_id, attempt, position) DO NOTHING
+      `)
+    }
+
+    // Kết quả TRƯỚC rejudge tồn tại vĩnh viễn nhờ `attempt` nằm trong PK (FR-D9).
+    const [before] = await qt<{ verdict: string | null; passed_weight: number | null }>(t, sql`
+      SELECT verdict, passed_weight FROM submissions WHERE id = ${submissionId}
+    `)
+
+    await t.execute(sql`
+      UPDATE submissions
+      SET verdict = ${payload.verdict}, passed_weight = ${payload.passedWeight},
+          total_weight = ${payload.totalWeight}, time_ms_max = ${payload.timeMsMax},
+          memory_kb_max = ${payload.memoryKbMax}, compile_output = ${payload.compileOutput || null},
+          judge_ms = ${payload.judgeMs}, testcase_rev = ${payload.testcaseRev},
+          attempt = ${shadowAttempt}, finished_at = now()
+      WHERE id = ${submissionId}
+    `)
+
+    await t.execute(sql`
+      INSERT INTO submission_score_audit
+        (submission_id, verdict_before, verdict_after, passed_weight_before, passed_weight_after, reason, actor)
+      SELECT ${submissionId}, ${before?.verdict ?? null}, ${payload.verdict},
+             ${before?.passed_weight ?? null}, ${payload.passedWeight},
+             COALESCE(rq.reason, 'rejudge'), rq.actor
+      FROM rejudge_queue rq WHERE rq.submission_id = ${submissionId}
+    `)
+
+    await t.execute(sql`DELETE FROM rejudge_queue WHERE submission_id = ${submissionId}`)
+    return true
+  })
+}
+
+/** Nhả claim của worker đã chết — chấm lại không biến mất không dấu vết (§2.6). */
+export async function reapRejudge(): Promise<number> {
+  const rows = await q<{ submission_id: string }>(sql`
+    UPDATE rejudge_queue rq
+    SET claimed_by = NULL, claimed_at = NULL, shadow_attempt = NULL
+    WHERE rq.claimed_by IS NOT NULL
+      AND rq.claimed_at < now() - interval '5 minutes'
+      AND NOT EXISTS (
+        SELECT 1 FROM workers w
+        WHERE w.id = rq.claimed_by AND w.last_seen_at > now() - interval '60 seconds'
+      )
+    RETURNING submission_id
+  `)
+  return rows.length
+}
+
+export async function rejudgeQueueDepth(): Promise<number> {
+  const [row] = await q<{ n: number }>(sql`SELECT count(*)::int AS n FROM rejudge_queue`)
+  return row?.n ?? 0
 }

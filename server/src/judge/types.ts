@@ -65,6 +65,8 @@ export interface TestcaseResult {
   /** Chỉ ghi cho testcase mẫu — ADR-10 kỷ luật không-bao-giờ-ghi. */
   stdout: string | null
   stderr: string | null
+  /** Bản sao chỉ-mentor, dùng cho diff của validate (ADR-10). */
+  mentorStdout: string | null
   firstDiffLine: number | null
 }
 

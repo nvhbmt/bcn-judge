@@ -26,16 +26,18 @@ adminSystemRoutes.get('/languages', async (c) => {
 const languageSchema = z.object({
   id: z.string().min(1).max(40).regex(/^[a-z0-9]+$/, 'Id chỉ gồm chữ thường và số.'),
   name: z.string().min(1).max(60),
-  versionLabel: z.string().max(60).optional(),
+  // GET trả null cho các cột nullable và trả CHUỖI cho numeric (pg không tự ép).
+  // Schema phải nhận lại đúng thứ mình vừa trả ra, nếu không round-trip là 400.
+  versionLabel: z.string().max(60).nullable().optional(),
   image: z.string().min(1).max(200),
   sourceFilename: z.string().min(1).max(80),
   compileArgv: z.array(z.string()).nullable().optional(),
   runArgv: z.array(z.string()).min(1),
-  timeFactor: z.number().min(0.1).max(20).optional(),
-  memoryExtraMb: z.number().int().min(0).max(2048).optional(),
-  cmMode: z.string().max(40).optional(),
+  timeFactor: z.union([z.number(), z.string()]).transform(Number).pipe(z.number().min(0.1).max(20)).optional(),
+  memoryExtraMb: z.union([z.number(), z.string()]).transform(Number).pipe(z.number().int().min(0).max(2048)).optional(),
+  cmMode: z.string().max(40).nullable().optional(),
   enabled: z.boolean().optional(),
-  position: z.number().int().optional(),
+  position: z.number().int().nullable().optional(),
 })
 
 adminSystemRoutes.put('/languages/:id', async (c) => {

@@ -10,7 +10,10 @@ export async function parseBody<S extends z.ZodTypeAny>(
 ): Promise<{ ok: true; data: z.infer<S> } | { ok: false; response: Response }> {
   let raw: unknown
   try {
-    raw = await c.req.json()
+    const text = await c.req.text()
+    // POST không body là hợp lệ khi mọi trường đều optional (vd /publish, /clone):
+    // bắt lỗi ở đây thì client buộc phải nhớ gửi `{}`, một cái bẫy không cần thiết.
+    raw = text.trim() === '' ? {} : JSON.parse(text)
   } catch {
     return { ok: false, response: errors.badRequest(c, 'Body phải là JSON hợp lệ.') }
   }
