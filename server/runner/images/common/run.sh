@@ -82,7 +82,13 @@ pids=$(cat /sys/fs/cgroup/pids.current 2>/dev/null || echo 0)
 
 # stderr của member (đã cắt), rồi tới dòng meta thật. Member có thể in ra một dòng
 # __JUDGE_META__ giả, nhưng nó luôn nằm TRƯỚC dòng này — worker chỉ đọc dòng cuối.
-head -c 8192 "$ERR" 2>/dev/null >&2
+#
+# THỨ TỰ CHUYỂN HƯỚNG LÀ QUAN TRỌNG. Bản trước viết `2>/dev/null >&2`: shell đặt
+# fd2 vào /dev/null TRƯỚC, rồi `>&2` nhân bản fd2 hiện tại vào fd1 — tức là cả hai
+# cùng trỏ /dev/null. Hệ quả: stderr của trình biên dịch bị nuốt sạch, mọi bài CE
+# chỉ hiện "Biên dịch thất bại." mà không nói lỗi ở đâu. Phải `>&2` trước (nhân
+# bản stderr THẬT vào fd1) rồi mới `2>/dev/null` (im lặng lỗi của chính head).
+head -c 8192 "$ERR" >&2 2>/dev/null
 
 awk -v st="$st" -v oom0="$oom0" -v oom1="$oom1" -v pids="$pids" -v bset="$BSET" '
   NF == 4 && $1 ~ /^[0-9.]+$/ { e = $1; u = $2; s = $3; m = $4 }

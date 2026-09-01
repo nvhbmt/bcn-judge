@@ -1032,8 +1032,27 @@ cũng phải quy về được "một chương trình, stdin vào, stdout ra".
    tự viết" (mức C, chưa làm). Harness tự tuần tự hoá về dạng chuẩn tắc là đủ cho
    phần lớn bài; khi nào cần hơn thì làm checker, không vá vào đây.
 
-### Nợ còn lại
+### Thông báo lỗi biên dịch — đo lại và sửa
 
-Số dòng trong thông báo CE tính theo file đã ghép, nên bài 20 dòng có thể nhận
-"lỗi ở dòng 87". Cần chỉ thị `#line` (C/C++) hoặc dịch ngược số dòng trước khi
-mở cho lớp C cơ bản. Chưa làm.
+Bản đầu của delta này ghi nợ "số dòng CE tính theo file đã ghép, cần `#line`".
+**Đo lại thì điều đó sai**: biên dịch hai file riêng (hoặc `#include` mà GCC vẫn
+theo dõi) nên mọi trình biên dịch đều báo đúng tên file và đúng số dòng của người
+học — `solution.c:3`, `File "solution.py", line 3`, `Solution.java:3`. Không có
+độ lệch nào để mà sửa.
+
+Nhưng phép đo lộ ra hai lỗi thật:
+
+1. **`run.sh` nuốt sạch stderr của trình biên dịch** — thứ tự chuyển hướng
+   `2>/dev/null >&2` đẩy cả fd1 lẫn fd2 vào `/dev/null`. Mọi bài CE, cả stdio lẫn
+   function, chỉ hiện "Biên dịch thất bại." Đây là lỗi có sẵn từ P0, không phải do
+   delta này. Sửa thành `>&2 2>/dev/null`.
+2. **Lỗi trong harness in cả mã harness ra cho member** — trình biên dịch trích lại
+   dòng nguồn gây lỗi, nên một lỗi ở `main.c` đẩy thẳng code của mentor ra ngoài.
+   Đây là rò dữ liệu mentor qua đúng đường không ai nghĩ tới. Thêm
+   `judge/compileOutput.ts`: bám theo "file đang được nói tới" để bỏ trọn khối chẩn
+   đoán thuộc file của mentor (kể cả các dòng trích nguồn phía sau, vốn không nhắc
+   tên file nào), bỏ tiền tố `/w/`, và nếu giấu hết thì nói rõ "lỗi thuộc phần khung
+   do người ra đề viết" thay vì để người học nhìn màn hình trống rồi tự trách.
+
+`SourceFile.owner: 'member' | 'mentor'` là thứ tầng judge dùng để biết file nào của
+ai — khai tường minh, không đoán theo tên file.

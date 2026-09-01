@@ -116,11 +116,21 @@ describe.skipIf(!RUN_DOCKER)('P0 — sandbox trên Docker thật', () => {
   })
 
   // ---- Bảng verdict trên hành vi thật.
-  it('lỗi cú pháp → CE kèm thông báo compiler', async () => {
+  it('lỗi cú pháp → CE kèm CHẨN ĐOÁN THẬT của compiler', async () => {
     const out = await judge('c11', 'syntax_error.c', [tc(1, '', 'x')])
     expect(out.verdict).toBe('CE')
-    expect(out.compileOutput.length).toBeGreaterThan(0)
     expect(out.results).toHaveLength(0)
+
+    // Bản trước chỉ kiểm `length > 0`, mà chuỗi dự phòng "Biên dịch thất bại."
+    // cũng thoả — nên test vẫn xanh suốt trong khi run.sh nuốt sạch stderr của
+    // compiler (thứ tự chuyển hướng `2>/dev/null >&2` đẩy cả fd1 vào /dev/null).
+    // Người học nhận CE mà không biết sai ở đâu. Phải đòi nội dung THẬT:
+    // Nguồn được nạp vào container dưới tên của ngôn ngữ (main.c), không phải tên
+    // file fixture trên máy host.
+    expect(out.compileOutput).toContain('main.c')
+    expect(out.compileOutput).toMatch(/error/i)
+    expect(out.compileOutput).toContain('khong_ton_tai')
+    expect(out.compileOutput).not.toBe('Biên dịch thất bại.')
   })
 
   it('vòng lặp vô hạn → TLE (không treo worker)', async () => {

@@ -34,7 +34,7 @@ Kiểm chứng toàn hệ thống qua HTTP (cần API + worker đang chạy):
 
 ```bash
 node scripts/smoke.mjs      # 29 kiểm tra: cấp tài khoản → soạn bài → nộp → chấm → verdict
-node scripts/judge-e2e.mjs  # 91 kiểm tra, chỉ soi luồng chấm nhưng soi tới đáy (~60 s)
+node scripts/judge-e2e.mjs  # 93 kiểm tra, chỉ soi luồng chấm nhưng soi tới đáy (~60 s)
 ```
 
 `judge-e2e.mjs` cần một database **còn trống** (nó tạo tài khoản, khoá, bài mới và
@@ -89,9 +89,11 @@ Ba điều đáng biết trước khi soạn:
 - **Harness không bao giờ tới member** — cấm ở tầng kiểu trong serializer, và đường
   member cũng không SELECT cột đó ra khỏi DB.
 
-Còn nợ: số dòng trong thông báo CE tính theo file đã ghép, nên bài 20 dòng có thể
-nhận "lỗi ở dòng 87". Cần `#line` hoặc dịch ngược số dòng trước khi mở cho lớp C
-cơ bản. Chi tiết ở `docs/design.md`, mục *Delta FR-D10*.
+Thông báo lỗi biên dịch chỉ đúng file và đúng dòng **người học** viết
+(`solution.c:3`, không phải file đã ghép) — đã đo trên cả 5 ngôn ngữ. Lỗi nằm trong
+harness thì **không một dòng mã harness nào** lọt ra ngoài; người học nhận câu "lỗi
+thuộc phần khung do người ra đề viết" thay vì bị đổ oan. Chi tiết ở `docs/design.md`,
+mục *Delta FR-D10*.
 
 **Nợ kỹ thuật quan trọng nhất** (ghi trong `docs/design.md` §14): mọi số đo và toàn bộ bộ abuse
 mới chạy trên **máy dev (OrbStack)**. §11 của thiết kế yêu cầu chạy lại trên **đúng kernel/Docker
@@ -118,9 +120,9 @@ Chạy trên Docker thật, không mock. Mỗi ca ánh xạ thẳng tới một 
 Độ trễ trên máy dev, hàng đợi rỗng: **C 620 ms · C++ 627 ms · Python 487 ms · Java 883 ms ·
 Node 433 ms** (ngưỡng NFR-4 là ≤ 3 s; C++ kể cả biên dịch ≤ 10 s).
 
-## Sáu điều thiết kế nói đúng nhưng Docker làm khác
+## Bảy điều thiết kế nói đúng nhưng Docker làm khác
 
-Cả sáu đều **hỏng im lặng**: không exception, chỉ là mọi bài nộp trả verdict sai. Đây là lý do
+Cả bảy đều **hỏng im lặng**: không exception, chỉ là mọi bài nộp trả verdict sai. Đây là lý do
 P0 phải chạy trước mọi thứ khác.
 
 1. **`putArchive` không dùng được với `--read-only`** → nạp source qua stdin của exec.
@@ -133,6 +135,13 @@ P0 phải chạy trước mọi thứ khác.
 6. **PATH của sandbox không phủ mọi image** — python ở `/usr/local/bin`, JDK ở
    `/opt/java/openjdk/bin`. Lần thứ ba của cùng lớp lỗi nên chốt quy ước: **runner image tự
    đưa toolchain lên PATH chuẩn**, không nới PATH của sandbox theo từng ngôn ngữ.
+
+7. **`run.sh` nuốt sạch stderr của trình biên dịch** vì thứ tự chuyển hướng ngược:
+   `2>/dev/null >&2` đặt fd2 vào `/dev/null` **trước**, rồi `>&2` nhân bản fd2 đó vào
+   fd1 — cả hai cùng trỏ `/dev/null`. Hệ quả: **mọi bài CE trong toàn hệ thống chỉ
+   hiện "Biên dịch thất bại."**, không nói sai ở đâu. Với câu lạc bộ dạy C cho người
+   mới, đây là hỏng ở đúng chỗ đau nhất. Test cũ không bắt được vì chỉ kiểm
+   `compileOutput.length > 0`, mà chính chuỗi dự phòng cũng thoả điều kiện đó.
 
 ## Mười ba lỗi API do việc dựng giao diện làm lộ ra
 

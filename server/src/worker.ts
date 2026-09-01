@@ -113,8 +113,10 @@ function buildFiles(
   if (!harnessSource) throw new Error('harness_missing')
   if (!language.functionSourceFilename) throw new Error('language_no_function_support')
   return [
-    { name: language.sourceFilename, content: harnessSource },
-    { name: language.functionSourceFilename, content: userSource },
+    // owner:'mentor' → chẩn đoán biên dịch thuộc file này bị giấu khỏi người học,
+    // vì trình biên dịch in lại dòng nguồn gây lỗi (compileOutput.ts).
+    { name: language.sourceFilename, content: harnessSource, owner: 'mentor' },
+    { name: language.functionSourceFilename, content: userSource, owner: 'member' },
   ]
 }
 

@@ -320,8 +320,11 @@ async function main() {
 
   const ce = await submitAndWait(nextMember(), { languageId: 'c11', source: SRC.c11.ce })
   check('CE khi sai cú pháp', ce.detail?.verdict === 'CE', `verdict=${ce.detail?.verdict}`)
-  check('CE: trả log biên dịch để người học sửa được', (ce.detail?.compileOutput ?? '').length > 0,
-    JSON.stringify(ce.detail?.compileOutput))
+  // KHÔNG kiểm `length > 0`: chuỗi dự phòng "Biên dịch thất bại." cũng thoả, và
+  // đó chính là cách lỗi nuốt stderr của compiler sống sót qua mọi bộ test.
+  check('CE: trả CHẨN ĐOÁN THẬT của compiler, không phải câu chung chung',
+    /error/i.test(ce.detail?.compileOutput ?? '') && (ce.detail?.compileOutput ?? '').includes('main.c'),
+    JSON.stringify((ce.detail?.compileOutput ?? '').slice(0, 200)))
   check('CE: không chạy testcase nào', (ce.detail?.results ?? []).length === 0, `có ${ce.detail?.results?.length} kết quả`)
 
   // ── 5. Điểm từng phần ─────────────────────────────────────────────────────
@@ -573,9 +576,15 @@ async function main() {
     fnWa.detail?.verdict === 'WA', `verdict=${fnWa.detail?.verdict}`)
 
   const fnCe = await submitAndWait(nextMember(), { languageId: 'python3', source: FN.ce.python3, itemId: fnItemId })
-  check('hàm sai cú pháp → CE chứ không phải RE khó hiểu',
-    fnCe.detail?.verdict === 'CE' && (fnCe.detail?.compileOutput ?? '').length > 0,
+  check('hàm sai cú pháp → CE chứ không phải RE khó hiểu', fnCe.detail?.verdict === 'CE',
     `verdict=${fnCe.detail?.verdict}`)
+  check('CE của bài function chỉ đúng file và dòng NGƯỜI HỌC viết',
+    (fnCe.detail?.compileOutput ?? '').includes('solution.py') &&
+      !(fnCe.detail?.compileOutput ?? '').includes('main.py'),
+    JSON.stringify((fnCe.detail?.compileOutput ?? '').slice(0, 200)))
+  check('CE không để lộ mã harness qua dòng trích nguồn của compiler',
+    !(fnCe.detail?.compileOutput ?? '').includes('from solution import'),
+    JSON.stringify((fnCe.detail?.compileOutput ?? '').slice(0, 200)))
 
   const fnBadLang = await nextMember()('/api/member/submissions', {
     method: 'POST',

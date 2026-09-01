@@ -212,8 +212,8 @@ module.exports = { twoSum };
 /** Ghép file đúng như worker làm: harness chiếm điểm vào, người học ở file bên cạnh. */
 function filesFor(lang: LanguageConfig, harness: string, userSource: string): SourceFile[] {
   return [
-    { name: lang.sourceFilename, content: harness },
-    { name: lang.functionSourceFilename!, content: userSource },
+    { name: lang.sourceFilename, content: harness, owner: 'mentor' },
+    { name: lang.functionSourceFilename!, content: userSource, owner: 'member' },
   ]
 }
 
@@ -265,6 +265,43 @@ describe.skipIf(!RUN_DOCKER)('Bài dạng function (kiểu LeetCode)', () => {
       expect(out.results).toHaveLength(0)
     }, 120_000)
   }
+
+  it('CE của người học chỉ ra ĐÚNG file và ĐÚNG dòng họ viết', async () => {
+    const lang = langFor('c11')
+    const out = await judgeSubmission({
+      language: lang,
+      // Lỗi cú pháp cố ý ở dòng 3 của file người học.
+      files: filesFor(lang, CASES.c11!.harness, '// dong 1\n// dong 2\nint *twoSum(int *a,int n,int t,int *rs){ return 0\n}\n'),
+      testcases: TESTCASES,
+      limits: { ...DEFAULT_LIMITS, timeLimitMs: 5000 },
+    })
+
+    expect(out.verdict).toBe('CE')
+    expect(out.compileOutput).toContain('solution.c:3')
+    // Đường dẫn trong container không có nghĩa gì với người học.
+    expect(out.compileOutput).not.toContain('/w/')
+  }, 120_000)
+
+  it('lỗi nằm trong HARNESS: không lộ một dòng mã harness nào cho người học', async () => {
+    const lang = langFor('c11')
+    const harnessHong = `#include <stdio.h>
+#include "solution.c"
+int main(void) { int BI_MAT_CUA_MENTOR = 1 return 0; }
+`
+    const out = await judgeSubmission({
+      language: lang,
+      files: filesFor(lang, harnessHong, CASES.c11!.solution),
+      testcases: TESTCASES,
+      limits: { ...DEFAULT_LIMITS, timeLimitMs: 5000 },
+    })
+
+    expect(out.verdict).toBe('CE')
+    // Trình biên dịch IN LẠI dòng nguồn gây lỗi — đó là đường rò mà bộ lọc chặn.
+    expect(out.compileOutput).not.toContain('BI_MAT_CUA_MENTOR')
+    expect(out.compileOutput).not.toContain('main.c')
+    // Và nói rõ đây không phải lỗi của người học, thay vì để họ nhìn màn hình trống.
+    expect(out.compileOutput).toMatch(/khung do người ra đề viết/)
+  }, 120_000)
 
   it('tên file nguồn có đường dẫn bị từ chối, không ghi ra ngoài /w', async () => {
     const lang = langFor('c11')

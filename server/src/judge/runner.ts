@@ -7,6 +7,7 @@
  * Hàm này thuần judge: không đụng DB, không đụng HTTP. Queue/worker gọi nó.
  */
 import type { LanguageConfig } from './languages'
+import { compileMessageForMember } from './compileOutput'
 import { PIDS_POISON_THRESHOLD, Sandbox } from './sandbox'
 import type { JudgeLimits, JudgeOutcome, SourceFile, TestcaseInput, TestcaseResult, Verdict } from './types'
 import { decideVerdict, overallVerdict } from './verdict'
@@ -109,7 +110,11 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
       },
     )
 
-    const text = [outcome.stdout.toString('utf8'), outcome.stderr].filter(Boolean).join('\n').slice(0, COMPILE_STDERR_BYTES)
+    const rawText = [outcome.stdout.toString('utf8'), outcome.stderr].filter(Boolean).join('\n')
+    // Lọc TRƯỚC khi cắt: cắt trước có thể chặt đôi một khối chẩn đoán của mentor
+    // và để lại nửa sau — nửa đó không còn nêu tên file nên lọt qua bộ lọc.
+    const mentorFiles = req.files.filter((f) => f.owner === 'mentor').map((f) => f.name)
+    const text = compileMessageForMember(rawText, mentorFiles).slice(0, COMPILE_STDERR_BYTES)
     if (outcome.timedOut || !outcome.meta) return { ok: false, output: text, ie: 'compile_no_meta' }
     if (outcome.meta.st !== 0) return { ok: false, output: text || 'Biên dịch thất bại.', ie: null }
     return { ok: true, output: text, ie: null }

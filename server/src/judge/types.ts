@@ -42,6 +42,12 @@ export interface SourceFile {
   /** Tên file trong /w. Không được chứa '/' — tầng judge không tạo thư mục con. */
   name: string
   content: string
+  /**
+   * Ai viết file này. 'mentor' = harness — chẩn đoán biên dịch thuộc file đó bị
+   * giấu khỏi người học, vì trình biên dịch in lại dòng nguồn gây lỗi và như vậy
+   * là đẩy mã harness ra ngoài (xem compileOutput.ts). Mặc định 'member'.
+   */
+  owner?: 'member' | 'mentor'
 }
 
 export interface JudgeLimits {
