@@ -159,6 +159,31 @@ test('testcase mẫu sai thì chỉ ra đúng chỗ lệch, không bắt tự d�
   await expect(diff.locator('mark')).toHaveText(['-2', '8'])
 })
 
+test('verdict về qua SSE, không phải chờ đường lùi polling (FR-F4)', async ({ page }) => {
+  await page.goto('/')
+  await openFirstProblem(page)
+  await typeCode(page, AC_SOURCE)
+
+  // Chốt thời gian, vì đây là một lỗi CÂM. Máy chủ gửi sự kiện SSE có tên, mà bản cũ
+  // chỉ gắn `EventSource.onmessage` — thứ chỉ nổ với sự kiện không tên — nên trình
+  // duyệt không nhận được gì. Không ai phát hiện suốt thời gian dài vì đường lùi
+  // polling vẫn đưa verdict về, chỉ chậm hơn hẳn.
+  //
+  // Đường lùi KHÔNG THỂ nhanh hơn 6 giây (4 giây chờ ân hạn + một nhịp poll 2 giây),
+  // nên mốc 4,5 giây ở đây phân biệt được hai đường mà vẫn thừa chỗ cho một lượt chấm
+  // chậm gấp mấy lần bình thường (~600 ms).
+  const t0 = Date.now()
+  await page.getByRole('button', { name: 'Nộp bài' }).click()
+  await page.waitForResponse(
+    async (res) =>
+      /\/api\/member\/submissions\/[0-9a-f-]{36}$/.test(new URL(res.url()).pathname) &&
+      res.ok() &&
+      (await res.json().catch(() => null))?.data?.status === 'done',
+    { timeout: 60_000 },
+  )
+  expect(Date.now() - t0).toBeLessThan(4_500)
+})
+
 test('nộp bài đúng → AC, nộp bài sai → WA, cả hai vào lịch sử', async ({ page }) => {
   const { errors } = watchForErrors(page)
   await page.goto('/')

@@ -57,11 +57,29 @@ export function useSubmissionStream(submissionId: string | null): {
     void refetch()
 
     source = new EventSource(`/api/member/submissions/${submissionId}/events`, { withCredentials: true })
-    source.onmessage = () => {
+
+    const onEvent = () => {
       gotEvent.current = true
       setLive(true)
       void refetch()
     }
+
+    /*
+     * Máy chủ gửi sự kiện CÓ TÊN: `sse.ts` đặt tên bằng `payload.kind`, và khi payload
+     * không có `kind` — đúng trường hợp của bài nộp — thì rơi về TÊN KÊNH. Mà
+     * `EventSource.onmessage` chỉ nổ với sự kiện KHÔNG tên, nên bản trước không bao giờ
+     * nhận được gì.
+     *
+     * Hỏng hoàn toàn câm: đường lùi polling 2 giây vẫn đưa verdict về, chỉ chậm hơn —
+     * nên FR-F4 ("verdict từng testcase cập nhật trực tiếp") thực ra chưa từng chạy trên
+     * trình duyệt, và không có gì báo. Đo được: worker chấm xong ở ~520 ms nhưng giao
+     * diện tới ~6070 ms mới biết, đúng bằng 4 giây chờ ân hạn cộng một nhịp poll.
+     *
+     * Vẫn gắn `onmessage` kèm theo: payload có `kind` sẽ mang tên khác tên kênh, và một
+     * handler thừa rẻ hơn nhiều so với việc im lặng bỏ lỡ lần nữa.
+     */
+    source.addEventListener(`submission:${submissionId}`, onEvent)
+    source.onmessage = onEvent
     source.onerror = () => setLive(false)
 
     // Đường lùi: nếu sau vài giây SSE chưa nói gì thì bật polling song song.
