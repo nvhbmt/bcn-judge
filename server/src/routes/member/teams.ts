@@ -1,14 +1,18 @@
 /**
- * FR-J2/J3/J4: trang team và các view CHỈ ĐỌC của leader.
+ * FR-J2/J3/J4/J6: trang team và các view của leader.
  *
- * Cả cây route này không có một mutation nào — "leader không sửa được gì" là sự
- * VẮNG MẶT của bề mặt, không phải một câu if ai đó có thể quên (§8).
+ * Leader KHÔNG có một mutation nào lên dữ liệu chấm, tiến độ hay thành viên —
+ * đó là sự VẮNG MẶT của bề mặt, không phải một câu if ai đó có thể quên (§8).
+ * Ngoại lệ duy nhất là ghi chú FR-J6: nó chỉ TẠO dữ liệu mới của chính leader,
+ * không sửa được gì đang có.
  */
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { z } from 'zod'
 import { teamRole } from '../../auth/middleware'
 import { q } from '../../db/pool'
-import { errors, ok } from '../../lib/apiResponse'
+import { created, errors, ok } from '../../lib/apiResponse'
+import { parseBody } from '../../lib/http'
 import { toLeaderSubmission, type RawSubmissionRow } from '../../serialize/submission'
 
 export const memberTeamRoutes = new Hono()
@@ -114,4 +118,72 @@ memberTeamRoutes.get('/:teamId/submissions', async (c) => {
       ),
     ),
   )
+})
+
+// ── FR-J6: ghi chú nhắc nhở của leader ───────────────────────────────────────
+
+/** POST /api/member/teams/:id/notes — leader nhắc một thành viên trong team mình. */
+memberTeamRoutes.post('/:teamId/notes', async (c) => {
+  const me = c.get('user')
+  const teamId = c.req.param('teamId')
+  const role = await teamRole(me.id, teamId)
+  if (!role?.isLeader) return errors.forbidden(c, 'Chỉ leader để lại được ghi chú.')
+
+  const body = await parseBody(
+    c,
+    z.object({ targetUserId: z.string().min(1), body: z.string().min(1).max(2000) }),
+  )
+  if (!body.ok) return body.response
+
+  // Chỉ nhắc được người TRONG team của mình.
+  const target = await teamRole(body.data.targetUserId, teamId)
+  if (!target) return errors.notFound(c, 'Người này không thuộc team của bạn.')
+
+  const [row] = await q<{ id: string }>(sql`
+    INSERT INTO team_notes (team_id, author_id, target_user_id, body)
+    VALUES (${teamId}, ${me.id}, ${body.data.targetUserId}, ${body.data.body})
+    RETURNING id
+  `)
+  return created(c, row)
+})
+
+/** GET /api/member/notes — ghi chú gửi CHO TÔI (thông báo trong app). */
+memberTeamRoutes.get('/notes/mine', async (c) => {
+  const me = c.get('user')
+  const rows = await q(sql`
+    SELECT n.id, n.body, n.created_at AS "createdAt", n.read_at AS "readAt",
+           u.display_name AS "authorName", t.name AS "teamName"
+    FROM team_notes n
+    JOIN users u ON u.id = n.author_id
+    JOIN teams t ON t.id = n.team_id
+    WHERE n.target_user_id = ${me.id}
+    ORDER BY n.created_at DESC LIMIT 50
+  `)
+  return ok(c, rows)
+})
+
+memberTeamRoutes.post('/notes/:noteId/read', async (c) => {
+  const me = c.get('user')
+  const [row] = await q<{ id: string }>(sql`
+    UPDATE team_notes SET read_at = now()
+    WHERE id = ${c.req.param('noteId')} AND target_user_id = ${me.id} AND read_at IS NULL
+    RETURNING id
+  `)
+  if (!row) return errors.notFound(c, 'Không tìm thấy ghi chú.')
+  return ok(c, { ok: true })
+})
+
+/** GET /api/member/teams/:id/notes — leader xem lại ghi chú mình đã để. */
+memberTeamRoutes.get('/:teamId/notes', async (c) => {
+  const me = c.get('user')
+  const role = await teamRole(me.id, c.req.param('teamId'))
+  if (!role?.isLeader) return errors.forbidden(c, 'Chỉ leader xem được danh sách ghi chú của team.')
+  const rows = await q(sql`
+    SELECT n.id, n.body, n.created_at AS "createdAt", n.read_at AS "readAt",
+           u.display_name AS "targetName", n.target_user_id AS "targetUserId"
+    FROM team_notes n JOIN users u ON u.id = n.target_user_id
+    WHERE n.team_id = ${c.req.param('teamId')}
+    ORDER BY n.created_at DESC LIMIT 200
+  `)
+  return ok(c, rows)
 })

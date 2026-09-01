@@ -97,7 +97,48 @@ describe.skipIf(!INTEGRATION)('team & leader (FR-J)', () => {
     expect((await call(`/api/member/teams/${teamId}/submissions`, { as: outsider })).status).toBe(403)
   })
 
-  it('cây route của leader KHÔNG có mutation nào', async () => {
+  it('FR-J6: leader nhắc được thành viên, thành viên thấy và đánh dấu đã đọc', async () => {
+    const sent = await call(`/api/member/teams/${teamId}/notes`, {
+      as: leader,
+      body: { targetUserId: teammate.id, body: 'Tuần này còn 2 bài chưa AC nhé.' },
+    })
+    expect(sent.status).toBe(201)
+
+    const mine = await call('/api/member/teams/notes/mine', { as: teammate })
+    expect(mine.body.data).toHaveLength(1)
+    expect(mine.body.data[0].body).toContain('chưa AC')
+    expect(mine.body.data[0].readAt).toBeNull()
+
+    const read = await call(`/api/member/teams/notes/${mine.body.data[0].id}/read`, { as: teammate, method: 'POST' })
+    expect(read.status).toBe(200)
+    expect((await call('/api/member/teams/notes/mine', { as: teammate })).body.data[0].readAt).not.toBeNull()
+  })
+
+  it('FR-J6: chỉ leader để lại được ghi chú, và chỉ cho người trong team', async () => {
+    const notLeader = await call(`/api/member/teams/${teamId}/notes`, {
+      as: teammate,
+      body: { targetUserId: leader.id, body: 'x' },
+    })
+    expect(notLeader.status).toBe(403)
+
+    const outsiderTarget = await call(`/api/member/teams/${teamId}/notes`, {
+      as: leader,
+      body: { targetUserId: outsider.id, body: 'x' },
+    })
+    expect(outsiderTarget.status).toBe(404)
+  })
+
+  it('FR-J6: không đọc trộm được ghi chú của người khác', async () => {
+    const sent = await call(`/api/member/teams/${teamId}/notes`, {
+      as: leader,
+      body: { targetUserId: teammate.id, body: 'riêng tư' },
+    })
+    expect(JSON.stringify((await call('/api/member/teams/notes/mine', { as: outsider })).body.data)).not.toContain('riêng tư')
+    const steal = await call(`/api/member/teams/notes/${sent.body.data.id}/read`, { as: outsider, method: 'POST' })
+    expect(steal.status).toBe(404)
+  })
+
+  it('leader không có mutation nào lên dữ liệu chấm, tiến độ hay thành viên', async () => {
     for (const [path, method] of [
       [`/api/member/teams/${teamId}/progress`, 'POST'],
       [`/api/member/teams/${teamId}/submissions`, 'POST'],
