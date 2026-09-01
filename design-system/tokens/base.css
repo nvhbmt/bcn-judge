@@ -1,0 +1,18 @@
+/* Nền tảng đặt SAU preflight của Tailwind nên ghi đè được.
+   Cố ý không reset lại những gì preflight đã làm — chỉ đặt vai trò chữ và màu nền. */
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: var(--weight-medium); letter-spacing: var(--track-display); }
+a { color: var(--moss); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+code, pre, .num { font-family: var(--font-mono); }
+/* Số xếp cột phải thẳng hàng — dùng ở mọi bảng và dải số liệu. */
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }

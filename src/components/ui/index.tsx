@@ -1,49 +1,69 @@
-/** Bộ UI tối giản tự viết (mẫu imath src/components/ui — không kéo thư viện). */
+/**
+ * Bộ UI tối giản tự viết (không kéo thư viện).
+ *
+ * Ba luật của hệ thiết kế được ép ở đây, vì đây là chỗ mọi màn hình đi qua:
+ *   - bo góc 0 (ngoại lệ duy nhất: chấm trạng thái)
+ *   - không bóng đổ — cần phân tầng thì dùng đường kẻ hoặc đổi nền một bậc
+ *   - mọi con số và verdict dùng mono; nhãn nút ALL-CAPS
+ * Xem design-system/readme.md, mục VISUAL FOUNDATIONS.
+ */
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { VERDICT_LABEL, VERDICT_TONE, type Verdict } from '@/types/api'
+import { VERDICT_LABEL, type Verdict } from '@/types/api'
 
-type ButtonVariant = 'primary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'quiet'
+type ButtonSize = 'sm' | 'md' | 'lg'
 
-const BUTTON_STYLE: Record<ButtonVariant, string> = {
-  primary: 'bg-[var(--color-primary)] text-white hover:opacity-90',
-  ghost: 'border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800',
-  danger: 'bg-[var(--color-wa)] text-white hover:opacity-90',
+/** `--moss-solid` chỉ tồn tại ở bản sáng; bản tối rơi về `--moss`. */
+const VARIANT: Record<ButtonVariant, string> = {
+  primary:
+    'bg-[var(--moss-solid,var(--moss))] text-on-accent font-semibold uppercase hover:opacity-90',
+  ghost: 'border border-line-strong text-ink-3 hover:bg-surface-sel',
+  danger: 'bg-clay text-on-accent font-semibold uppercase hover:opacity-90',
+  quiet: 'text-ink-5 hover:text-ink-3',
+}
+
+const SIZE: Record<ButtonSize, string> = {
+  sm: 'px-[11px] py-[5px] text-[11px]',
+  md: 'px-[14px] py-[7px] text-[12px]',
+  lg: 'px-4 py-[9px] text-[13px]',
 }
 
 export function Button({
   variant = 'ghost',
+  size = 'md',
   className = '',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize }) {
   return (
     <button
       {...props}
-      className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium
-        transition disabled:cursor-not-allowed disabled:opacity-50
-        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]
-        ${BUTTON_STYLE[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-none font-mono tracking-[0.06em]
+        transition-[background-color,color] duration-[120ms] ease-linear
+        disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-6 disabled:opacity-100
+        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss
+        ${VARIANT[variant]} ${SIZE[size]} ${className}`}
     />
   )
 }
 
-const TONE_CLASS = {
-  ac: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-  wa: 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300',
-  tle: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300',
-  neutral: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
-}
-
+/**
+ * Verdict lấy màu từ `--verdict-*`, ánh xạ 1:1 với `VERDICT_TONE` ở tầng dữ liệu.
+ * Chữ đặt trên nền mờ cùng tông chứ không phải nền đặc — `--clay` phải đọc được
+ * trên chính `--tint-clay`, đó là nền xấu nhất và ngưỡng 4.5:1 đo ở đó.
+ */
 export function VerdictBadge({ verdict, pending }: { verdict: Verdict | null; pending?: boolean }) {
   if (!verdict) {
     return (
-      <span className={`rounded px-1.5 py-0.5 font-mono text-xs ${TONE_CLASS.neutral}`}>
+      <span className="num rounded-none bg-surface-sel px-1.5 py-0.5 font-mono text-[11px] text-ink-5">
         {pending ? 'Đang chấm…' : '—'}
       </span>
     )
   }
+  const color = `var(--verdict-${verdict.toLowerCase()})`
   return (
     <span
-      className={`rounded px-1.5 py-0.5 font-mono text-xs font-semibold ${TONE_CLASS[VERDICT_TONE[verdict]]}`}
+      className="num rounded-none border px-1.5 py-0.5 font-mono text-[11px] font-semibold"
+      style={{ color, borderColor: color }}
       title={VERDICT_LABEL[verdict]}
     >
       {verdict}
@@ -53,8 +73,8 @@ export function VerdictBadge({ verdict, pending }: { verdict: Verdict | null; pe
 
 export function Spinner({ label = 'Đang tải…' }: { label?: string }) {
   return (
-    <span className="inline-flex items-center gap-2 text-sm text-slate-500" role="status">
-      <span className="size-3 animate-spin rounded-full border-2 border-slate-300 border-t-[var(--color-primary)]" />
+    <span className="inline-flex items-center gap-2 text-[13px] text-ink-5" role="status">
+      <span className="size-3 animate-spin rounded-full border-2 border-line border-t-moss" />
       {label}
     </span>
   )
@@ -62,9 +82,28 @@ export function Spinner({ label = 'Đang tải…' }: { label?: string }) {
 
 export function EmptyState({ title, hint }: { title: string; hint?: ReactNode }) {
   return (
-    <div className="px-4 py-10 text-center text-sm text-slate-500">
-      <p className="font-medium text-slate-600 dark:text-slate-300">{title}</p>
-      {hint ? <p className="mt-1">{hint}</p> : null}
+    <div className="px-4 py-10 text-center text-[13px] text-ink-5">
+      <p className="font-display text-[16px] text-ink-2">{title}</p>
+      {hint ? <p className="mt-1.5">{hint}</p> : null}
+    </div>
+  )
+}
+
+/**
+ * Motif nhận diện: nhãn mono → đường kẻ chạy hết chiều ngang → khối 18×6px ở cuối.
+ * Lấy từ dấu góc vuông + gạch chân trong logo Ban Công Nghệ. Dùng thay cho
+ * `<h2 class="text-sm font-semibold">` ở mọi đầu mục.
+ */
+export function SectionRule({ label, meta }: { label: string; meta?: ReactNode }) {
+  return (
+    <div className="flex items-end gap-0">
+      <div className="pr-3 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{label}</div>
+      <div className="h-px flex-1 bg-line" />
+      {meta ? (
+        <div className="num pl-3 font-mono text-[11px] text-ink-5">{meta}</div>
+      ) : (
+        <div className="h-1.5 w-[18px] bg-line-strong" />
+      )}
     </div>
   )
 }

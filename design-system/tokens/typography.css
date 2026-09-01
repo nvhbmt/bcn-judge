@@ -1,0 +1,36 @@
+/* Ba vai trò, không lẫn nhau:
+   - display (serif): tiêu đề màn hình, tên bài, tên khoá.
+   - ui (sans): mọi câu văn.
+   - mono: MỌI con số, mã, verdict, nhãn ALL-CAPS. Số phải thẳng cột. */
+:root {
+  --text-mono-xs: 10px;
+  --text-mono-sm: 11px;
+  --text-mono-md: 12px;
+  --text-mono-lg: 13px;
+
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+
+  --display-sm: 22px;
+  --display-md: 24px;
+  --display-lg: 26px;
+  --display-xl: 31px;
+
+  --leading-tight: 1.2;
+  --leading-snug: 1.55;
+  --leading-normal: 1.65;
+  --leading-loose: 1.8;
+
+  --track-display: -0.008em;
+  --track-label: 0.14em;   /* nhãn ALL-CAPS mono */
+  --track-tab: 0.06em;
+
+  --weight-light: 300;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+}

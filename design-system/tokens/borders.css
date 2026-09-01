@@ -1,0 +1,14 @@
+/* Cạnh sắc, đường mảnh, KHÔNG bóng đổ. */
+:root {
+  --radius-none: 0px;
+  --radius-dot: 999px;      /* chỉ dùng cho chấm trạng thái */
+  --border-hairline: 1px solid var(--line);
+  --border-strong: 1px solid var(--line-strong);
+  --border-accent: 1px solid var(--moss);
+
+  /* dòng đang chọn: vạch trong bên trái, không dùng box-shadow làm bóng */
+  --mark-selected: inset 2px 0 0 var(--moss);
+  --mark-tab: inset 0 -2px 0 var(--moss);
+
+  --shadow-none: none;      /* hệ này không có shadow. Nếu cần nổi khối, dùng đường kẻ. */
+}

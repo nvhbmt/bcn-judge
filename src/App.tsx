@@ -1,11 +1,14 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { TopBar } from '@/components/layout/TopBar'
 import { Spinner } from '@/components/ui'
 import { AdminCoursesPage } from '@/pages/admin/CoursesPage'
 import { AdminJudgePage } from '@/pages/admin/JudgeStatusPage'
 import { AdminSettingsPage } from '@/pages/admin/SettingsPage'
 import { AdminTeamsPage } from '@/pages/admin/TeamsPage'
 import { AdminUsersPage } from '@/pages/admin/UsersPage'
+/* Đặt bí danh vì mentor cũng có một ContestListPage (màn soạn contest). */
+import { ContestListPage as MemberContestListPage } from '@/pages/ContestListPage'
 import { ContestPage } from '@/pages/ContestPage'
 import { CourseDetailPage } from '@/pages/CourseDetailPage'
 import { CoursesPage } from '@/pages/CoursesPage'
@@ -20,6 +23,7 @@ import { ProblemListPage } from '@/pages/mentor/ProblemListPage'
 import { TeamPage } from '@/pages/TeamPage'
 import { WorkspacePage } from '@/pages/workspace/WorkspacePage'
 import { useAuth } from '@/stores/auth'
+import type { Me } from '@/types/api'
 
 export function App() {
   const { me, loading, bootstrap } = useAuth()
@@ -56,16 +60,31 @@ export function App() {
   }
 
   return (
+    /* Thanh trên nằm NGOÀI cây route: điều hướng toàn cục phải có ở mọi màn đã đăng
+       nhập, không phụ thuộc vào việc trang nào nhớ vẽ nó. Xem TopBar.tsx. */
+    <div className="flex h-full flex-col">
+      <TopBar />
+      <div className="min-h-0 flex-1 overflow-auto">
+        <AppRoutes role={me.role} />
+      </div>
+    </div>
+  )
+}
+
+/** Tách riêng để thanh trên bọc ngoài mà cây route không phải thụt lề lại. */
+function AppRoutes({ role }: { role: Me['role'] }) {
+  return (
     <Routes>
       <Route path="/" element={<CoursesPage />} />
       <Route path="/khoa-hoc/:courseId" element={<CourseDetailPage />} />
       <Route path="/khoa-hoc/:courseId/bai/:itemId" element={<WorkspacePage />} />
+      <Route path="/contest" element={<MemberContestListPage />} />
       <Route path="/contest/:contestId" element={<ContestPage />} />
       <Route path="/contest/:contestId/bai/:contestProblemId" element={<WorkspacePage />} />
       <Route path="/team" element={<TeamPage />} />
       {/* Cụm quản trị (FR-A/B/H/J). Đây chỉ là lớp che UI — quyền thật do
           requireAuth + requireAdmin ở server quyết định (app.ts:43). */}
-      {me.role === 'admin' ? (
+      {role === 'admin' ? (
         <>
           <Route path="/quan-tri" element={<AdminJudgePage />} />
           <Route path="/quan-tri/tai-khoan" element={<AdminUsersPage />} />
@@ -77,13 +96,13 @@ export function App() {
       {/* FR-D: màn soạn bài của mentor. Admin ngầm có mọi quyền của mentor (§3) nên
           điều kiện là "không phải member" chứ không phải role === 'mentor'. Đây chỉ
           là lớp che UI; quyền thật do requireStaff + canEdit() ở server quyết định. */}
-      {me.role !== 'member' ? <Route path="/mentor/bai-tap" element={<ProblemListPage />} /> : null}
-      {me.role !== 'member' ? (
+      {role !== 'member' ? <Route path="/mentor/bai-tap" element={<ProblemListPage />} /> : null}
+      {role !== 'member' ? (
         <Route path="/mentor/bai-tap/:problemId" element={<ProblemEditorPage />} />
       ) : null}
       {/* FR-C1/C3 + FR-I: soạn giáo trình khoá và cụm contest. Cùng lý do "không
           phải member" như trên; server chặn thật bằng requireStaff + isCourseStaff. */}
-      {me.role !== 'member' ? (
+      {role !== 'member' ? (
         <>
           <Route path="/mentor/khoa-hoc/:courseId" element={<CourseContentPage />} />
           <Route path="/mentor/contest" element={<ContestListPage />} />

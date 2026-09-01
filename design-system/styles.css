@@ -1,0 +1,7 @@
+/* BCN Judge — điểm vào duy nhất. Chỉ gồm @import. */
+@import './tokens/fonts.css';
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/borders.css';
+@import './tokens/base.css';

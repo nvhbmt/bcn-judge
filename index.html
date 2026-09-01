@@ -1,9 +1,30 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BCN Judge</title>
+
+    <!-- Nạp font ở ĐÂY chứ không phải bằng @import trong CSS: bundler nâng @import
+         lồng trong file CSS đã import ra ngoài rồi bỏ luôn, nên font khai mà không
+         bao giờ tải. Repo từng dính đúng lỗi đó với 'Be Vietnam Pro'. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      /* Đặt theme TRƯỚC lần vẽ đầu tiên. Không làm thì mỗi lần tải trang màn hình
+         chớp một nhịp sáng→tối. Mặc định 'light'; giữ đồng bộ với src/lib/theme.ts. */
+      try {
+        var t = localStorage.getItem('bcn-theme')
+        document.documentElement.dataset.theme = t === 'dark' || t === 'light' ? t : 'light'
+      } catch (e) {
+        /* localStorage bị chặn (chế độ riêng tư) — giữ mặc định trên thẻ <html>. */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

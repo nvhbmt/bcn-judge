@@ -1,0 +1,9 @@
+/* Ba họ chữ.
+   File font nạp bằng <link> trong index.html, KHÔNG bằng @import ở đây: bundler nâng
+   @import lồng trong CSS đã import ra ngoài rồi bỏ luôn, nên font sẽ khai mà không tải.
+   Nếu CLB muốn self-host thì tải .woff2 về src/assets/fonts/ rồi thay bằng @font-face. */
+:root {
+  --font-display: 'Lora', Georgia, 'Times New Roman', serif;
+  --font-ui: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}

@@ -1,34 +1,46 @@
+/* Nền tảng giao diện — design-system/ là nguồn chuẩn, file này chỉ nối nó vào Tailwind.
+   Xem design-system/readme.md để biết vì sao mỗi token có giá trị như vậy. */
 @import 'tailwindcss';
+@import '../design-system/styles.css';
 
 @theme {
-  --color-primary: #2b4fbf;
-  --color-primary-soft: #e3e9fa;
-  --color-ac: #1e8e5a;
-  --color-wa: #c63b3b;
-  --color-tle: #b7791f;
-  --font-sans: 'Be Vietnam Pro', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Ánh xạ token cũ → token mới, GIỮ NGUYÊN API cũ: components/ui/index.tsx và mọi
+     chỗ đang gọi var(--color-primary/ac/wa/tle) không phải sửa một dòng nào. */
+  --color-primary: var(--moss);
+  --color-primary-soft: var(--surface-sel);
+  --color-ac: var(--moss);
+  --color-wa: var(--clay);
+  --color-tle: var(--earth);
+
+  --font-sans: var(--font-ui);
+
+  /* Nền và mực dùng qua class Tailwind: bg-surface-1, text-ink-4, border-line… */
+  --color-canvas: var(--canvas);
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-sel: var(--surface-sel);
+  --color-surface-code: var(--surface-code);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-ink-5: var(--ink-5);
+  --color-ink-6: var(--ink-6);
+  --color-ink-7: var(--ink-7);
+  --color-moss: var(--moss);
+  --color-earth: var(--earth);
+  --color-clay: var(--clay);
+  --color-brass: var(--brass);
+  --color-on-accent: var(--on-accent);
+
+  --radius-none: 0px;
 }
 
-html,
-body,
-#root {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  background: #f4f6f9;
-  color: #1a2233;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #0f1319;
-    color: #e4e9f1;
-  }
-}
+/* Bản sáng KHÔNG theo prefers-color-scheme nữa — người dùng tự chọn, xem src/lib/theme.ts. */
 
 /* Vạch chia kéo được (FR-E1) — con trỏ phải nói rõ nó kéo được. */
 .split-handle {
