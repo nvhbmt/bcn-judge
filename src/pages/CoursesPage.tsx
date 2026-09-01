@@ -1,10 +1,28 @@
 import { useQuery } from '@tanstack/react-query'
-import { LogOut, PencilRuler, Trophy, Users } from 'lucide-react'
+import { LogOut, PencilRuler, ShieldCheck, Trophy, Users } from 'lucide-react'
+import type { ComponentType, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Button, EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import { useAuth } from '@/stores/auth'
 import type { CourseSummary } from '@/types/api'
+
+/** Trang này là trang chủ của CẢ BA vai trò, nên nó cũng là lối vào duy nhất tới
+ *  mọi cụm khác. Thiếu một link ở đây là cả một cụm trang không ai tới được. */
+function NavLinkButton({ to, icon: Icon, children }: {
+  to: string
+  icon: ComponentType<{ size?: number }>
+  children: ReactNode
+}) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+    >
+      <Icon size={16} /> {children}
+    </Link>
+  )
+}
 
 /** FR-B5: trang chủ member liệt kê khoá đã ghi danh. */
 export function CoursesPage() {
@@ -24,27 +42,18 @@ export function CoursesPage() {
         <div className="flex items-center gap-2">
           {/* Lối vào duy nhất tới màn soạn bài (FR-D). Trang chủ của mentor cũng là
               trang này, nên link phải đứng đây; member không thấy vì route cũng không có. */}
-          <Link
-            to="/team"
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-          >
-            <Users size={16} /> Team
-          </Link>
+          <NavLinkButton to="/team" icon={Users}>Team</NavLinkButton>
           {me && me.role !== 'member' ? (
-            <Link
-              to="/mentor/contest"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-            >
-              <Trophy size={16} /> Contest
-            </Link>
+            <>
+              <NavLinkButton to="/mentor/contest" icon={Trophy}>Contest</NavLinkButton>
+              <NavLinkButton to="/mentor/bai-tap" icon={PencilRuler}>Soạn bài</NavLinkButton>
+            </>
           ) : null}
-          {me && me.role !== 'member' ? (
-            <Link
-              to="/mentor/bai-tap"
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
-            >
-              <PencilRuler size={16} /> Soạn bài
-            </Link>
+          {/* Lối vào duy nhất tới cả cụm /quan-tri (tài khoản, khoá học, team, cài
+              đặt, tình trạng chấm). Không có nó thì năm trang đó chỉ tới được bằng
+              cách gõ tay URL — App.tsx đã khai route nhưng không ai link tới. */}
+          {me?.role === 'admin' ? (
+            <NavLinkButton to="/quan-tri" icon={ShieldCheck}>Quản trị</NavLinkButton>
           ) : null}
           <Button onClick={() => void logout()}>
             <LogOut size={16} /> Đăng xuất
