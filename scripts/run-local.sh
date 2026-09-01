@@ -38,6 +38,16 @@ DATABASE_URL="$DB_URL" npm run --silent dev &
 echo "==> Worker"
 DATABASE_URL="$DB_URL" node --import tsx src/worker.ts &
 
+# Chờ API mở cổng rồi mới bật SPA — cùng lý do như scripts/e2e-stack.sh: hai tiến
+# trình đua nhau, ai thua thì vite lên trước và request đầu tiên nhận ECONNREFUSED
+# qua proxy. Ở đây nó chỉ gây khó chịu (bấm tải lại là xong), nhưng cùng một gốc.
+printf '==> chờ API'
+for _ in $(seq 1 120); do
+  curl -fsS http://localhost:8099/healthz >/dev/null 2>&1 && { echo ' · sẵn sàng'; break; }
+  printf '.'
+  sleep 0.5
+done
+
 echo "==> SPA :5174"
 cd "$ROOT"
 npm run --silent dev &
