@@ -83,9 +83,14 @@ describe.skipIf(!INTEGRATION)('bất biến schema', () => {
     ).rejects.toThrow(/append-only/)
   })
 
-  it('tách quyền Postgres: worker KHÔNG chạm được bảng users (ADR-5)', async () => {
+  it('tách quyền Postgres: worker KHÔNG chạm được bảng users (ADR-5)', async ({ skip }) => {
     const applied = await applyGrants(() => {})
-    if (!applied) return // môi trường không có quyền tạo role — bỏ qua
+    // `return` trần khiến test XANH mà không khẳng định gì, và không có dấu skip nào
+    // để ai đó nhận ra. applyGrants trả false khi current_user không phải superuser —
+    // đúng hình dạng của môi trường production/CI với role ứng dụng. Nghĩa là bất biến
+    // an ninh ADR-5 báo PASS ở đúng nơi nó cần được kiểm nhất. Dùng skip() để trạng
+    // thái "chưa kiểm" hiện ra thay vì giả dạng "đã đạt".
+    if (!applied) skip('cần superuser để tạo role — chưa kiểm được ADR-5 ở môi trường này')
     const result = await checkWorkerCannotTouchUsers()
     expect(result.ok, result.detail).toBe(true)
   })

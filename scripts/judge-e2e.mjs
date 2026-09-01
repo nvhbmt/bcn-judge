@@ -626,7 +626,12 @@ function finish() {
   process.exit(1)
 }
 
+// KHÔNG gọi finish() ở đây. finish() thoát 0 khi mảng failures rỗng, mà một ngoại
+// lệ giữa chừng — `waitFor` hết giờ vì worker chết, `fetch failed` vì sai cổng — làm
+// mảng đó rỗng đúng nghĩa: chưa kiểm tra nào kịp chạy. Bản trước vì thế in
+// "✓ Luồng chấm bài: 0 kiểm tra, tất cả đạt." rồi thoát 0. 93 kiểm tra biến mất
+// không dấu vết, và CI xanh.
 main().catch((err) => {
   console.error(`\nDừng giữa chừng: ${err.message}`)
-  finish()
+  process.exit(1)
 })

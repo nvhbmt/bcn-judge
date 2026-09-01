@@ -51,8 +51,11 @@ function pressKey(
 
 describe('languageExtension', () => {
   it('ánh xạ các mã ngôn ngữ của judge', () => {
+    // KHÔNG dùng toBeTruthy: nhánh `default` trả `[]`, mà `[]` là truthy trong JS —
+    // chính ca ngay dưới chứng minh điều đó. Cho mọi ngôn ngữ rơi xuống default thì
+    // tô màu cú pháp chết sạch mà test tên "ánh xạ các mã ngôn ngữ" vẫn xanh.
     for (const id of ['c11', 'cpp17', 'python3', 'java17', 'node20']) {
-      expect(languageExtension(id)).toBeTruthy()
+      expect(languageExtension(id)).not.toEqual([])
     }
   })
 

@@ -132,4 +132,11 @@ describe('overallVerdict (FR-F2)', () => {
       { position: 2, verdict: 'IE' },
     ])).toBe('IE')
   })
+
+  it('không có testcase nào → IE, KHÔNG phải AC', () => {
+    // Nhánh rỗng chưa từng được kiểm. Đổi `return 'IE'` thành `return 'AC'` thì cả
+    // 209 test vẫn xanh — mà nghĩa của nó là bài chưa có testcase nào cho AC trọn
+    // điểm cho mọi người nộp.
+    expect(overallVerdict([])).toBe('IE')
+  })
 })

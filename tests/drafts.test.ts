@@ -251,6 +251,40 @@ describe('useDraft (FR-E6 · chậm nhất 2 giây sau lần gõ cuối)', () =>
     expect(listDrafts('u1')).toHaveLength(MAX_DRAFTS_PER_USER)
   })
 
+  it('đóng tab giữa lúc gõ: ghi nốt nháp trước khi trang biến mất', () => {
+    // Đây là lời hứa đầu bài của FR-E6 ("không mất khi reload hoặc đóng tab") và nó
+    // chưa có một khẳng định nào — cả file không có chữ pagehide/beforeunload. Biến
+    // hai handler thành no-op thì 114 test vẫn xanh, còn người học đóng tab trong
+    // cửa sổ debounce 2 giây là mất code.
+    vi.useFakeTimers()
+    const { result } = renderHook(() => useDraft(KEY, ''))
+
+    act(() => {
+      result.current[1]('int main(void) { return 0; }')
+    })
+    // Cố ý KHÔNG chạy hết debounce: đây đúng là lúc nguy hiểm.
+    expect(result.current[2]).toBe('saving')
+    expect(loadDraft(KEY)?.source).toBeUndefined()
+
+    act(() => {
+      window.dispatchEvent(new Event('pagehide'))
+    })
+    expect(loadDraft(KEY)?.source).toBe('int main(void) { return 0; }')
+  })
+
+  it('rời trang bằng beforeunload cũng ghi nốt', () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() => useDraft(KEY, ''))
+
+    act(() => {
+      result.current[1]('x = 1')
+    })
+    act(() => {
+      window.dispatchEvent(new Event('beforeunload'))
+    })
+    expect(loadDraft(KEY)?.source).toBe('x = 1')
+  })
+
   it('trạng thái error khi ghi thất bại', () => {
     vi.useFakeTimers()
     const { result } = renderHook(() => useDraft(KEY, ''))

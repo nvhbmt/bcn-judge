@@ -97,4 +97,34 @@ describe('form bài dạng function — FR-D10', () => {
 
     expect(validateForm(v)).toBeNull()
   })
+
+  // Sáu nhánh dưới đây trước không có ca nào — chỉ nhánh harness và nhánh null được
+  // đi qua. Xoá hẳn khối kiểm `timeLimitMs` thì 114 test vẫn xanh, mà hệ quả là mentor
+  // lưu được `timeLimitMs = 0` và MỌI người học TLE toàn bài.
+  const stdio = (over: Partial<ProblemFormValues> = {}): ProblemFormValues => ({
+    ...toFormValues(detail({ kind: 'stdio', harness: {} })),
+    ...over,
+  })
+
+  it.each([
+    ['tiêu đề rỗng', { title: '   ' }, /Tiêu đề/],
+    ['tiêu đề quá 200 ký tự', { title: 'x'.repeat(201) }, /200/],
+    ['đề bài rỗng', { statementMd: '  ' }, /Đề bài/],
+    ['thời gian dưới cận', { timeLimitMs: '99' }, /thời gian/i],
+    ['thời gian trên cận', { timeLimitMs: '60001' }, /thời gian/i],
+    ['thời gian không phải số', { timeLimitMs: 'abc' }, /thời gian/i],
+    ['bộ nhớ dưới cận', { memoryLimitMb: '15' }, /bộ nhớ/i],
+    ['bộ nhớ trên cận', { memoryLimitMb: '2049' }, /bộ nhớ/i],
+    ['có lời giải mà thiếu ngôn ngữ', { solutionSource: 'int main(){}', solutionLanguageId: '' }, /ngôn ngữ/i],
+  ])('chặn: %s', (_ten, over, mau) => {
+    expect(validateForm(stdio(over as Partial<ProblemFormValues>))).toMatch(mau)
+  })
+
+  it.each([
+    ['đúng cận dưới', { timeLimitMs: '100', memoryLimitMb: '16' }],
+    ['đúng cận trên', { timeLimitMs: '60000', memoryLimitMb: '2048' }],
+  ])('cho qua: %s', (_ten, over) => {
+    // Đối chứng hai đầu mút: chặn không được chặn nhầm giá trị hợp lệ.
+    expect(validateForm(stdio(over as Partial<ProblemFormValues>))).toBeNull()
+  })
 })

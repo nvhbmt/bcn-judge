@@ -167,6 +167,39 @@ describe.skipIf(!INTEGRATION)('contest (FR-I)', () => {
     expect(full).toHaveLength(1)
   })
 
+  it('FR-I10: đóng băng có hiệu lực trên ROUTE member, không chỉ trong hàm tính', async () => {
+    // Ca trên gọi thẳng computeStandings/cutoffFor. Đường dây từ route tới hàm thì
+    // chưa ai kiểm: truyền `true` thay cho `contest.isStaff` ở member/contests.ts làm
+    // mọi thí sinh xem được bảng điểm trực tiếp trong N phút cuối, mà 209 test vẫn
+    // xanh. FR-I10 hỏng hoàn toàn đúng lúc nó quan trọng nhất.
+    const { contestId, cpA } = await makeContest({ startOffsetMin: -60, endOffsetMin: 30, freezeMinutes: 60 })
+    await scoreSubmission(member.id, contestId, cpA, problemA, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 5 })
+
+    const cuaMember = await call(`/api/member/contests/${contestId}/standings`, { as: member })
+    expect(cuaMember.status).toBe(200)
+    expect(cuaMember.body.data).toHaveLength(0)
+
+    // Đối chứng: mentor gọi CÙNG route đó vẫn phải thấy — nếu không thì "đóng băng"
+    // chỉ là route hỏng chứ không phải cơ chế hoạt động (isStaff suy ra trong route).
+    const cuaMentor = await call(`/api/member/contests/${contestId}/standings`, { as: mentor })
+    expect(cuaMentor.status).toBe(200)
+    expect(cuaMentor.body.data).toHaveLength(1)
+  })
+
+  it('bảng xếp hạng lấy lần nộp TỐT NHẤT của mỗi bài, không phải lần cuối', async () => {
+    // standings.ts sắp `passed_weight/total_weight DESC` để chọn lần tốt nhất, nhưng
+    // trong cả file này mỗi người chỉ nộp MỘT lần mỗi bài nên thứ tự đó chưa bao giờ
+    // có tác dụng. Đổi DESC thành ASC (lấy lần TỆ nhất) vẫn xanh 209 test — mà nghĩa
+    // của nó là người học sửa bài rồi nộp lại bị giữ điểm thấp cũ suốt contest.
+    const { contestId, cpA } = await makeContest({ startOffsetMin: -60, endOffsetMin: 60 })
+    await scoreSubmission(member.id, contestId, cpA, problemA, { verdict: 'WA', passed: 1, total: 2, minutesAgo: 20 })
+    await scoreSubmission(member.id, contestId, cpA, problemA, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 10 })
+
+    const rows = await computeStandings(contestId, { cutoff: 'infinity', meId: member.id })
+    expect(rows).toHaveLength(1)
+    expect(rows[0]?.totalPoints).toBe(100)
+  })
+
   it('FR-I10: hết giờ thì mở băng lại', async () => {
     const endAt = new Date(Date.now() - 60_000)
     expect(cutoffFor({ endAt, freezeMinutes: 60 }, false)).toBe('infinity')
@@ -266,6 +299,13 @@ describe.skipIf(!INTEGRATION)('contest (FR-I)', () => {
     `)
     expect(clone?.status).toBe('draft')
     expect(clone?.n).toBe(0)
+    // Câu SQL trên vẫn SELECT start_at nhưng trước đây không ai khẳng định nó — đúng
+    // con số nằm trong tên test. Đổi `interval '7 days'` thành '0 days' thì cả bộ vẫn
+    // xanh, và mentor nhân bản contest tuần sau sẽ thấy nó mở ra ngay hôm nay: đề lộ
+    // trước giờ thi.
+    const goc = await q<{ start_at: string }>(sql`SELECT start_at FROM contests WHERE id = ${contestId}`)
+    const cachNhauMs = new Date(clone!.start_at).getTime() - new Date(goc[0]!.start_at).getTime()
+    expect(Math.round(cachNhauMs / 86_400_000)).toBe(7)
   })
 
   it('FR-I7: thống kê phân biệt "đã mở" với "đã nộp"', async () => {
