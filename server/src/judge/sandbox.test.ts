@@ -61,6 +61,29 @@ describe.skipIf(!RUN_DOCKER)('P0 — sandbox trên Docker thật', () => {
     expect(out.verdict).toBe('AC')
   })
 
+  // Mức S: image build sẵn, tắt trong seed. Ca này canh lớp lỗi PATH đã cắn hai
+  // lần (python ở /usr/local/bin, JDK ở /opt/java/openjdk/bin) — image phải tự
+  // đưa toolchain lên PATH chuẩn chứ không nới PATH của sandbox.
+  it.each([
+    ['java17', 'Main.java'],
+    ['node20', 'hello.js'],
+  ])('ca 0 — %s: biên dịch và chạy end-to-end', async (langId, file) => {
+    const out = await judge(langId as keyof typeof LANGUAGES, file, [tc(1, '', 'hello')], {
+      timeLimitMs: 5000,
+      memoryLimitMb: 512,
+    })
+    expect(out.compileOutput).not.toMatch(/error|not found/i)
+    expect(out.verdict).toBe('AC')
+  })
+
+  it('java: JVM chạy lọt trần 64 tiến trình của sandbox', async () => {
+    const out = await judge('java17', 'Main.java', [tc(1, '3 5\n', '8')], {
+      timeLimitMs: 5000,
+      memoryLimitMb: 512,
+    })
+    expect(out.verdict).toBe('AC')
+  })
+
   // ---- Rủi ro P0 có tên: half-close/EOF của stdin qua Docker exec API (§12 #1).
   it('stdin nhận EOF thật — chương trình đọc tới EOF không bị treo', async () => {
     const out = await judge('python3', 'cat_eof.py', [tc(1, 'abcde', '5')])

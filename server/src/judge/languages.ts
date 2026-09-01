@@ -55,6 +55,31 @@ export const LANGUAGES = {
     memoryExtraMb: 64,
     enabled: true,
   },
+  // Mức S: image build sẵn nhưng TẮT trong seed — bật ở trang quản trị (US-8).
+  java17: {
+    id: 'java17',
+    label: 'Java 17',
+    image: 'bcnjudge-runner-openjdk:17',
+    sourceFilename: 'Main.java',
+    // -proc:none chặn annotation processor chạy code lúc biên dịch.
+    compileArgv: ['javac', '-proc:none', '-d', '/w', 'Main.java'],
+    // JVM tự chọn heap theo RAM container; -XX:-UsePerfData bỏ file /tmp/hsperfdata.
+    runArgv: ['java', '-XX:-UsePerfData', '-XX:+UseSerialGC', '-Xss64m', '-cp', '/w', 'Main'],
+    timeFactor: 2,
+    memoryExtraMb: 256,
+    enabled: false,
+  },
+  node20: {
+    id: 'node20',
+    label: 'JavaScript (Node 20)',
+    image: 'bcnjudge-runner-node:20',
+    sourceFilename: 'main.js',
+    compileArgv: null,
+    runArgv: ['node', 'main.js'],
+    timeFactor: 2,
+    memoryExtraMb: 128,
+    enabled: false,
+  },
 } as const satisfies Record<string, LanguageConfig>
 
 export type LanguageId = keyof typeof LANGUAGES

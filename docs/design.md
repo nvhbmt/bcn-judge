@@ -942,6 +942,13 @@ Ngoài ra, một tinh chỉnh bảng verdict §3.4: SIGKILL do **chính worker**
 được tính là TLE (dòng 3) — ca đó thuộc dòng 4 RE(`output_limit`). Dòng 3 chỉ nói tới SIGKILL từ
 `timeout`. Đã có test riêng cho ranh giới này.
 
+**Lần thứ ba của cùng một lớp lỗi (khi build image Java/Node mức S)**: `javac` nằm ở
+`/opt/java/openjdk/bin` của image temurin, ngoài PATH tối thiểu `/usr/local/bin:/usr/bin:/bin` của
+§3.2 ⇒ mọi bài Java thành CE(127) — y hệt vụ Python. Chốt **quy ước** thay vì vá từng lần:
+*runner image phải tự đưa toolchain lên PATH chuẩn* (một dòng `ln -s` trong Dockerfile), KHÔNG nới
+PATH của sandbox cho từng ngôn ngữ. Bộ abuse có ca số 0 cho cả bốn ngôn ngữ nên lần thứ tư sẽ đỏ
+ngay ở CI thay vì đỏ trên đầu member.
+
 **Còn nợ P0** (không chặn P1, ghi để khỏi quên): mọi con số trên đo bằng OrbStack trên máy dev,
 **chưa chạy trên VPS đích** — §11 yêu cầu bộ abuse phải xanh trên đúng kernel/Docker của VPS trước
 khi chốt; ba mục cần đo lại ở đó là `docker update --memory` shrink, `memory.events` trong
