@@ -1,0 +1,25 @@
+{
+  "name": "bcn-judge-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:sandbox": "DOCKER=1 vitest run src/judge/sandbox.test.ts",
+    "images:build": "bash ../scripts/build-runner-images.sh",
+    "judge:demo": "node --import tsx src/judge/cli.ts"
+  },
+  "dependencies": {
+    "dockerode": "^5.0.1",
+    "tar-stream": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/dockerode": "^4.0.1",
+    "@types/node": "^26.4.0",
+    "@types/tar-stream": "^3.1.4",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
