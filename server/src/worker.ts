@@ -25,8 +25,9 @@ import {
   type RejudgeJob,
 } from './judge/queue'
 import { judgeSubmission } from './judge/runner'
-import { reapOrphanSandboxes } from './judge/sandbox'
 import { DEFAULT_LIMITS, type JudgeLimits, type SourceFile, type TestcaseInput } from './judge/types'
+import { drainPool, poolStats, sweepPool } from './judge/pool'
+import { reapOrphanSandboxes } from './judge/reap'
 import { startJobWake, wakeAll, waitForJob } from './judge/wake'
 import { getSettings } from './lib/settings'
 
@@ -498,6 +499,7 @@ async function probeLanguages(): Promise<void> {
     }
     try {
       const outcome = await judgeSubmission({
+        skipPool: true,
         language: toLanguageConfig(row, DEFAULT_LIMITS),
         files: [{ name: row.source_filename, content: source }],
         testcases: [{ position: 1, isSample: true, weight: 1, input: Buffer.alloc(0), expected: Buffer.from('ok\n') }],
@@ -519,8 +521,12 @@ async function probeLanguages(): Promise<void> {
 export async function startWorker(): Promise<void> {
   console.log(`[worker] ${WORKER_ID}, ${config.workerSlots} slot`)
   await registerWorker()
-  const orphans = await reapOrphanSandboxes()
-  if (orphans > 0) console.log(`[worker] dọn ${orphans} container mồ côi`)
+  try {
+    const reaped = await reapOrphanSandboxes(WORKER_ID)
+    if (reaped.removed) console.log(`[worker] dọn ${reaped.removed} container mồ côi (giữ ${reaped.kept})`)
+  } catch (err) {
+    console.error('[worker] dọn container mồ côi hỏng:', err)
+  }
   if (process.env.SKIP_LANGUAGE_PROBE !== '1') await probeLanguages()
 
   const beat = setInterval(() => {
@@ -546,6 +552,14 @@ export async function startWorker(): Promise<void> {
       .catch((err) => console.error('[worker] dọn dữ liệu cũ hỏng:', err))
   }, 3_600_000)
 
+  const poolSweep = setInterval(() => {
+    sweepPool()
+      .then((n) => {
+        if (n) console.log(`[worker] thả ${n} container ấm nằm quá lâu (${poolStats().ready} còn chờ)`)
+      })
+      .catch((err) => console.error('[worker] quét pool hỏng:', err))
+  }, 60_000)
+
   // Nối chuông "có việc mới" trước khi mở slot: nối sau thì những lượt nộp trong khoảng
   // đó không đánh thức được ai và phải chờ hết một nhịp poll.
   const unwake = await startJobWake()
@@ -559,6 +573,7 @@ export async function startWorker(): Promise<void> {
       console.log(`[worker] ${signal} — chấm nốt testcase hiện tại rồi thoát`)
       clearInterval(beat)
       clearInterval(hourly)
+      clearInterval(poolSweep)
       // Đánh thức mọi slot đang ngủ để chúng thấy `stopping` ngay, thay vì nằm chờ hết
       // nhịp poll rồi mới chịu thoát.
       wakeAll()
@@ -569,7 +584,11 @@ export async function startWorker(): Promise<void> {
   await Promise.all(slots)
   clearInterval(beat)
   clearInterval(hourly)
+  clearInterval(poolSweep)
   unwake()
+  // Huỷ container ấm TRƯỚC khi đóng pool DB: bỏ qua bước này là mỗi lần tắt để lại một
+  // lứa container nằm không, và bộ dọn ở lần khởi động sau mới nhặt được.
+  await drainPool()
   await closePool()
 }
 

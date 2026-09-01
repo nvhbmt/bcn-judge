@@ -8,6 +8,7 @@
  */
 import type { LanguageConfig } from './languages'
 import { compileMessageForMember } from './compileOutput'
+import { acquire } from './pool'
 import { PIDS_POISON_THRESHOLD, Sandbox } from './sandbox'
 import type { JudgeLimits, JudgeOutcome, SourceFile, TestcaseInput, TestcaseResult, Verdict } from './types'
 import { decideVerdict, overallVerdict } from './verdict'
@@ -25,6 +26,12 @@ export interface JudgeRequest {
   /** Pin core cho slot (§3.2); bỏ trống khi chạy dev. */
   cpusetCpus?: string
   labels?: Record<string, string>
+  /**
+   * Bỏ qua pool ấm. Dùng cho lượt probe lúc khởi động: nó chạy bằng DEFAULT_LIMITS chứ
+   * không phải giới hạn thật từ settings, nên sẽ nạp pool bằng những khoá mà không lượt
+   * nộp nào dùng tới — giữ chỗ vô ích cho tới khi hết TTL.
+   */
+  skipPool?: boolean
 }
 
 export interface JudgeHooks {
@@ -60,15 +67,22 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
   const testcases = [...req.testcases].sort((a, b) => a.position - b.position)
   const totalWeight = testcases.reduce((sum, tc) => sum + tc.weight, 0)
 
-  const newSandbox = () =>
-    Sandbox.create({
+  const sandboxOpts = () =>
+    ({
       image: language.image,
       memoryMb: limits.compileMemoryMb,
       maxOutputBytes: limits.maxOutputBytes,
       cpus: 1,
       ...(req.cpusetCpus ? { cpusetCpus: req.cpusetCpus } : {}),
       ...(req.labels ? { labels: req.labels } : {}),
-    })
+    }) satisfies Parameters<typeof Sandbox.create>[0]
+
+  /**
+   * Container ĐẦU TIÊN lấy từ pool ấm — đây là chỗ tiết kiệm được ~155 ms. Container
+   * thay giữa chừng (namespace nhiễm độc) thì dựng thẳng: ca đó hiếm, và lấy từ pool
+   * sẽ rút mất hàng dự trữ của lượt nộp kế tiếp để phục vụ một lượt vốn đã hỏng.
+   */
+  const newSandbox = () => Sandbox.create(sandboxOpts())
 
   const fail = (verdict: Verdict, ieReason: string | null, compileOutput = ''): JudgeOutcome => ({
     verdict,
@@ -85,7 +99,7 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
 
   let sandbox: Sandbox
   try {
-    sandbox = await newSandbox()
+    sandbox = req.skipPool ? await newSandbox() : (await acquire(sandboxOpts())).sandbox
   } catch (err) {
     hooks.log?.(`tạo container thất bại: ${String(err)}`)
     return fail('IE', 'sandbox_create_failed')
@@ -198,7 +212,7 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
         },
       )
     } catch (err) {
-      hooks.log?.(`exec testcase ${tc.position} lỗi: ${String(err)}`)
+      hooks.log?.(`exec testcase ${tc.position} lỗi trên container ${sandbox.id.slice(0, 12)}: ${String(err)}`)
       systemError = 'exec_failed'
       outcome = null
     }
@@ -248,7 +262,11 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
     const poisoned = pids > PIDS_POISON_THRESHOLD
     const isLast = tc.position === testcases[testcases.length - 1]?.position
     if ((poisoned || outcome?.timedOut) && !isLast) {
-      hooks.log?.(`container nhiễm độc sau test ${tc.position} (pids=${pids}) — thay container mới`)
+      // Id container ghi ra ở đây vì container ấm không mang nhãn `bcnjudge.submission`
+      // — đây đúng là lúc người trực cần map từ log sang `docker ps`.
+      hooks.log?.(
+        `container ${sandbox.id.slice(0, 12)} nhiễm độc sau test ${tc.position} (pids=${pids}) — thay container mới`,
+      )
       await sandbox.destroy()
       try {
         sandbox = await newSandbox()

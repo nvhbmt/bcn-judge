@@ -409,17 +409,3 @@ export class Sandbox {
   }
 }
 
-/** Dọn container mồ côi của một worker (khởi động lại sau sự cố). */
-export async function reapOrphanSandboxes(labelSelector = 'bcnjudge.sandbox=1'): Promise<number> {
-  const list = await docker.listContainers({ all: true, filters: { label: [labelSelector] } })
-  let removed = 0
-  for (const info of list) {
-    try {
-      await docker.getContainer(info.Id).remove({ force: true })
-      removed++
-    } catch {
-      // bỏ qua
-    }
-  }
-  return removed
-}
