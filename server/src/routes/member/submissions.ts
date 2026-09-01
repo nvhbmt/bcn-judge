@@ -7,9 +7,10 @@ import { enqueue } from '../../judge/queue'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { parseBody } from '../../lib/http'
 import { getSettings } from '../../lib/settings'
+import { iso } from '../../lib/time'
 import { sseStream } from '../../realtime/sse'
 import { toMemberProblem, type RawProblemRow, type RawTestcaseRow } from '../../serialize/problem'
-import { toMemberSubmission, type RawResultRow, type RawSubmissionRow } from '../../serialize/submission'
+import { scoreOf, toMemberSubmission, type RawResultRow, type RawSubmissionRow } from '../../serialize/submission'
 import { resolveAccess } from './access'
 
 export const memberSubmissionRoutes = new Hono()
@@ -113,6 +114,54 @@ memberSubmissionRoutes.post('/runs', async (c) => {
       : errors.badRequest(c, result.message, { code: result.code })
   }
   return created(c, { id: result.id, status: 'pending' })
+})
+
+/**
+ * GET /api/member/submissions/recent — vài lần nộp gần nhất của CHÍNH MÌNH, gộp
+ * mọi bài (FR-G1). Trang chủ bản v2 cần một dòng thời gian ngắn; đường `?itemId=`
+ * bên dưới chỉ trả lịch sử của MỘT bài nên không dùng được.
+ *
+ * Cố ý KHÔNG đi qua serializer đầy đủ: không source, không kết quả từng testcase.
+ * Ít dữ liệu rời máy chủ thì ít đường rò (NFR-2).
+ *
+ * Phải khai TRƯỚC route '/:id', nếu không Hono coi 'recent' là một id.
+ */
+memberSubmissionRoutes.get('/recent', async (c) => {
+  const me = c.get('user')
+  const limit = Math.min(20, Math.max(1, Number(c.req.query('limit') ?? 8)))
+
+  const rows = await q<{
+    id: string
+    verdict: string | null
+    status: string
+    receivedAt: Date | string
+    problemTitle: string
+    itemId: string | null
+    contestId: string | null
+    passedWeight: number | null
+    totalWeight: number | null
+  }>(sql`
+    SELECT s.id, s.verdict, s.status, s.received_at AS "receivedAt",
+           p.title AS "problemTitle", s.item_id AS "itemId", s.contest_id AS "contestId",
+           s.passed_weight AS "passedWeight", s.total_weight AS "totalWeight"
+    FROM submissions s JOIN problems p ON p.id = s.problem_id
+    WHERE s.user_id = ${me.id} AND s.kind = 'submit'
+    ORDER BY s.seq DESC LIMIT ${limit}
+  `)
+
+  return ok(
+    c,
+    rows.map((r) => ({
+      id: r.id,
+      verdict: r.verdict,
+      status: r.status,
+      receivedAt: iso(r.receivedAt),
+      problemTitle: r.problemTitle,
+      itemId: r.itemId,
+      contestId: r.contestId,
+      score: scoreOf(r.passedWeight, r.totalWeight),
+    })),
+  )
 })
 
 /** GET /api/member/submissions?itemId=… — lịch sử CỦA CHÍNH MÌNH (FR-G1). */

@@ -16,3 +16,14 @@ code, pre, .num { font-family: var(--font-mono); }
 /* Số xếp cột phải thẳng hàng — dùng ở mọi bảng và dải số liệu. */
 .num { font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
+
+/* Logo là ảnh DUY NHẤT của hệ này. File nguồn là chữ sáng trên nền tối, nên phải
+   hoà trộn chứ không dán thẳng: nền tối dùng `screen` để nền đen của ảnh biến mất;
+   nền sáng đảo màu trước rồi `multiply` để chữ thành tối trên nền kem. */
+.logo-bcn {
+  mix-blend-mode: screen;
+}
+[data-theme='light'] .logo-bcn {
+  filter: invert(1);
+  mix-blend-mode: multiply;
+}

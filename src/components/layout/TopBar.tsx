@@ -45,7 +45,7 @@ export function TopBar() {
   return (
     <header className="flex h-12 shrink-0 items-center gap-6 border-b border-line bg-surface-1 px-4">
       <span className="flex items-center gap-2">
-        <img src={logo} alt="" aria-hidden className="h-5 w-5 opacity-80" />
+        <img src={logo} alt="" aria-hidden className="logo-bcn h-5 w-5" />
         <span className="font-mono text-[13px] font-semibold tracking-[0.06em] text-ink-1">BCN</span>
         {/* Khối 14×7px sau chữ BCN — chữ ký thứ hai của hệ thiết kế. */}
         <span aria-hidden className="h-[7px] w-[14px] bg-moss" />

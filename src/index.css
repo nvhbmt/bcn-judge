@@ -42,6 +42,19 @@
 
 /* Bản sáng KHÔNG theo prefers-color-scheme nữa — người dùng tự chọn, xem src/lib/theme.ts. */
 
+/* Ngoại lệ chuyển động duy nhất của hệ thiết kế: con trỏ nhấp nháy ở màn đăng nhập.
+   `steps(1)` cho nó nháy dứt khoát chứ không mờ dần — đúng nhịp con trỏ terminal. */
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
 /* Vạch chia kéo được (FR-E1) — con trỏ phải nói rõ nó kéo được. */
 .split-handle {
   cursor: col-resize;
