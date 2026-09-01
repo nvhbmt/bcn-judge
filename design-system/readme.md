@@ -1,0 +1,99 @@
+# Hệ thiết kế BCN Judge v2
+
+Nguồn: project thiết kế `b37de235` ("Cải tiến giao diện hiện đại"), file
+`BCN Judge v2 - So sanh toi sang.dc.html` — 8 màn × 2 theme.
+
+Bốn file trong `src/` trỏ về đây (`src/index.css`, `src/components/ui/index.tsx`,
+`src/components/layout/TopBar.tsx`, `src/lib/theme.ts`), nên file này là **hợp đồng**,
+không phải ghi chú: sửa một giá trị ở đây mà không sửa `tokens/` là làm tài liệu nói dối.
+
+## VISUAL FOUNDATIONS
+
+Ba luật, ép ở `src/components/ui/index.tsx` vì đó là chỗ mọi màn hình đi qua:
+
+1. **Bo góc 0.** Ngoại lệ duy nhất là **chấm trạng thái** (`size-2 rounded-full`) và
+   vòng xoay của `Spinner` — hai thứ tròn theo bản chất, không phải lựa chọn bán kính.
+   Chip, huy hiệu, ô số thứ tự đều vuông.
+2. **Không bóng đổ.** Cần phân tầng thì dùng đường kẻ (`--line`, `--line-strong`) hoặc
+   đổi nền một bậc (`--surface-0` → `--surface-3`). `shadow-[inset_0_-2px_0_…]` KHÔNG
+   phải ngoại lệ: đó là gạch chân tab, không phải bóng.
+3. **Mono cho mọi con số và verdict; nhãn nút ALL-CAPS.** Hai đồng hồ đếm ngược cùng
+   giá trị mà khác font là lỗi. Tiêu đề dùng Lora (`--font-display`).
+
+## Thang màu
+
+Trung tính **ấm** (không phải `slate`) + hai màu điểm: xanh rêu `--moss` (xong / đang
+mở) và nâu đất `--earth` / `--clay` (cần chú ý). Giá trị thật ở `tokens/colors.css`.
+
+Ngưỡng cứng, đo trên nền xấu nhất mỗi theme (tối: `--surface-sel`, sáng: `--surface-0`):
+
+| Bậc | Vai trò | Ngưỡng |
+|---|---|---|
+| `--ink-1` … `--ink-6` | chữ mang thông tin | **≥ 4.5:1** |
+| `--ink-7` | CHỈ trang trí — đường phân cách, chấm | không đặt chữ |
+
+Hệ quả thực tế đã gặp: `disabled:opacity-40/50/60` kéo tương phản xuống 2,33–3,99:1 nên
+**không dùng opacity để làm mờ điều khiển đã tắt** — đổi màu chữ sang `--ink-5` và làm
+nhạt đường viền, giữ `opacity-100`. "Đã tắt" không có nghĩa là "không đọc được".
+
+`--select-bg` (vệt bôi đen trong editor) tách riêng khỏi `--surface-sel`: dòng đang gõ
+đã dùng `--surface-sel`, nếu vùng chọn dùng chung thì bôi đen trên chính dòng đó không
+thấy gì. Đặt ~2.1:1 so với nền editor — đủ rõ mà chữ bên trên vẫn đọc được. Ngưỡng
+3:1 của WCAG 1.4.11 là cho **ranh giới thành phần**, không áp cho nền vùng chọn có chữ
+nằm trên.
+
+## Kích thước cố định
+
+Lấy đúng từ thiết kế, **không làm tròn về bội số 8** — thang khoảng cách cố ý có 6, 10,
+14, 22, 26:
+
+| | |
+|---|---|
+| thanh trên | 48px |
+| rail biểu tượng | 56px |
+| đầu mục | 38px |
+| console | 302px |
+| khung tối thiểu | 320px |
+| khối cuối `SectionRule` | 18×6px |
+
+## Motif nhận diện
+
+`SectionRule`: nhãn mono → đường kẻ chạy hết chiều ngang → khối 18×6px ở cuối. Lấy từ
+dấu góc vuông + gạch chân trong logo Ban Công Nghệ. Nó **thay cho `<h2>`**, nên phải
+render thẻ tiêu đề thật — đường kẻ và khối cuối là trang trí nên `aria-hidden`.
+
+## Theme
+
+Đổi bằng `[data-theme]` trên `<html>` (`src/lib/theme.ts`), **không** bằng
+`prefers-color-scheme`. Vì vậy trong `src/` không được dùng cặp `dark:` của Tailwind:
+nó biên dịch thành `@media (prefers-color-scheme)` nên sẽ nghe hệ điều hành chứ không
+nghe nút đổi theme — app tối + OS sáng cho ra mảng gần trắng giữa nền tối.
+
+Lệnh quét, phải ra **0** — và nhớ quét cả `*.ts` chứ không riêng `*.tsx` (đã từng bỏ
+sót `src/pages/mentor/contestPhase.ts` đúng vì vậy):
+
+```bash
+grep -rnE '(^|[^a-z-])(slate-|dark:)' src --include='*.ts' --include='*.tsx'
+```
+
+Ranh giới `(^|[^a-z-])` là bắt buộc, không phải cầu kỳ: `grep "slate-"` trần khớp cả
+`-translate-y-1/2` (tran**slate-**y) và cho bốn kết quả rác mỗi lần quét. Cặp `dark:`
+cũng khớp nhầm tham số TypeScript `(dark: boolean)` — đọc kết quả rồi hãy tin.
+
+### Một điểm lệch có chủ đích
+
+Thiết kế chốt **mặc định tối** ("contest hay chấm bài buổi tối, đổi theme giữa lúc gõ
+code thì loá mắt"). Dự án này chọn **mặc định sáng**, nút đổi nằm trên thanh trên. Ghi
+ở đây và ở `src/lib/theme.ts` để người sau đọc thiết kế không tưởng là code sai.
+
+## Nạp vào Tailwind
+
+`tokens/*.css` là nguồn giá trị; `src/index.css` ánh xạ chúng vào khối `@theme` của
+Tailwind v4. Class nào không có mặt trong `@theme` sẽ **im lặng không sinh CSS** — đã
+mất `.font-display` trên 28 chỗ đúng vì `--font-display` khai bằng `var(--font-display)`
+(tự trỏ vào chính nó → rỗng). Khai giá trị literal trong `@theme`, và sau khi thêm token
+mới thì kiểm bằng:
+
+```bash
+npm run build && grep -c "\.font-display" dist/assets/index-*.css   # phải > 0
+```

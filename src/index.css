@@ -13,6 +13,11 @@
   --color-tle: var(--earth);
 
   --font-sans: var(--font-ui);
+  /* Khai LẶP giá trị (fonts.css cũng có) chứ không viết `var(--font-display)`: trỏ
+     một biến @theme vào chính tên nó là vòng lặp, giá trị thành rỗng. Và phải khai
+     ở ĐÂY thì Tailwind mới sinh ra class .font-display — thiếu nó thì 28 chỗ gọi
+     font-display im lặng rơi về sans, không báo lỗi gì. */
+  --font-display: 'Lora', Georgia, 'Times New Roman', serif;
 
   /* Nền và mực dùng qua class Tailwind: bg-surface-1, text-ink-4, border-line… */
   --color-canvas: var(--canvas);

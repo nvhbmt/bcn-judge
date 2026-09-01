@@ -67,7 +67,7 @@ export function TeamPage() {
         {team.members.map((m) => (
           <li
             key={m.id}
-            className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-sm"
+            className="inline-flex items-center gap-1.5 border border-line px-3 py-1 text-sm"
           >
             {m.isLeader ? <Crown size={14} className="text-[var(--color-tle)]" aria-label="Leader" /> : null}
             {m.displayName}

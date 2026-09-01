@@ -17,7 +17,7 @@ import { FailureBanner, Select } from './ui'
 
 const ACTION_BTN =
   'inline-flex items-center gap-1  border border-line-strong px-2 py-1 text-xs hover:bg-surface-sel ' +
-  'disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-1 ' +
+  'disabled:cursor-not-allowed disabled:border-line disabled:text-ink-5 disabled:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 ' +
   'focus-visible:outline-[var(--color-primary)]'
 
 export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: OneTimeSecretData) => void }) {

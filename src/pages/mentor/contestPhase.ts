@@ -12,10 +12,19 @@ export const PHASE_LABEL: Record<ContestPhase, string> = {
   'da-ket-thuc': 'Đã kết thúc',
 }
 
+/**
+ * Ba chip này từng là thang slate kèm cặp `dark:` — bản quét đợt 2 bỏ sót vì script
+ * chỉ duyệt `*.tsx`, còn đây là `.ts`.
+ *
+ * Cặp `dark:` biên dịch thành `@media (prefers-color-scheme)`, mà app đổi theme
+ * bằng `[data-theme]` (src/lib/theme.ts). Nên chip nghe HỆ ĐIỀU HÀNH chứ không
+ * nghe nút đổi theme: app tối + OS sáng cho ra mảng gần trắng giữa nền tối, và
+ * ngược lại. Nay dùng token nên nó theo đúng theme đang bật.
+ */
 export const PHASE_CLASS: Record<ContestPhase, string> = {
-  'sap-dien-ra': 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
-  'dang-dien-ra': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
-  'da-ket-thuc': 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+  'sap-dien-ra': 'border border-line-strong text-ink-4',
+  'dang-dien-ra': 'border border-moss text-moss',
+  'da-ket-thuc': 'border border-line text-ink-5',
 }
 
 export function contestPhase(startAt: string, endAt: string, now: number = Date.now()): ContestPhase {

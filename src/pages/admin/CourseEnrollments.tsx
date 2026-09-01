@@ -108,7 +108,7 @@ export function CourseEnrollments({ courseId }: { courseId: string }) {
               onClick={() => unenroll.mutate(row.id)}
               disabled={unenroll.isPending}
               className="ml-auto inline-flex shrink-0 items-center gap-1 border border-line-strong px-2 py-1
- text-xs hover:bg-surface-sel disabled:opacity-50 focus-visible:outline-2
+ text-xs hover:bg-surface-sel disabled:cursor-not-allowed disabled:border-line disabled:text-ink-5 disabled:opacity-100 focus-visible:outline-2
  focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]"
             >
               <UserMinus size={13} /> Gỡ

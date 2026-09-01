@@ -129,6 +129,12 @@ export function WorkspacePage() {
       ) : null}
 
       <div className="min-h-0 flex-1 overflow-auto">
+        {/* Cột nội dung phải LUÔN có đúng một <h1>. Trước đây h1 duy nhất nằm trong
+            StatementPanel, mà panel đó chỉ hiện khi rail === null — nên ở bốn trạng
+            thái rail còn lại (trợ giúp, mô tả, giáo trình, bảng xếp hạng) cả trang
+            không có tiêu đề cấp 1 nào, và người dùng trình đọc màn hình mất mốc điều
+            hướng. Ở đây h1 ẩn về thị giác vì mỗi panel đã tự có nhan đề nhìn thấy. */}
+        {rail !== null ? <h1 className="sr-only">{contentLabel}</h1> : null}
         {isLoading ? <div className="p-4"><Spinner /></div> : null}
         {rail === 'tro-giup' ? <HelpPanel role={me?.role ?? 'member'} /> : null}
         {rail === 'mo-ta' ? (

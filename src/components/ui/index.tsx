@@ -39,7 +39,7 @@ export function Button({
       {...props}
       className={`inline-flex items-center justify-center gap-2 rounded-none font-mono tracking-[0.06em]
         transition-[background-color,color] duration-[120ms] ease-linear
-        disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-6 disabled:opacity-100
+        disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5 disabled:opacity-100
         focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss
         ${VARIANT[variant]} ${SIZE[size]} ${className}`}
     />
@@ -91,18 +91,35 @@ export function EmptyState({ title, hint }: { title: string; hint?: ReactNode })
 
 /**
  * Motif nhận diện: nhãn mono → đường kẻ chạy hết chiều ngang → khối 18×6px ở cuối.
- * Lấy từ dấu góc vuông + gạch chân trong logo Ban Công Nghệ. Dùng thay cho
- * `<h2 class="text-sm font-semibold">` ở mọi đầu mục.
+ * Lấy từ dấu góc vuông + gạch chân trong logo Ban Công Nghệ.
+ *
+ * Đây thay cho `<h2>` ở mọi đầu mục, nên nó PHẢI là thẻ tiêu đề thật. Bản trước
+ * dùng `<div>`: nhìn thì giống hệt, nhưng trình đọc màn hình mất sạch cây tiêu đề
+ * và người dùng không nhảy giữa các mục được (NFR-6). Đường kẻ và khối cuối là
+ * trang trí nên `aria-hidden`; chỉ nhãn nằm trong tên của tiêu đề.
+ *
+ * `level` cho chỗ nào lồng sâu hơn khai đúng bậc, tránh nhảy cóc h1 → h3.
  */
-export function SectionRule({ label, meta }: { label: string; meta?: ReactNode }) {
+export function SectionRule({
+  label,
+  meta,
+  level = 2,
+}: {
+  label: string
+  meta?: ReactNode
+  level?: 2 | 3 | 4
+}) {
+  const Heading = `h${level}` as 'h2' | 'h3' | 'h4'
   return (
     <div className="flex items-end gap-0">
-      <div className="pr-3 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{label}</div>
-      <div className="h-px flex-1 bg-line" />
+      <Heading className="pr-3 font-mono text-[11px] font-normal tracking-[0.14em] text-ink-6 uppercase">
+        {label}
+      </Heading>
+      <div aria-hidden className="h-px flex-1 bg-line" />
       {meta ? (
         <div className="num pl-3 font-mono text-[11px] text-ink-5">{meta}</div>
       ) : (
-        <div className="h-1.5 w-[18px] bg-line-strong" />
+        <div aria-hidden className="h-1.5 w-[18px] bg-line-strong" />
       )}
     </div>
   )

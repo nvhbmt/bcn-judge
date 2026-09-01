@@ -23,7 +23,7 @@ export function ChangePasswordPage() {
     <div className="grid h-full place-items-center px-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm border border-line bg-surface-2 p-6 shadow-sm"
+        className="w-full max-w-sm border border-line bg-surface-2 p-6"
       >
         <h1 className="font-display text-[22px] text-ink-1">Đổi mật khẩu</h1>
         <p className="mt-1 mb-5 text-sm text-ink-5">

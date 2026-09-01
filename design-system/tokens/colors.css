@@ -51,6 +51,11 @@
 
   /* chữ đặt trên nền màu điểm */
   --on-accent: #131110;
+
+  /* Vệt bôi đen trong editor. Tách RIÊNG khỏi --surface-sel: dòng đang gõ dùng
+     surface-sel, nếu vùng chọn cũng dùng nó thì bôi đen trên chính dòng đó không
+     thấy gì. ~2.1:1 so với nền editor — rõ mà chữ bên trên vẫn đọc được. */
+  --select-bg: oklch(0.74 0.10 128 / 0.36);
 }
 
 [data-theme='light'] {
@@ -91,4 +96,7 @@
   --syn-string:  oklch(0.42 0.08 128);
 
   --on-accent: #fcfaf5;
+
+  /* Bản sáng cần đậm hơn: nền kem sáng làm tint nhạt chìm mất. */
+  --select-bg: oklch(0.48 0.08 128 / 0.30);
 }

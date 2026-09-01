@@ -11,7 +11,7 @@ import type { FailureNotice } from './conflicts'
 const CONTROL =
   'w-full border border-line-strong bg-surface-2 px-2.5 py-1.5 text-sm ' +
   'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)] ' +
-  'disabled:cursor-not-allowed disabled:opacity-60'
+  'disabled:cursor-not-allowed disabled:bg-surface-1 disabled:text-ink-5 disabled:opacity-100'
 
 export function Field({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
   return (

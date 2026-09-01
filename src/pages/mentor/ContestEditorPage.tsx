@@ -58,7 +58,7 @@ export function ContestEditorPage() {
 
       <header className="mb-4 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-[26px] text-ink-1">{row.title}</h1>
-        <span className={`rounded-full px-2 py-0.5 text-xs ${PHASE_CLASS[phase]}`}>{PHASE_LABEL[phase]}</span>
+        <span className={`px-2 py-0.5 text-xs ${PHASE_CLASS[phase]}`}>{PHASE_LABEL[phase]}</span>
         <Link
           to={`/mentor/contest/${contestId}/thong-ke`}
           className="ml-auto inline-flex items-center gap-1 text-sm text-[var(--color-primary)] hover:underline"

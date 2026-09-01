@@ -116,7 +116,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                   <span
                     aria-hidden="true"
                     data-testid={`rail-badge-${item.key}`}
-                    className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-wa px-1 text-[10px] leading-4 font-semibold text-on-accent"
+                    className="absolute -top-0.5 -right-0.5 min-w-4 bg-wa px-1 text-[10px] leading-4 font-semibold text-on-accent"
                   >
                     {item.badge}
                   </span>

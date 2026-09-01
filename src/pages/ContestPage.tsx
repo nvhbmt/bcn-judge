@@ -46,7 +46,7 @@ export function ContestPage() {
       <header className="mb-5">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="font-display text-[26px] text-ink-1">{data.title}</h1>
-          <span className="rounded-full bg-surface-sel px-2 py-0.5 text-xs">
+          <span className="bg-surface-sel px-2 py-0.5 text-xs">
             {PHASE_LABEL[data.phase]}
           </span>
         </div>
