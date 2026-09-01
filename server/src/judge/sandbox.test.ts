@@ -36,7 +36,7 @@ function judge(
 ) {
   return judgeSubmission({
     language: LANGUAGES[langId],
-    source: src(file),
+    files: [{ name: LANGUAGES[langId].sourceFilename, content: src(file) }],
     testcases,
     limits: { ...DEFAULT_LIMITS, ...limits },
   })

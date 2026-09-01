@@ -8,12 +8,17 @@
  */
 import type { LanguageConfig } from './languages'
 import { PIDS_POISON_THRESHOLD, Sandbox } from './sandbox'
-import type { JudgeLimits, JudgeOutcome, TestcaseInput, TestcaseResult, Verdict } from './types'
+import type { JudgeLimits, JudgeOutcome, SourceFile, TestcaseInput, TestcaseResult, Verdict } from './types'
 import { decideVerdict, overallVerdict } from './verdict'
 
 export interface JudgeRequest {
   language: LanguageConfig
-  source: string
+  /**
+   * Các file nạp vào /w, theo thứ tự. Bài stdio có một file; bài dạng function có
+   * harness + mã người học. Tầng này không biết file nào của ai — nó chỉ nạp rồi
+   * chạy `compileArgv`, nên thêm dạng bài mới không phải sửa ở đây.
+   */
+  files: SourceFile[]
   testcases: TestcaseInput[]
   limits: JudgeLimits
   /** Pin core cho slot (§3.2); bỏ trống khi chạy dev. */
@@ -81,7 +86,7 @@ export async function judgeSubmission(req: JudgeRequest, hooks: JudgeHooks = {})
 
   /** Nạp source + biên dịch. Trả về compileOutput, hoặc ném để báo CE/IE. */
   const prepare = async (sb: Sandbox): Promise<{ ok: boolean; output: string; ie: string | null }> => {
-    await sb.putSource(language.sourceFilename, req.source)
+    for (const file of req.files) await sb.putSource(file.name, file.content)
     if (!language.compileArgv) return { ok: true, output: '', ie: null }
 
     const compileSec = ceilSec(limits.compileTimeLimitMs)

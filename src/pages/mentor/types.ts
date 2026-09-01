@@ -16,6 +16,7 @@
  */
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
+export type ProblemKind = 'stdio' | 'function'
 export type CompareMode = 'trim' | 'exact' | 'float'
 export type TestcaseKind = 'sample' | 'hidden'
 
@@ -48,6 +49,9 @@ export interface MentorTestcaseView {
 export interface MentorProblemDetail {
   id: string
   title: string
+  kind: ProblemKind
+  /** {languageId: harness} — chỉ có ở đường mentor, không bao giờ sang member. */
+  harness: Record<string, string>
   statementMd: string
   inputDescMd: string | null
   outputDescMd: string | null

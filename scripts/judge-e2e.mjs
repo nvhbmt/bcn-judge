@@ -105,6 +105,30 @@ const SRC = {
 }
 
 /**
+ * Bài dạng function (kiểu LeetCode): người học chỉ viết hàm `twoSum`, harness của
+ * mentor đọc stdin rồi gọi hàm đó. Sau khi ghép, chương trình vẫn stdin → stdout.
+ */
+const FN = {
+  harness: {
+    c11: '#include <stdio.h>\n#include <stdlib.h>\n#include "solution.c"\nint main(void){int n;if(scanf("%d",&n)!=1)return 1;int*a=malloc((size_t)n*sizeof(int));for(int i=0;i<n;i++)scanf("%d",&a[i]);int t;scanf("%d",&t);int rn=0;int*r=twoSum(a,n,t,&rn);for(int i=0;i<rn;i++)printf("%d%s",r[i],i+1<rn?" ":"");printf("\\n");return 0;}\n',
+    python3: 'import sys\nfrom solution import Solution\nd = sys.stdin.read().split()\nn = int(d[0])\nnums = [int(x) for x in d[1:1+n]]\nprint(" ".join(str(x) for x in Solution().twoSum(nums, int(d[1+n]))))\n',
+  },
+  ac: {
+    c11: 'int *twoSum(int *nums,int n,int target,int *returnSize){static int r[2];for(int i=0;i<n;i++)for(int j=i+1;j<n;j++)if(nums[i]+nums[j]==target){r[0]=i;r[1]=j;*returnSize=2;return r;}*returnSize=0;return r;}\n',
+    python3: 'class Solution:\n    def twoSum(self, nums, target):\n        seen = {}\n        for i, x in enumerate(nums):\n            if target - x in seen:\n                return [seen[target - x], i]\n            seen[x] = i\n        return []\n',
+  },
+  wa: {
+    c11: 'int *twoSum(int *nums,int n,int target,int *returnSize){static int r[2];for(int i=0;i<n;i++)for(int j=i+1;j<n;j++)if(nums[i]+nums[j]==target){r[0]=j;r[1]=i;*returnSize=2;return r;}*returnSize=0;return r;}\n',
+  },
+  ce: { python3: 'class Solution:\n    def twoSum(self, nums, target)\n        return []\n' },
+  testcases: [
+    { input: '4\n2 7 11 15\n9\n', expected: '0 1\n', kind: 'sample' },
+    { input: '3\n3 2 4\n6\n', expected: '1 2\n', kind: 'hidden' },
+    { input: '2\n3 3\n6\n', expected: '0 1\n', kind: 'hidden' },
+  ],
+}
+
+/**
  * 4 testcase: 1 mẫu + 3 ẩn. Hai test có tổng ≤ 0, nên `partial` đúng đúng 2/4.
  * KHÔNG nhét canary vào đây: canary là rác nằm ngoài định dạng, chương trình nào
  * đọc hết stdin (Python, Node) sẽ vỡ và ta đo nhầm lỗi của chính bài kiểm.
@@ -500,6 +524,72 @@ async function main() {
   // 404, nên sẽ không chứng minh được gì về giới hạn kích thước.
   const huge = await pool[3]('/api/member/submissions', { method: 'POST', body: { itemId, languageId: 'c11', source: 'x'.repeat(70_000) } })
   check('mã nguồn vượt 64 KB bị từ chối', huge.status === 400, `status=${huge.status} ${JSON.stringify(huge.body?.error?.code)}`)
+
+  // ── 13. Bài dạng function ─────────────────────────────────────────────────
+  console.log('\n13. Bài dạng function, kiểu LeetCode (FR-D10)')
+
+  const noHarness = await admin('/api/mentor/problems', {
+    method: 'POST',
+    body: { title: 'Thiếu harness', kind: 'function', statementMd: 'x' },
+  })
+  check('bài function KHÔNG có harness bị từ chối ngay lúc tạo',
+    noHarness.status === 400, `status=${noHarness.status} ${JSON.stringify(noHarness.body?.error?.message)}`)
+
+  const fnProblem = await admin('/api/mentor/problems', {
+    method: 'POST',
+    body: {
+      title: 'Two Sum (e2e)',
+      kind: 'function',
+      harness: FN.harness,
+      statementMd: 'Cho mảng `nums` và số `target`, trả về chỉ số hai phần tử có tổng bằng target.',
+      timeLimitMs: 2000,
+      solutionLanguageId: 'c11',
+      solutionSource: FN.ac.c11,
+      starterCode: { c11: 'int *twoSum(int *nums,int n,int target,int *returnSize){\n    // code ở đây\n}\n' },
+    },
+  })
+  const fnId = fnProblem.body?.data?.id
+  check('tạo bài function có harness cho C và Python', fnProblem.status === 201, JSON.stringify(fnProblem.body))
+
+  const fnTc = await admin(`/api/mentor/problems/${fnId}/testcases`, { method: 'PUT', body: { testcases: FN.testcases } })
+  check('nạp 3 testcase cho bài function', fnTc.body?.data?.count === 3, JSON.stringify(fnTc.body))
+
+  const fnPub = await validateAndPublish(fnId, 'Two Sum')
+  check('lời giải mẫu dạng function kiểm được và bài xuất bản được (FR-D6)',
+    fnPub.validated && Boolean(fnPub.itemId), JSON.stringify(fnPub))
+  const fnItemId = fnPub.itemId
+
+  const fnAcC = await submitAndWait(nextMember(), { languageId: 'c11', source: FN.ac.c11, itemId: fnItemId })
+  check('C: chỉ nộp một HÀM, không có main → AC 3/3',
+    fnAcC.detail?.verdict === 'AC' && fnAcC.detail?.score === 100,
+    `verdict=${fnAcC.detail?.verdict} compile=${(fnAcC.detail?.compileOutput ?? '').slice(0, 160)}`)
+
+  const fnAcPy = await submitAndWait(nextMember(), { languageId: 'python3', source: FN.ac.python3, itemId: fnItemId })
+  check('Python: cùng bài, cùng testcase, cũng AC — harness theo từng ngôn ngữ',
+    fnAcPy.detail?.verdict === 'AC' && fnAcPy.detail?.score === 100, `verdict=${fnAcPy.detail?.verdict}`)
+
+  const fnWa = await submitAndWait(nextMember(), { languageId: 'c11', source: FN.wa.c11, itemId: fnItemId })
+  check('hàm trả chỉ số ngược → WA, lỗi đến từ hàm người học chứ không phải harness',
+    fnWa.detail?.verdict === 'WA', `verdict=${fnWa.detail?.verdict}`)
+
+  const fnCe = await submitAndWait(nextMember(), { languageId: 'python3', source: FN.ce.python3, itemId: fnItemId })
+  check('hàm sai cú pháp → CE chứ không phải RE khó hiểu',
+    fnCe.detail?.verdict === 'CE' && (fnCe.detail?.compileOutput ?? '').length > 0,
+    `verdict=${fnCe.detail?.verdict}`)
+
+  const fnBadLang = await nextMember()('/api/member/submissions', {
+    method: 'POST',
+    body: { itemId: fnItemId, languageId: 'cpp17', source: 'x' },
+  })
+  check('ngôn ngữ chưa có harness bị chặn NGAY LÚC NỘP, không để thành IE lúc chấm',
+    fnBadLang.status === 400, `status=${fnBadLang.status}`)
+
+  const fnView = (await nextMember()(`/api/member/problems?itemId=${fnItemId}`)).body
+  check('member biết đây là bài dạng function', fnView?.data?.kind === 'function', JSON.stringify(fnView?.data?.kind))
+  check('member nhận được starter code để điền vào', Boolean(fnView?.data?.starterCode?.c11))
+  check('harness KHÔNG rò sang member',
+    !JSON.stringify(fnView).includes('#include "solution.c"') && !JSON.stringify(fnView).includes('from solution import'),
+    'harness xuất hiện trong đề bài gửi cho member')
 
   await waitFor(async () => {
     const q = (await admin('/api/admin/judge')).body?.data?.queue

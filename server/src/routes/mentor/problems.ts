@@ -36,6 +36,10 @@ async function canEdit(user: AuthUser, problemId: string): Promise<boolean> {
 
 const problemSchema = z.object({
   title: z.string().min(1).max(200),
+  /** 'function' = người học chỉ viết một hàm, ghép với `harness` rồi biên dịch. */
+  kind: z.enum(['stdio', 'function']).optional(),
+  /** {languageId: mã harness}. Bắt buộc khi kind = 'function'. */
+  harness: z.record(z.string().max(40), z.string().max(200_000)).optional(),
   statementMd: z.string().min(1).max(200_000),
   inputDescMd: z.string().max(50_000).optional(),
   outputDescMd: z.string().max(50_000).optional(),
@@ -54,6 +58,30 @@ const problemSchema = z.object({
   solutionVisibility: z.enum(['mentor', 'after_ac', 'after_contest']).optional(),
   scopeCourseId: z.string().optional(),
 })
+
+/**
+ * Bài dạng function phải có harness, và harness phải viết cho ngôn ngữ mà hệ
+ * thống biết ghép. Chặn ở đây thay vì để tới lúc chấm: sai cấu hình mà lọt xuống
+ * worker thì mọi bài nộp thành IE, và IE không nói cho mentor biết họ thiếu gì.
+ */
+async function checkFunctionShape(
+  kind: string,
+  harness: Record<string, string> | undefined,
+): Promise<string | null> {
+  if (kind !== 'function') return null
+  const entries = Object.entries(harness ?? {}).filter(([, src]) => src.trim().length > 0)
+  if (entries.length === 0) return 'Bài dạng function phải có harness cho ít nhất một ngôn ngữ.'
+
+  // Nguồn sự thật là bảng `languages`, không phải hằng số trong code: admin bật
+  // tắt và cấu hình ngôn ngữ ở trang quản trị (NFR-9).
+  const rows = await q<{ id: string }>(sql`
+    SELECT id FROM languages WHERE function_source_filename IS NOT NULL
+  `)
+  const supported = new Set(rows.map((r) => r.id))
+  const unsupported = entries.map(([id]) => id).filter((id) => !supported.has(id))
+  if (unsupported.length > 0) return `Ngôn ngữ chưa hỗ trợ dạng function: ${unsupported.join(', ')}.`
+  return null
+}
 
 mentorProblemRoutes.get('/', async (c) => {
   const me = c.get('user')
@@ -79,16 +107,33 @@ mentorProblemRoutes.post('/', async (c) => {
   const body = await parseBody(c, problemSchema)
   if (!body.ok) return body.response
   const me = c.get('user')
+  const guard = await checkFunctionShape(body.data.kind ?? 'stdio', body.data.harness)
+  if (guard) return errors.badRequest(c, guard)
+
   const [row] = await q<{ id: string }>(sql`
-    INSERT INTO problems (title, statement_md, input_desc_md, output_desc_md, constraints_md,
+    -- Sáu cột cuối từng bị zod cho qua rồi INSERT bỏ quên: mentor tạo bài kèm
+    -- starter code / tags / ví dụ thì mất sạch, im lặng. Cùng họ với lỗi đã sửa
+    -- ở PATCH — lần đó không ai soi lại POST.
+    INSERT INTO problems (title, kind, harness, statement_md, input_desc_md, output_desc_md, constraints_md,
                           time_limit_ms, memory_limit_mb, difficulty, compare_mode,
-                          solution_language_id, solution_source, scope_course_id, created_by)
-    VALUES (${body.data.title}, ${body.data.statementMd}, ${body.data.inputDescMd ?? null},
+                          solution_language_id, solution_source, scope_course_id, created_by,
+                          examples, tags, allowed_language_ids, float_eps, starter_code, solution_visibility)
+    VALUES (${body.data.title}, ${body.data.kind ?? 'stdio'},
+            ${JSON.stringify(body.data.harness ?? {})}::jsonb,
+            ${body.data.statementMd}, ${body.data.inputDescMd ?? null},
             ${body.data.outputDescMd ?? null}, ${body.data.constraintsMd ?? null},
             ${body.data.timeLimitMs ?? null}, ${body.data.memoryLimitMb ?? null},
             ${body.data.difficulty ?? null}, ${body.data.compareMode ?? 'trim'},
             ${body.data.solutionLanguageId ?? null}, ${body.data.solutionSource ?? null},
-            ${body.data.scopeCourseId ?? null}, ${me.id})
+            ${body.data.scopeCourseId ?? null}, ${me.id},
+            ${JSON.stringify(body.data.examples ?? [])}::jsonb,
+            ARRAY(SELECT jsonb_array_elements_text(${JSON.stringify(body.data.tags ?? [])}::jsonb)),
+            ${body.data.allowedLanguageIds
+              ? sql`ARRAY(SELECT jsonb_array_elements_text(${JSON.stringify(body.data.allowedLanguageIds)}::jsonb))`
+              : sql`NULL`},
+            ${body.data.floatEps ?? null},
+            ${JSON.stringify(body.data.starterCode ?? {})}::jsonb,
+            ${body.data.solutionVisibility ?? 'mentor'})
     RETURNING id
   `)
   await audit(me.id, 'problem.create', 'problem', row!.id, null, { title: body.data.title })
@@ -101,7 +146,7 @@ mentorProblemRoutes.get('/:id', async (c) => {
   if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
 
   const [problem] = await q<RawProblemRow>(sql`
-    SELECT id, title, statement_md AS "statementMd", input_desc_md AS "inputDescMd",
+    SELECT id, title, kind, harness, statement_md AS "statementMd", input_desc_md AS "inputDescMd",
            output_desc_md AS "outputDescMd", constraints_md AS "constraintsMd", examples,
            time_limit_ms AS "timeLimitMs", memory_limit_mb AS "memoryLimitMb", difficulty, tags,
            allowed_language_ids AS "allowedLanguageIds", compare_mode AS "compareMode",
@@ -142,9 +187,21 @@ mentorProblemRoutes.patch('/:id', async (c) => {
   if (!body.ok) return body.response
 
   const d = body.data
+  // Kiểm trên trạng thái SAU khi ghép: đổi kind mà không gửi harness, hoặc gửi
+  // harness cho bài vốn đã là function — cả hai đều phải hợp lệ ở kết quả cuối.
+  if (d.kind !== undefined || d.harness !== undefined) {
+    const [cur] = await q<{ kind: string; harness: Record<string, string> | null }>(sql`
+      SELECT kind, harness FROM problems WHERE id = ${problemId}
+    `)
+    const guard = await checkFunctionShape(d.kind ?? cur?.kind ?? 'stdio', d.harness ?? cur?.harness ?? {})
+    if (guard) return errors.badRequest(c, guard)
+  }
+
   await db.execute(sql`
     UPDATE problems SET
       title = COALESCE(${d.title ?? null}, title),
+      kind = COALESCE(${d.kind ?? null}, kind),
+      harness = COALESCE(${d.harness ? JSON.stringify(d.harness) : null}::jsonb, harness),
       statement_md = COALESCE(${d.statementMd ?? null}, statement_md),
       input_desc_md = COALESCE(${d.inputDescMd ?? null}, input_desc_md),
       output_desc_md = COALESCE(${d.outputDescMd ?? null}, output_desc_md),
@@ -156,10 +213,21 @@ mentorProblemRoutes.patch('/:id', async (c) => {
       solution_language_id = COALESCE(${d.solutionLanguageId ?? null}, solution_language_id),
       solution_source = COALESCE(${d.solutionSource ?? null}, solution_source),
       solution_visibility = COALESCE(${d.solutionVisibility ?? null}, solution_visibility),
-      allowed_language_ids = COALESCE(${d.allowedLanguageIds ?? null}, allowed_language_ids),
+      allowed_language_ids = CASE
+        WHEN ${d.allowedLanguageIds ? JSON.stringify(d.allowedLanguageIds) : null}::jsonb IS NULL
+          THEN allowed_language_ids
+        ELSE ARRAY(SELECT jsonb_array_elements_text(${d.allowedLanguageIds ? JSON.stringify(d.allowedLanguageIds) : null}::jsonb))
+      END,
       -- Năm cột dưới đây từng bị zod cho qua rồi UPDATE bỏ quên: dữ liệu mất im
       -- lặng còn audit thì ghi như đã đổi (agent UI phát hiện). FR-D1 bắt buộc tags.
-      tags = COALESCE(${d.tags ?? null}::text[], tags),
+      -- KHÔNG nội suy thẳng mảng JS rồi ép ::text[]: drizzle bung mảng thành hai
+      -- tham số nên câu lệnh hoá ra (\$1, \$2)::text[] và Postgres ném lỗi. Vì
+      -- vậy cột này chưa bao giờ đặt được, dù FR-D1 bắt buộc có tags. Đi vòng qua
+      -- jsonb, giống seed-demo.ts.
+      tags = CASE
+        WHEN ${d.tags ? JSON.stringify(d.tags) : null}::jsonb IS NULL THEN tags
+        ELSE ARRAY(SELECT jsonb_array_elements_text(${d.tags ? JSON.stringify(d.tags) : null}::jsonb))
+      END,
       examples = COALESCE(${d.examples ? JSON.stringify(d.examples) : null}::jsonb, examples),
       starter_code = COALESCE(${d.starterCode ? JSON.stringify(d.starterCode) : null}::jsonb, starter_code),
       float_eps = COALESCE(${d.floatEps ?? null}, float_eps),

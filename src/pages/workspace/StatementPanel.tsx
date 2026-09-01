@@ -13,6 +13,16 @@ export function StatementPanel({ problem }: { problem: ProblemView }) {
         </p>
       </header>
 
+      {/* Bài dạng function: người học phải biết đừng viết main, nếu không sẽ CE vì
+          trùng điểm vào với harness — và thông báo của trình biên dịch lúc đó rất
+          khó hiểu với người mới. */}
+      {problem.kind === 'function' ? (
+        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          Bài dạng <strong>hàm</strong>: chỉ viết đúng hàm theo mẫu có sẵn trong trình soạn thảo.{' '}
+          <strong>Đừng viết hàm main</strong> — phần đọc dữ liệu và in kết quả đã có sẵn.
+        </p>
+      ) : null}
+
       <Markdown source={problem.statementMd} />
 
       {problem.inputDescMd ? <Section title="Dữ liệu vào" body={problem.inputDescMd} /> : null}

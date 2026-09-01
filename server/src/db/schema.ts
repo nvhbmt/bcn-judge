@@ -154,6 +154,10 @@ export const problems = pgTable(
   {
     id: id(),
     title: text('title').notNull(),
+    /** stdio = chương trình trọn vẹn; function = chỉ một hàm, ghép với harness. */
+    kind: text('kind').notNull().default('stdio'),
+    /** {languageId: harness}. CHỈ mentor đọc — xem serialize/problem.ts. */
+    harness: jsonb('harness').notNull().default(sql`'{}'::jsonb`),
     statementMd: text('statement_md').notNull(),
     inputDescMd: text('input_desc_md'),
     outputDescMd: text('output_desc_md'),
@@ -221,7 +225,11 @@ export const languages = pgTable('languages', {
   versionLabel: text('version_label'),
   image: text('image').notNull(),
   sourceFilename: text('source_filename').notNull(),
+  /** Tên file chứa mã người học ở dạng function; NULL = ngôn ngữ chưa hỗ trợ dạng đó. */
+  functionSourceFilename: text('function_source_filename'),
   compileArgv: jsonb('compile_argv'),
+  /** NULL = dùng lại compileArgv; xem drizzle/0003_function_problems.sql. */
+  compileArgvFunction: jsonb('compile_argv_function'),
   runArgv: jsonb('run_argv').notNull(),
   timeFactor: numeric('time_factor', { precision: 4, scale: 2 }).notNull().default('1'),
   memoryExtraMb: integer('memory_extra_mb').notNull().default(0),

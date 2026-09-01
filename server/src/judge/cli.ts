@@ -49,7 +49,7 @@ console.log(`Giới hạn : ${timeLimitMs} ms × ${language.timeFactor}, ${memor
 const outcome = await judgeSubmission(
   {
     language,
-    source,
+    files: [{ name: language.sourceFilename, content: source }],
     testcases,
     limits: { ...DEFAULT_LIMITS, timeLimitMs, memoryLimitMb },
   },

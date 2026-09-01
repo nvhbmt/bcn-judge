@@ -7,8 +7,9 @@
  */
 import { Field, Section, Select, TextArea, TextInput } from './fields'
 import type { ProblemFormValues } from './form'
+import { HarnessSection } from './HarnessSection'
 import { SolutionSection } from './SolutionSection'
-import { COMPARE_MODE_LABEL, type CompareMode, type Difficulty } from './types'
+import { COMPARE_MODE_LABEL, type CompareMode, type Difficulty, type ProblemKind } from './types'
 
 export function ProblemForm({
   values,
@@ -116,6 +117,20 @@ export function ProblemForm({
             </Select>
           </Field>
 
+          <Field
+            id="f-kind"
+            label="Dạng bài"
+            hint="function = người học chỉ viết một hàm, ghép với harness bên dưới"
+          >
+            <Select
+              id="f-kind"
+              value={values.kind}
+              onChange={(e) => onChange({ kind: e.target.value as ProblemKind })}
+            >
+              <option value="stdio">Chương trình trọn vẹn (đọc stdin, in stdout)</option>
+              <option value="function">Chỉ một hàm (kiểu LeetCode)</option>
+            </Select>
+          </Field>
           <Field id="f-compare" label="Cách so sánh output (FR-D5)">
             <Select
               id="f-compare"
@@ -131,6 +146,9 @@ export function ProblemForm({
           </Field>
         </div>
       </Section>
+
+      {/* FR-D10: chỉ hiện khi bài ở dạng function — bài stdio không có harness. */}
+      {values.kind === 'function' ? <HarnessSection values={values} onChange={onChange} /> : null}
 
       <SolutionSection values={values} onChange={onChange} />
     </div>

@@ -9,6 +9,10 @@ import type { RawSubmissionRow } from './submission'
 export interface RawProblemRow {
   id: string
   title: string
+  /** 'stdio' | 'function' — xem drizzle/0003_function_problems.sql. */
+  kind: string
+  /** {languageId: harness}. CHỈ mentor; member không bao giờ thấy cột này. */
+  harness: unknown
   statementMd: string
   inputDescMd: string | null
   outputDescMd: string | null
@@ -45,6 +49,11 @@ export interface MemberSampleView {
 export interface MemberProblemView {
   id: string
   title: string
+  /**
+   * Dạng bài. Member CẦN biết để giao diện hiện đúng thứ: bài function thì nạp
+   * `starterCode` vào trình soạn thảo và nói rõ "chỉ viết hàm, đừng viết main".
+   */
+  kind: string
   statementMd: string
   inputDescMd: string | null
   outputDescMd: string | null
@@ -62,6 +71,12 @@ export interface MemberProblemView {
   /** Cấm với member — khai kiểu để rò rỉ thành lỗi biên dịch. */
   solutionSource?: never
   hiddenTestcases?: never
+  /**
+   * Harness chứa cách bài được kiểm — lộ nó là lộ luôn nửa đáp án, và ở bài
+   * function nó thường in ra chính giá trị mong đợi. Cấm ở tầng kiểu như
+   * `solutionSource`, không dựa vào việc nhớ đừng chọn cột.
+   */
+  harness?: never
 }
 
 export function toMemberProblem(
@@ -73,6 +88,7 @@ export function toMemberProblem(
   return {
     id: problem.id,
     title: problem.title,
+    kind: problem.kind,
     statementMd: problem.statementMd,
     inputDescMd: problem.inputDescMd,
     outputDescMd: problem.outputDescMd,
@@ -109,7 +125,9 @@ export function mayMemberSeeSolution(
   }
 }
 
-export interface MentorProblemView extends Omit<MemberProblemView, 'solutionSource' | 'hiddenTestcases'> {
+export interface MentorProblemView extends Omit<MemberProblemView, 'solutionSource' | 'hiddenTestcases' | 'harness'> {
+  /** {languageId: harness} — chỉ có ở đường mentor. */
+  harness: unknown
   compareMode: string
   testcaseRev: number
   solutionLanguageId: string | null
@@ -137,6 +155,7 @@ export function toMentorProblem(
   const member = toMemberProblem(problem, testcases, defaults)
   return {
     ...member,
+    harness: problem.harness,
     compareMode: problem.compareMode,
     testcaseRev: problem.testcaseRev,
     solutionLanguageId: problem.solutionLanguageId,

@@ -4,7 +4,7 @@ Hệ thống chấm bài tập lập trình nội bộ của câu lạc bộ: qu
 thành viên code trên trình duyệt, chấm tự động bằng testcase, contest theo tuần có bảng xếp hạng.
 
 - Yêu cầu: [`docs/requirements.md`](docs/requirements.md) (v0.7)
-- Thiết kế: [`docs/design.md`](docs/design.md) — 14 ADR, delta Team/Leader, delta P0
+- Thiết kế: [`docs/design.md`](docs/design.md) — 14 ADR, delta Team/Leader, delta P0, delta FR-D10
 
 ## Chạy thử trong 3 lệnh
 
@@ -34,7 +34,7 @@ Kiểm chứng toàn hệ thống qua HTTP (cần API + worker đang chạy):
 
 ```bash
 node scripts/smoke.mjs      # 29 kiểm tra: cấp tài khoản → soạn bài → nộp → chấm → verdict
-node scripts/judge-e2e.mjs  # 79 kiểm tra, chỉ soi luồng chấm nhưng soi tới đáy (~50 s)
+node scripts/judge-e2e.mjs  # 91 kiểm tra, chỉ soi luồng chấm nhưng soi tới đáy (~60 s)
 ```
 
 `judge-e2e.mjs` cần một database **còn trống** (nó tạo tài khoản, khoá, bài mới và
@@ -42,7 +42,7 @@ không dọn sau khi chạy) và bật cả 5 ngôn ngữ. Phủ: AC trên cả 
 verdict sinh từ hành vi thật của chương trình, điểm từng phần, hai canary chứng
 minh testcase ẩn không rò, chạy thử (mẫu và input tự nhập), giới hạn tần suất, bốn
 người nộp đồng thời, contest và bảng xếp hạng, chấm lại hai chiều kèm vết kiểm
-toán, và các cổng chặn quanh luồng nộp.
+toán, bài dạng function, và các cổng chặn quanh luồng nộp.
 
 ## Trạng thái
 
@@ -67,6 +67,31 @@ leader (FR-J6), bốn ngôn ngữ chấm.
 
 Chưa làm, đều là mức **C**: đăng nhập Google (FR-A5), checker tự viết (FR-D5), phát hiện
 trùng code (FR-G7), lịch tự tạo contest hằng tuần (FR-I11).
+
+## Bài dạng function (kiểu LeetCode) — FR-D10
+
+Ngoài bài stdio thông thường, mentor đặt bài ở dạng **hàm**: người học chỉ viết một
+hàm theo chữ ký cho sẵn, không viết `main`. Mentor soạn một *harness* cho từng ngôn
+ngữ; hệ thống ghép harness với mã người học rồi biên dịch thành một chương trình.
+
+Sau khi ghép, chương trình vẫn đọc stdin và ghi stdout như mọi bài stdio — nên
+sandbox, hàng đợi, worker, chấm điểm, bảng xếp hạng, chấm lại **không đổi một dòng**.
+Quy ước tên file: harness chiếm chỗ điểm vào (`main.c`, `Main.java`…), mã người học
+nằm ở `solution.c` / `Solution.java` / `solution.py` / `solution.cpp` / `solution.js`.
+
+Ba điều đáng biết trước khi soạn:
+
+- **Harness không được tự phán đúng/sai.** Nó chạy chung sandbox với code không tin
+  được, nên `printf("PASS")` giả mạo được. Harness chỉ in giá trị trả về; verdict do
+  máy chủ quyết ở ngoài — cùng lý do `run.sh` in dòng đo bằng root ngoài `setpriv`.
+- **Ngôn ngữ chưa có harness thì không nộp được bằng ngôn ngữ đó**, và bị chặn ngay
+  lúc nộp chứ không để thành IE lúc chấm.
+- **Harness không bao giờ tới member** — cấm ở tầng kiểu trong serializer, và đường
+  member cũng không SELECT cột đó ra khỏi DB.
+
+Còn nợ: số dòng trong thông báo CE tính theo file đã ghép, nên bài 20 dòng có thể
+nhận "lỗi ở dòng 87". Cần `#line` hoặc dịch ngược số dòng trước khi mở cho lớp C
+cơ bản. Chi tiết ở `docs/design.md`, mục *Delta FR-D10*.
 
 **Nợ kỹ thuật quan trọng nhất** (ghi trong `docs/design.md` §14): mọi số đo và toàn bộ bộ abuse
 mới chạy trên **máy dev (OrbStack)**. §11 của thiết kế yêu cầu chạy lại trên **đúng kernel/Docker

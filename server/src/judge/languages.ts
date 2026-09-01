@@ -12,6 +12,13 @@ export interface LanguageConfig {
   sourceFilename: string
   /** null = ngôn ngữ thông dịch không có bước biên dịch riêng. */
   compileArgv: string[] | null
+  /**
+   * Tên file chứa mã NGƯỜI HỌC ở bài dạng function; harness chiếm chỗ
+   * `sourceFilename` vì nó mới là điểm vào. null = ngôn ngữ chưa hỗ trợ dạng này.
+   */
+  functionSourceFilename: string | null
+  /** null = dùng lại `compileArgv`. Chỉ khác khi phải nêu đích danh cả hai file. */
+  compileArgvFunction: string[] | null
   runArgv: string[]
   /** Hệ số nhân giới hạn thời gian (FR-D2). */
   timeFactor: number
@@ -27,6 +34,9 @@ export const LANGUAGES = {
     image: 'bcnjudge-runner-gcc:14',
     sourceFilename: 'main.c',
     compileArgv: ['gcc', '-std=c11', '-O2', '-pipe', '-static', '-s', '-o', '/w/prog', 'main.c', '-lm'],
+    // Harness `main.c` tự `#include "solution.c"`, nên lệnh biên dịch không đổi.
+    functionSourceFilename: 'solution.c',
+    compileArgvFunction: null,
     runArgv: ['/w/prog'],
     timeFactor: 1,
     memoryExtraMb: 0,
@@ -38,6 +48,8 @@ export const LANGUAGES = {
     image: 'bcnjudge-runner-gcc:14',
     sourceFilename: 'main.cpp',
     compileArgv: ['g++', '-std=c++17', '-O2', '-pipe', '-static', '-s', '-o', '/w/prog', 'main.cpp'],
+    functionSourceFilename: 'solution.cpp',
+    compileArgvFunction: null,
     runArgv: ['/w/prog'],
     timeFactor: 1,
     memoryExtraMb: 0,
@@ -50,6 +62,10 @@ export const LANGUAGES = {
     sourceFilename: 'main.py',
     // py_compile để lỗi cú pháp thành CE như mọi ngôn ngữ khác (§3.2 phase 2).
     compileArgv: ['python3', '-m', 'py_compile', 'main.py'],
+    functionSourceFilename: 'solution.py',
+    // Phải kiểm CẢ solution.py, nếu không lỗi cú pháp của người học thành RE lúc
+    // import chứ không phải CE — đúng thứ làm người mới học rối nhất.
+    compileArgvFunction: ['python3', '-m', 'py_compile', 'solution.py', 'main.py'],
     runArgv: ['python3', 'main.py'],
     timeFactor: 3,
     memoryExtraMb: 64,
@@ -63,6 +79,10 @@ export const LANGUAGES = {
     sourceFilename: 'Main.java',
     // -proc:none chặn annotation processor chạy code lúc biên dịch.
     compileArgv: ['javac', '-proc:none', '-d', '/w', 'Main.java'],
+    // Tên class công khai phải trùng tên file, nên harness buộc là Main.java còn
+    // người học viết class Solution; javac cần nêu đích danh cả hai.
+    functionSourceFilename: 'Solution.java',
+    compileArgvFunction: ['javac', '-proc:none', '-d', '/w', 'Main.java', 'Solution.java'],
     // JVM tự chọn heap theo RAM container; -XX:-UsePerfData bỏ file /tmp/hsperfdata.
     runArgv: ['java', '-XX:-UsePerfData', '-XX:+UseSerialGC', '-Xss64m', '-cp', '/w', 'Main'],
     timeFactor: 2,
@@ -75,6 +95,10 @@ export const LANGUAGES = {
     image: 'bcnjudge-runner-node:20',
     sourceFilename: 'main.js',
     compileArgv: null,
+    functionSourceFilename: 'solution.js',
+    // Dạng stdio không có bước biên dịch, nhưng dạng function thì `--check` đáng
+    // giá: nó biến lỗi cú pháp của người học thành CE thay vì RE khó hiểu.
+    compileArgvFunction: ['node', '--check', 'solution.js'],
     runArgv: ['node', 'main.js'],
     timeFactor: 2,
     memoryExtraMb: 128,

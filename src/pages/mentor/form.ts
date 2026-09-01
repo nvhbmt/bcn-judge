@@ -10,10 +10,16 @@
  *      trường không gửi = giữ nguyên. Vì vậy chỉ gửi trường THỰC SỰ đổi, và độ khó
  *      bỏ trống là "giữ nguyên" chứ không phải "xoá".
  */
-import type { CompareMode, Difficulty, MentorProblemDetail } from './types'
+import type { CompareMode, Difficulty, MentorProblemDetail, ProblemKind } from './types'
 
 export interface ProblemFormValues {
   title: string
+  /** 'function' = người học chỉ viết một hàm, ghép với harness rồi biên dịch. */
+  kind: ProblemKind
+  /** {languageId: harness}. Mỗi ngôn ngữ một bản, vì cách ghép khác nhau. */
+  harness: Record<string, string>
+  /** Ngôn ngữ đang được soạn harness — chỉ là trạng thái màn hình, không gửi đi. */
+  harnessLanguageId: string
   statementMd: string
   inputDescMd: string
   outputDescMd: string
@@ -32,6 +38,9 @@ const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
 export function toFormValues(detail: MentorProblemDetail): ProblemFormValues {
   return {
     title: detail.title,
+    kind: detail.kind === 'function' ? 'function' : 'stdio',
+    harness: detail.harness ?? {},
+    harnessLanguageId: Object.keys(detail.harness ?? {})[0] ?? detail.solutionLanguageId ?? '',
     statementMd: detail.statementMd,
     inputDescMd: detail.inputDescMd ?? '',
     outputDescMd: detail.outputDescMd ?? '',
@@ -47,6 +56,10 @@ export function toFormValues(detail: MentorProblemDetail): ProblemFormValues {
 
 /** Kiểm ở FE để lỗi nói tiếng người: zod của server chỉ trả "Dữ liệu không hợp lệ." */
 export function validateForm(v: ProblemFormValues): string | null {
+  // Chặn ở FE để mentor thấy ngay; máy chủ vẫn kiểm lại (checkFunctionShape).
+  if (v.kind === 'function' && !Object.values(v.harness).some((src) => src.trim().length > 0)) {
+    return 'Bài dạng function phải có harness cho ít nhất một ngôn ngữ.'
+  }
   const title = v.title.trim()
   if (title.length === 0) return 'Tiêu đề không được để trống.'
   if (title.length > 200) return 'Tiêu đề tối đa 200 ký tự.'
@@ -87,6 +100,14 @@ export function toPatchPayload(
     if (current[key] !== initial[key]) patch[key] = current[key]
   }
   if (current.compareMode !== initial.compareMode) patch.compareMode = current.compareMode
+  if (current.kind !== initial.kind) patch.kind = current.kind
+  // Gửi cả map khi có bất kỳ ngôn ngữ nào đổi: server ghi đè nguyên cột jsonb, nên
+  // gửi một phần là xoá mất harness của những ngôn ngữ còn lại.
+  if (JSON.stringify(current.harness) !== JSON.stringify(initial.harness)) {
+    patch.harness = Object.fromEntries(
+      Object.entries(current.harness).filter(([, src]) => src.trim().length > 0),
+    )
+  }
   // Độ khó rỗng KHÔNG gửi: schema là enum nên `''` bị 400, và COALESCE không xoá được.
   if (current.difficulty !== initial.difficulty && current.difficulty !== '') {
     patch.difficulty = current.difficulty

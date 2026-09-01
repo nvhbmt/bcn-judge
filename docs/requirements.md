@@ -134,6 +134,7 @@ Mức ưu tiên: **M** = bắt buộc trong v1 · **S** = nên có trong v1 nế
 | FR-D7 | M | Lời giải tham khảo lưu kèm bài, chỉ mentor/admin xem. Cho member xem sau khi AC hoặc sau khi contest kết thúc (S). |
 | FR-D8 | S | Bài tập dùng chung giữa nhiều khoá và contest (tham chiếu tới cùng một bài, không sao chép), để sửa testcase một nơi. |
 | FR-D9 | S | Chấm lại (rejudge) toàn bộ bài nộp của một bài sau khi sửa testcase; kết quả cũ được giữ trong lịch sử; bảng xếp hạng contest tính lại theo. |
+| FR-D10 | S | **Bài dạng function (kiểu LeetCode)**: người học chỉ viết một hàm theo chữ ký cho sẵn, không viết `main`. Mentor soạn *harness* riêng cho từng ngôn ngữ; hệ thống ghép harness với mã người học rồi biên dịch thành một chương trình, sau đó chấm y như bài stdio. Ngôn ngữ chưa có harness thì không nộp bằng ngôn ngữ đó được, và bài dạng này bắt buộc có harness cho ít nhất một ngôn ngữ. Harness không bao giờ lộ ra cho member. |
 
 ### FR-E · Giao diện làm bài (split view)
 

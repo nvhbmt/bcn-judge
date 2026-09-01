@@ -28,7 +28,9 @@ const CANARY_HIDDEN_INPUT = 'CANARY_HIDDEN_INPUT_9f3a'
 const CANARY_HIDDEN_EXPECTED = 'CANARY_HIDDEN_EXPECTED_7c1b'
 const CANARY_SOLUTION = 'CANARY_SOLUTION_4e8d'
 const CANARY_MENTOR_STDOUT = 'CANARY_MENTOR_STDOUT_2a6f'
-const ALL_CANARIES = [CANARY_HIDDEN_INPUT, CANARY_HIDDEN_EXPECTED, CANARY_SOLUTION, CANARY_MENTOR_STDOUT]
+/** Harness của bài dạng function: lộ nó là lộ luôn cách bài được kiểm. */
+const CANARY_HARNESS = 'CANARY_HARNESS_5b2e'
+const ALL_CANARIES = [CANARY_HIDDEN_INPUT, CANARY_HIDDEN_EXPECTED, CANARY_SOLUTION, CANARY_MENTOR_STDOUT, CANARY_HARNESS]
 
 describe.skipIf(!INTEGRATION)('canary — dữ liệu ẩn không bao giờ tới member', () => {
   let member: TestUser
@@ -163,7 +165,8 @@ describe.skipIf(!INTEGRATION)('canary — dữ liệu ẩn không bao giờ tớ
   it('serializer thuần: đề bài chỉ mang testcase mẫu', () => {
     const view = toMemberProblem(
       {
-        id: 'p', title: 't', statementMd: 's', inputDescMd: null, outputDescMd: null, constraintsMd: null,
+        id: 'p', title: 't', kind: 'function', harness: { c11: CANARY_HARNESS },
+        statementMd: 's', inputDescMd: null, outputDescMd: null, constraintsMd: null,
         examples: [], timeLimitMs: null, memoryLimitMb: null, difficulty: null, tags: [],
         allowedLanguageIds: null, compareMode: 'trim', starterCode: {},
         solutionLanguageId: 'c11', solutionSource: CANARY_SOLUTION, solutionVisibility: 'mentor', testcaseRev: 1,
@@ -179,6 +182,9 @@ describe.skipIf(!INTEGRATION)('canary — dữ liệu ẩn không bao giờ tớ
     )
     expect(JSON.stringify(view)).not.toContain(CANARY_HIDDEN_INPUT)
     expect(JSON.stringify(view)).not.toContain(CANARY_SOLUTION)
+    // Bài dạng function: harness KHÔNG được đi cùng đề bài sang member.
+    expect(JSON.stringify(view)).not.toContain(CANARY_HARNESS)
+    expect(view.kind).toBe('function')
     expect(view.hiddenTestcaseCount).toBe(1)
   })
 })

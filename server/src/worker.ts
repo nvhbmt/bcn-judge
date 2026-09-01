@@ -25,7 +25,7 @@ import {
 } from './judge/queue'
 import { judgeSubmission } from './judge/runner'
 import { reapOrphanSandboxes } from './judge/sandbox'
-import { DEFAULT_LIMITS, type JudgeLimits, type TestcaseInput } from './judge/types'
+import { DEFAULT_LIMITS, type JudgeLimits, type SourceFile, type TestcaseInput } from './judge/types'
 import { getSettings } from './lib/settings'
 
 const WORKER_ID = `${hostname()}-${process.pid}`
@@ -54,19 +54,28 @@ interface LanguageRow {
   time_factor: string
   memory_extra_mb: number
   enabled: boolean
+  /** Chỉ có ở truy vấn của loadJob; probeLanguages không cần nên để tuỳ chọn. */
+  function_source_filename?: string | null
+  compile_argv_function?: string[] | null
 }
 
-function toLanguageConfig(row: LanguageRow, limits: JudgeLimits): LanguageConfig {
+function toLanguageConfig(row: LanguageRow, limits: JudgeLimits, kind = 'stdio'): LanguageConfig {
   const substitute = (arg: string) =>
     arg
       .replace('{memory_mb}', String(limits.memoryLimitMb))
       .replace('{time_s}', String(Math.ceil((limits.timeLimitMs * Number(row.time_factor)) / 1000)))
+  // Dạng function biên dịch hai file, và vài ngôn ngữ phải nêu đích danh cả hai
+  // (javac) hoặc kiểm cú pháp thêm file của người học (py_compile, node --check).
+  const compile =
+    kind === 'function' && row.compile_argv_function ? row.compile_argv_function : row.compile_argv
   return {
     id: row.id,
     label: row.name,
     image: row.image,
     sourceFilename: row.source_filename,
-    compileArgv: row.compile_argv?.map(substitute) ?? null,
+    functionSourceFilename: row.function_source_filename ?? null,
+    compileArgv: compile?.map(substitute) ?? null,
+    compileArgvFunction: row.compile_argv_function?.map(substitute) ?? null,
     runArgv: row.run_argv.map(substitute),
     timeFactor: Number(row.time_factor),
     memoryExtraMb: row.memory_extra_mb,
@@ -79,7 +88,34 @@ interface JobContext {
   limits: JudgeLimits
   testcases: TestcaseInput[]
   testcaseRev: number | null
-  source: string
+  /** Đã ghép sẵn theo dạng bài: stdio một file, function là harness + solution. */
+  files: SourceFile[]
+}
+
+/**
+ * Ghép danh sách file nạp vào sandbox.
+ *
+ * Bài stdio: đúng một file, y như trước.
+ * Bài function: harness của mentor chiếm chỗ `sourceFilename` (main.c, Main.java…)
+ * vì nó là điểm vào, mã người học nằm ở `functionSourceFilename` và được harness
+ * gọi tới. Thiếu harness cho ngôn ngữ đang nộp là lỗi CẤU HÌNH của bài, không
+ * phải lỗi người học — nên ném ra để thành IE, và route nộp bài đã chặn từ trước.
+ */
+function buildFiles(
+  kind: string,
+  language: LanguageConfig,
+  harness: Record<string, string>,
+  userSource: string,
+): SourceFile[] {
+  if (kind !== 'function') return [{ name: language.sourceFilename, content: userSource }]
+
+  const harnessSource = harness[language.id]
+  if (!harnessSource) throw new Error('harness_missing')
+  if (!language.functionSourceFilename) throw new Error('language_no_function_support')
+  return [
+    { name: language.sourceFilename, content: harnessSource },
+    { name: language.functionSourceFilename, content: userSource },
+  ]
 }
 
 /** Nạp mọi thứ cần để chấm. Lỗi ở đây là IE — không bao giờ tính lên đầu member. */
@@ -93,14 +129,18 @@ async function loadJob(job: ClaimedSubmission): Promise<JobContext> {
     float_eps: number | null
     testcase_rev: number
     solution_source: string | null
+    kind: string
+    harness: Record<string, string> | null
   }>(sql`
-    SELECT time_limit_ms, memory_limit_mb, compare_mode, float_eps, testcase_rev, solution_source
+    SELECT time_limit_ms, memory_limit_mb, compare_mode, float_eps, testcase_rev, solution_source,
+           kind, harness
     FROM problems WHERE id = ${job.problemId}
   `)
   if (!problem) throw new Error('problem_not_found')
 
   const [langRow] = await q<LanguageRow>(sql`
-    SELECT id, name, image, source_filename, compile_argv, run_argv, time_factor, memory_extra_mb, enabled
+    SELECT id, name, image, source_filename, function_source_filename,
+           compile_argv, compile_argv_function, run_argv, time_factor, memory_extra_mb, enabled
     FROM languages WHERE id = ${job.languageId}
   `)
   if (!langRow) throw new Error('language_not_found')
@@ -118,11 +158,12 @@ async function loadJob(job: ClaimedSubmission): Promise<JobContext> {
 
   // Chạy thử với input tự nhập: một testcase tổng hợp, không có expected.
   if (job.kind === 'run' && job.runTarget === 'custom') {
+    const language = toLanguageConfig(langRow, limits, problem.kind)
     return {
-      language: toLanguageConfig(langRow, limits),
+      language,
       limits,
       testcaseRev: problem.testcase_rev,
-      source: job.source,
+      files: buildFiles(problem.kind, language, problem.harness ?? {}, job.source),
       testcases: [
         { position: 1, isSample: true, weight: 1, input: job.customInput ?? Buffer.alloc(0), expected: null },
       ],
@@ -144,12 +185,19 @@ async function loadJob(job: ClaimedSubmission): Promise<JobContext> {
     ORDER BY position
   `)
 
+  const language = toLanguageConfig(langRow, limits, problem.kind)
   return {
-    language: toLanguageConfig(langRow, limits),
+    language,
     limits,
     testcaseRev: problem.testcase_rev,
     // FR-D6: validate chấm chính LỜI GIẢI MẪU của bài, không phải source người gửi.
-    source: job.runTarget === 'validate' ? (problem.solution_source ?? job.source) : job.source,
+    // Ở dạng function, lời giải mẫu cũng chỉ là "một hàm nữa" đi qua cùng harness.
+    files: buildFiles(
+      problem.kind,
+      language,
+      problem.harness ?? {},
+      job.runTarget === 'validate' ? (problem.solution_source ?? job.source) : job.source,
+    ),
     testcases: rows.map((r) => ({
       position: r.position,
       isSample: r.kind === 'sample',
@@ -202,7 +250,7 @@ async function runJob(job: ClaimedSubmission, slot: number): Promise<void> {
     const outcome = await judgeSubmission(
       {
         language: ctx.language,
-        source: ctx.source,
+        files: ctx.files,
         testcases: ctx.testcases,
         limits: ctx.limits,
         ...(config.workerCpuset ? { cpusetCpus: config.workerCpuset.split(',')[slot] ?? '' } : {}),
@@ -312,7 +360,7 @@ export async function processOneRejudge(slot = 0): Promise<RejudgeJob | null> {
     const ctx = await loadJob(job)
     const outcome = await judgeSubmission({
       language: ctx.language,
-      source: ctx.source,
+      files: ctx.files,
       testcases: ctx.testcases,
       limits: ctx.limits,
       labels: { 'bcnjudge.rejudge': job.id, 'bcnjudge.worker': WORKER_ID },
@@ -411,7 +459,7 @@ async function probeLanguages(): Promise<void> {
     try {
       const outcome = await judgeSubmission({
         language: toLanguageConfig(row, DEFAULT_LIMITS),
-        source,
+        files: [{ name: row.source_filename, content: source }],
         testcases: [{ position: 1, isSample: true, weight: 1, input: Buffer.alloc(0), expected: Buffer.from('ok\n') }],
         limits: { ...DEFAULT_LIMITS, timeLimitMs: 5000 },
       })

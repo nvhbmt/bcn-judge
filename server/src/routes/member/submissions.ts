@@ -21,9 +21,26 @@ const handleSchema = z.object({
   source: z.string().max(2_000_000),
 })
 
+/**
+ * Ngôn ngữ có nộp được cho bài này không.
+ *
+ * Với bài dạng function còn hai điều kiện nữa, và cả hai phải chặn TẠI ĐÂY chứ
+ * không phải lúc chấm: thiếu thì worker ném ra IE, mà IE hiện lên như lỗi hệ
+ * thống nên người học tưởng mình bị oan còn mentor không biết bài mình thiếu gì.
+ *   - ngôn ngữ phải biết ghép hai file (`function_source_filename`)
+ *   - bài phải có harness viết cho đúng ngôn ngữ đó
+ */
 async function languageAllowed(problemId: string, languageId: string): Promise<boolean> {
   const [row] = await q<{ allowed: boolean }>(sql`
-    SELECT (l.enabled AND (p.allowed_language_ids IS NULL OR ${languageId} = ANY (p.allowed_language_ids))) AS allowed
+    SELECT (
+      l.enabled
+      AND (p.allowed_language_ids IS NULL OR ${languageId} = ANY (p.allowed_language_ids))
+      AND (
+        p.kind <> 'function'
+        OR (l.function_source_filename IS NOT NULL
+            AND coalesce(btrim(p.harness ->> l.id), '') <> '')
+      )
+    ) AS allowed
     FROM problems p, languages l
     WHERE p.id = ${problemId} AND l.id = ${languageId}
   `)
@@ -179,7 +196,12 @@ memberProblemRoutes.get('/', async (c) => {
   if (!access.ok) return errors_from(c, access)
 
   const [problem] = await q<RawProblemRow>(sql`
-    SELECT id, title, statement_md AS "statementMd", input_desc_md AS "inputDescMd",
+    -- harness KHÔNG bao giờ đi tới member, nên đường này không lấy nó ra khỏi DB
+    -- luôn. Serializer vẫn là cổng chặn (khai kiểu never), đây là lớp thứ hai:
+    -- byte không được nạp thì không có gì để rò. Khác solution_source — cột đó
+    -- phải lấy vì FR-D7 cho phép mở lời giải sau khi AC.
+    SELECT id, title, kind, '{}'::jsonb AS harness,
+           statement_md AS "statementMd", input_desc_md AS "inputDescMd",
            output_desc_md AS "outputDescMd", constraints_md AS "constraintsMd", examples,
            time_limit_ms AS "timeLimitMs", memory_limit_mb AS "memoryLimitMb", difficulty, tags,
            allowed_language_ids AS "allowedLanguageIds", compare_mode AS "compareMode",

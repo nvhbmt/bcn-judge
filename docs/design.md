@@ -982,3 +982,58 @@ namespace, và hành vi half-close của exec stdin.
 5. *Minor — tuyên bố flip Q17 vênh hai chữ: (1) drop unique KHÔNG phải additive — migration flip như mô tả bị chính gate `check-migrations-safe.sh` của §9 chặn; (2) tổ hợp team-theo-khoá + member-nhiều-team không giữ được "≤1 team mỗi khoá" ở tầng DB* → sửa lời: online-safe nhưng cần lối đi tay qua gate chỉ-additive (như dòng `deferrable` viết tay của ADR-14); tổ hợp (a)+(b) mô tả trước cột `course_id` denormalize trên `team_members` + `unique (user_id, course_id)` — vẫn additive. — §2 (dòng flip), §2.8, §14 delta
 6. *Minor — ER ghi `users ||--o{ teams` (one-to-many) trong khi `unique(user_id)` + composite FK ép mỗi user là leader của tối đa MỘT team — ER là căn cứ kiểm tra flip, cardinality lệch dẫn UI/API admin cho phép điều DB từ chối* → đổi `||--o|` kèm chú thích "≤1 do unique(user_id)". — §2 ER
 7. *Minor — FR-J4 (S, "trong v1" ở §13) không được gọi tên trong deliverable P4 — khi P7 triage cắt S-item sẽ không mốc nào giữ nó; +12 h là ước lượng mỏng cho migrate + admin CRUD kèm UI + trang hai chế độ + serializer + 4 lớp test* → nhãn P4 thêm "FR-J4 (S)" + liệt kê deliverable đầy đủ; 12 → 16 giờ, tổng 342 → 346. — §11, §13, §14 delta
+
+---
+
+## Delta FR-D10 — bài dạng function (kiểu LeetCode), 01/09/2026
+
+**Kết luận sau khi soi kiến trúc:** không phải làm lại gì. Sau khi ghép harness với
+mã người học, chương trình vẫn đọc stdin và ghi stdout như mọi bài stdio — nên
+sandbox, hàng đợi, worker, chấm điểm, bảng xếp hạng, SSE, chấm lại đều **không
+đổi một dòng**. Đó là tiêu chí thiết kế, không phải may mắn: dạng bài mới nào
+cũng phải quy về được "một chương trình, stdin vào, stdout ra".
+
+### Thay đổi
+
+- **§2.3 `problems`** thêm `kind text not null default 'stdio' check (kind in ('stdio','function'))`
+  và `harness jsonb not null default '{}'` (`{languageId: mã harness}`, cùng hình
+  dạng `starter_code`). Ràng buộc DB `problems_function_needs_harness`: bài
+  `kind='function'` không được có `harness = '{}'`. Giữ ở DB chứ không ở guard API
+  — bản ghi sai ở đây biến mọi bài nộp thành IE.
+- **§2.4 `languages`** thêm `function_source_filename` (NULL = ngôn ngữ chưa hỗ trợ
+  dạng function) và `compile_argv_function` (NULL = dùng lại `compile_argv`).
+  Vẫn là dữ liệu, không phải code (NFR-9): thêm ngôn ngữ không sửa ứng dụng.
+- **§3.2** `JudgeRequest.source: string` → `files: SourceFile[]`. Tầng judge không
+  biết file nào của ai, chỉ nạp rồi chạy `compileArgv`.
+- **§3.1 quy ước tên file**: harness chiếm chỗ `source_filename` (`main.c`,
+  `Main.java`…) vì nó là **điểm vào**; mã người học nằm ở `function_source_filename`
+  (`solution.c`, `Solution.java`…). Java buộc phải như vậy: tên class công khai
+  phải trùng tên file.
+- **§5** `POST/PATCH /api/mentor/problems` nhận `kind` + `harness`, kiểm hình dạng
+  dựa trên trạng thái **sau khi ghép**. `languageAllowed()` ở đường nộp bài thêm
+  hai điều kiện cho bài function; chặn tại đây chứ không để tới lúc chấm, vì IE
+  hiện lên như lỗi hệ thống nên người học tưởng bị oan còn mentor không biết thiếu gì.
+- **§8** `harness` vào danh sách cấm của serializer member (khai kiểu `never` như
+  `solutionSource`), và đường member **không SELECT** cột đó ra khỏi DB — lớp thứ
+  hai: byte không nạp thì không có gì để rò.
+
+### Ba quyết định đáng ghi
+
+1. **Harness không được tự phán đúng/sai.** Nó chạy chung sandbox với code không
+   tin được, nên `printf("PASS")` là giả mạo được — đúng lớp tấn công mà bộ abuse
+   đã có ca "in dòng `__JUDGE_META__` giả vẫn nhận TLE". Harness chỉ in giá trị
+   trả về; verdict do máy chủ quyết ở ngoài. Câu này in thẳng trên màn hình soạn bài.
+2. **`compile_argv_function` tồn tại là vì CE.** Nếu chỉ biên dịch file harness thì
+   lỗi cú pháp của người học rơi xuống lúc chạy và hiện thành RE — thứ khó hiểu
+   nhất với người mới học. Python thêm `py_compile solution.py`, Java nêu đích danh
+   `Solution.java`, và Node vốn không có bước biên dịch nay có `node --check`.
+3. **So sánh output giữ nguyên `trim`/`exact`/`float`.** So theo *giá trị* (mảng
+   không quan trọng thứ tự, nhiều đáp án đúng) trùng đúng phạm vi FR-D5 "checker
+   tự viết" (mức C, chưa làm). Harness tự tuần tự hoá về dạng chuẩn tắc là đủ cho
+   phần lớn bài; khi nào cần hơn thì làm checker, không vá vào đây.
+
+### Nợ còn lại
+
+Số dòng trong thông báo CE tính theo file đã ghép, nên bài 20 dòng có thể nhận
+"lỗi ở dòng 87". Cần chỉ thị `#line` (C/C++) hoặc dịch ngược số dòng trước khi
+mở cho lớp C cơ bản. Chưa làm.

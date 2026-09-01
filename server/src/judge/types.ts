@@ -31,6 +31,19 @@ export interface TestcaseInput {
   expected: Buffer | null
 }
 
+/**
+ * Một file nguồn nạp vào sandbox.
+ *
+ * Bài stdio có đúng một file. Bài dạng function có hai: harness của mentor chiếm
+ * chỗ điểm vào (main.c, Main.java…), mã của người học nằm ở file bên cạnh
+ * (solution.c, Solution.java…) và được harness gọi tới.
+ */
+export interface SourceFile {
+  /** Tên file trong /w. Không được chứa '/' — tầng judge không tạo thư mục con. */
+  name: string
+  content: string
+}
+
 export interface JudgeLimits {
   timeLimitMs: number
   memoryLimitMb: number

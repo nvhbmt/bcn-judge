@@ -187,6 +187,11 @@ export class Sandbox {
    * Chọn cách sau: giữ nguyên rootfs read-only, không thêm bề mặt nào.
    */
   async putSource(filename: string, content: string): Promise<void> {
+    // Tên file đi từ bảng `languages` — dữ liệu admin sửa được — nên chặn ở đây
+    // thay vì tin tầng gọi: một tên như `../etc/passwd` sẽ ghi ra ngoài /w.
+    if (!/^[A-Za-z0-9._-]+$/.test(filename) || filename.startsWith('.')) {
+      throw new Error(`tên file nguồn không hợp lệ: ${filename}`)
+    }
     const target = `/w/${filename}`
     const outcome = await this.exec(
       // Không chown: file do root tạo nên đã là 0:0, mà CAP_CHOWN cũng đã bị drop.

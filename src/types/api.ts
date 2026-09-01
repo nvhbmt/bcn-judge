@@ -28,6 +28,8 @@ export interface SampleIO {
 export interface ProblemView {
   id: string
   title: string
+  /** 'function' = chỉ nộp một hàm; harness của mentor lo phần đọc/ghi dữ liệu. */
+  kind: 'stdio' | 'function'
   statementMd: string
   inputDescMd: string | null
   outputDescMd: string | null
