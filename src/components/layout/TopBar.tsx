@@ -1,19 +1,26 @@
 /**
- * Thanh trên 48px — điều hướng toàn cục của app.
+ * Thanh trên 56px — điều hướng toàn cục của app (màn 02–03, 05–08 của bản v2).
  *
  * Vì sao nó tồn tại: trước bản v2 app KHÔNG có header toàn cục, `CoursesPage` kiêm
  * luôn vai trò đó. Hệ quả là mọi cụm không được `CoursesPage` link tới thì không ai
  * mở được — cụm `/quan-tri` từng như vậy (sửa ở commit 6bd5cdb), và `/contest` cũng
  * vậy. Đặt điều hướng vào một chỗ duy nhất để lỗi đó không tái diễn.
  *
- * Nav dùng mono kiểu đường dẫn shell (`~/khoá-học`) — đây là chữ ký của hệ thiết kế,
- * xem `design-system/readme.md`. Chỉ liệt kê route CÓ THẬT; thêm mục ở đây mà quên
- * khai route trong App.tsx là tạo link chết.
+ * Nav dùng mono kiểu đường dẫn shell (`~/khoá-học`) — chữ ký của hệ thiết kế. Mục
+ * đang mở nhận NỀN `--surface-code` chứ không đổi màu chữ: thiết kế đánh dấu trạng
+ * thái bằng nền và đường kẻ, không bằng màu nhấn rải rác. Chỉ liệt kê route CÓ THẬT;
+ * thêm mục ở đây mà quên khai route trong App.tsx là tạo link chết.
+ *
+ * KHÔNG có ô `⌘K tìm bài` như bản vẽ: app chưa có tìm kiếm toàn cục, và chính hợp
+ * đồng nội dung của hệ thiết kế cấm vẽ thứ chưa chạy được ("Chức năng đang được
+ * phát triển" → bỏ khỏi màn hình). Thêm lại khi nào tính năng có thật.
+ *
+ * Xem design-system/readme.md.
  */
 import { LogOut, Moon, Sun } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import logo from '@/assets/logo-bcn.png'
+import { Avatar } from '@/components/ui/patterns'
 import { currentTheme, toggleTheme, type Theme } from '@/lib/theme'
 import { useAuth } from '@/stores/auth'
 
@@ -37,29 +44,39 @@ function navFor(role: string): NavItem[] {
   return items
 }
 
+/** Vai trò hiện thành chip viền: mentor xanh rêu, admin nâu đất đỏ. Member không có chip. */
+function RoleChip({ role }: { role: string }) {
+  if (role === 'admin') {
+    return <span className="border border-clay px-2.5 py-1 font-mono text-[11px] text-clay">ADMIN</span>
+  }
+  if (role === 'mentor') {
+    return <span className="border border-moss px-2.5 py-1 font-mono text-[11px] text-moss">MENTOR</span>
+  }
+  return null
+}
+
 export function TopBar() {
   const { me, logout } = useAuth()
   const [theme, setTheme] = useState<Theme>(() => currentTheme())
   if (!me) return null
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-6 border-b border-line bg-surface-1 px-4">
-      <span className="flex items-center gap-2">
-        <img src={logo} alt="" aria-hidden className="logo-bcn h-5 w-5" />
-        <span className="font-mono text-[13px] font-semibold tracking-[0.06em] text-ink-1">BCN</span>
-        {/* Khối 14×7px sau chữ BCN — chữ ký thứ hai của hệ thiết kế. */}
-        <span aria-hidden className="h-[7px] w-[14px] bg-moss" />
+    <header className="flex h-14 shrink-0 items-center gap-6 border-b border-line bg-surface-1 px-7">
+      {/* Chữ ký thứ hai của hệ: khối 14×7px moss ngay sau chữ BCN, chân chữ thẳng hàng. */}
+      <span className="flex shrink-0 items-end gap-2">
+        <span className="font-mono text-[13px] font-bold tracking-[0.06em] text-ink-1">BCN</span>
+        <span aria-hidden className="mb-[3px] h-[7px] w-[14px] bg-moss" />
       </span>
 
-      <nav aria-label="Điều hướng chính" className="flex items-center gap-1">
+      <nav aria-label="Điều hướng chính" className="flex min-w-0 items-center gap-0.5 overflow-x-auto">
         {navFor(me.role).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `px-2 py-1 font-mono text-[12px] tracking-[0.06em] transition-colors duration-[120ms] ease-linear ${
-                isActive ? 'text-moss' : 'text-ink-5 hover:text-ink-2'
+              `px-3 py-1.5 font-mono text-[12px] whitespace-nowrap transition-colors duration-[120ms] ease-linear ${
+                isActive ? 'bg-surface-code text-ink-1' : 'text-ink-5 hover:text-ink-2'
               }`
             }
           >
@@ -68,8 +85,10 @@ export function TopBar() {
         ))}
       </nav>
 
-      <div className="ml-auto flex items-center gap-3">
-        <span className="font-mono text-[12px] text-ink-5">{me.displayName}</span>
+      <div className="ml-auto flex shrink-0 items-center gap-3">
+        <RoleChip role={me.role} />
+        <span className="hidden font-mono text-[12px] text-ink-2 sm:inline">{me.displayName}</span>
+        <Avatar name={me.displayName} chars={1} />
         <button
           type="button"
           onClick={() => setTheme(toggleTheme())}

@@ -50,8 +50,18 @@ async function loadContest(contestId: string, userId: string, role: string): Pro
 /** GET /api/member/contests — contest trong phạm vi của tôi (FR-B5). */
 memberContestRoutes.get('/', async (c) => {
   const me = c.get('user')
-  const rows = await q<{ id: string; title: string; startAt: string; endAt: string; problemCount: number }>(sql`
+  const rows = await q<{
+    id: string
+    title: string
+    startAt: string
+    endAt: string
+    problemCount: number
+    freezeMinutes: number
+  }>(sql`
     SELECT ct.id, ct.title, ct.start_at AS "startAt", ct.end_at AS "endAt",
+           -- Trang chủ nói "đóng băng BXH lúc HH:MM"; mốc đó suy ra từ end_at trừ
+           -- freeze_minutes nên phải trả cột này ra, không thì dòng đó im lặng biến mất.
+           ct.freeze_minutes AS "freezeMinutes",
            (SELECT count(*)::int FROM contest_problems cp WHERE cp.contest_id = ct.id) AS "problemCount"
     FROM contests ct
     WHERE ct.status = 'published' AND ct.deleted_at IS NULL

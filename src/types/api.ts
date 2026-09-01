@@ -19,6 +19,12 @@ export interface CourseSummary {
   descriptionMd: string | null
 }
 
+/** `GET /api/member/courses/:id` — bản chi tiết, có thêm mentor và ngôn ngữ của khoá. */
+export interface CourseDetail extends CourseSummary {
+  mentors: { displayName: string; email: string }[]
+  languages: { id: string; name: string }[]
+}
+
 export interface SampleIO {
   position: number
   input: string

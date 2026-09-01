@@ -75,5 +75,35 @@ memberCourseRoutes.get('/:id', async (c) => {
     .from(courses)
     .where(eq(courses.id, courseId))
     .limit(1)
-  return ok(c, row)
+  if (!row) return errors.notFound(c, 'Không tìm thấy khoá học.')
+
+  // Mentor của khoá: member cần biết hỏi ai khi tắc. Chỉ tên và email công vụ —
+  // KHÔNG trả id, vai trò hay bất cứ thứ gì khác của bảng users.
+  const mentors = await q<{ displayName: string; email: string }>(sql`
+    SELECT u.display_name AS "displayName", u.email
+    FROM course_mentors cm JOIN users u ON u.id = cm.user_id
+    WHERE cm.course_id = ${courseId} AND u.disabled = false AND u.deleted_at IS NULL
+    ORDER BY u.display_name
+  `)
+
+  // Ngôn ngữ dùng được trong khoá = hợp của allowed_language_ids trên các bài ĐÃ
+  // XUẤT BẢN của khoá, giao với ngôn ngữ đang bật. Bài để NULL nghĩa là "mọi ngôn
+  // ngữ", nên gặp một bài như vậy là cả danh sách đang bật đều dùng được.
+  const languages = await q<{ id: string; name: string }>(sql`
+    SELECT l.id, l.name
+    FROM languages l
+    WHERE l.enabled = true AND EXISTS (
+      SELECT 1
+      FROM items i
+      JOIN sections sec ON sec.id = i.section_id
+      JOIN problems p ON p.id = i.problem_id
+      WHERE sec.course_id = ${courseId}
+        AND i.status = 'published'
+        AND p.deleted_at IS NULL
+        AND (p.allowed_language_ids IS NULL OR l.id = ANY (p.allowed_language_ids))
+    )
+    ORDER BY l.position
+  `)
+
+  return ok(c, { ...row, mentors, languages })
 })

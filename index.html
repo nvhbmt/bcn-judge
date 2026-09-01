@@ -7,11 +7,24 @@
 
     <!-- Nạp font ở ĐÂY chứ không phải bằng @import trong CSS: bundler nâng @import
          lồng trong file CSS đã import ra ngoài rồi bỏ luôn, nên font khai mà không
-         bao giờ tải. Repo từng dính đúng lỗi đó với 'Be Vietnam Pro'. -->
+         bao giờ tải. Repo từng dính đúng lỗi đó với 'Be Vietnam Pro'.
+
+         Montserrat CHỈ dùng cho logo (src/components/BcnLogo.tsx) — chữ hình học gần
+         nhất với logo gốc của CLB. Tham số `text=` cắt bộ chữ xuống đúng những ký tự
+         logo cần, nên nó tải vài KB thay vì cả bộ Latin + Việt. Đổi chữ trong logo thì
+         phải bổ sung ký tự mới vào đây, không thì ký tự đó rơi về font dự phòng. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!-- KHÔNG dùng tham số `text=` để cắt bộ chữ, dù nó gọn hơn nhiều: bộ chữ cắt kiểu
+         đó trả về thiếu glyph dấu mũ, nên logo hiện ra "BAN CONG NGHẸ" thay vì
+         "BAN CÔNG NGHỆ" (đã nhìn thấy trên trình duyệt). Subset `vietnamese` chuẩn của
+         Google mới có đủ dấu và đủ dữ liệu đặt dấu. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&display=swap"
       rel="stylesheet"
     />
 

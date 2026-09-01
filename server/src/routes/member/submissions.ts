@@ -115,14 +115,24 @@ memberSubmissionRoutes.get('/recent', async (c) => {
     receivedAt: Date | string
     problemTitle: string
     itemId: string | null
+    courseId: string | null
     contestId: string | null
+    contestProblemId: string | null
     passedWeight: number | null
     totalWeight: number | null
   }>(sql`
     SELECT s.id, s.verdict, s.status, s.received_at AS "receivedAt",
            p.title AS "problemTitle", s.item_id AS "itemId", s.contest_id AS "contestId",
+           s.contest_problem_id AS "contestProblemId",
+           -- courseId KHÔNG nằm trên submissions: nó ở cuối chuỗi item → section →
+           -- course. Thiếu nó thì trang chủ không dựng nổi link về màn làm bài, và
+           -- dòng log của bài trong khoá (khác bài contest) không bấm được.
+           sec.course_id AS "courseId",
            s.passed_weight AS "passedWeight", s.total_weight AS "totalWeight"
-    FROM submissions s JOIN problems p ON p.id = s.problem_id
+    FROM submissions s
+    JOIN problems p ON p.id = s.problem_id
+    LEFT JOIN items i ON i.id = s.item_id
+    LEFT JOIN sections sec ON sec.id = i.section_id
     WHERE s.user_id = ${me.id} AND s.kind = 'submit'
     ORDER BY s.seq DESC LIMIT ${limit}
   `)
@@ -136,7 +146,9 @@ memberSubmissionRoutes.get('/recent', async (c) => {
       receivedAt: iso(r.receivedAt),
       problemTitle: r.problemTitle,
       itemId: r.itemId,
+      courseId: r.courseId,
       contestId: r.contestId,
+      contestProblemId: r.contestProblemId,
       score: scoreOf(r.passedWeight, r.totalWeight),
     })),
   )
