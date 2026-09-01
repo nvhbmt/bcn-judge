@@ -15,8 +15,9 @@ import { ContentHeader } from './ContentHeader'
 import { EditorPane } from './EditorPane'
 import { HelpPanel } from './HelpPanel'
 import { LeaderboardPanel } from './LeaderboardPanel'
+import { LessonPanel } from './LessonPanel'
 import { NoteBanner } from './NoteBanner'
-import { RAIL_ITEMS, RAIL_LABEL, type RailKey } from './rail'
+import { RAIL_ITEMS, RAIL_ITEMS_LESSON, RAIL_LABEL, type RailKey } from './rail'
 import { StatementPanel } from './StatementPanel'
 import { SubmissionsPanel } from './SubmissionsPanel'
 import { useSiblings } from './siblings'
@@ -48,9 +49,23 @@ export function WorkspacePage() {
 
   const handleQuery = contestProblemId ? `contestProblemId=${contestProblemId}` : `itemId=${itemId}`
 
+  // Loại của mục lấy từ giáo trình mà màn này VỐN ĐÃ nạp (xem useSiblings) — không tốn
+  // thêm vòng mạng nào. Biết sớm là để không gọi endpoint bài tập cho một bài đọc: gọi
+  // thì chắc chắn 404, và đó chính là loạt 404 rải khắp log.
+  const siblings = useSiblings({ courseId, itemId, contestId, contestProblemId })
+  const laBaiDoc = siblings.kind === 'lesson'
+
   const { data: problemResult, isLoading } = useQuery({
     queryKey: ['problem', handleQuery],
     queryFn: () => api.getWithMeta<ProblemView>(`/api/member/problems?${handleQuery}`),
+    // Chỉ hỏi khi đã BIẾT CHẮC mục không phải bài đọc. Bắn sớm thì mọi bài đọc đều tạo
+    // một 404 — không phải lỗi vô hại: nó lẫn vào log và che mất 404 thật.
+    //
+    // Trên đường khoá học, giáo trình gần như luôn đã nằm sẵn trong cache (vừa đi qua
+    // trang khoá hoặc panel Giáo trình) nên chờ ở đây không tốn gì; chỉ khi mở thẳng
+    // bằng URL nguội mới mất thêm một vòng. `resolved` bảo đảm không chờ vô hạn khi
+    // giáo trình lỗi — lúc đó vẫn hỏi, và 404 nhận về là 404 THẬT.
+    enabled: siblings.resolved && !laBaiDoc,
   })
   const problem = problemResult?.data
   const meta = problemResult?.meta
@@ -126,8 +141,11 @@ export function WorkspacePage() {
     setRail('de-bai')
   }, [handle])
 
-  const siblings = useSiblings({ courseId, itemId, contestId, contestProblemId })
-  const contentLabel = RAIL_LABEL[rail]
+  // "Đề bài" là sai tên cho một trang lý thuyết — và nhãn này còn là tên tab ở màn hẹp.
+  const contentLabel = rail === 'de-bai' && laBaiDoc ? 'Bài đọc' : RAIL_LABEL[rail]
+  // Truy vấn ĐANG TẮT thì react-query báo isLoading = false, nên nếu chỉ nhìn nó thì
+  // trong lúc còn chờ giáo trình màn hình đã kết luận "không mở được" rồi mới đi hỏi.
+  const dangCho = !siblings.resolved || isLoading
   // FR-I6: sau giờ kết thúc contest vẫn nộp và chấm được, nhưng không tính BXH.
   const contestEndAt = meta?.contestEndAt as string | undefined
   const practiceMode = Boolean(contestEndAt && new Date(contestEndAt) <= new Date())
@@ -148,7 +166,7 @@ export function WorkspacePage() {
       <NoteBanner />
 
       <div className="min-h-0 flex-1 overflow-auto">
-        {isLoading ? (
+        {dangCho ? (
           <div className="p-4">
             <Spinner />
           </div>
@@ -163,9 +181,11 @@ export function WorkspacePage() {
         ) : null}
         {rail === 'bang-xep-hang' ? <LeaderboardPanel courseId={courseId} contestId={contestId} /> : null}
         {rail === 'de-bai' ? (
-          problem ? (
+          laBaiDoc && itemId ? (
+            <LessonPanel itemId={itemId} />
+          ) : problem ? (
             <StatementPanel problem={problem} />
-          ) : isLoading ? null : (
+          ) : dangCho ? null : (
             // Không có bài mà không nói gì thì khung nội dung trống trơn, trông như
             // app treo. Gặp thật khi mở một link cũ sau lúc dữ liệu bị dựng lại.
             <EmptyState
@@ -189,7 +209,7 @@ export function WorkspacePage() {
     </div>
   )
 
-  const editor = (
+  const editor = laBaiDoc ? undefined : (
     <EditorPane
       languages={allowed}
       languageId={languageId}
@@ -223,7 +243,7 @@ export function WorkspacePage() {
       contentLabel={contentLabel}
       rail={
         <IconRail
-          items={RAIL_ITEMS}
+          items={laBaiDoc ? RAIL_ITEMS_LESSON : RAIL_ITEMS}
           activeKey={rail}
           onSelect={(key) => setRail(key as RailKey)}
         />

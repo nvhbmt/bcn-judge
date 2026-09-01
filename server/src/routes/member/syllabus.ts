@@ -9,6 +9,7 @@ import { Hono } from 'hono'
 import { q } from '../../db/pool'
 import { errors, ok } from '../../lib/apiResponse'
 import { iso } from '../../lib/time'
+import { lessonForMember } from './access'
 import { isEnrolledInOpenCourse } from './courses'
 
 export const memberSyllabusRoutes = new Hono()
@@ -152,3 +153,22 @@ memberSyllabusRoutes.get('/:courseId/leaderboard', async (c) => {
 })
 
 export { bestSubmissions }
+
+/**
+ * GET /api/member/items/:itemId/lesson — nội dung một BÀI ĐỌC của giáo trình.
+ *
+ * Vì sao là route riêng chứ không nhét thân bài vào chính giáo trình: giáo trình là
+ * danh sách, được gọi mỗi lần mở màn làm bài; kèm thân của mọi bài đọc vào đó thì một
+ * khoá hai chục bài lý thuyết kéo theo hàng trăm KB cho mỗi lần liệt kê, trong khi
+ * người đọc chỉ mở đúng một bài.
+ *
+ * Cổng kiểm dùng CHUNG với đường bài tập (`passesItemGate`), nên bài đọc hẹn giờ cũng
+ * không lộ trước giờ mở.
+ */
+export const memberItemRoutes = new Hono()
+
+memberItemRoutes.get('/:itemId/lesson', async (c) => {
+  const lesson = await lessonForMember(c.get('user'), c.req.param('itemId'))
+  if (!lesson) return errors.notFound(c, 'Không tìm thấy bài đọc.')
+  return ok(c, lesson)
+})

@@ -35,3 +35,13 @@ export const RAIL_LABEL: Record<RailKey, string> = {
   'bang-xep-hang': 'Bảng xếp hạng',
   'tro-giup': 'Trợ giúp',
 }
+
+/**
+ * Rail cho một BÀI ĐỌC: bỏ "Bài nộp", và "Đề bài" đổi tên thành "Bài đọc".
+ *
+ * Bài đọc không có bài nộp nào để liệt kê — panel đó gọi API bằng chính itemId này và
+ * chỉ nhận về 404. Một icon dẫn tới khung trống thì thà không có.
+ */
+export const RAIL_ITEMS_LESSON: RailDef[] = RAIL_ITEMS.filter((i) => i.key !== 'bai-nop').map((i) =>
+  i.key === 'de-bai' ? { ...i, label: 'Bài đọc' } : i,
+)

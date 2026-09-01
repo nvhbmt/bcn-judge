@@ -50,7 +50,12 @@ const TAB_ORDER: TabKey[] = ['content', 'editor']
 export interface WorkspaceProps {
   rail: ReactNode
   content: ReactNode
-  editor: ReactNode
+  /**
+   * Khung code. BỎ TRỐNG với mục không có gì để gõ — bài đọc của giáo trình chẳng
+   * hạn: ở đó một editor rỗng cạnh vạch chia kéo được chỉ tổ mời người ta gõ vào một
+   * chỗ không nộp đi đâu được.
+   */
+  editor?: ReactNode
   /** Nhãn mục đang hiển thị ở khung nội dung — dùng làm nhãn tab Nội dung khi màn hình hẹp. */
   contentLabel: string
   storageKey: string
@@ -146,7 +151,12 @@ export function Workspace({ rail, content, editor, contentLabel, storageKey, col
         {rail}
       </div>
 
-      {narrow ? (
+      {editor === undefined ? (
+        // Không có khung code: nội dung chiếm hết phần còn lại, ở cả hai cỡ màn hình.
+        // Không dựng tablist một tab, cũng không dựng SplitPane một bên — cả hai đều là
+        // bộ điều khiển không điều khiển được gì.
+        <div className="min-w-0 flex-1">{content}</div>
+      ) : narrow ? (
         <div className="flex min-w-0 flex-1 flex-col" data-testid="workspace-tabs">
           <div
             role="tablist"

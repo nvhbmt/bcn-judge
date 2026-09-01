@@ -17,7 +17,7 @@ import { adminUserRoutes } from './routes/admin/users'
 import { memberContestRoutes } from './routes/member/contests'
 import { memberCourseRoutes, memberLanguageRoutes } from './routes/member/courses'
 import { memberProblemRoutes, memberSubmissionRoutes } from './routes/member/submissions'
-import { memberSyllabusRoutes } from './routes/member/syllabus'
+import { memberItemRoutes, memberSyllabusRoutes } from './routes/member/syllabus'
 import { memberTeamRoutes } from './routes/member/teams'
 import { mentorContentRoutes } from './routes/mentor/content'
 import { mentorContestRoutes } from './routes/mentor/contests'
@@ -62,6 +62,7 @@ export function createApp(): Hono {
   const member = new Hono()
   member.use('*', requireAuth)
   member.route('/courses', memberSyllabusRoutes)
+  member.route('/items', memberItemRoutes)
   member.route('/courses', memberCourseRoutes)
   member.route('/languages', memberLanguageRoutes)
   member.route('/teams', memberTeamRoutes)

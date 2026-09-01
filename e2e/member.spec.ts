@@ -77,6 +77,35 @@ test('thanh icon đổi panel bên trái (FR-E7)', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Tổng hai số' })).toBeVisible()
 })
 
+test('bài đọc trong giáo trình mở và dựng được nội dung', async ({ page }) => {
+  const { errors } = watchForErrors(page)
+  await page.goto('/')
+  await page.getByRole('link', { name: /C cơ bản/ }).click()
+
+  // Mục loại `lesson` trước đây không có đường hiển thị nào: cả hai danh sách giáo
+  // trình đều trỏ nó vào màn làm bài, mà màn đó hỏi /api/member/problems và nhận 404.
+  // Nên bấm vào một bài đọc chỉ ra khung trống, còn log thì đầy 404.
+  await page.getByRole('link', { name: 'Đọc và ghi dữ liệu chuẩn' }).first().click()
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Đọc và ghi dữ liệu chuẩn' })).toBeVisible()
+  await expect(page.getByText(/Chương trình trên hệ thống chấm/)).toBeVisible()
+  // Markdown dựng thật: khối code và công thức KaTeX trong thân bài đều lên hình.
+  await expect(page.locator('pre code').first()).toContainText('scanf')
+  await expect(page.locator('.katex').first()).toBeVisible()
+
+  // Không có gì để gõ thì không dựng khung code — và cũng không có mục "Bài nộp".
+  await expect(page.locator('.cm-content')).toHaveCount(0)
+  const rail = page.getByRole('navigation').filter({ hasNot: page.getByText('~/khoá-học') })
+  await expect(rail.getByRole('button', { name: 'Bài nộp' })).toHaveCount(0)
+
+  // Đọc xong phải đi tiếp được, nếu không là mắc kẹt ở trang lý thuyết.
+  await page.getByRole('link', { name: 'bài sau →' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Tổng hai số' })).toBeVisible()
+  await expect(page.locator('.cm-content')).toBeVisible()
+
+  expect(errors).toEqual([])
+})
+
 test('chạy thử trên testcase mẫu, không tính vào lịch sử nộp (FR-F1)', async ({ page }) => {
   await page.goto('/')
   await openFirstProblem(page)

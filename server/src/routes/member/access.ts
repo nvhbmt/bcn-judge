@@ -27,17 +27,54 @@ export type AccessResult =
 
 const NOT_FOUND = { ok: false as const, status: 404 as const, code: 'not_found', message: 'Không tìm thấy bài tập.' }
 
+interface ItemGateRow {
+  status: string
+  visible_from: string | null
+  course_id: string
+  course_status: string
+  is_staff: boolean
+  is_enrolled: boolean
+}
+
+/**
+ * Cổng chung cho MỌI mục giáo trình: đã xuất bản, tới lịch mở, khoá đang mở, user đã
+ * ghi danh — staff của khoá và admin thì đi thẳng.
+ *
+ * Tách ra vì bài tập và bài đọc đi hai đường khác nhau nhưng phải chịu ĐÚNG một luật.
+ * Chép luật thành hai bản là mở đường cho chúng trôi lệch, mà lệch ở đây nghĩa là một
+ * mục hẹn giờ bị lộ trước giờ mở.
+ */
+function passesItemGate(user: AuthUser, row: ItemGateRow): boolean {
+  if (user.role === 'admin' || row.is_staff) return true
+  if (!row.is_enrolled || row.course_status !== 'open') return false
+  if (row.status !== 'published') return false
+  if (row.visible_from && new Date(row.visible_from) > new Date()) return false
+  return true
+}
+
+/** Bài đọc của khoá (kind = 'lesson'): không có problem nên đi riêng, cổng thì dùng chung. */
+export async function lessonForMember(
+  user: AuthUser,
+  itemId: string,
+): Promise<{ id: string; title: string; bodyMd: string | null; courseId: string } | null> {
+  const [row] = await q<ItemGateRow & { id: string; title: string; body_md: string | null }>(sql`
+    SELECT i.id, i.title, i.lesson_body_md AS body_md, i.status, i.visible_from,
+           c.id AS course_id, c.status AS course_status,
+           EXISTS (SELECT 1 FROM course_mentors cm WHERE cm.course_id = c.id AND cm.user_id = ${user.id}) AS is_staff,
+           EXISTS (SELECT 1 FROM course_enrollments ce
+                   WHERE ce.course_id = c.id AND ce.user_id = ${user.id} AND ce.status = 'active') AS is_enrolled
+    FROM items i
+    JOIN sections s ON s.id = i.section_id
+    JOIN courses c ON c.id = s.course_id
+    WHERE i.id = ${itemId} AND i.kind = 'lesson'
+  `)
+  if (!row || !passesItemGate(user, row)) return null
+  return { id: row.id, title: row.title, bodyMd: row.body_md, courseId: row.course_id }
+}
+
 /** Đường khoá học: item phải ĐÃ XUẤT BẢN, tới lịch mở, khoá đang mở, user đã ghi danh. */
 async function accessByItem(user: AuthUser, itemId: string): Promise<AccessResult> {
-  const [row] = await q<{
-    problem_id: string
-    status: string
-    visible_from: string | null
-    course_id: string
-    is_staff: boolean
-    is_enrolled: boolean
-    course_status: string
-  }>(sql`
+  const [row] = await q<ItemGateRow & { problem_id: string }>(sql`
     SELECT i.problem_id, i.status, i.visible_from, c.id AS course_id, c.status AS course_status,
            EXISTS (SELECT 1 FROM course_mentors cm WHERE cm.course_id = c.id AND cm.user_id = ${user.id}) AS is_staff,
            EXISTS (SELECT 1 FROM course_enrollments ce
@@ -48,13 +85,8 @@ async function accessByItem(user: AuthUser, itemId: string): Promise<AccessResul
     WHERE i.id = ${itemId} AND i.kind = 'problem'
   `)
   if (!row || !row.problem_id) return NOT_FOUND
+  if (!passesItemGate(user, row)) return NOT_FOUND
 
-  const isStaff = user.role === 'admin' || row.is_staff
-  if (!isStaff) {
-    if (!row.is_enrolled || row.course_status !== 'open') return NOT_FOUND
-    if (row.status !== 'published') return NOT_FOUND
-    if (row.visible_from && new Date(row.visible_from) > new Date()) return NOT_FOUND
-  }
   return {
     ok: true,
     access: {
