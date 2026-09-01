@@ -66,7 +66,7 @@ export function CourseEnrollments({ courseId }: { courseId: string }) {
     <Card title={`Ghi danh member (${active.length} đang học)`}>
       <FailureBanner notice={notice} />
 
-      <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300" htmlFor="enroll-emails">
+      <label className="mb-1 block text-xs font-medium text-ink-3" htmlFor="enroll-emails">
         Dán danh sách email
       </label>
       <TextArea
@@ -77,7 +77,7 @@ export function CourseEnrollments({ courseId }: { courseId: string }) {
         placeholder={'an.nguyen@bcn.local\nbinh.tran@bcn.local, chi.le@bcn.local'}
         spellCheck={false}
       />
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-ink-5">
         Ngăn cách bằng xuống dòng, dấu phẩy, chấm phẩy hoặc khoảng trắng — dán thẳng từ Excel hay Zalo đều được. Trùng
         lặp tự loại. {parsed.length > 0 ? `Đang nhận diện ${valid.length} email hợp lệ` : null}
         {badNow.length > 0 ? `, ${badNow.length} dòng sai định dạng` : null}
@@ -92,25 +92,24 @@ export function CourseEnrollments({ courseId }: { courseId: string }) {
 
       {enroll.data ? <EnrollResult report={enroll.data} invalid={invalid} /> : null}
 
-      <h3 className="mt-5 mb-2 text-xs font-semibold text-slate-600 dark:text-slate-300">Đã ghi danh</h3>
+      <h3 className="mt-5 mb-2 text-xs font-semibold text-ink-3">Đã ghi danh</h3>
       {isLoading ? <Spinner /> : null}
-      {data && data.length === 0 ? <p className="text-sm text-slate-500">Chưa member nào trong khoá.</p> : null}
+      {data && data.length === 0 ? <p className="text-sm text-ink-5">Chưa member nào trong khoá.</p> : null}
 
-      <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+      <ul className="divide-y divide-line">
         {active.map((row) => (
           <li key={row.id} className="flex items-center gap-2 py-1.5 text-sm">
             <span className="min-w-0">
               <span className="block truncate">{row.displayName}</span>
-              <span className="block truncate font-mono text-xs text-slate-500">{row.email}</span>
+              <span className="block truncate font-mono text-xs text-ink-5">{row.email}</span>
             </span>
             <button
               type="button"
               onClick={() => unenroll.mutate(row.id)}
               disabled={unenroll.isPending}
-              className="ml-auto inline-flex shrink-0 items-center gap-1 rounded border border-slate-300 px-2 py-1
-                text-xs hover:bg-slate-100 disabled:opacity-50 focus-visible:outline-2
-                focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]
-                dark:border-slate-600 dark:hover:bg-slate-800"
+              className="ml-auto inline-flex shrink-0 items-center gap-1 border border-line-strong px-2 py-1
+ text-xs hover:bg-surface-sel disabled:opacity-50 focus-visible:outline-2
+ focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]"
             >
               <UserMinus size={13} /> Gỡ
             </button>
@@ -119,7 +118,7 @@ export function CourseEnrollments({ courseId }: { courseId: string }) {
       </ul>
 
       {removed.length > 0 ? (
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-ink-5">
           {removed.length} member đã gỡ ghi danh. Bài nộp và tiến độ của họ vẫn còn — ghi danh lại là khôi phục.
         </p>
       ) : null}

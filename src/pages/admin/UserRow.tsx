@@ -16,9 +16,9 @@ import type { AdminUser, UserWithSecret } from './types'
 import { FailureBanner, Select } from './ui'
 
 const ACTION_BTN =
-  'inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100 ' +
+  'inline-flex items-center gap-1  border border-line-strong px-2 py-1 text-xs hover:bg-surface-sel ' +
   'disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-1 ' +
-  'focus-visible:outline-[var(--color-primary)] dark:border-slate-600 dark:hover:bg-slate-800'
+  'focus-visible:outline-[var(--color-primary)]'
 
 export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: OneTimeSecretData) => void }) {
   const client = useQueryClient()
@@ -48,10 +48,10 @@ export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: One
 
   return (
     <>
-      <tr className={`border-t border-slate-100 dark:border-slate-800 ${user.disabled ? 'opacity-60' : ''}`}>
+      <tr className={`border-t border-line ${user.disabled ? 'opacity-60' : ''}`}>
         <td className="px-2 py-2">
           <span className="block">{user.displayName}</span>
-          <span className="block font-mono text-xs break-all text-slate-500">{user.email}</span>
+          <span className="block font-mono text-xs break-all text-ink-5">{user.email}</span>
         </td>
         <td className="px-2 py-2">
           <Select
@@ -68,19 +68,19 @@ export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: One
         </td>
         <td className="px-2 py-2 text-xs">
           {user.disabled ? (
-            <span className="rounded bg-red-100 px-1.5 py-0.5 font-medium text-red-800 dark:bg-red-950 dark:text-red-300">
+            <span className="bg-[var(--tint-clay)] px-1.5 py-0.5 font-medium text-clay">
               Đã khoá
             </span>
           ) : (
-            <span className="rounded bg-emerald-100 px-1.5 py-0.5 font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            <span className="bg-surface-sel px-1.5 py-0.5 font-medium text-moss">
               Hoạt động
             </span>
           )}
           {user.mustChangePassword ? (
-            <span className="mt-1 block text-slate-500">Chờ đổi mật khẩu lần đầu</span>
+            <span className="mt-1 block text-ink-5">Chờ đổi mật khẩu lần đầu</span>
           ) : null}
         </td>
-        <td className="px-2 py-2 text-xs whitespace-nowrap text-slate-500">
+        <td className="px-2 py-2 text-xs whitespace-nowrap text-ink-5">
           {user.lastLogin ? new Date(user.lastLogin).toLocaleString('vi-VN') : 'chưa đăng nhập'}
         </td>
         <td className="px-2 py-2">

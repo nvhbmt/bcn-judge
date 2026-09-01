@@ -28,14 +28,14 @@ export function ContestListPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </Link>
 
       <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Contest</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-ink-5">
             Trạng thái <i>Sắp diễn ra / Đang diễn ra / Đã kết thúc</i> suy ra từ khung thời gian (FR-I1).
           </p>
         </div>

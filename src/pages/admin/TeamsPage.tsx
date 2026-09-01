@@ -40,23 +40,23 @@ export function AdminTeamsPage() {
         {data?.map((team) => {
           const open = openId === team.id
           return (
-            <li key={team.id} className="rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+            <li key={team.id} className="border border-line bg-surface-2">
               <button
                 type="button"
                 onClick={() => setOpenId(open ? null : team.id)}
                 aria-expanded={open}
                 className="flex w-full items-center gap-2 p-3 text-left focus-visible:outline-2
-                  focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+ focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
               >
                 {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 <span className="min-w-0">
                   <span className="block truncate font-medium">{team.name}</span>
-                  <span className="flex items-center gap-1 text-xs text-slate-500">
+                  <span className="flex items-center gap-1 text-xs text-ink-5">
                     <Crown size={12} className="text-[var(--color-tle)]" />
                     {team.leaderName}
                   </span>
                 </span>
-                <span className="ml-auto text-xs whitespace-nowrap text-slate-500">
+                <span className="ml-auto text-xs whitespace-nowrap text-ink-5">
                   {team.memberCount} thành viên
                 </span>
               </button>

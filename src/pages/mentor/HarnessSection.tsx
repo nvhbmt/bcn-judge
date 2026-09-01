@@ -83,13 +83,13 @@ export function HarnessSection({
 
       {current && MEMBER_FILE[current] ? (
         <>
-          <p className="mb-2 text-xs text-slate-600 dark:text-slate-300">
+          <p className="mb-2 text-xs text-ink-3">
             Mã của người học nằm ở{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-slate-800">{MEMBER_FILE[current]}</code>. Trong
+            <code className="bg-surface-1 px-1 font-mono">{MEMBER_FILE[current]}</code>. Trong
             harness, lấy nó vào bằng{' '}
-            <code className="rounded bg-slate-100 px-1 font-mono dark:bg-slate-800">{HOW_TO_INCLUDE[current]}</code>.
+            <code className="bg-surface-1 px-1 font-mono">{HOW_TO_INCLUDE[current]}</code>.
           </p>
-          <div className="h-64 overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+          <div className="h-64 overflow-hidden border border-line-strong">
             <CodeEditor
               value={values.harness[current] ?? ''}
               onChange={(v) => onChange({ harness: { ...values.harness, [current]: v } })}
@@ -99,13 +99,13 @@ export function HarnessSection({
           </div>
         </>
       ) : (
-        <p className="text-sm text-slate-500">Chọn một ngôn ngữ để soạn harness.</p>
+        <p className="text-sm text-ink-5">Chọn một ngôn ngữ để soạn harness.</p>
       )}
 
       {written.length === 0 ? (
         <Notice tone="error">Bài dạng function phải có harness cho ít nhất một ngôn ngữ thì mới lưu được.</Notice>
       ) : (
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-ink-5">
           Đã có harness cho: {written.map(([id]) => id).join(', ')}.
         </p>
       )}

@@ -19,23 +19,23 @@ export function CourseDetailPage() {
   })
 
   if (isLoading) return <div className="grid h-full place-items-center"><Spinner /></div>
-  if (!course) return <p className="p-6 text-sm text-slate-500">Không tìm thấy khoá học.</p>
+  if (!course) return <p className="p-6 text-sm text-ink-5">Không tìm thấy khoá học.</p>
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Khoá học của tôi
       </Link>
 
       <header className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <span className="font-mono text-xs text-slate-500">{course.code}</span>
+          <span className="font-mono text-xs text-ink-5">{course.code}</span>
           <h1 className="text-xl font-semibold">{course.name}</h1>
         </div>
         {me && me.role !== 'member' ? (
           <Link
             to={`/mentor/khoa-hoc/${courseId}`}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-600 dark:hover:bg-slate-800"
+            className="inline-flex shrink-0 items-center gap-1.5 border border-line-strong px-3 py-1.5 text-sm font-medium transition hover:bg-surface-sel"
           >
             <PencilRuler size={16} /> Soạn nội dung
           </Link>
@@ -43,12 +43,12 @@ export function CourseDetailPage() {
       </header>
 
       {course.descriptionMd ? (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+        <div className="mb-6 border border-line bg-surface-2 p-4">
           <Markdown source={course.descriptionMd} />
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+      <div className="border border-line bg-surface-2">
         <SyllabusPanel courseId={courseId!} />
       </div>
     </div>

@@ -117,7 +117,7 @@ export function Workspace({ rail, content, editor, contentLabel, storageKey, col
       className={`flex-1 border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary ${
         tab === k
           ? 'border-primary text-primary'
-          : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+          : 'border-transparent text-ink-5 hover:text-ink-2'
       }`}
       onClick={() => setTab(k)}
     >
@@ -152,7 +152,7 @@ export function Workspace({ rail, content, editor, contentLabel, storageKey, col
             role="tablist"
             aria-label="Khung làm việc"
             aria-orientation="horizontal"
-            className="flex shrink-0 border-b border-slate-200 dark:border-slate-700"
+            className="flex shrink-0 border-b border-line"
             onKeyDown={onTabKeyDown}
           >
             {tabButton('content', contentLabel, `Nội dung: ${contentLabel}`)}

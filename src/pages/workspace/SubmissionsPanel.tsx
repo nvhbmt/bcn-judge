@@ -30,19 +30,19 @@ export function SubmissionsPanel({
   }
 
   return (
-    <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+    <ul className="divide-y divide-line">
       {data.map((s) => (
         <li key={s.id}>
           <div
             className={`flex items-center gap-3 px-4 py-2 text-sm ${
-              s.id === selectedId ? 'bg-[var(--color-primary-soft)] dark:bg-slate-800' : ''
+              s.id === selectedId ? 'bg-[var(--color-primary-soft)]' : ''
             }`}
           >
             <button onClick={() => onSelect(s.id)} className="flex flex-1 items-center gap-3 text-left">
               <VerdictBadge verdict={s.verdict} pending={s.status !== 'done'} />
               <span className="tabular-nums">{s.score === null ? '—' : `${s.score} đ`}</span>
-              <span className="font-mono text-xs text-slate-500">{s.languageId}</span>
-              <span className="ml-auto text-xs text-slate-400">{formatTime(s.receivedAt)}</span>
+              <span className="font-mono text-xs text-ink-5">{s.languageId}</span>
+              <span className="ml-auto text-xs text-ink-6">{formatTime(s.receivedAt)}</span>
             </button>
             <button
               onClick={async () => onLoadIntoEditor(await api.get<SubmissionView>(`/api/member/submissions/${s.id}`))}

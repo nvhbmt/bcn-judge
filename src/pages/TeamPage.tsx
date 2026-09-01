@@ -57,14 +57,14 @@ export function TeamPage() {
     <Shell>
       <header className="mb-4">
         <h1 className="text-xl font-semibold">{team.name}</h1>
-        <p className="text-sm text-slate-500">{team.members.length} thành viên</p>
+        <p className="text-sm text-ink-5">{team.members.length} thành viên</p>
       </header>
 
       <ul className="mb-6 flex flex-wrap gap-2">
         {team.members.map((m) => (
           <li
             key={m.id}
-            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1 text-sm dark:border-slate-700"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-sm"
           >
             {m.isLeader ? <Crown size={14} className="text-[var(--color-tle)]" aria-label="Leader" /> : null}
             {m.displayName}
@@ -78,7 +78,7 @@ export function TeamPage() {
           {openMember ? <TeamSubmissions teamId={team.id} userId={openMember} /> : null}
         </>
       ) : (
-        <p className="text-sm text-slate-500">Chỉ leader xem được tiến độ và bài nộp của cả team.</p>
+        <p className="text-sm text-ink-5">Chỉ leader xem được tiến độ và bài nộp của cả team.</p>
       )}
     </Shell>
   )
@@ -87,7 +87,7 @@ export function TeamPage() {
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </Link>
       {children}
@@ -107,7 +107,7 @@ function TeamProgress({ teamId, onPick }: { teamId: string; onPick: (userId: str
     <section className="mb-6">
       <h2 className="mb-2 text-sm font-semibold">Tiến độ theo khoá</h2>
       <table className="w-full text-sm">
-        <thead className="text-left text-xs text-slate-500">
+        <thead className="text-left text-xs text-ink-5">
           <tr>
             <th className="py-1">Thành viên</th>
             <th>Khoá</th>
@@ -117,7 +117,7 @@ function TeamProgress({ teamId, onPick }: { teamId: string; onPick: (userId: str
         </thead>
         <tbody>
           {data.map((row) => (
-            <tr key={`${row.userId}:${row.courseId}`} className="border-t border-slate-100 dark:border-slate-800">
+            <tr key={`${row.userId}:${row.courseId}`} className="border-t border-line">
               <td className="py-1.5">
                 <button onClick={() => onPick(row.userId)} className="text-[var(--color-primary)] hover:underline">
                   {row.displayName}
@@ -127,7 +127,7 @@ function TeamProgress({ teamId, onPick }: { teamId: string; onPick: (userId: str
               <td className="text-right tabular-nums">
                 {row.acCount}/{row.totalItems}
               </td>
-              <td className="text-right text-xs text-slate-500">
+              <td className="text-right text-xs text-ink-5">
                 {row.lastSubmittedAt ? new Date(row.lastSubmittedAt).toLocaleDateString('vi-VN') : 'chưa nộp'}
               </td>
             </tr>
@@ -150,21 +150,21 @@ function TeamSubmissions({ teamId, userId }: { teamId: string; userId: string })
       <h2 className="mb-2 text-sm font-semibold">Bài nộp — chỉ đọc</h2>
       <ul className="space-y-2">
         {data.map((s) => (
-          <li key={s.id} className="rounded-md border border-slate-200 p-3 text-sm dark:border-slate-700">
+          <li key={s.id} className="border border-line p-3 text-sm">
             <div className="flex items-center gap-2">
               <VerdictBadge verdict={s.verdict} />
               <span className="tabular-nums">{s.score ?? '—'} đ</span>
-              <span className="font-mono text-xs text-slate-500">{s.languageId}</span>
-              <span className="ml-auto text-xs text-slate-400">
+              <span className="font-mono text-xs text-ink-5">{s.languageId}</span>
+              <span className="ml-auto text-xs text-ink-6">
                 {new Date(s.receivedAt).toLocaleString('vi-VN')}
               </span>
             </div>
             {s.source ? (
-              <pre className="mt-2 max-h-48 overflow-auto rounded bg-slate-100 p-2 font-mono text-xs dark:bg-slate-800">
+              <pre className="mt-2 max-h-48 overflow-auto bg-surface-1 p-2 font-mono text-xs">
                 {s.source}
               </pre>
             ) : (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-ink-5">
                 Contest đang diễn ra — xem được code sau{' '}
                 {s.sourceEmbargoedUntil ? new Date(s.sourceEmbargoedUntil).toLocaleString('vi-VN') : 'khi kết thúc'}.
               </p>

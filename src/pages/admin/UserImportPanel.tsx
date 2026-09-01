@@ -37,7 +37,7 @@ export function UserImportPanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <section className="border border-line bg-surface-2 p-4">
       <div className="mb-3 flex items-center gap-2">
         <h2 className="text-sm font-semibold">Nhập hàng loạt từ CSV</h2>
         <Button onClick={onClose} className="ml-auto">
@@ -47,7 +47,7 @@ export function UserImportPanel({ onClose }: { onClose: () => void }) {
 
       <FailureBanner notice={notice} />
 
-      <p className="mb-2 text-sm text-slate-500">
+      <p className="mb-2 text-sm text-ink-5">
         Mỗi dòng: <code className="font-mono">email,họ tên,vai trò[,mã khoá]</code>. Vai trò là{' '}
         <code className="font-mono">member</code>, <code className="font-mono">mentor</code> hoặc{' '}
         <code className="font-mono">admin</code>. Cột mã khoá bỏ trống nếu chưa ghi danh. Dòng tiêu đề bắt đầu bằng{' '}

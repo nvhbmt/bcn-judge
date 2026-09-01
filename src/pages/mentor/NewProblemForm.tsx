@@ -61,7 +61,7 @@ export function NewProblemForm({ onCancel }: { onCancel: () => void }) {
   }
 
   return (
-    <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <div className="mb-4 border border-line bg-surface-2 p-4">
       <h2 className="mb-3 text-sm font-semibold">Bài tập mới</h2>
 
       <Field id="new-title" label="Tiêu đề">

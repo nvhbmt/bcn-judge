@@ -39,7 +39,7 @@ export function LanguagesPanel() {
   return (
     <section className="mb-5">
       <h2 className="mb-1 text-sm font-semibold">Ngôn ngữ chấm</h2>
-      <p className="mb-3 text-sm text-slate-500">
+      <p className="mb-3 text-sm text-ink-5">
         Bật một ngôn ngữ là mentor thấy nó ngay trong danh sách ngôn ngữ cho phép của bài — không cần deploy lại. Image
         Docker phải có sẵn trên máy chấm trước khi bật.
       </p>
@@ -50,7 +50,7 @@ export function LanguagesPanel() {
 
       <ul className="space-y-2">
         {data?.map((lang) => (
-          <li key={lang.id} className="rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+          <li key={lang.id} className="border border-line bg-surface-2">
             <div className="flex flex-wrap items-center gap-3 p-3">
               <label className="flex cursor-pointer items-center gap-2">
                 <input
@@ -62,7 +62,7 @@ export function LanguagesPanel() {
                 />
                 <span
                   className={`text-xs font-semibold ${
-                    lang.enabled ? 'text-[var(--color-ac)]' : 'text-slate-400'
+                    lang.enabled ? 'text-[var(--color-ac)]' : 'text-ink-6'
                   }`}
                 >
                   {lang.enabled ? 'Đang bật' : 'Đang tắt'}
@@ -72,22 +72,22 @@ export function LanguagesPanel() {
               <span className="min-w-0">
                 <span className="block truncate font-medium">
                   {lang.name}
-                  {lang.versionLabel ? <span className="ml-1 text-slate-500">{lang.versionLabel}</span> : null}
+                  {lang.versionLabel ? <span className="ml-1 text-ink-5">{lang.versionLabel}</span> : null}
                 </span>
-                <span className="block truncate font-mono text-xs text-slate-500">
+                <span className="block truncate font-mono text-xs text-ink-5">
                   {lang.id} · {lang.image}
                 </span>
               </span>
 
               <span className="ml-auto flex items-center gap-3">
-                <span className="text-xs whitespace-nowrap text-slate-500">×{Number(lang.timeFactor) || 1} thời gian</span>
+                <span className="text-xs whitespace-nowrap text-ink-5">×{Number(lang.timeFactor) || 1} thời gian</span>
                 <button
                   type="button"
                   onClick={() => setEditing(editing === lang.id ? null : lang.id)}
                   aria-expanded={editing === lang.id}
-                  className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs
-                    hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1
-                    focus-visible:outline-[var(--color-primary)] dark:border-slate-600 dark:hover:bg-slate-800"
+                  className="inline-flex items-center gap-1 border border-line-strong px-2 py-1 text-xs
+ hover:bg-surface-sel focus-visible:outline-2 focus-visible:outline-offset-1
+ focus-visible:outline-[var(--color-primary)]"
                 >
                   <Pencil size={13} /> Sửa
                 </button>
@@ -99,7 +99,7 @@ export function LanguagesPanel() {
         ))}
       </ul>
 
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 text-xs text-ink-5">
         Thêm ngôn ngữ hoàn toàn mới cần một id chưa tồn tại; API hiện chỉ có <code className="font-mono">PUT</code> theo
         id nên việc này làm bằng seed hoặc migration, sau đó chỉnh tại đây.
       </p>

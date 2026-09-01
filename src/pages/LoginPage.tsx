@@ -19,10 +19,10 @@ export function LoginPage() {
     <div className="grid h-full place-items-center px-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+        className="w-full max-w-sm border border-line bg-surface-2 p-6 shadow-sm"
       >
         <h1 className="text-lg font-semibold">BCN Judge</h1>
-        <p className="mt-1 mb-5 text-sm text-slate-500">Đăng nhập bằng tài khoản câu lạc bộ cấp.</p>
+        <p className="mt-1 mb-5 text-sm text-ink-5">Đăng nhập bằng tài khoản câu lạc bộ cấp.</p>
 
         <label className="block text-sm font-medium" htmlFor="email">
           Email hoặc tên đăng nhập
@@ -33,7 +33,7 @@ export function LoginPage() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="username"
           required
-          className="mt-1 mb-3 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
+          className="mt-1 mb-3 w-full border border-line-strong px-3 py-2 text-sm"
         />
 
         <label className="block text-sm font-medium" htmlFor="password">
@@ -46,7 +46,7 @@ export function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
           required
-          className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
+          className="mt-1 w-full border border-line-strong px-3 py-2 text-sm"
         />
 
         {error ? (

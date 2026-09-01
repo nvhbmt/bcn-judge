@@ -11,9 +11,9 @@ import { CourseMentors } from './CourseMentors'
 import type { AdminCourse, CourseStatus } from './types'
 
 const STATUS: Record<CourseStatus, { label: string; className: string }> = {
-  draft: { label: 'Nháp', className: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200' },
-  open: { label: 'Đang mở', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' },
-  archived: { label: 'Lưu trữ', className: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300' },
+  draft: { label: 'Nháp', className: 'bg-surface-sel text-ink-2' },
+  open: { label: 'Đang mở', className: 'bg-surface-sel text-moss' },
+  archived: { label: 'Lưu trữ', className: 'bg-[var(--tint-earth)] text-earth' },
 }
 
 export function AdminCoursesPage() {
@@ -55,32 +55,32 @@ export function AdminCoursesPage() {
         {data?.map((course) => {
           const open = openId === course.id
           return (
-            <li key={course.id} className="rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+            <li key={course.id} className="border border-line bg-surface-2">
               <div className="flex flex-wrap items-center gap-2 p-3">
                 <button
                   type="button"
                   onClick={() => setOpenId(open ? null : course.id)}
                   aria-expanded={open}
                   className="flex min-w-0 items-center gap-2 text-left focus-visible:outline-2
-                    focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+ focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
                 >
                   {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                   <span className="min-w-0">
                     <span className="block truncate font-medium">{course.name}</span>
-                    <span className="block truncate font-mono text-xs text-slate-500">{course.code}</span>
+                    <span className="block truncate font-mono text-xs text-ink-5">{course.code}</span>
                   </span>
                 </button>
 
-                <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${STATUS[course.status].className}`}>
+                <span className={` px-1.5 py-0.5 text-xs font-medium ${STATUS[course.status].className}`}>
                   {STATUS[course.status].label}
                 </span>
                 {course.selfEnroll ? (
-                  <span className="rounded bg-[var(--color-primary-soft)] px-1.5 py-0.5 text-xs text-[var(--color-primary)]">
+                  <span className="bg-[var(--color-primary-soft)] px-1.5 py-0.5 text-xs text-[var(--color-primary)]">
                     Tự ghi danh
                   </span>
                 ) : null}
 
-                <span className="ml-auto flex items-center gap-3 text-xs whitespace-nowrap text-slate-500">
+                <span className="ml-auto flex items-center gap-3 text-xs whitespace-nowrap text-ink-5">
                   <span>{course.mentorCount} mentor</span>
                   <span>{course.memberCount} member</span>
                 </span>
@@ -98,7 +98,7 @@ export function AdminCoursesPage() {
               {/* Mentor và ghi danh chỉ nạp khi mở: hai truy vấn mỗi khoá × N khoá
                   là gánh vô ích cho một danh sách người ta chỉ mở từng cái một. */}
               {open ? (
-                <div className="border-t border-slate-200 p-3 dark:border-slate-700">
+                <div className="border-t border-line p-3">
                   <CourseMentors courseId={course.id} />
                   <CourseEnrollments courseId={course.id} />
                 </div>

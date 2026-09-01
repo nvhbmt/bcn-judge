@@ -28,6 +28,9 @@ export function currentTheme(): Theme {
   return isTheme(applied) ? applied : DEFAULT_THEME
 }
 
+/** Component nào cần đổi theo theme thì nghe sự kiện này (xem useTheme). */
+export const THEME_EVENT = 'bcn-theme'
+
 export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme
   try {
@@ -35,6 +38,7 @@ export function applyTheme(theme: Theme): void {
   } catch {
     // Chế độ riêng tư chặn localStorage — vẫn đổi được, chỉ là không nhớ sang lần sau.
   }
+  window.dispatchEvent(new CustomEvent(THEME_EVENT, { detail: theme }))
 }
 
 export function toggleTheme(): Theme {

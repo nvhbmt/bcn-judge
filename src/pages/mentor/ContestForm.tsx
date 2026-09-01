@@ -55,7 +55,7 @@ export function ContestForm({
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <form onSubmit={submit} className="border border-line bg-surface-2 p-4">
       <Field id={ids.title} label="Tên contest">
         <TextInput
           id={ids.title}
@@ -161,7 +161,7 @@ export function ContestForm({
           Chuỗi tuần tự — phải AC bài trước mới mở bài sau (FR-I8)
         </label>
         {mode === 'edit' ? (
-          <p id={`${ids.seq}-hint`} className="mt-1 text-xs text-slate-500">
+          <p id={`${ids.seq}-hint`} className="mt-1 text-xs text-ink-5">
             Chỉ được ghi khi bạn tự bấm vào ô này: API không trả giá trị hiện tại nên form không dám đoán.
           </p>
         ) : null}

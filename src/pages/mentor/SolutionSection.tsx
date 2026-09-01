@@ -59,8 +59,8 @@ export function SolutionSection({
 
       {/* Không dùng `<label htmlFor>`: CodeMirror không phải form control, nhãn sẽ
           trỏ vào hư không. Tên đọc được của ô là `ariaLabel` truyền xuống CodeEditor. */}
-      <p className="mb-1 text-xs font-semibold text-slate-600 dark:text-slate-300">Mã nguồn lời giải</p>
-      <div className="h-64 overflow-hidden rounded-md border border-slate-300 dark:border-slate-600">
+      <p className="mb-1 text-xs font-semibold text-ink-3">Mã nguồn lời giải</p>
+      <div className="h-64 overflow-hidden border border-line-strong">
         <CodeEditor
           value={values.solutionSource}
           onChange={(v) => onChange({ solutionSource: v })}

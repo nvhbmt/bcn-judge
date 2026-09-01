@@ -127,7 +127,7 @@ export function HSplit({
         tabIndex={collapsed ? -1 : 0}
         data-testid="hsplit-divider"
         data-dragging={dragging ? 'true' : undefined}
-        className={`split-handle-h relative bg-slate-200 transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary dark:bg-slate-700 ${
+        className={`split-handle-h relative bg-surface-sel transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary ${
           dragging ? 'bg-primary/60' : ''
         }`}
         onPointerDown={onPointerDown}

@@ -44,12 +44,12 @@ export function EditorPane({
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 px-2 py-1.5 dark:border-slate-700">
+      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
         <select
           aria-label="Ngôn ngữ"
           value={languageId}
           onChange={(e) => onLanguage(e.target.value)}
-          className="rounded border border-slate-300 px-2 py-1 font-mono text-xs dark:border-slate-600 dark:bg-slate-800"
+          className="border border-line-strong px-2 py-1 font-mono text-xs"
         >
           {languages.map((l) => (
             <option key={l.id} value={l.id}>
@@ -59,14 +59,14 @@ export function EditorPane({
         </select>
 
         {submission ? <VerdictBadge verdict={submission.verdict} pending={submission.status !== 'done'} /> : null}
-        <span className="text-xs text-slate-400" aria-live="polite">
+        <span className="text-xs text-ink-6" aria-live="polite">
           {draftStatus === 'saving' ? 'Đang lưu nháp…' : draftStatus === 'error' ? 'Không lưu được nháp' : ''}
         </span>
 
         <div className="ml-auto flex items-center gap-2">
           {/* FR-I6: chế độ luyện tập phải nói rõ, không để member tưởng còn tính điểm. */}
           {practiceMode ? (
-            <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <span className="bg-[var(--tint-earth)] px-2 py-0.5 text-xs text-earth">
               Luyện tập — không tính BXH
             </span>
           ) : null}
@@ -80,7 +80,7 @@ export function EditorPane({
       </div>
 
       {error ? (
-        <p role="alert" className="shrink-0 bg-red-50 px-3 py-1.5 text-xs text-[var(--color-wa)] dark:bg-red-950/40">
+        <p role="alert" className="shrink-0 bg-[var(--tint-clay)] px-3 py-1.5 text-xs text-[var(--color-wa)]">
           {error}
         </p>
       ) : null}

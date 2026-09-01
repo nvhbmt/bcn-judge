@@ -33,9 +33,9 @@ export function CoursesPage() {
           <li key={course.id}>
             <Link
               to={`/khoa-hoc/${course.id}`}
-              className="block rounded-lg border border-slate-200 bg-white p-4 transition hover:border-[var(--color-primary)] dark:border-slate-700 dark:bg-slate-900"
+              className="block border border-line bg-surface-2 p-4 transition hover:border-[var(--color-primary)]"
             >
-              <span className="font-mono text-xs text-slate-500">{course.code}</span>
+              <span className="font-mono text-xs text-ink-5">{course.code}</span>
               <p className="font-medium">{course.name}</p>
             </Link>
           </li>

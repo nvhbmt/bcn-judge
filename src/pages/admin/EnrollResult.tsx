@@ -21,7 +21,7 @@ export function EnrollResult({ report, invalid }: { report: EnrollReport; invali
       </p>
 
       {clean ? (
-        <p className="text-sm text-slate-500">Mọi email trong danh sách đều ghi danh được.</p>
+        <p className="text-sm text-ink-5">Mọi email trong danh sách đều ghi danh được.</p>
       ) : null}
 
       <EmailGroup
@@ -59,14 +59,14 @@ export function EnrollResult({ report, invalid }: { report: EnrollReport; invali
 function EmailGroup({ title, emails, action }: { title: string; emails: string[]; action: ReactNode }) {
   if (emails.length === 0) return null
   return (
-    <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+    <div className="mt-2 border border-line bg-surface-1 p-3">
       <div className="mb-1.5 flex items-center gap-2">
         <h4 className="text-sm font-medium">{title}</h4>
         <span className="ml-auto">
           <CopyButton value={emails.join('\n')} label="Chép danh sách" />
         </span>
       </div>
-      <p className="mb-2 text-xs text-slate-600 dark:text-slate-300">{action}</p>
+      <p className="mb-2 text-xs text-ink-3">{action}</p>
       <ul className="max-h-40 space-y-0.5 overflow-auto font-mono text-xs">
         {emails.map((email) => (
           <li key={email} className="break-all">

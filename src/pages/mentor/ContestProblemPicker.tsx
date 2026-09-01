@@ -73,7 +73,7 @@ export function ContestProblemPicker({
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <section className="border border-line bg-surface-2 p-4">
       <h2 className="mb-1 text-sm font-semibold">Bài trong contest</h2>
       {/* Không có API đọc danh sách bài hiện tại của contest, mà PUT thì THAY THẾ
           toàn bộ — nói thẳng để không ai vô tình gỡ sạch bài của contest đang chạy. */}
@@ -107,8 +107,8 @@ export function ContestProblemPicker({
       ) : (
         <ol className="grid gap-2">
           {drafts.map((d, i) => (
-            <li key={d.problemId} className="flex items-center gap-2 rounded-md bg-slate-50 px-2 py-1.5 dark:bg-slate-800/50">
-              <span className="w-6 text-center font-mono text-xs text-slate-500">{i + 1}</span>
+            <li key={d.problemId} className="flex items-center gap-2 bg-surface-1 px-2 py-1.5">
+              <span className="w-6 text-center font-mono text-xs text-ink-5">{i + 1}</span>
               <TextInput
                 value={d.label}
                 maxLength={4}

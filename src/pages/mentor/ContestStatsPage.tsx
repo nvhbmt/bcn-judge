@@ -27,7 +27,7 @@ export function ContestStatsPage() {
     <div className="mx-auto max-w-3xl px-4 py-6">
       <Link
         to={`/mentor/contest/${contestId}`}
-        className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline"
+        className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline"
       >
         <ArrowLeft size={15} /> Về contest
       </Link>
@@ -55,22 +55,22 @@ export function ContestStatsPage() {
                 {byProblem.map((p) => (
                   <li
                     key={p.contestProblemId}
-                    className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
+                    className="border border-line bg-surface-2 p-3"
                   >
                     <div className="flex flex-wrap items-baseline gap-2">
                       <h3 className="min-w-0 flex-1 truncate text-sm font-medium">{p.title}</h3>
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-ink-5">
                         {p.total} lượt nộp · AC {p.acCount} ({percent(p.acCount, p.total)})
                       </span>
                     </div>
                     {p.total === 0 ? (
-                      <p className="mt-1 text-sm text-slate-500">Chưa ai nộp bài này.</p>
+                      <p className="mt-1 text-sm text-ink-5">Chưa ai nộp bài này.</p>
                     ) : (
                       <ul className="mt-2 flex flex-wrap gap-2">
                         {p.counts.map((c) => (
                           <li key={c.verdict} className="inline-flex items-center gap-1">
                             <VerdictBadge verdict={c.verdict} />
-                            <span className="font-mono text-xs tabular-nums text-slate-500">×{c.n}</span>
+                            <span className="font-mono text-xs tabular-nums text-ink-5">×{c.n}</span>
                           </li>
                         ))}
                       </ul>
@@ -84,9 +84,9 @@ export function ContestStatsPage() {
           <section>
             <h2 className="mb-2 text-sm font-semibold">Đã mở contest nhưng chưa nộp bài nào</h2>
             {data.notSubmitted.length === 0 ? (
-              <p className="text-sm text-slate-500">Mọi người đã mở contest đều đã nộp ít nhất một bài.</p>
+              <p className="text-sm text-ink-5">Mọi người đã mở contest đều đã nộp ít nhất một bài.</p>
             ) : (
-              <ul className="grid gap-1 rounded-lg border border-slate-200 bg-white p-3 text-sm dark:border-slate-700 dark:bg-slate-900">
+              <ul className="grid gap-1 border border-line bg-surface-2 p-3 text-sm">
                 {data.notSubmitted.map((u) => (
                   <li key={u.id}>{u.displayName}</li>
                 ))}
@@ -101,8 +101,8 @@ export function ContestStatsPage() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
-      <p className="text-xs text-slate-500">{label}</p>
+    <div className="border border-line bg-surface-2 px-3 py-2">
+      <p className="text-xs text-ink-5">{label}</p>
       <p className="font-mono text-lg tabular-nums">{value}</p>
     </div>
   )

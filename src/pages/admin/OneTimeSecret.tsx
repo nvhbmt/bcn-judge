@@ -34,11 +34,11 @@ export function OneTimeSecret({ data, onDismiss }: { data: OneTimeSecretData; on
       ref={ref}
       role="alert"
       tabIndex={-1}
-      className="mb-4 rounded-lg border-2 border-[var(--color-tle)] bg-amber-50 p-4 dark:bg-amber-950/30"
+      className="mb-4 border-2 border-[var(--color-tle)] bg-[var(--tint-earth)] p-4"
     >
       <div className="mb-2 flex items-center gap-2">
         <KeyRound size={16} className="text-[var(--color-tle)]" />
-        <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+        <h2 className="text-sm font-semibold text-earth">
           {data.kind === 'created' ? 'Tài khoản đã tạo — mật khẩu ban đầu' : 'Mật khẩu mới đã đặt lại'}
         </h2>
         <Button variant="ghost" onClick={onDismiss} className="ml-auto" aria-label="Đóng, tôi đã lưu mật khẩu">
@@ -47,14 +47,14 @@ export function OneTimeSecret({ data, onDismiss }: { data: OneTimeSecretData; on
       </div>
 
       <dl className="mb-3 grid gap-2 sm:grid-cols-[auto_1fr] sm:items-center">
-        <dt className="text-xs text-slate-600 dark:text-slate-300">Tài khoản</dt>
+        <dt className="text-xs text-ink-3">Tài khoản</dt>
         <dd className="flex items-center gap-2 font-mono text-sm break-all">
           {data.email}
           <CopyButton value={data.email} label="Chép email" />
         </dd>
-        <dt className="text-xs text-slate-600 dark:text-slate-300">Mật khẩu</dt>
+        <dt className="text-xs text-ink-3">Mật khẩu</dt>
         <dd className="flex items-center gap-2">
-          <code className="rounded bg-white px-2 py-1 font-mono text-base font-semibold tracking-wide select-all dark:bg-slate-900">
+          <code className="bg-surface-2 px-2 py-1 font-mono text-base font-semibold tracking-wide select-all">
             {data.password}
           </code>
           <CopyButton value={data.password} label="Chép mật khẩu" />
@@ -62,7 +62,7 @@ export function OneTimeSecret({ data, onDismiss }: { data: OneTimeSecretData; on
         </dd>
       </dl>
 
-      <p className="text-sm text-amber-900 dark:text-amber-200">
+      <p className="text-sm text-earth">
         <strong>Chuỗi này không xem lại được.</strong> Hệ thống chỉ lưu bản băm — đóng bảng mà chưa chép thì cách duy
         nhất là đặt lại mật khẩu lần nữa. Người dùng sẽ bị bắt đổi mật khẩu ngay ở lần đăng nhập đầu.
       </p>

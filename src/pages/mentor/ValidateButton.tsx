@@ -48,7 +48,7 @@ export function ValidateButton(props: ValidateButtonProps) {
   return (
     <section
       aria-label="Kiểm tra testcase bằng lời giải mẫu"
-      className="shrink-0 border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900"
+      className="shrink-0 border-b border-line bg-surface-2 px-4 py-3"
     >
       <div className="flex flex-wrap items-center gap-3">
         <Button
@@ -61,7 +61,7 @@ export function ValidateButton(props: ValidateButtonProps) {
           {waiting ? 'Đang kiểm…' : 'Kiểm tra bằng lời giải mẫu'}
         </Button>
 
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-ink-5">
           Chạy lời giải mẫu trên cả {props.testcaseCount} testcase và đối chiếu expected output (FR-D6).
         </p>
 

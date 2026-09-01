@@ -35,14 +35,14 @@ export function ProblemListPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Khoá học của tôi
       </Link>
 
       <header className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Bài tập</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-ink-5">
             Soạn đề, nạp testcase và kiểm bằng lời giải mẫu trước khi member thấy bài.
           </p>
         </div>
@@ -65,7 +65,7 @@ export function ProblemListPage() {
           <li key={row.id}>
             <Link
               to={`/mentor/bai-tap/${row.id}`}
-              className="block rounded-lg border border-slate-200 bg-white p-3 transition hover:border-[var(--color-primary)] dark:border-slate-700 dark:bg-slate-900"
+              className="block border border-line bg-surface-2 p-3 transition hover:border-[var(--color-primary)]"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{row.title}</span>
@@ -73,11 +73,11 @@ export function ProblemListPage() {
                   state={validationState({ testcases: row.testcases, validated: isValidated(row) })}
                 />
                 {row.difficulty ? (
-                  <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  <span className="bg-surface-1 px-1.5 py-0.5 text-xs text-ink-3">
                     {DIFFICULTY_LABEL[row.difficulty] ?? row.difficulty}
                   </span>
                 ) : null}
-                <span className="ml-auto text-xs text-slate-400">
+                <span className="ml-auto text-xs text-ink-6">
                   {new Date(row.updatedAt).toLocaleString('vi-VN', {
                     hour: '2-digit',
                     minute: '2-digit',
@@ -87,7 +87,7 @@ export function ProblemListPage() {
                 </span>
               </div>
 
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-ink-5">
                 <span className="font-mono">{courseCode(row.scopeCourseId)}</span>
                 <span>{row.testcases} testcase</span>
                 <span className="font-mono">bộ test #{row.testcaseRev}</span>

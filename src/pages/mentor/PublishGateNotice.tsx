@@ -24,10 +24,10 @@ export function PublishGateNotice({
   return (
     <div
       role="alert"
-      className={`mt-2 rounded-md px-3 py-2 text-sm ${
+      className={`mt-2  px-3 py-2 text-sm ${
         soft
-          ? 'bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
-          : 'bg-red-50 text-[var(--color-wa)] dark:bg-red-950/40'
+          ? 'bg-[var(--tint-earth)] text-earth'
+          : 'bg-[var(--tint-clay)] text-[var(--color-wa)]'
       }`}
     >
       <p className="flex items-start gap-2">

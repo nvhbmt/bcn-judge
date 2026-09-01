@@ -93,16 +93,16 @@ export function ProblemEditorPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-2 dark:border-slate-700">
-        <Link to="/mentor/bai-tap" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-line px-4 py-2">
+        <Link to="/mentor/bai-tap" className="inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
           <ArrowLeft size={15} /> Bài tập
         </Link>
         <h1 className="truncate text-sm font-semibold">{values.title || 'Bài chưa đặt tên'}</h1>
         <ValidationBadge state={validationState({ testcases: detail.testcases.length, validated })} />
-        <span className="font-mono text-xs text-slate-400">bộ test #{detail.testcaseRev}</span>
+        <span className="font-mono text-xs text-ink-6">bộ test #{detail.testcaseRev}</span>
 
         <div className="ml-auto flex items-center gap-2">
-          {dirty ? <span className="text-xs text-amber-700 dark:text-amber-300">Có thay đổi chưa lưu</span> : null}
+          {dirty ? <span className="text-xs text-earth">Có thay đổi chưa lưu</span> : null}
           <Button variant="primary" onClick={() => void save()} disabled={saving || !dirty}>
             <Save size={16} /> {saving ? 'Đang lưu…' : 'Lưu'}
           </Button>
@@ -132,7 +132,7 @@ export function ProblemEditorPage() {
             <div className="flex h-full min-h-0 flex-col">
               <div
                 role="tablist"
-                className="flex shrink-0 gap-1 border-b border-slate-200 px-2 pt-1 dark:border-slate-700"
+                className="flex shrink-0 gap-1 border-b border-line px-2 pt-1"
               >
                 <EditorTab id="de-bai" active={tab} onTab={setTab}>
                   Đề bài
@@ -197,10 +197,10 @@ function EditorTab({
       aria-selected={active === id}
       aria-controls={`panel-${id}`}
       onClick={() => onTab(id)}
-      className={`rounded-t-md px-3 py-1.5 text-sm font-medium ${
+      className={`px-3 py-1.5 text-sm font-medium ${
         active === id
-          ? 'bg-slate-100 shadow-[inset_0_-2px_0_var(--color-primary)] dark:bg-slate-800'
-          : 'text-slate-500'
+          ? 'bg-surface-1 shadow-[inset_0_-2px_0_var(--color-primary)]'
+          : 'text-ink-5'
       }`}
     >
       {children}

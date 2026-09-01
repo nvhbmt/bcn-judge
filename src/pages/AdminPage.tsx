@@ -34,7 +34,7 @@ export function AdminPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </Link>
       <h1 className="mb-4 text-xl font-semibold">Tình trạng chấm bài</h1>
@@ -43,7 +43,7 @@ export function AdminPage() {
       {data.health.noLiveWorker ? <Alarm>Không có worker nào sống — bài nộp đang xếp hàng.</Alarm> : null}
       {data.health.submitBacklogAlarm ? <Alarm>Bài nộp chờ quá 2 phút — kiểm tra worker.</Alarm> : null}
       {data.health.runBacklogWarning ? (
-        <p className="mb-3 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+        <p className="mb-3 bg-[var(--tint-earth)] px-3 py-2 text-sm text-earth">
           Nhiều lượt chạy thử đang chờ — bình thường ở giờ đầu contest.
         </p>
       ) : null}
@@ -61,15 +61,15 @@ export function AdminPage() {
       <section className="mb-5">
         <h2 className="mb-2 text-sm font-semibold">Worker</h2>
         {data.workers.length === 0 ? (
-          <p className="text-sm text-slate-500">Chưa worker nào đăng ký.</p>
+          <p className="text-sm text-ink-5">Chưa worker nào đăng ký.</p>
         ) : (
           <ul className="space-y-1 text-sm">
             {data.workers.map((w) => (
               <li key={w.id} className="flex items-center gap-2">
                 <span className={`size-2 rounded-full ${w.alive ? 'bg-[var(--color-ac)]' : 'bg-[var(--color-wa)]'}`} />
                 <span className="font-mono text-xs">{w.id}</span>
-                <span className="text-slate-500">{w.slots} slot</span>
-                <span className="ml-auto text-xs text-slate-400">
+                <span className="text-ink-5">{w.slots} slot</span>
+                <span className="ml-auto text-xs text-ink-6">
                   {new Date(w.lastSeenAt).toLocaleTimeString('vi-VN')}
                 </span>
               </li>
@@ -80,7 +80,7 @@ export function AdminPage() {
 
       <section className="mb-5">
         <h2 className="mb-2 text-sm font-semibold">Bài lỗi hệ thống (IE) — 48 giờ qua</h2>
-        <p className="mb-2 text-sm text-slate-500">
+        <p className="mb-2 text-sm text-ink-5">
           {data.ieSubmissions.length} bài. IE không tính vào lượt của member và được chấm lại.
         </p>
         <Button onClick={() => retryIe.mutate()} disabled={retryIe.isPending || data.ieSubmissions.length === 0}>
@@ -90,7 +90,7 @@ export function AdminPage() {
 
       <section>
         <h2 className="mb-2 text-sm font-semibold">Bảo trì</h2>
-        <p className="mb-2 text-sm text-slate-500">
+        <p className="mb-2 text-sm text-ink-5">
           Tạm dừng nhận bài nộp mới; member vẫn đọc đề và lưu nháp bình thường.
         </p>
         <Button
@@ -107,8 +107,8 @@ export function AdminPage() {
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900">
-      <p className="text-xs text-slate-500">{label}</p>
+    <div className="border border-line bg-surface-2 px-3 py-2">
+      <p className="text-xs text-ink-5">{label}</p>
       <p className="font-mono text-lg tabular-nums">{value}</p>
     </div>
   )
@@ -116,7 +116,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 
 function Alarm({ children }: { children: string }) {
   return (
-    <p role="alert" className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm text-[var(--color-wa)] dark:bg-red-950/40">
+    <p role="alert" className="mb-3 bg-[var(--tint-clay)] px-3 py-2 text-sm text-[var(--color-wa)]">
       {children}
     </p>
   )

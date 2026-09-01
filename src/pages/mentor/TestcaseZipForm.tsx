@@ -75,7 +75,7 @@ export function TestcaseZipForm({
             setFile(e.target.files?.[0] ?? null)
             setError(null)
           }}
-          className="w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-200 file:px-3 file:py-1.5 file:text-sm dark:file:bg-slate-700"
+          className="w-full text-sm file:mr-3 file: file:border-0 file:bg-surface-sel file:px-3 file:py-1.5 file:text-sm"
         />
       </Field>
 
@@ -95,7 +95,7 @@ export function TestcaseZipForm({
         />
       </Field>
 
-      <label htmlFor={generateId} className="mb-3 flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+      <label htmlFor={generateId} className="mb-3 flex items-start gap-2 text-xs text-ink-3">
         <input
           id={generateId}
           type="checkbox"

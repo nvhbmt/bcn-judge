@@ -32,10 +32,10 @@ export function SectionBlock({
   const createItem = useCreateItem(courseId)
 
   return (
-    <section className="mb-4 rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
-      <header className="flex items-center gap-2 border-b border-slate-200 px-3 py-2 dark:border-slate-700">
+    <section className="mb-4 border border-line bg-surface-2">
+      <header className="flex items-center gap-2 border-b border-line px-3 py-2">
         <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{section.title}</h2>
-        <span className="text-xs text-slate-500">{section.items.length} mục</span>
+        <span className="text-xs text-ink-5">{section.items.length} mục</span>
         <Button
           onClick={() => onMoveSection(-1)}
           disabled={first}

@@ -16,24 +16,24 @@ const STATE = {
   'no-testcase': {
     label: 'Chưa có testcase',
     title: 'Bài chưa có testcase nào — chưa chấm được.',
-    className: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+    className: 'bg-surface-sel text-ink-2',
   },
   unchecked: {
     label: 'Chưa kiểm',
     title: 'Bộ test hiện tại chưa được lời giải mẫu xác nhận (FR-D6).',
-    className: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300',
+    className: 'bg-[var(--tint-earth)] text-earth',
   },
   checked: {
     label: 'Đã kiểm',
     title: 'Lời giải mẫu đã chạy đúng trên toàn bộ bộ test hiện tại.',
-    className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+    className: 'bg-surface-sel text-moss',
   },
 } as const
 
 export function ValidationBadge({ state }: { state: ValidationState }) {
   const s = STATE[state]
   return (
-    <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${s.className}`} title={s.title}>
+    <span className={` px-1.5 py-0.5 text-xs font-semibold ${s.className}`} title={s.title}>
       {s.label}
     </span>
   )

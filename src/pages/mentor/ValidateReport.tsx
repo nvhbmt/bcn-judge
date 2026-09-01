@@ -19,7 +19,7 @@ export function ValidateReport({ submission }: { submission: SubmissionView }) {
     return (
       <div className="space-y-2">
         <Notice tone="error">Lời giải mẫu không biên dịch được — chưa kiểm được testcase nào.</Notice>
-        <pre className="max-h-40 overflow-auto rounded bg-slate-900 p-2 font-mono text-xs whitespace-pre-wrap text-slate-100">
+        <pre className="max-h-40 overflow-auto border border-line bg-[var(--surface-code)] p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
           {submission.compileOutput}
         </pre>
       </div>
@@ -55,11 +55,11 @@ export function ValidateReport({ submission }: { submission: SubmissionView }) {
           <FailedRow key={r.position} result={r} />
         ))}
       </ul>
-      <details className="text-xs text-slate-500">
+      <details className="text-xs text-ink-5">
         <summary className="cursor-pointer">Xem toàn bộ {results.length} testcase</summary>
         <ul className="mt-1 flex flex-wrap gap-1">
           {results.map((r) => (
-            <li key={r.position} className="flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 dark:bg-slate-800">
+            <li key={r.position} className="flex items-center gap-1 bg-surface-1 px-1.5 py-0.5">
               <span className="font-mono">#{r.position}</span>
               <VerdictBadge verdict={r.verdict} />
             </li>
@@ -72,24 +72,24 @@ export function ValidateReport({ submission }: { submission: SubmissionView }) {
 
 function FailedRow({ result }: { result: ResultView }) {
   return (
-    <li className="rounded-md border border-red-200 px-2 py-1.5 text-xs dark:border-red-900">
+    <li className="border border-clay px-2 py-1.5 text-xs">
       <div className="flex items-center gap-2">
         <span className="font-mono font-semibold">Testcase #{result.position}</span>
         <VerdictBadge verdict={result.verdict} />
-        <span className="text-slate-500">{result.isSample ? 'mẫu' : 'ẩn'}</span>
-        <span className="ml-auto font-mono text-slate-400 tabular-nums">
+        <span className="text-ink-5">{result.isSample ? 'mẫu' : 'ẩn'}</span>
+        <span className="ml-auto font-mono text-ink-6 tabular-nums">
           {result.timeMs ?? '—'} ms
           {result.memoryKb ? ` · ${Math.round(result.memoryKb / 1024)} MB` : ''}
         </span>
       </div>
-      {result.detail ? <p className="mt-1 font-mono text-slate-500">{result.detail}</p> : null}
+      {result.detail ? <p className="mt-1 font-mono text-ink-5">{result.detail}</p> : null}
       {result.isSample && result.stdout !== undefined && result.stdout !== null ? (
-        <pre className="mt-1 max-h-32 overflow-auto rounded bg-slate-100 p-2 font-mono whitespace-pre-wrap dark:bg-slate-800">
+        <pre className="mt-1 max-h-32 overflow-auto bg-surface-1 p-2 font-mono whitespace-pre-wrap">
           Lời giải mẫu in ra: {result.stdout || '(rỗng)'}
           {result.firstDiffLine ? `\nKhác expected từ dòng ${result.firstDiffLine}` : ''}
         </pre>
       ) : (
-        <p className="mt-1 text-slate-500">
+        <p className="mt-1 text-ink-5">
           {result.isSample
             ? 'Không có output để đối chiếu.'
             : 'Testcase ẩn: API chỉ trả verdict, không trả diff — mở nó thành testcase mẫu nếu cần xem output.'}

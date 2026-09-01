@@ -19,10 +19,10 @@ export function StatementPreview({
   hiddenCount: number
 }) {
   return (
-    <div className="h-full overflow-auto bg-slate-50 px-5 py-4 dark:bg-slate-950">
-      <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400 uppercase">Member sẽ đọc thế này</p>
+    <div className="h-full overflow-auto bg-surface-1 px-5 py-4">
+      <p className="mb-3 text-xs font-semibold tracking-wide text-ink-6 uppercase">Member sẽ đọc thế này</p>
 
-      <div className="mb-4 flex flex-wrap gap-3 rounded-md bg-white px-3 py-2 font-mono text-xs text-slate-500 dark:bg-slate-900">
+      <div className="mb-4 flex flex-wrap gap-3 bg-surface-2 px-3 py-2 font-mono text-xs text-ink-5">
         <span>{values.timeLimitMs || '—'} ms</span>
         <span>{values.memoryLimitMb || '—'} MB</span>
         <span>{sampleCount} testcase mẫu</span>

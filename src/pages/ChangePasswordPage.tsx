@@ -23,10 +23,10 @@ export function ChangePasswordPage() {
     <div className="grid h-full place-items-center px-4">
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+        className="w-full max-w-sm border border-line bg-surface-2 p-6 shadow-sm"
       >
         <h1 className="text-lg font-semibold">Đổi mật khẩu</h1>
-        <p className="mt-1 mb-5 text-sm text-slate-500">
+        <p className="mt-1 mb-5 text-sm text-ink-5">
           Mật khẩu hiện tại do quản trị viên cấp — đổi trước khi dùng tiếp.
         </p>
 
@@ -47,7 +47,7 @@ export function ChangePasswordPage() {
               required
               minLength={f.id === 'cur' ? 1 : 8}
               onChange={(e) => f.set(e.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-800"
+              className="mt-1 w-full border border-line-strong px-3 py-2 text-sm"
             />
           </div>
         ))}

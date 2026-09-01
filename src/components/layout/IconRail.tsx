@@ -79,7 +79,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
       aria-label="Điều hướng khu làm bài"
       data-testid="icon-rail"
       // 48px cố định (w-12) — FR-E1 tính phần còn lại cho hai khung dựa trên con số này.
-      className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-slate-200 bg-white py-2 dark:border-slate-700 dark:bg-slate-900"
+      className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface-2 py-2"
     >
       <ul className="flex flex-col items-center gap-1">
         {items.map((item) => {
@@ -97,10 +97,10 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                 title={item.label}
                 aria-current={isActive ? 'page' : undefined}
                 data-testid={`rail-item-${item.key}`}
-                className={`relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                className={`relative flex h-10 w-10 items-center justify-center  transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                   isActive
-                    ? 'bg-primary-soft text-primary dark:bg-primary/25 dark:text-white'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+                    ? 'bg-primary-soft text-primary'
+                    : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2'
                 }`}
                 onClick={() => onSelect(item.key)}
                 onPointerDown={(e) => onPointerDown(e, item.key)}
@@ -116,7 +116,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                   <span
                     aria-hidden="true"
                     data-testid={`rail-badge-${item.key}`}
-                    className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-wa px-1 text-[10px] leading-4 font-semibold text-white"
+                    className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-wa px-1 text-[10px] leading-4 font-semibold text-on-accent"
                   >
                     {item.badge}
                   </span>
@@ -133,7 +133,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                   role="tooltip"
                   id={tipId}
                   data-testid="rail-tooltip"
-                  className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 rounded-md bg-slate-900 px-2 py-1 text-xs whitespace-nowrap text-white shadow-lg dark:bg-slate-100 dark:text-slate-900"
+                  className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 border border-line bg-surface-sel px-2 py-1 font-mono text-[11px] whitespace-nowrap text-ink-1"
                 >
                   {item.label}
                 </span>

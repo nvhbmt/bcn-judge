@@ -22,7 +22,7 @@ export function ConsolePanel({
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div role="tablist" className="flex shrink-0 gap-1 border-b border-slate-200 px-2 pt-1 dark:border-slate-700">
+      <div role="tablist" className="flex shrink-0 gap-1 border-b border-line px-2 pt-1">
         <Tab id="chay-thu" active={tab} onTab={onTab}>
           Chạy thử
         </Tab>
@@ -34,7 +34,7 @@ export function ConsolePanel({
       <div className="min-h-0 flex-1 overflow-auto px-3 py-2">
         {tab === 'chay-thu' ? (
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-slate-500" htmlFor="custom-input">
+            <label className="block text-xs font-medium text-ink-5" htmlFor="custom-input">
               Input tự nhập (bỏ trống để chạy với testcase mẫu)
             </label>
             <textarea
@@ -42,7 +42,7 @@ export function ConsolePanel({
               value={customInput}
               onChange={(e) => onCustomInput(e.target.value)}
               rows={3}
-              className="w-full rounded-md border border-slate-300 px-2 py-1 font-mono text-xs dark:border-slate-600 dark:bg-slate-800"
+              className="w-full border border-line-strong px-2 py-1 font-mono text-xs"
             />
             <ResultTable submission={runResult} emptyText="Chưa chạy thử lần nào." />
           </div>
@@ -70,10 +70,10 @@ function Tab({
       role="tab"
       aria-selected={active === id}
       onClick={() => onTab(id)}
-      className={`rounded-t-md px-3 py-1 text-xs font-medium ${
+      className={`px-3 py-1 text-xs font-medium ${
         active === id
-          ? 'bg-slate-100 text-slate-900 shadow-[inset_0_-2px_0_var(--color-primary)] dark:bg-slate-800 dark:text-slate-100'
-          : 'text-slate-500'
+          ? 'bg-surface-1 text-ink-1 shadow-[inset_0_-2px_0_var(--color-primary)]'
+          : 'text-ink-5'
       }`}
     >
       {children}
@@ -82,13 +82,13 @@ function Tab({
 }
 
 function ResultTable({ submission, emptyText }: { submission: SubmissionView | null; emptyText: string }) {
-  if (!submission) return <p className="py-4 text-center text-xs text-slate-500">{emptyText}</p>
+  if (!submission) return <p className="py-4 text-center text-xs text-ink-5">{emptyText}</p>
 
   if (submission.compileOutput) {
     return (
       <div>
         <p className="mb-1 text-xs font-medium text-[var(--color-wa)]">Lỗi biên dịch</p>
-        <pre className="max-h-60 overflow-auto rounded bg-slate-900 p-2 font-mono text-xs whitespace-pre-wrap text-slate-100">
+        <pre className="max-h-60 overflow-auto border border-line bg-[var(--surface-code)] p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
           {submission.compileOutput}
         </pre>
       </div>
@@ -98,7 +98,7 @@ function ResultTable({ submission, emptyText }: { submission: SubmissionView | n
   const results = submission.results ?? []
   if (results.length === 0) {
     return (
-      <p className="py-4 text-center text-xs text-slate-500">
+      <p className="py-4 text-center text-xs text-ink-5">
         {submission.status === 'done' ? 'Không có kết quả.' : 'Đang chấm…'}
       </p>
     )
@@ -106,7 +106,7 @@ function ResultTable({ submission, emptyText }: { submission: SubmissionView | n
 
   return (
     <table className="w-full text-xs">
-      <thead className="text-left text-slate-500">
+      <thead className="text-left text-ink-5">
         <tr>
           <th className="py-1">Test</th>
           <th>Verdict</th>
@@ -126,13 +126,13 @@ function ResultTable({ submission, emptyText }: { submission: SubmissionView | n
 function ResultRow({ result }: { result: ResultView }) {
   return (
     <>
-      <tr className="border-t border-slate-100 dark:border-slate-800">
+      <tr className="border-t border-line">
         <td className="py-1">
-          #{result.position} {result.isSample ? <span className="text-slate-400">mẫu</span> : <span className="text-slate-400">ẩn</span>}
+          #{result.position} {result.isSample ? <span className="text-ink-6">mẫu</span> : <span className="text-ink-6">ẩn</span>}
         </td>
         <td>
           <VerdictBadge verdict={result.verdict} />
-          {result.detail ? <span className="ml-1 text-slate-400">{result.detail}</span> : null}
+          {result.detail ? <span className="ml-1 text-ink-6">{result.detail}</span> : null}
         </td>
         <td className="text-right tabular-nums">{result.timeMs ?? '—'} ms</td>
         <td className="text-right tabular-nums">
@@ -143,7 +143,7 @@ function ResultRow({ result }: { result: ResultView }) {
       {result.isSample && result.verdict === 'WA' && result.stdout !== undefined ? (
         <tr>
           <td colSpan={4} className="pb-2">
-            <pre className="overflow-x-auto rounded bg-slate-100 p-2 whitespace-pre-wrap dark:bg-slate-800">
+            <pre className="overflow-x-auto bg-surface-1 p-2 whitespace-pre-wrap">
               Output của bạn: {result.stdout || '(rỗng)'}
               {result.firstDiffLine ? `\nKhác từ dòng ${result.firstDiffLine}` : ''}
             </pre>

@@ -34,7 +34,7 @@ export function ItemEditor({
   }
 
   return (
-    <form onSubmit={submit} className="mt-2 rounded-md bg-slate-50 p-3 dark:bg-slate-800/50">
+    <form onSubmit={submit} className="mt-2 bg-surface-1 p-3">
       <Field id={titleId} label="Tên mục">
         <TextInput
           id={titleId}

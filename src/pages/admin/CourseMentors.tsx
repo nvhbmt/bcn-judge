@@ -49,27 +49,26 @@ export function CourseMentors({ courseId }: { courseId: string }) {
       {isLoading ? <Spinner /> : null}
 
       {data && data.length === 0 ? (
-        <p className="mb-3 text-sm text-slate-500">
+        <p className="mb-3 text-sm text-ink-5">
           Chưa có mentor nào. Mentor được gán sẽ thấy khoá trong mục “Khoá tôi phụ trách” và soạn được nội dung.
         </p>
       ) : null}
 
       {data && data.length > 0 ? (
-        <ul className="mb-3 divide-y divide-slate-100 dark:divide-slate-800">
+        <ul className="mb-3 divide-y divide-line">
           {data.map((mentor) => (
             <li key={mentor.id} className="flex items-center gap-2 py-1.5 text-sm">
               <span className="min-w-0">
                 <span className="block truncate">{mentor.displayName}</span>
-                <span className="block truncate font-mono text-xs text-slate-500">{mentor.email}</span>
+                <span className="block truncate font-mono text-xs text-ink-5">{mentor.email}</span>
               </span>
               <button
                 type="button"
                 onClick={() => remove.mutate(mentor.id)}
                 disabled={remove.isPending}
-                className="ml-auto inline-flex shrink-0 items-center gap-1 rounded border border-slate-300 px-2 py-1
-                  text-xs hover:bg-slate-100 disabled:opacity-50 focus-visible:outline-2
-                  focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]
-                  dark:border-slate-600 dark:hover:bg-slate-800"
+                className="ml-auto inline-flex shrink-0 items-center gap-1 border border-line-strong px-2 py-1
+ text-xs hover:bg-surface-sel disabled:opacity-50 focus-visible:outline-2
+ focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]"
               >
                 <UserMinus size={13} /> Gỡ
               </button>
@@ -78,7 +77,7 @@ export function CourseMentors({ courseId }: { courseId: string }) {
         </ul>
       ) : null}
 
-      <p className="mb-1.5 text-xs text-slate-500">
+      <p className="mb-1.5 text-xs text-ink-5">
         Chỉ tài khoản vai trò Mentor hoặc Admin gán được — chọn nhầm tài khoản Member sẽ bị từ chối.
       </p>
       <UserPicker

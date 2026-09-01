@@ -35,23 +35,23 @@ export function SyllabusPanel({ courseId, currentItemId }: { courseId: string; c
     <nav className="px-2 py-3" aria-label="Giáo trình">
       {data.map((section) => (
         <section key={section.id} className="mb-4">
-          <h3 className="px-2 pb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{section.title}</h3>
+          <h3 className="px-2 pb-1 text-xs font-semibold tracking-wide text-ink-5 uppercase">{section.title}</h3>
           <ul>
             {section.items.map((item) => (
               <li key={item.id}>
                 <Link
                   to={`/khoa-hoc/${courseId}/bai/${item.id}`}
                   aria-current={item.id === currentItemId ? 'page' : undefined}
-                  className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm ${
+                  className={`flex items-center gap-2  px-2 py-1.5 text-sm ${
                     item.id === currentItemId
-                      ? 'bg-[var(--color-primary-soft)] font-medium dark:bg-slate-800'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                      ? 'bg-[var(--color-primary-soft)] font-medium'
+                      : 'hover:bg-surface-sel'
                   }`}
                 >
                   <StatusIcon item={item} />
                   <span className="truncate">{item.title}</span>
                   {item.attempts > 0 ? (
-                    <span className="ml-auto shrink-0 font-mono text-xs text-slate-400">{item.attempts} lần</span>
+                    <span className="ml-auto shrink-0 font-mono text-xs text-ink-6">{item.attempts} lần</span>
                   ) : null}
                 </Link>
               </li>
@@ -64,9 +64,9 @@ export function SyllabusPanel({ courseId, currentItemId }: { courseId: string; c
 }
 
 function StatusIcon({ item }: { item: SyllabusItem }) {
-  if (item.kind === 'lesson') return <BookText size={15} className="shrink-0 text-slate-400" aria-label="Bài đọc" />
+  if (item.kind === 'lesson') return <BookText size={15} className="shrink-0 text-ink-6" aria-label="Bài đọc" />
   if (item.status === 'da-ac') return <Check size={15} className="shrink-0 text-[var(--color-ac)]" aria-label="Đã AC" />
   if (item.status === 'da-thu')
     return <CircleDot size={15} className="shrink-0 text-[var(--color-tle)]" aria-label="Đã thử" />
-  return <Circle size={15} className="shrink-0 text-slate-300" aria-label="Chưa làm" />
+  return <Circle size={15} className="shrink-0 text-ink-6" aria-label="Chưa làm" />
 }

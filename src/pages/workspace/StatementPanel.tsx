@@ -7,7 +7,7 @@ export function StatementPanel({ problem }: { problem: ProblemView }) {
     <article className="space-y-4 px-4 py-4">
       <header>
         <h1 className="text-lg font-semibold">{problem.title}</h1>
-        <p className="mt-1 font-mono text-xs text-slate-500">
+        <p className="mt-1 font-mono text-xs text-ink-5">
           Thời gian {problem.timeLimitMs} ms · Bộ nhớ {problem.memoryLimitMb} MB
           {problem.hiddenTestcaseCount > 0 ? ` · ${problem.hiddenTestcaseCount} testcase ẩn` : ''}
         </p>
@@ -17,7 +17,7 @@ export function StatementPanel({ problem }: { problem: ProblemView }) {
           trùng điểm vào với harness — và thông báo của trình biên dịch lúc đó rất
           khó hiểu với người mới. */}
       {problem.kind === 'function' ? (
-        <p className="rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <p className="bg-[var(--tint-earth)] px-3 py-2 text-sm text-earth">
           Bài dạng <strong>hàm</strong>: chỉ viết đúng hàm theo mẫu có sẵn trong trình soạn thảo.{' '}
           <strong>Đừng viết hàm main</strong> — phần đọc dữ liệu và in kết quả đã có sẵn.
         </p>
@@ -57,8 +57,8 @@ function Section({ title, body }: { title: string; body: string }) {
 
 function IoBox({ label, text }: { label: string; text: string }) {
   return (
-    <div className="overflow-hidden rounded-md border border-slate-200 dark:border-slate-700">
-      <div className="border-b border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800">
+    <div className="overflow-hidden border border-line">
+      <div className="border-b border-line bg-surface-1 px-2 py-1 text-xs font-medium text-ink-5">
         {label}
       </div>
       <pre className="overflow-x-auto px-2 py-1.5 font-mono text-xs whitespace-pre-wrap">{text}</pre>

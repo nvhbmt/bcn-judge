@@ -37,7 +37,7 @@ export function ContestEditorPage() {
   if (isError || !row) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-6">
-        <Link to="/mentor/contest" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+        <Link to="/mentor/contest" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
           <ArrowLeft size={15} /> Danh sách contest
         </Link>
         <EmptyState
@@ -52,7 +52,7 @@ export function ContestEditorPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
-      <Link to="/mentor/contest" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/mentor/contest" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Danh sách contest
       </Link>
 

@@ -26,7 +26,7 @@ const ITEMS: NavItem[] = [
 
 export function AdminNav() {
   return (
-    <nav aria-label="Quản trị" className="mb-5 border-b border-slate-200 dark:border-slate-700">
+    <nav aria-label="Quản trị" className="mb-5 border-b border-line">
       <ul className="flex flex-wrap gap-1">
         {ITEMS.map(({ to, label, icon: Icon }) => (
           <li key={to}>
@@ -38,7 +38,7 @@ export function AdminNav() {
                  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
                    isActive
                      ? 'border-[var(--color-primary)] font-medium text-[var(--color-primary)]'
-                     : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                     : 'border-transparent text-ink-5 hover:text-ink-2'
                  }`
               }
             >
@@ -63,13 +63,13 @@ export function AdminShell({
 }) {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
-      <NavLink to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <NavLink to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </NavLink>
       <AdminNav />
       <header className="mb-4">
         <h1 className="text-xl font-semibold">{title}</h1>
-        {description ? <p className="mt-1 text-sm text-slate-500">{description}</p> : null}
+        {description ? <p className="mt-1 text-sm text-ink-5">{description}</p> : null}
       </header>
       {children}
     </div>

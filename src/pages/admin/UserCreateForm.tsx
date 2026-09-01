@@ -48,7 +48,7 @@ export function UserCreateForm({
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <form onSubmit={submit} className="border border-line bg-surface-2 p-4">
       <h2 className="mb-3 text-sm font-semibold">Tạo tài khoản</h2>
       <FailureBanner notice={notice} />
 

@@ -44,7 +44,7 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
       <SuccessNote>{saved}</SuccessNote>
 
       {groupSettings(settings).map((group) => (
-        <section key={group.title} className="mb-5 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+        <section key={group.title} className="mb-5 border border-line bg-surface-2 p-4">
           <h2 className="mb-3 text-sm font-semibold">{group.title}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {group.keys.map((key) => {
@@ -52,11 +52,11 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
               const value = valueOf(key)
               const dirty = key in draft
               return (
-                <div key={key} className={dirty ? 'rounded-md bg-[var(--color-primary-soft)]/40 p-2 -m-2' : ''}>
+                <div key={key} className={dirty ? ' bg-[var(--color-primary-soft)]/40 p-2 -m-2' : ''}>
                   <label className="block">
-                    <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <span className="mb-1 block text-xs font-medium text-ink-3">
                       {meta.label}
-                      {meta.unit ? <span className="font-normal text-slate-500"> ({meta.unit})</span> : null}
+                      {meta.unit ? <span className="font-normal text-ink-5"> ({meta.unit})</span> : null}
                     </span>
                     {typeof value === 'boolean' ? (
                       <span className="flex items-center gap-2 py-1.5 text-sm">
@@ -86,11 +86,11 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
                       />
                     )}
                   </label>
-                  <span className="mt-1 block text-xs text-slate-500">
+                  <span className="mt-1 block text-xs text-ink-5">
                     {meta.bytes && typeof value === 'number' ? `${humanBytes(value)}. ` : null}
                     {meta.hint}
                   </span>
-                  <span className="mt-0.5 block font-mono text-[11px] text-slate-400">{key}</span>
+                  <span className="mt-0.5 block font-mono text-[11px] text-ink-6">{key}</span>
                 </div>
               )
             })}
@@ -98,7 +98,7 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
         </section>
       ))}
 
-      <div className="sticky bottom-0 -mx-4 border-t border-slate-200 bg-[#f4f6f9] px-4 py-3 dark:border-slate-700 dark:bg-[#0f1319]">
+      <div className="sticky bottom-0 -mx-4 border-t border-line bg-[#f4f6f9] px-4 py-3">
         <Button variant="primary" onClick={() => save.mutate(draft)} disabled={save.isPending || dirtyKeys.length === 0}>
           {save.isPending ? 'Đang lưu…' : dirtyKeys.length === 0 ? 'Chưa có thay đổi' : `Lưu ${dirtyKeys.length} thay đổi`}
         </Button>

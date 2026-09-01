@@ -57,7 +57,7 @@ export function UserPicker({
   return (
     <div>
       <div className="relative">
-        <Search size={14} className="pointer-events-none absolute top-2.5 left-2.5 text-slate-400" />
+        <Search size={14} className="pointer-events-none absolute top-2.5 left-2.5 text-ink-6" />
         <TextInput
           value={term}
           onChange={(e) => setTerm(e.target.value)}
@@ -72,27 +72,26 @@ export function UserPicker({
           <Spinner label="Đang tìm…" />
         </div>
       ) : results.length === 0 ? (
-        <p className="py-2 text-sm text-slate-500" role="status">
+        <p className="py-2 text-sm text-ink-5" role="status">
           Không có tài khoản nào khớp “{q}”
           {role === 'member' ? ' với vai trò Member' : ''}.
         </p>
       ) : (
-        <ul className="mt-2 max-h-56 divide-y divide-slate-100 overflow-auto rounded-md border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
+        <ul className="mt-2 max-h-56 divide-y divide-line overflow-auto border border-line">
           {results.map((user) => (
             <li key={user.id} className="flex items-center gap-2 px-2.5 py-1.5 text-sm">
               <span className="min-w-0">
                 <span className="block truncate">{user.displayName}</span>
-                <span className="block truncate font-mono text-xs text-slate-500">{user.email}</span>
+                <span className="block truncate font-mono text-xs text-ink-5">{user.email}</span>
               </span>
-              <span className="ml-auto shrink-0 text-xs text-slate-400">{ROLE_LABEL[user.role]}</span>
+              <span className="ml-auto shrink-0 text-xs text-ink-6">{ROLE_LABEL[user.role]}</span>
               <button
                 type="button"
                 disabled={pending || blocked.has(user.id)}
                 onClick={() => onPick(user)}
-                className="shrink-0 rounded border border-slate-300 px-2 py-1 text-xs hover:bg-slate-100
-                  disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2
-                  focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]
-                  dark:border-slate-600 dark:hover:bg-slate-800"
+                className="shrink-0 border border-line-strong px-2 py-1 text-xs hover:bg-surface-sel
+ disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2
+ focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]"
               >
                 {blocked.has(user.id) ? 'Đã có' : actionLabel}
               </button>

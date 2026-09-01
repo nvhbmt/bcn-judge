@@ -36,11 +36,11 @@ export function LeaderboardPanel({ courseId, contestId }: { courseId?: string; c
 
   return (
     <div className="px-2 py-3">
-      <h3 className="px-2 pb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+      <h3 className="px-2 pb-2 text-xs font-semibold tracking-wide text-ink-5 uppercase">
         {contestId ? 'Bảng xếp hạng contest' : 'Bảng xếp hạng khoá'}
       </h3>
       <table className="w-full text-sm">
-        <thead className="text-left text-xs text-slate-500">
+        <thead className="text-left text-xs text-ink-5">
           <tr>
             <th className="px-2 py-1">#</th>
             <th>Thành viên</th>
@@ -52,8 +52,8 @@ export function LeaderboardPanel({ courseId, contestId }: { courseId?: string; c
           {data.map((row) => (
             <tr
               key={row.userId}
-              className={`border-t border-slate-100 dark:border-slate-800 ${
-                row.isMe ? 'bg-[var(--color-primary-soft)] font-medium dark:bg-slate-800' : ''
+              className={`border-t border-line ${
+                row.isMe ? 'bg-[var(--color-primary-soft)] font-medium' : ''
               }`}
             >
               <td className="px-2 py-1.5 tabular-nums">{row.rank}</td>

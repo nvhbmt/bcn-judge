@@ -39,18 +39,18 @@ export function ContestPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </Link>
 
       <header className="mb-5">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-semibold">{data.title}</h1>
-          <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs dark:bg-slate-700">
+          <span className="rounded-full bg-surface-sel px-2 py-0.5 text-xs">
             {PHASE_LABEL[data.phase]}
           </span>
         </div>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-ink-5">
           {new Date(data.startAt).toLocaleString('vi-VN')} → {new Date(data.endAt).toLocaleString('vi-VN')} ·{' '}
           {data.problemCount} bài
         </p>
@@ -63,13 +63,13 @@ export function ContestPage() {
       </header>
 
       {data.phase === 'da-ket-thuc' ? (
-        <p className="mb-4 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+        <p className="mb-4 bg-[var(--tint-earth)] px-3 py-2 text-sm text-earth">
           Chế độ luyện tập — bài nộp vẫn được chấm nhưng không tính vào bảng xếp hạng.
         </p>
       ) : null}
 
       {data.descriptionMd ? (
-        <div className="mb-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+        <div className="mb-6 border border-line bg-surface-2 p-4">
           <Markdown source={data.descriptionMd} />
         </div>
       ) : null}
@@ -82,18 +82,18 @@ export function ContestPage() {
             <li key={p.id}>
               <Link
                 to={`/contest/${contestId}/bai/${p.id}`}
-                className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 transition hover:border-[var(--color-primary)] dark:border-slate-700 dark:bg-slate-900"
+                className="flex items-center gap-3 border border-line bg-surface-2 px-4 py-3 transition hover:border-[var(--color-primary)]"
               >
-                <span className="font-mono text-sm text-slate-500">{p.label}</span>
+                <span className="font-mono text-sm text-ink-5">{p.label}</span>
                 <span className="font-medium">{p.title}</span>
-                <span className="ml-auto font-mono text-xs text-slate-400">{p.maxScore} điểm</span>
+                <span className="ml-auto font-mono text-xs text-ink-6">{p.maxScore} điểm</span>
               </Link>
             </li>
           ))}
         </ul>
       )}
 
-      <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+      <div className="border border-line bg-surface-2">
         <LeaderboardPanel contestId={contestId} />
       </div>
     </div>

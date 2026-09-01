@@ -98,7 +98,7 @@ export function TestcasePanel({
       >
         <TestcaseTable drafts={drafts} onChange={setDrafts} />
 
-        <div className="mt-3 border-t border-slate-200 pt-3 dark:border-slate-700">
+        <div className="mt-3 border-t border-line pt-3">
           {blocking ? <Notice tone="error">{blocking}</Notice> : null}
           {error ? <Notice tone="error">{error}</Notice> : null}
 
@@ -127,7 +127,7 @@ export function TestcasePanel({
       </Step>
 
       <Step n={3} title="Kiểm bằng lời giải mẫu">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-ink-5">
           Nút <strong>Kiểm tra bằng lời giải mẫu</strong> nằm ở băng trên cùng của màn hình, luôn nhìn thấy. Chỉ
           sau khi nó báo xanh thì bộ test mới coi là dùng được.
         </p>
@@ -140,12 +140,12 @@ function Step({ n, title, hint, children }: { n: number; title: string; hint?: s
   return (
     <section className="mb-6">
       <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold">
-        <span className="grid size-5 place-items-center rounded-full bg-[var(--color-primary)] text-xs text-white">
+        <span className="grid size-5 place-items-center rounded-full bg-[var(--color-primary)] text-xs text-on-accent">
           {n}
         </span>
         {title}
       </h3>
-      {hint ? <p className="mb-2 text-xs text-slate-500">{hint}</p> : null}
+      {hint ? <p className="mb-2 text-xs text-ink-5">{hint}</p> : null}
       {children}
     </section>
   )

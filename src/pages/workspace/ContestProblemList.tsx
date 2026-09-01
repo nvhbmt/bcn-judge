@@ -27,22 +27,22 @@ export function ContestProblemList({ contestId, currentId }: { contestId?: strin
 
   return (
     <nav className="px-2 py-3" aria-label="Bài trong contest">
-      <h3 className="px-2 pb-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">{data.title}</h3>
+      <h3 className="px-2 pb-1 text-xs font-semibold tracking-wide text-ink-5 uppercase">{data.title}</h3>
       <ul>
         {data.problems.map((p) => (
           <li key={p.id}>
             <Link
               to={`/contest/${contestId}/bai/${p.id}`}
               aria-current={p.id === currentId ? 'page' : undefined}
-              className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm ${
+              className={`flex items-center gap-2  px-2 py-1.5 text-sm ${
                 p.id === currentId
-                  ? 'bg-[var(--color-primary-soft)] font-medium dark:bg-slate-800'
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-[var(--color-primary-soft)] font-medium'
+                  : 'hover:bg-surface-sel'
               }`}
             >
-              <span className="w-4 shrink-0 font-mono text-xs text-slate-500">{p.label}</span>
+              <span className="w-4 shrink-0 font-mono text-xs text-ink-5">{p.label}</span>
               <span className="truncate">{p.title}</span>
-              <span className="ml-auto shrink-0 font-mono text-xs text-slate-400">{p.maxScore}đ</span>
+              <span className="ml-auto shrink-0 font-mono text-xs text-ink-6">{p.maxScore}đ</span>
             </Link>
           </li>
         ))}

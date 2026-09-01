@@ -6,7 +6,7 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
     <div className="space-y-5 px-4 py-4 text-sm">
       <section>
         <h2 className="mb-1 font-semibold">Làm bài thế nào</h2>
-        <ol className="list-decimal space-y-1 pl-5 text-slate-600 dark:text-slate-300">
+        <ol className="list-decimal space-y-1 pl-5 text-ink-3">
           <li>Đọc đề ở khung giữa, chọn ngôn ngữ ở khung code bên phải.</li>
           <li>
             Bấm <b>Chạy thử</b> để chạy với testcase mẫu hoặc input tự nhập — không tính là nộp bài.
@@ -23,7 +23,7 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
           {(Object.keys(VERDICT_LABEL) as Verdict[]).map((v) => (
             <div key={v} className="contents">
               <dt className="font-mono text-xs font-semibold">{v}</dt>
-              <dd className="text-slate-600 dark:text-slate-300">{VERDICT_EXPLAIN[v]}</dd>
+              <dd className="text-ink-3">{VERDICT_EXPLAIN[v]}</dd>
             </div>
           ))}
         </dl>
@@ -31,11 +31,11 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
 
       <section>
         <h2 className="mb-1 font-semibold">Đọc dữ liệu vào, ghi dữ liệu ra</h2>
-        <p className="text-slate-600 dark:text-slate-300">
+        <p className="text-ink-3">
           Chương trình đọc từ <b>stdin</b> và in ra <b>stdout</b> — không đọc/ghi file. Kết quả so sánh bỏ qua khoảng
           trắng cuối dòng và dòng trống cuối, nên thừa một dấu xuống dòng không bị tính sai.
         </p>
-        <pre className="mt-2 overflow-x-auto rounded bg-slate-100 p-2 font-mono text-xs dark:bg-slate-800">
+        <pre className="mt-2 overflow-x-auto bg-surface-1 p-2 font-mono text-xs">
 {`C:      scanf("%d %d", &a, &b);   printf("%d\\n", a + b);
 C++:    std::cin >> a >> b;       std::cout << a + b << "\\n";
 Python: a, b = map(int, input().split());  print(a + b)`}
@@ -44,7 +44,7 @@ Python: a, b = map(int, input().split());  print(a + b)`}
 
       <section>
         <h2 className="mb-1 font-semibold">Phím tắt</h2>
-        <ul className="list-disc space-y-1 pl-5 text-slate-600 dark:text-slate-300">
+        <ul className="list-disc space-y-1 pl-5 text-ink-3">
           <li>
             <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd> — chạy thử
           </li>
@@ -61,7 +61,7 @@ Python: a, b = map(int, input().split());  print(a + b)`}
       {role !== 'member' ? (
         <section>
           <h2 className="mb-1 font-semibold">Dành cho mentor</h2>
-          <ul className="list-disc space-y-1 pl-5 text-slate-600 dark:text-slate-300">
+          <ul className="list-disc space-y-1 pl-5 text-ink-3">
             <li>
               Tải testcase hàng loạt bằng file zip theo quy ước <code>01.in</code> / <code>01.out</code>.
             </li>

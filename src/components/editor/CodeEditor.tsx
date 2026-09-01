@@ -5,10 +5,6 @@
  * Phủ FR-E4 (tô màu cú pháp, số dòng, thụt lề tự động, Tab/Shift+Tab, tìm kiếm,
  * undo/redo, chủ đề sáng/tối) và FR-E8 (Ctrl/⌘+Enter chạy thử, Ctrl/⌘+Shift+Enter nộp bài).
  */
-import { cpp } from '@codemirror/lang-cpp'
-import { java } from '@codemirror/lang-java'
-import { javascript } from '@codemirror/lang-javascript'
-import { python } from '@codemirror/lang-python'
 import {
   bracketMatching,
   defaultHighlightStyle,
@@ -26,8 +22,17 @@ import {
   temporarilySetTabFocusMode,
 } from '@codemirror/commands'
 import { highlightSelectionMatches, search, searchKeymap } from '@codemirror/search'
-import { Annotation, Compartment, EditorState, Prec, type Extension } from '@codemirror/state'
-import { oneDark } from '@codemirror/theme-one-dark'
+import { Annotation, EditorState, Prec } from '@codemirror/state'
+import { useTheme } from '@/hooks/useTheme'
+import {
+  baseTheme,
+  languageConf,
+  languageExtension,
+  shellConf,
+  shellExtension,
+  themeConf,
+  themeExtension,
+} from './extensions'
 import {
   EditorView,
   drawSelection,
@@ -70,49 +75,6 @@ export const SUBMIT_SHORTCUT = 'Mod-Shift-Enter'
  */
 const externalSync = Annotation.define<boolean>()
 
-// Compartment chỉ là "khoá định danh" trong state của từng view, nên dùng chung
-// ở mức module vẫn an toàn khi có nhiều editor trên cùng màn hình.
-const languageConf = new Compartment()
-const themeConf = new Compartment()
-/** readOnly + aria-label: cả hai chỉ đổi thuộc tính DOM, gộp một compartment. */
-const shellConf = new Compartment()
-
-/**
- * Ánh xạ mã ngôn ngữ judge → language support của CodeMirror.
- * Ngôn ngữ lạ (thêm bằng cấu hình theo FR-F7) trả về `[]` — editor vẫn chạy ở chế
- * độ văn bản thuần, tuyệt đối không ném lỗi làm sập cả màn hình làm bài.
- */
-export function languageExtension(languageId: string): Extension {
-  switch (languageId) {
-    case 'c11':
-    case 'cpp17':
-      return cpp()
-    case 'python3':
-      return python()
-    case 'java17':
-      return java()
-    case 'node20':
-      return javascript()
-    default:
-      return []
-  }
-}
-
-function themeExtension(theme: 'light' | 'dark'): Extension {
-  // Chủ đề sáng không cần extension riêng: đã có `defaultHighlightStyle` nạp
-  // cố định trong danh sách extension bên dưới.
-  return theme === 'dark' ? oneDark : []
-}
-
-function shellExtension(readOnly: boolean, ariaLabel: string): Extension {
-  return [
-    // Cần cả hai: `readOnly` chặn các lệnh sửa, `editable` chặn gõ thẳng vào DOM.
-    EditorState.readOnly.of(readOnly),
-    EditorView.editable.of(!readOnly),
-    EditorView.contentAttributes.of({ 'aria-label': ariaLabel }),
-  ]
-}
-
 /** Gọi handler đang giữ trong ref; trả `false` khi cha không truyền để phím rơi
  *  về hành vi mặc định của CodeMirror thay vì bị nuốt. */
 function callRef(ref: { current: (() => void) | undefined }): boolean {
@@ -133,25 +95,20 @@ function escapeToTabFocus(view: EditorView): boolean {
   return false
 }
 
-const baseTheme = EditorView.theme({
-  '&': { height: '100%', fontSize: '13px' },
-  '.cm-scroller': {
-    overflow: 'auto',
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-    lineHeight: '1.5',
-  },
-})
-
 export function CodeEditor({
   value,
   onChange,
   languageId,
-  theme = 'light',
+  // Mặc định BÁM theo theme của app. Trước đây cắm cứng 'light' và không chỗ nào
+  // truyền prop này, nên editor sáng trắng giữa giao diện tối.
+  theme: themeProp,
   readOnly = false,
   onRun,
   onSubmit,
   ariaLabel = 'Trình soạn code',
 }: CodeEditorProps) {
+  const appTheme = useTheme()
+  const theme = themeProp ?? appTheme
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
 
@@ -266,5 +223,8 @@ export function CodeEditor({
 
   return <div ref={hostRef} className="h-full min-h-0 overflow-hidden" data-testid="code-editor" />
 }
+
+/* Giữ export cũ: nơi khác đang import languageExtension từ file này. */
+export { languageExtension }
 
 export default CodeEditor

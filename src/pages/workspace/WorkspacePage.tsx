@@ -115,14 +115,14 @@ export function WorkspacePage() {
   const content = (
     <div className="flex h-full min-h-0 flex-col">
       {rail === null ? (
-        <div role="tablist" className="flex shrink-0 gap-1 border-b border-slate-200 px-2 pt-1 dark:border-slate-700">
+        <div role="tablist" className="flex shrink-0 gap-1 border-b border-line px-2 pt-1">
           <ProblemTab id="de-bai" active={problemTab} onTab={setProblemTab}>
             Đề bài
           </ProblemTab>
           <ProblemTab id="bai-nop" active={problemTab} onTab={setProblemTab}>
             Bài nộp
           </ProblemTab>
-          <Link to={courseId ? `/khoa-hoc/${courseId}` : '/'} className="ml-auto self-center px-2 text-xs text-slate-500 hover:underline">
+          <Link to={courseId ? `/khoa-hoc/${courseId}` : '/'} className="ml-auto self-center px-2 text-xs text-ink-5 hover:underline">
             ← Danh sách
           </Link>
         </div>
@@ -218,10 +218,10 @@ function ProblemTab({
       role="tab"
       aria-selected={active === id}
       onClick={() => onTab(id)}
-      className={`rounded-t-md px-3 py-1.5 text-sm font-medium ${
+      className={`px-3 py-1.5 text-sm font-medium ${
         active === id
-          ? 'bg-slate-100 shadow-[inset_0_-2px_0_var(--color-primary)] dark:bg-slate-800'
-          : 'text-slate-500'
+          ? 'bg-surface-1 shadow-[inset_0_-2px_0_var(--color-primary)]'
+          : 'text-ink-5'
       }`}
     >
       {children}

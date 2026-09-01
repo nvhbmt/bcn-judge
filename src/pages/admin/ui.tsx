@@ -9,16 +9,16 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTML
 import type { FailureNotice } from './conflicts'
 
 const CONTROL =
-  'w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm ' +
+  'w-full  border border-line-strong bg-surface-2 px-2.5 py-1.5 text-sm ' +
   'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)] ' +
-  'disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900'
+  'disabled:cursor-not-allowed disabled:opacity-60'
 
 export function Field({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">{label}</span>
+      <span className="mb-1 block text-xs font-medium text-ink-3">{label}</span>
       {children}
-      {hint ? <span className="mt-1 block text-xs text-slate-500">{hint}</span> : null}
+      {hint ? <span className="mt-1 block text-xs text-ink-5">{hint}</span> : null}
     </label>
   )
 }
@@ -37,7 +37,7 @@ export function Select({ className = '', ...props }: SelectHTMLAttributes<HTMLSe
 
 export function Card({ title, actions, children }: { title: string; actions?: ReactNode; children: ReactNode }) {
   return (
-    <section className="mb-5 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <section className="mb-5 border border-line bg-surface-2 p-4">
       <div className="mb-3 flex items-center gap-2">
         <h2 className="text-sm font-semibold">{title}</h2>
         {actions ? <div className="ml-auto flex items-center gap-2">{actions}</div> : null}
@@ -51,10 +51,10 @@ export function Card({ title, actions, children }: { title: string; actions?: Re
 export function FailureBanner({ notice }: { notice: FailureNotice | null }) {
   if (!notice) return null
   return (
-    <p role="alert" className="mb-3 rounded-md bg-red-50 px-3 py-2 text-sm dark:bg-red-950/40">
+    <p role="alert" className="mb-3 bg-[var(--tint-clay)] px-3 py-2 text-sm">
       <span className="font-medium text-[var(--color-wa)]">{notice.message}</span>
       {notice.nextStep ? (
-        <span className="mt-1 block text-slate-600 dark:text-slate-300">{notice.nextStep}</span>
+        <span className="mt-1 block text-ink-3">{notice.nextStep}</span>
       ) : null}
     </p>
   )
@@ -63,7 +63,7 @@ export function FailureBanner({ notice }: { notice: FailureNotice | null }) {
 export function SuccessNote({ children }: { children: ReactNode }) {
   if (!children) return null
   return (
-    <p role="status" className="mb-3 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
+    <p role="status" className="mb-3 bg-surface-sel px-3 py-2 text-sm text-moss">
       {children}
     </p>
   )
@@ -97,9 +97,9 @@ export function CopyButton({ value, label = 'Chép' }: { value: string; label?: 
     <button
       type="button"
       onClick={() => void copy()}
-      className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs
-        hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1
-        focus-visible:outline-[var(--color-primary)] dark:border-slate-600 dark:hover:bg-slate-800"
+      className="inline-flex items-center gap-1 border border-line-strong px-2 py-1 text-xs
+ hover:bg-surface-sel focus-visible:outline-2 focus-visible:outline-offset-1
+ focus-visible:outline-[var(--color-primary)]"
     >
       {done ? <Check size={13} className="text-[var(--color-ac)]" /> : <Copy size={13} />}
       {done ? 'Đã chép' : label}

@@ -7,10 +7,13 @@
  */
 
 .markdown-body {
-  --md-border: #d4d4d8;
-  --md-muted: #71717a;
-  --md-surface: #f4f4f5;
+  /* Ba biến này nay nối thẳng vào token của hệ thiết kế, nên markdown đổi theo
+     theme mà không cần khối ghi đè riêng — xem design-system/tokens/colors.css. */
+  --md-border: var(--line);
+  --md-muted: var(--ink-5);
+  --md-surface: var(--surface-code);
 
+  color: var(--ink-2);
   line-height: 1.65;
   overflow-wrap: break-word;
 }
@@ -151,10 +154,13 @@
  * Bảng màu highlight.js tối thiểu. Nhập nguyên một theme của highlight.js sẽ ghi đè cả nền và
  * chữ theo màu của nó, đá nhau với biến màu ở trên — sáu dòng này phủ hết token mà C/C++/Python
  * sinh ra trong đề.
+ *
+ * Sáu màu này TỪNG cắm cứng theo bảng GitHub sáng, nên trên nền tối không đọc
+ * được. Nay lấy từ --syn-* của hệ thiết kế, đổi theo theme.
  */
 .markdown-body .hljs-comment,
 .markdown-body .hljs-quote {
-  color: #6a737d;
+  color: var(--syn-comment);
   font-style: italic;
 }
 
@@ -162,26 +168,26 @@
 .markdown-body .hljs-selector-tag,
 .markdown-body .hljs-literal,
 .markdown-body .hljs-type {
-  color: #d73a49;
+  color: var(--syn-keyword);
 }
 
 .markdown-body .hljs-string,
 .markdown-body .hljs-meta-string {
-  color: #032f62;
+  color: var(--syn-string);
 }
 
 .markdown-body .hljs-number,
 .markdown-body .hljs-symbol {
-  color: #005cc5;
+  color: var(--syn-number);
 }
 
 .markdown-body .hljs-title,
 .markdown-body .hljs-function .hljs-title,
 .markdown-body .hljs-attr {
-  color: #6f42c1;
+  color: var(--syn-func);
 }
 
 .markdown-body .hljs-meta,
 .markdown-body .hljs-built_in {
-  color: #e36209;
+  color: var(--syn-func);
 }

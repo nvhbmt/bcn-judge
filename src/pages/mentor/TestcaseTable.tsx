@@ -28,7 +28,7 @@ export function TestcaseTable({
 
   return (
     <div>
-      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+      <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-ink-5">
         <span>
           {drafts.length} testcase · <strong>{samples} mẫu</strong> · {drafts.length - samples} ẩn
         </span>
@@ -54,8 +54,8 @@ export function TestcaseTable({
         {drafts.map((draft, index) => (
           <li
             key={draft.key}
-            className={`rounded-md border p-2 ${
-              draft.truncated ? 'border-[var(--color-wa)] bg-red-50/50 dark:bg-red-950/20' : 'border-slate-200 dark:border-slate-700'
+            className={` border p-2 ${
+              draft.truncated ? 'border-[var(--color-wa)] bg-[var(--tint-clay)]/50' : 'border-line'
             }`}
           >
             <div className="mb-1.5 flex flex-wrap items-center gap-2 text-xs">
@@ -75,7 +75,7 @@ export function TestcaseTable({
                 <option value="hidden">Ẩn</option>
               </Select>
 
-              <label htmlFor={`${draft.key}-weight`} className="text-slate-500">
+              <label htmlFor={`${draft.key}-weight`} className="text-ink-5">
                 Trọng số
               </label>
               <TextInput
@@ -89,7 +89,7 @@ export function TestcaseTable({
                 className="max-w-20 py-1"
               />
 
-              <span className="text-slate-400">
+              <span className="text-ink-6">
                 {utf8Bytes(draft.input)} B vào · {draft.expected === null ? 'chưa có' : `${utf8Bytes(draft.expected)} B`} ra
               </span>
 
@@ -111,7 +111,7 @@ export function TestcaseTable({
             ) : null}
 
             {draft.expected === null ? (
-              <p className="mb-1.5 text-xs text-amber-700 dark:text-amber-300">
+              <p className="mb-1.5 text-xs text-earth">
                 Chưa có expected output (nạp từ zip với tuỳ chọn sinh sau). Gõ vào đây, hoặc để trống và dùng lời
                 giải mẫu.
               </p>
@@ -119,7 +119,7 @@ export function TestcaseTable({
 
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <label htmlFor={`${draft.key}-in`} className="mb-0.5 block text-xs text-slate-500">
+                <label htmlFor={`${draft.key}-in`} className="mb-0.5 block text-xs text-ink-5">
                   Input
                 </label>
                 <TextArea
@@ -132,7 +132,7 @@ export function TestcaseTable({
                 />
               </div>
               <div>
-                <label htmlFor={`${draft.key}-out`} className="mb-0.5 block text-xs text-slate-500">
+                <label htmlFor={`${draft.key}-out`} className="mb-0.5 block text-xs text-ink-5">
                   Expected output
                 </label>
                 <TextArea

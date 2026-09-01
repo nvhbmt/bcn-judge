@@ -31,7 +31,7 @@ export function ImportReportTable({ report }: { report: ImportReport }) {
         <span className="inline-flex items-center gap-1.5 text-[var(--color-ac)]">
           <CheckCircle2 size={15} /> {report.created} tài khoản đã tạo
         </span>
-        <span className={`inline-flex items-center gap-1.5 ${report.failed > 0 ? 'text-[var(--color-wa)]' : 'text-slate-500'}`}>
+        <span className={`inline-flex items-center gap-1.5 ${report.failed > 0 ? 'text-[var(--color-wa)]' : 'text-ink-5'}`}>
           <XCircle size={15} /> {report.failed} dòng lỗi
         </span>
         <span className="ml-auto flex gap-2">
@@ -41,16 +41,16 @@ export function ImportReportTable({ report }: { report: ImportReport }) {
       </div>
 
       {createdRows.length > 0 ? (
-        <p className="mb-2 rounded-md bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+        <p className="mb-2 bg-[var(--tint-earth)] px-3 py-2 text-sm text-earth">
           <strong>Chép mật khẩu trước khi rời trang.</strong> Hệ thống không lưu bản rõ; muốn có lại phải đặt lại mật
           khẩu từng tài khoản.
         </p>
       ) : null}
 
-      <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-700">
+      <div className="overflow-x-auto border border-line">
         <table className="w-full text-sm">
           <caption className="sr-only">Kết quả nhập từng dòng CSV</caption>
-          <thead className="bg-slate-50 text-left text-xs text-slate-500 dark:bg-slate-800">
+          <thead className="bg-surface-1 text-left text-xs text-ink-5">
             <tr>
               <th scope="col" className="px-2 py-1.5">Dòng</th>
               <th scope="col" className="px-2 py-1.5">Email</th>
@@ -72,15 +72,15 @@ export function ImportReportTable({ report }: { report: ImportReport }) {
 function ReportRow({ row }: { row: ImportRow }) {
   const created = row.status === 'created'
   return (
-    <tr className="border-t border-slate-100 dark:border-slate-800">
-      <td className="px-2 py-1.5 font-mono text-xs tabular-nums text-slate-500">{row.line}</td>
+    <tr className="border-t border-line">
+      <td className="px-2 py-1.5 font-mono text-xs tabular-nums text-ink-5">{row.line}</td>
       <td className="px-2 py-1.5 font-mono text-xs break-all">{row.email || '—'}</td>
       <td className="px-2 py-1.5">
         <span
-          className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+          className={` px-1.5 py-0.5 text-xs font-medium ${
             created
-              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-              : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
+              ? 'bg-surface-sel text-moss'
+              : 'bg-[var(--tint-clay)] text-clay'
           }`}
         >
           {STATUS_LABEL[row.status] ?? row.status}
@@ -93,7 +93,7 @@ function ReportRow({ row }: { row: ImportRow }) {
             <CopyButton value={row.password} />
           </span>
         ) : (
-          <span className="text-xs text-slate-600 dark:text-slate-300">{row.message ?? '—'}</span>
+          <span className="text-xs text-ink-3">{row.message ?? '—'}</span>
         )}
       </td>
     </tr>

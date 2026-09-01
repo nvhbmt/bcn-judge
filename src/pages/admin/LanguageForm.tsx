@@ -59,7 +59,7 @@ export function LanguageForm({ lang, onDone }: { lang: Language; onDone: () => v
   }
 
   return (
-    <form onSubmit={submit} className="border-t border-slate-200 p-3 dark:border-slate-700">
+    <form onSubmit={submit} className="border-t border-line p-3">
       <FailureBanner notice={notice} />
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Tên hiển thị">

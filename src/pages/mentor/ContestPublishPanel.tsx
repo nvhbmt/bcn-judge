@@ -22,9 +22,9 @@ export function ContestPublishPanel({ contestId, status }: { contestId: string; 
   }
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <section className="border border-line bg-surface-2 p-4">
       <h2 className="mb-1 text-sm font-semibold">Xuất bản</h2>
-      <p className="mb-3 text-sm text-slate-500">
+      <p className="mb-3 text-sm text-ink-5">
         Contest Nháp chưa member nào thấy (US-10). Xuất bản rồi thì member trong phạm vi thấy nó ở mục
         “Sắp diễn ra” kèm đếm ngược, nhưng chưa thấy đề trước giờ bắt đầu.
       </p>

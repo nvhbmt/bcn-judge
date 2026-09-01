@@ -75,14 +75,14 @@ export function CourseContentPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-slate-500 hover:underline">
+      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </Link>
 
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Soạn nội dung khoá học</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-ink-5">
             Member chỉ thấy mục đã <b>Xuất bản</b>; mục Nháp là chỗ soạn dở (FR-C3).
           </p>
         </div>
@@ -119,7 +119,7 @@ export function CourseContentPage() {
 
       <form
         onSubmit={addSection}
-        className="rounded-lg border border-dashed border-slate-300 p-3 dark:border-slate-600"
+        className="border border-dashed border-line-strong p-3"
       >
         <Field id={titleId} label="Chương mới">
           <TextInput
