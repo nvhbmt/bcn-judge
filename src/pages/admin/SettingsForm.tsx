@@ -51,8 +51,15 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
               const meta = metaFor(key)
               const value = valueOf(key)
               const dirty = key in draft
+              // Ô đã sửa: nền đậm một bậc CỘNG vạch trái 2px, đúng lối `Row accent` của
+              // hệ thiết kế. Trước đây chỉ có mỗi nền, lại còn phủ 40% — ở nền tối nó
+              // chênh với surface-2 chừng 3/255, tức là không thấy gì. Mà đây đúng là
+              // thứ trả lời "tôi vừa đổi những ô nào" trước khi bấm Lưu.
               return (
-                <div key={key} className={dirty ? ' bg-[var(--color-primary-soft)]/40 p-2 -m-2' : ''}>
+                <div
+                  key={key}
+                  className={dirty ? '-m-2 border-l-2 border-l-moss bg-surface-sel p-2 pl-3' : ''}
+                >
                   <label className="block">
                     <span className="mb-1 block text-xs font-medium text-ink-3">
                       {meta.label}
@@ -98,7 +105,12 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
         </section>
       ))}
 
-      <div className="sticky bottom-0 -mx-4 border-t border-line bg-[#f4f6f9] px-4 py-3">
+      {/* Thanh hành động dính đáy. Nền phải LẤY TỪ TOKEN và phải đục: nội dung cuộn
+          chui xuống dưới nó, nên một màu cứng ở đây vừa không đổi theo theme vừa là
+          thứ duy nhất còn sót lại của thang xám lạnh cũ — ở nền tối nó thành một vạch
+          sáng trắng nằm vắt ngang trang. Dùng --surface-1 vì nền trang là --surface-0
+          còn các khối là --surface-2: đây là bậc duy nhất tách khỏi cả hai. */}
+      <div className="sticky bottom-0 -mx-4 border-t border-line bg-surface-1 px-4 py-3">
         <Button variant="primary" onClick={() => save.mutate(draft)} disabled={save.isPending || dirtyKeys.length === 0}>
           {save.isPending ? 'Đang lưu…' : dirtyKeys.length === 0 ? 'Chưa có thay đổi' : `Lưu ${dirtyKeys.length} thay đổi`}
         </Button>
