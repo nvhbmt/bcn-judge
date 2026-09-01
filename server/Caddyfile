@@ -1,0 +1,23 @@
+# Caddy đứng trước API (design.md §9).
+{$BCN_DOMAIN:localhost} {
+	encode gzip
+
+	# SSE phải KHÔNG được buffer, nếu không verdict tới theo cụm và FR-F4 vỡ.
+	@sse path /api/member/submissions/*/events /api/member/contests/*/events
+	reverse_proxy @sse {$BCN_API_UPSTREAM:api-blue:8099} {
+		flush_interval -1
+	}
+
+	reverse_proxy /api/* /auth/* /healthz {$BCN_API_UPSTREAM:api-blue:8099}
+
+	# SPA build tĩnh; mọi route không phải file đều rơi về index.html.
+	root * /srv/spa
+	try_files {path} /index.html
+	file_server
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
+	}
+}

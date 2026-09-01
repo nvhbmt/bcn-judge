@@ -11,6 +11,7 @@ import { authRoutes } from './auth/routes'
 import { pool } from './db/pool'
 import { ok } from './lib/apiResponse'
 import { adminCourseRoutes } from './routes/admin/courses'
+import { adminSystemRoutes } from './routes/admin/system'
 import { adminTeamRoutes } from './routes/admin/teams'
 import { adminUserRoutes } from './routes/admin/users'
 import { memberContestRoutes } from './routes/member/contests'
@@ -44,6 +45,7 @@ export function createApp(): Hono {
   admin.route('/users', adminUserRoutes)
   admin.route('/courses', adminCourseRoutes)
   admin.route('/teams', adminTeamRoutes)
+  admin.route('/', adminSystemRoutes)
   app.route('/api/admin', admin)
 
   const mentor = new Hono()

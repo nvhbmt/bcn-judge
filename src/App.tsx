@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Spinner } from '@/components/ui'
+import { AdminPage } from '@/pages/AdminPage'
 import { ContestPage } from '@/pages/ContestPage'
 import { CourseDetailPage } from '@/pages/CourseDetailPage'
 import { CoursesPage } from '@/pages/CoursesPage'
@@ -52,6 +53,7 @@ export function App() {
       <Route path="/contest/:contestId" element={<ContestPage />} />
       <Route path="/contest/:contestId/bai/:contestProblemId" element={<WorkspacePage />} />
       <Route path="/team" element={<TeamPage />} />
+      {me.role === 'admin' ? <Route path="/quan-tri" element={<AdminPage />} /> : null}
       <Route path="/dang-nhap" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

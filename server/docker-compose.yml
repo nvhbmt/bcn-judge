@@ -1,0 +1,109 @@
+# Topology production trên MỘT VPS (design.md §9, ADR-11).
+#
+#   caddy → api-blue / api-green (blue/green)          ─┐
+#           worker ─→ docker-proxy ─→ /var/run/docker.sock │ Postgres là service
+#           postgres                                      ─┘ có trạng thái DUY NHẤT
+#
+# Socket Docker thô CHỈ mount vào docker-proxy (ADR-5 vòng 2). Nói thẳng giới hạn:
+# proxy chặn được phần lớn endpoint nhưng KHÔNG lọc `HostConfig.Binds`, nên một RCE
+# trong worker ở v1 vẫn chưa bị chứa ở tầng host — đường chứa thật (rootless /
+# VPS judge riêng) là việc post-v1, đã đặt tên trong design §12.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bcn}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?bắt buộc}
+      POSTGRES_DB: ${POSTGRES_DB:-bcn_judge}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-bcn}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: &logging
+      driver: json-file
+      options: { max-size: '10m', max-file: '3' }
+
+  migrate:
+    build: .
+    command: ['node', '--import', 'tsx', 'src/db/migrate.ts']
+    env_file: [.env.migrate]
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: 'no'
+    logging: *logging
+
+  api-blue: &api
+    build: .
+    restart: unless-stopped
+    env_file: [.env.api]
+    depends_on:
+      postgres: { condition: service_healthy }
+    stop_grace_period: 30s
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:8099/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    logging: *logging
+
+  api-green:
+    <<: *api
+    profiles: [green]
+
+  # Worker KHÔNG blue/green: NFR-5 cho phép judge ngưng ngắn (bài xếp hàng chờ),
+  # nên nhân đôi bộ phận chuyển động để tiết kiệm ~50 giây là sai chiều đánh đổi.
+  worker:
+    build: .
+    command: ['node', '--import', 'tsx', 'src/worker.ts']
+    restart: unless-stopped
+    env_file: [.env.worker]
+    environment:
+      DOCKER_HOST: tcp://docker-proxy:2375
+    depends_on:
+      postgres: { condition: service_healthy }
+      docker-proxy: { condition: service_started }
+    # Chấm nốt testcase hiện tại rồi tự trả bài về hàng đợi (§9).
+    stop_grace_period: 90s
+    logging: *logging
+
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:0.2.0
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1
+      POST: 1
+      EXEC: 1
+      IMAGES: 1
+      INFO: 1
+      # Mọi thứ khác đóng.
+      NETWORKS: 0
+      VOLUMES: 0
+      SERVICES: 0
+      SWARM: 0
+      SYSTEM: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    logging: *logging
+
+  caddy:
+    build:
+      context: .
+      dockerfile: deploy/Caddy.Dockerfile
+    restart: unless-stopped
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [api-blue]
+    logging: *logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
