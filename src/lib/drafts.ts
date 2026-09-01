@@ -279,7 +279,7 @@ export function useDraft(
   key: DraftKey,
   initial = '',
   options: UseDraftOptions = {},
-): [string, (next: string) => void, DraftStatus] {
+): [string, (next: string) => void, DraftStatus, number | null] {
   const { delayMs = DRAFT_AUTOSAVE_DELAY_MS, onEvicted } = options
   const storageKey = draftStorageKey(key)
 
@@ -292,6 +292,10 @@ export function useDraft(
 
   const [value, setValue] = useState<string>(() => loadDraft(key)?.source ?? initial)
   const [status, setStatus] = useState<DraftStatus>('saved')
+  // Mốc ghi gần nhất, để màn làm bài nói được "nháp đã lưu 14:41". Chỉ "đã lưu" không
+  // thôi thì người gõ vẫn phải đoán là lưu lúc nào — mà đó đúng là thứ họ cần biết
+  // trước khi đóng tab.
+  const [savedAt, setSavedAt] = useState<number | null>(() => loadDraft(key)?.updatedAt ?? null)
 
   useEffect(() => {
     onEvictedRef.current = onEvicted
@@ -315,7 +319,10 @@ export function useDraft(
     if (pending === null) return
     pendingRef.current = null
     const result = saveDraft(keyRef.current, pending)
-    if (mountedRef.current) setStatus(result.ok ? 'saved' : 'error')
+    if (mountedRef.current) {
+      setStatus(result.ok ? 'saved' : 'error')
+      if (result.ok) setSavedAt(Date.now())
+    }
     if (result.evicted > 0) onEvictedRef.current?.(result.evicted)
   }, [])
 
@@ -333,8 +340,10 @@ export function useDraft(
   useEffect(() => {
     const current = keyPropRef.current
     keyRef.current = current
-    setValue(loadDraft(current)?.source ?? initialRef.current)
+    const nap = loadDraft(current)
+    setValue(nap?.source ?? initialRef.current)
     setStatus('saved')
+    setSavedAt(nap?.updatedAt ?? null)
     return () => {
       flushRef.current()
     }
@@ -363,5 +372,5 @@ export function useDraft(
     [delayMs],
   )
 
-  return [value, setDraftValue, status]
+  return [value, setDraftValue, status, savedAt]
 }

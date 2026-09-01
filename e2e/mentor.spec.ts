@@ -24,8 +24,12 @@ test('danh sách bài tập hiện trạng thái kiểm và số bộ test', asy
 
   // Ba thứ này từng hỏng cùng lúc vì FE đọc sai tên trường (commit 3691a98):
   // ngày thành "Invalid Date", số bộ test biến mất, và MỌI bài đeo nhãn "Đã kiểm".
+  //
+  // Nhãn đổi từ "bộ test #N" sang "bộ #N" khi dựng lại màn 07 theo bản vẽ (cột hẹp).
+  // Chỉ đổi CHỮ trong khẳng định, không nới lỏng: vẫn đòi con số rev hiện ra, vì đó
+  // mới là thứ biến mất khi FE đọc sai tên trường.
   await expect(page.getByText('Invalid Date')).toHaveCount(0)
-  await expect(page.getByText(/bộ test #\d+/).first()).toBeVisible()
+  await expect(page.getByText(/bộ #\d+/).first()).toBeVisible()
   await expect(page.getByText('Đã kiểm').first()).toBeVisible()
   expect(errors).toEqual([])
 })

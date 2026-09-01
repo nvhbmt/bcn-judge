@@ -56,7 +56,7 @@ export function WorkspacePage() {
     () => ({ userId: me?.id ?? 'anon', problemId: problem?.id ?? handleQuery, languageId }),
     [me?.id, problem?.id, handleQuery, languageId],
   )
-  const [source, setSource, draftStatus] = useDraft(draftKey, problem?.starterCode?.[languageId] ?? '')
+  const [source, setSource, draftStatus, draftSavedAt] = useDraft(draftKey, problem?.starterCode?.[languageId] ?? '')
 
   const { submission } = useSubmissionStream(watchedId)
   const { submission: runResult } = useSubmissionStream(runId)
@@ -177,6 +177,7 @@ export function WorkspacePage() {
       source={source}
       onSource={setSource}
       draftStatus={draftStatus}
+      draftSavedAt={draftSavedAt}
       busy={busy}
       error={error}
       onRun={() => void send('run')}

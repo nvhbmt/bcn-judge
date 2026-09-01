@@ -1,6 +1,7 @@
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { HSplit } from '@/components/layout/HSplit'
 import { Button, VerdictBadge } from '@/components/ui'
+import { KeyHint } from '@/components/ui/patterns'
 import type { LanguageOption, SubmissionView } from '@/types/api'
 import { ConsolePanel } from './ConsolePanel'
 
@@ -12,6 +13,7 @@ export function EditorPane({
   source,
   onSource,
   draftStatus,
+  draftSavedAt,
   busy,
   error,
   onRun,
@@ -30,6 +32,7 @@ export function EditorPane({
   source: string
   onSource: (v: string) => void
   draftStatus: 'saved' | 'saving' | 'error'
+  draftSavedAt: number | null
   busy: 'run' | 'submit' | null
   error: string | null
   onRun: () => void
@@ -59,8 +62,16 @@ export function EditorPane({
         </select>
 
         {submission ? <VerdictBadge verdict={submission.verdict} pending={submission.status !== 'done'} /> : null}
-        <span className="text-xs text-ink-6" aria-live="polite">
-          {draftStatus === 'saving' ? 'Đang lưu nháp…' : draftStatus === 'error' ? 'Không lưu được nháp' : ''}
+        {/* Bản vẽ ghi "nháp đã lưu 14:41" — có GIỜ chứ không chỉ "đã lưu". Đó đúng là
+            thứ người gõ cần biết trước khi đóng tab. */}
+        <span className="font-mono text-[11px] text-ink-6" aria-live="polite">
+          {draftStatus === 'saving'
+            ? 'đang lưu nháp…'
+            : draftStatus === 'error'
+              ? 'không lưu được nháp'
+              : draftSavedAt
+                ? `nháp đã lưu ${new Date(draftSavedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
+                : ''}
         </span>
 
         <div className="ml-auto flex items-center gap-2">
@@ -70,6 +81,13 @@ export function EditorPane({
               Luyện tập — không tính BXH
             </span>
           ) : null}
+          {/* Chip phím tắt theo bản vẽ. Hai tổ hợp này CÓ THẬT (FR-E8, đăng ký ở
+              CodeEditor), nên nói ra là đúng — khác ô "⌘K tìm bài" của bản vẽ mà app
+              chưa có nên không vẽ. Ẩn ở khung hẹp: chỗ đó đã chật. */}
+          <span className="hidden xl:flex xl:items-center xl:gap-1.5">
+            <KeyHint>⌘↵ chạy thử</KeyHint>
+            <KeyHint>⇧⌘↵ nộp</KeyHint>
+          </span>
           <Button onClick={onRun} disabled={busy !== null}>
             {busy === 'run' ? 'Đang chạy…' : 'Chạy thử'}
           </Button>

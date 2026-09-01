@@ -1,7 +1,16 @@
+/**
+ * Màn 08 của bản v2 — tình trạng chấm bài (FR-H3).
+ *
+ * Bản vẽ đặt "tình trạng chấm" và "tài khoản" cạnh nhau trên một màn. Ở đây hai cụm
+ * đó là hai route riêng (`/quan-tri` và `/quan-tri/tai-khoan`) và giữ nguyên như vậy:
+ * gộp lại thành một trang là bắt admin cuộn qua bảng tài khoản mỗi lần chỉ muốn liếc
+ * hàng đợi, mà liếc hàng đợi mới là việc họ làm hàng ngày. Ngôn ngữ trình bày thì theo
+ * đúng bản vẽ: dải bốn số, danh sách worker dạng nhóm dòng, băng cảnh báo có vạch trái.
+ */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button, EmptyState, SectionRule, Spinner } from '@/components/ui'
+import { Row, RowGroup, StatStrip } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 
 interface JudgeStatus {
@@ -12,7 +21,25 @@ interface JudgeStatus {
   health: { submitBacklogAlarm: boolean; runBacklogWarning: boolean; noLiveWorker: boolean }
 }
 
-/** FR-H3: trang tình trạng chấm cho admin. */
+/**
+ * Băng cảnh báo. Hai mức tách bạch theo đúng nghĩa cố định của hai màu điểm: `clay`
+ * là hỏng và phải xử lý ngay, `earth` là đáng chú ý nhưng chưa cần làm gì.
+ */
+function Banner({ level, children }: { level: 'alarm' | 'warn'; children: string }) {
+  const alarm = level === 'alarm'
+  return (
+    <p
+      role={alarm ? 'alert' : undefined}
+      className={`mb-3 border-l-2 px-3 py-2 text-[13px] ${
+        alarm ? 'border-clay bg-[var(--tint-clay)] text-ink-2' : 'border-earth bg-[var(--tint-earth)] text-ink-3'
+      }`}
+    >
+      {children}
+      {alarm ? null : <span className="mt-0.5 block font-mono text-[11px] text-ink-5">cảnh báo, chưa cần xử lý</span>}
+    </p>
+  )
+}
+
 export function AdminPage() {
   const client = useQueryClient()
   const { data, isLoading } = useQuery({
@@ -29,70 +56,82 @@ export function AdminPage() {
     onSuccess: () => client.invalidateQueries({ queryKey: ['admin', 'judge'] }),
   })
 
-  if (isLoading) return <div className="grid h-full place-items-center"><Spinner /></div>
+  if (isLoading) {
+    return (
+      <div className="grid h-full place-items-center">
+        <Spinner />
+      </div>
+    )
+  }
   if (!data) return <EmptyState title="Không đọc được tình trạng chấm" />
 
+  const cho = data.queue.oldestPendingSubmitSec
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
-        <ArrowLeft size={15} /> Trang chủ
-      </Link>
-      <h1 className="mb-4 font-display text-[26px] text-ink-1">Tình trạng chấm bài</h1>
+    <div className="mx-auto min-h-0 w-full max-w-5xl overflow-y-auto px-7 py-8">
+      <h1 className="font-display text-[26px] text-ink-1">Tình trạng chấm bài</h1>
+      <p className="mt-1.5 mb-6 text-[14px] text-ink-4">
+        Cập nhật mỗi 5 giây. Bài nộp chờ quá 2 phút là báo động.
+      </p>
 
-      {/* Hai băng tách bạch: backlog chạy thử chỉ cảnh báo, backlog nộp bài mới kéo chuông. */}
-      {data.health.noLiveWorker ? <Alarm>Không có worker nào sống — bài nộp đang xếp hàng.</Alarm> : null}
-      {data.health.submitBacklogAlarm ? <Alarm>Bài nộp chờ quá 2 phút — kiểm tra worker.</Alarm> : null}
+      {data.health.noLiveWorker ? (
+        <Banner level="alarm">Không có worker nào sống — bài nộp đang xếp hàng.</Banner>
+      ) : null}
+      {data.health.submitBacklogAlarm ? (
+        <Banner level="alarm">Bài nộp chờ quá 2 phút — kiểm tra worker.</Banner>
+      ) : null}
       {data.health.runBacklogWarning ? (
-        <p className="mb-3 bg-[var(--tint-earth)] px-3 py-2 text-sm text-earth">
-          Nhiều lượt chạy thử đang chờ — bình thường ở giờ đầu contest.
-        </p>
+        <Banner level="warn">Nhiều lượt chạy thử đang chờ — bình thường ở giờ đầu contest.</Banner>
       ) : null}
 
-      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Nộp bài chờ" value={data.queue.pendingSubmit} />
-        <Stat label="Chạy thử chờ" value={data.queue.pendingRun} />
-        <Stat label="Đang chấm" value={data.queue.running} />
-        <Stat
-          label="Chờ lâu nhất"
-          value={data.queue.oldestPendingSubmitSec === null ? '—' : `${Math.round(data.queue.oldestPendingSubmitSec)}s`}
-        />
-      </div>
+      <StatStrip
+        items={[
+          { label: 'Nộp bài chờ', value: data.queue.pendingSubmit, tone: data.queue.pendingSubmit > 0 ? 'earth' : undefined },
+          { label: 'Chạy thử chờ', value: data.queue.pendingRun },
+          // Chỉ tô màu khi con số CÓ nghĩa: 0 tô xanh trông như "đang tốt" trong khi nó chỉ
+          // nghĩa là không có việc gì.
+          { label: 'Đang chấm', value: data.queue.running, tone: data.queue.running > 0 ? 'moss' : undefined },
+          { label: 'Chờ lâu nhất', value: cho === null ? '—' : `${Math.round(cho)}s` },
+        ]}
+      />
 
-      <section className="mb-5">
-        <div className="mb-2"><SectionRule label="Worker" /></div>
+      <section className="mt-8">
+        <SectionRule label="Worker" meta={`${data.workers.filter((w) => w.alive).length}/${data.workers.length} sống`} />
         {data.workers.length === 0 ? (
-          <p className="text-sm text-ink-5">Chưa worker nào đăng ký.</p>
+          <p className="mt-3 text-[13px] text-ink-5">Chưa worker nào đăng ký.</p>
         ) : (
-          <ul className="space-y-1 text-sm">
+          <RowGroup className="mt-3">
             {data.workers.map((w) => (
-              <li key={w.id} className="flex items-center gap-2">
-                <span className={`size-2 rounded-full ${w.alive ? 'bg-[var(--color-ac)]' : 'bg-[var(--color-wa)]'}`} />
-                <span className="font-mono text-xs">{w.id}</span>
-                <span className="text-ink-5">{w.slots} slot</span>
-                <span className="ml-auto text-xs text-ink-6">
+              <Row key={w.id}>
+                <span aria-hidden className={`size-2 shrink-0 rounded-full ${w.alive ? 'bg-moss' : 'bg-clay'}`} />
+                <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-ink-2">{w.id}</span>
+                <span className="num shrink-0 font-mono text-[11px] text-ink-5">
+                  {w.slots} slot{w.alive ? '' : ' · mất tín hiệu'}
+                </span>
+                <span className="num shrink-0 font-mono text-[11px] text-ink-6">
                   {new Date(w.lastSeenAt).toLocaleTimeString('vi-VN')}
                 </span>
-              </li>
+              </Row>
             ))}
-          </ul>
+          </RowGroup>
         )}
       </section>
 
-      <section className="mb-5">
-        <div className="mb-2"><SectionRule label="Bài lỗi hệ thống (IE) — 48 giờ qua" /></div>
-        <p className="mb-2 text-sm text-ink-5">
-          {data.ieSubmissions.length} bài. IE không tính vào lượt của member và được chấm lại.
+      <section className="mt-8">
+        <SectionRule label="Bài lỗi hệ thống (IE) — 48 giờ qua" meta={`${data.ieSubmissions.length} bài`} />
+        <p className="mt-3 mb-3 text-[13px] text-ink-5">
+          IE không tính vào lượt của member và được chấm lại.
         </p>
         <Button onClick={() => retryIe.mutate()} disabled={retryIe.isPending || data.ieSubmissions.length === 0}>
           {retryIe.isPending ? 'Đang xếp lại…' : 'Chấm lại toàn bộ IE trong 24 giờ'}
         </Button>
       </section>
 
-      <section>
-        <div className="mb-2"><SectionRule label="Bảo trì" /></div>
-        <p className="mb-2 text-sm text-ink-5">
+      <section className="mt-8">
+        <SectionRule label="Bảo trì" />
+        <p className="mt-3 mb-3 text-[13px] text-ink-5">
           Tạm dừng nhận bài nộp mới; member vẫn đọc đề và lưu nháp bình thường.
         </p>
+        {/* Nút phá dữ liệu nói HẬU QUẢ ngay trên chính nó, không giấu trong hộp thoại. */}
         <Button
           variant={data.judgePaused ? 'primary' : 'danger'}
           onClick={() => togglePause.mutate(!data.judgePaused)}
@@ -101,23 +140,12 @@ export function AdminPage() {
           {data.judgePaused ? 'Mở nhận bài trở lại' : 'Tạm dừng nhận bài'}
         </Button>
       </section>
-    </div>
-  )
-}
 
-function Stat({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="border border-line bg-surface-2 px-3 py-2">
-      <p className="text-xs text-ink-5">{label}</p>
-      <p className="font-mono text-lg tabular-nums">{value}</p>
+      <p className="mt-8 font-mono text-[11px] text-ink-6">
+        <Link to="/quan-tri/tai-khoan" className="hover:underline">
+          ~/quản-trị/tài-khoản
+        </Link>
+      </p>
     </div>
-  )
-}
-
-function Alarm({ children }: { children: string }) {
-  return (
-    <p role="alert" className="mb-3 bg-[var(--tint-clay)] px-3 py-2 text-sm text-[var(--color-wa)]">
-      {children}
-    </p>
   )
 }

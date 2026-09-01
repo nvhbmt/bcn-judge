@@ -97,9 +97,13 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                 title={item.label}
                 aria-current={isActive ? 'page' : undefined}
                 data-testid={`rail-item-${item.key}`}
-                className={`relative flex h-10 w-10 items-center justify-center  transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                // Kích thước 56×44 và vạch TRONG 2px bên trái theo bản vẽ (màn 04).
+                // `shadow-[inset_…]` ở đây không phải bóng đổ — hệ thiết kế không có
+                // bóng — mà là cách CSS duy nhất vẽ một vạch nằm BÊN TRONG mép trái mà
+                // không đẩy nội dung sang phải như `border-l` sẽ làm.
+                className={`relative flex h-11 w-14 items-center justify-center transition-colors duration-[120ms] ease-linear focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss ${
                   isActive
-                    ? 'bg-primary-soft text-primary'
+                    ? 'bg-surface-sel text-moss shadow-[inset_2px_0_0_var(--moss)]'
                     : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2'
                 }`}
                 onClick={() => onSelect(item.key)}
