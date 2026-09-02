@@ -221,6 +221,16 @@ test('danh sách contest → chi tiết → bảng xếp hạng', async ({ page 
   // Đếm ngược và bảng xếp hạng đều phải có số thật.
   await expect(page.getByText(/\d+:\d+:\d+/).first()).toBeVisible()
   await expect(page.getByText('Bảng xếp hạng').first()).toBeVisible()
+
+  // Bấm TIẾP vào một bài, không dừng ở trang chi tiết. Bước này từng thiếu, và đúng
+  // chỗ thiếu đó lọt một TypeError giết cả màn làm bài: trang contest ghi cache
+  // `['contest', id]` dưới dạng phong bì, màn làm bài đọc ra lại tưởng đã bóc. Vào
+  // thẳng bằng URL nguội thì không lỗi — chỉ ĐI TỪ trang contest mới lộ, nên cú bấm
+  // này là thứ duy nhất bắt được nó.
+  await page.getByRole('link', { name: /Bài|Tổng|Đếm|Chuỗi/ }).first().click()
+  await expect(page).toHaveURL(/\/contest\/[^/]+\/bai\/[^/]+/)
+  // Có đề và có chỗ gõ code thì màn làm bài đã dựng xong, không phải trang trắng.
+  await expect(page.getByRole('button', { name: /Nộp bài/ })).toBeVisible()
   expect(errors).toEqual([])
 })
 

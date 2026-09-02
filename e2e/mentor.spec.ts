@@ -62,6 +62,36 @@ test('soạn bài mới → nạp testcase → kiểm bằng lời giải mẫu 
   expect(errors).toEqual([])
 })
 
+test('trang sửa khoá: tab bên trái theo quyền, giáo trình là panel bên phải', async ({ page }) => {
+  const { errors } = watchForErrors(page)
+  // Vào thẳng bằng URL: mentor KHÔNG được ghi danh khoá nào nên trang chủ liệt kê
+  // "0 khoá", và thanh điều hướng chưa có mục nào dẫn tới màn soạn khoá. Lấy id qua
+  // chính API mentor thay vì cắm cứng — dữ liệu mẫu có thể đổi id giữa các lần dựng.
+  const res = await page.request.get('/api/mentor/courses', {
+    headers: { 'x-api-response-version': '2' },
+  })
+  const courses = (await res.json()).data as { id: string; code: string }[]
+  const course = courses.find((c) => c.code === 'c-co-ban-k12') ?? courses[0]
+  expect(course, 'mentor phải phụ trách ít nhất một khoá trong dữ liệu mẫu').toBeTruthy()
+  await page.goto(`/mentor/khoa-hoc/${course!.id}/thong-tin`)
+
+  // Mentor CHỈ thấy hai tab: "Mentor" bị ẩn vì mentor chỉ đọc được danh sách mentor,
+  // không gán/gỡ được. Thấy tab nghĩa là sửa được trong đó.
+  const rail = page.getByRole('navigation', { name: 'Phần của khoá học' })
+  await expect(rail.getByRole('link')).toHaveText(['Thông tin', 'Ghi danh'])
+
+  // Khung TRÁI — thông tin khoá. Ô mô tả phải mang mô tả THẬT: panel giữ nó trong
+  // state một lần, nên dựng trước khi tải xong là ô rỗng và bấm lưu sẽ xoá mất.
+  await expect(page.getByLabel('Mô tả khoá (Markdown)')).not.toHaveValue('')
+  // Mã và tên là quyền admin — hiện ra nhưng không có ô nhập.
+  await expect(page.getByText(course!.code).first()).toBeVisible()
+
+  // Khung PHẢI — giáo trình, luôn hiện.
+  await expect(page.getByLabel('Chương mới')).toBeVisible()
+  await expect(page.getByRole('button', { name: /Thêm mục/ }).first()).toBeVisible()
+  expect(errors).toEqual([])
+})
+
 test('mentor không mở được cụm quản trị', async ({ page }) => {
 
   await expect(page.getByRole('link', { name: '~/quản-trị' })).toHaveCount(0)
@@ -76,5 +106,35 @@ test('mentor xem được cụm contest và thống kê', async ({ page }) => {
   await page.getByRole('link', { name: '~/soạn-contest' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Contest')
   await expect(page.getByText(/Contest tuần/).first()).toBeVisible()
+  expect(errors).toEqual([])
+})
+
+test('trang sửa contest: hai khung, và khung bài nạp sẵn bài đang có (FR-I2)', async ({ page }) => {
+  const { errors } = watchForErrors(page)
+  await page.goto('/')
+  await page.getByRole('link', { name: '~/soạn-contest' }).click()
+  await page
+    .getByRole('listitem')
+    .filter({ has: page.getByRole('heading', { name: /Contest tuần 36/ }) })
+    .getByRole('link', { name: 'Sửa & chọn bài' })
+    .click()
+
+  // Khung TRÁI — thông tin contest. Ô mô tả phải mang mô tả THẬT: nó từng luôn mở ra
+  // rỗng vì SPA tưởng API không trả mô tả, và lưu lúc đó là ghi đè mất mô tả cũ.
+  await expect(page.getByLabel('Tên contest')).not.toHaveValue('')
+  await expect(page.getByLabel('Mô tả (Markdown)')).not.toHaveValue('')
+
+  // Khung PHẢI — bài trong contest. Danh sách phải có sẵn bài; rỗng nghĩa là bấm lưu
+  // sẽ gỡ sạch bài của contest, vì PUT /:id/problems thay thế cả bộ.
+  const list = page.getByRole('list', { name: 'Bài trong contest' })
+  await expect(list.getByRole('listitem')).not.toHaveCount(0)
+
+  // Mỗi bài là một hàng sửa được tại chỗ: nhãn, điểm, đổi vị trí, gỡ, lối sang trình
+  // soạn bài — tất cả trên cùng hàng, không phải bấm chọn rồi kéo mắt xuống khối dưới.
+  const row = list.getByRole('listitem').first()
+  await expect(row.getByLabel(/^Điểm tối đa của bài/)).not.toHaveValue('')
+  await expect(row.getByLabel(/^Nhãn của bài/)).toBeVisible()
+  await expect(row.getByRole('link', { name: /Sửa nội dung bài/ })).toBeVisible()
+  await expect(row.getByRole('button', { name: 'Đưa xuống dưới' })).toBeVisible()
   expect(errors).toEqual([])
 })

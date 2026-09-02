@@ -60,30 +60,32 @@ test.describe('Full luồng: admin mở khoá → mentor soạn bài → member 
     expect(otp).toMatch(/^[A-Za-z0-9]{8,}$/)
 
     // ── khoá học ─────────────────────────────────────────────────────────────
+    // Tạo và sửa đều là TRANG RIÊNG, không còn bung ra trong danh sách.
     await page.goto('/quan-tri/khoa-hoc')
-    await page.getByRole('button', { name: /Khoá mới|Tạo khoá/ }).first().click()
+    await page.getByRole('link', { name: /Tạo khoá học/ }).click()
     await page.getByLabel('Mã khoá').fill(COURSE_CODE)
     await page.getByLabel('Tên khoá').fill(`Khoá E2E ${STAMP}`)
     await page.getByLabel('Trạng thái').selectOption('open')
     await page.getByRole('button', { name: /Lưu|Tạo/ }).last().click()
 
-    await expect(page.getByText(COURSE_CODE).first()).toBeVisible({ timeout: 20_000 })
+    // Lưu xong quay về danh sách, và khoá vừa tạo phải có mặt ở đó.
+    await expect(page).toHaveURL(/\/quan-tri\/khoa-hoc$/, { timeout: 20_000 })
+    const row = page.getByRole('listitem').filter({ hasText: COURSE_CODE })
+    await expect(row).toBeVisible({ timeout: 20_000 })
 
     // ── ghi danh ─────────────────────────────────────────────────────────────
-    await page.getByText(COURSE_CODE).first().click()
+    // "Sửa" mở màn sửa khoá có TAB; ghi danh là một tab riêng, không phải thứ đầu tiên
+    // nhìn thấy. Id đọc từ URL — trước đây phải gọi API vòng qua vì trang khoá mở khoá
+    // trong chỗ và URL không đổi.
+    await row.getByRole('link', { name: 'Sửa' }).click()
+    await expect(page).toHaveURL(/\/mentor\/khoa-hoc\/[0-9a-f-]{36}\/thong-tin$/, { timeout: 20_000 })
+    courseId = new URL(page.url()).pathname.split('/')[3] ?? ''
+    expect(courseId).toMatch(/^[0-9a-f-]{36}$/)
+
+    await page.getByRole('navigation', { name: 'Phần của khoá học' }).getByRole('link', { name: 'Ghi danh' }).click()
     await page.getByLabel(/email/i).first().fill(EMAIL)
     await page.getByRole('button', { name: /Ghi danh/ }).click()
     await expect(page.getByText(EMAIL).first()).toBeVisible({ timeout: 20_000 })
-
-    // Id lấy qua API chứ không qua URL: trang khoá học của admin mở khoá TRONG CHỖ
-    // (state `openId`), URL không đổi. Đây là đường ống để bước sau đi tiếp, không
-    // phải thứ đang kiểm — mọi thao tác có nghĩa vẫn đi bằng cách bấm.
-    courseId = await page.evaluate(async (code) => {
-      const r = await fetch('/api/admin/courses', { headers: { 'x-api-response-version': '2' } })
-      const b = await r.json()
-      return (b.data ?? []).find((c: { code: string }) => c.code === code)?.id ?? ''
-    }, COURSE_CODE)
-    expect(courseId).not.toEqual('')
     expect(errors).toEqual([])
     await page.close()
   })
@@ -129,6 +131,9 @@ test.describe('Full luồng: admin mở khoá → mentor soạn bài → member 
     await page.getByRole('button', { name: 'Lưu', exact: true }).click()
     await expect(page.getByText(/Đã lưu|đã lưu/).first()).toBeVisible({ timeout: 20_000 })
 
+    // Nút kiểm nằm ở BƯỚC 3 của thẻ Testcase, không còn ở băng cố định dưới thanh
+    // tiêu đề — nên phải quay lại thẻ đó. Đổi lại, ba bước của US-2 nằm liền nhau.
+    await page.getByRole('tab', { name: /Testcase/ }).click()
     await page.getByRole('button', { name: 'Kiểm tra bằng lời giải mẫu' }).click()
     // Cổng xuất bản FR-D6: bài chỉ "Đã kiểm" khi lời giải mẫu chạy đúng toàn bộ test.
     await expect(page.getByText('Đã kiểm').first()).toBeVisible({ timeout: 90_000 })
@@ -140,7 +145,7 @@ test.describe('Full luồng: admin mở khoá → mentor soạn bài → member 
     const page = await browser.newPage({ storageState: authFile('admin') })
     const { errors } = watchForErrors(page)
 
-    await page.goto(`/mentor/khoa-hoc/${courseId}`)
+    await page.goto(`/mentor/khoa-hoc/${courseId}/thong-tin`)
     await page.getByLabel('Chương mới').fill('Chương 1 — E2E')
     await page.getByRole('button', { name: 'Tạo chương' }).click()
     await expect(page.getByText('Chương 1 — E2E').first()).toBeVisible({ timeout: 20_000 })
