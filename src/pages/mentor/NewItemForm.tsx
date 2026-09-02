@@ -61,7 +61,7 @@ export function NewItemForm({
         <Field
           id={problemFieldId}
           label="Bài tập từ ngân hàng"
-          hint="Chỉ bài đã có testcase và đã kiểm bằng lời giải mẫu mới xuất bản được suôn sẻ (FR-D6)."
+          hint="Chỉ bài đã có testcase và đã kiểm bằng lời giải mẫu mới xuất bản được suôn sẻ."
         >
           <Select
             id={problemFieldId}

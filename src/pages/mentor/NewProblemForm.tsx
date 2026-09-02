@@ -80,7 +80,7 @@ export function NewProblemForm({ onCancel }: { onCancel: () => void }) {
       <Field
         id="new-scope"
         label="Phạm vi"
-        hint="Để ở ngân hàng chung thì chỉ bạn và admin sửa được. Gắn vào một khoá thì mọi mentor của khoá đó sửa được (FR-D8)."
+        hint="Để ở ngân hàng chung thì chỉ bạn và admin sửa được. Gắn vào một khoá thì mọi mentor của khoá đó sửa được."
       >
         <Select
           id="new-scope"

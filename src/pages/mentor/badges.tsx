@@ -20,7 +20,7 @@ const STATE = {
   },
   unchecked: {
     label: 'Chưa kiểm',
-    title: 'Bộ test hiện tại chưa được lời giải mẫu xác nhận (FR-D6).',
+    title: 'Bộ test hiện tại chưa được lời giải mẫu xác nhận.',
     className: 'bg-[var(--tint-earth)] text-earth',
   },
   checked: {

@@ -65,7 +65,7 @@ export function ContestCard({
               mất công đi tìm 5 bài "biến đâu mất". */}
           <p>
             Bản sao giữ nguyên cấu hình, dời khung thời gian <b>+7 ngày</b> và ở trạng thái Nháp.{' '}
-            <b>Danh sách bài để trống</b> để bạn chọn bài mới cho tuần sau (FR-I9).
+            <b>Danh sách bài để trống</b> để bạn chọn bài mới cho tuần sau.
           </p>
           <div className="mt-2 flex gap-2">
             <Button

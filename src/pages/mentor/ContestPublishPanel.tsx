@@ -25,7 +25,7 @@ export function ContestPublishPanel({ contestId, status }: { contestId: string; 
     <section className="border border-line bg-surface-2 p-4">
       <div className="mb-1"><SectionRule label="Xuất bản" /></div>
       <p className="mb-3 text-sm text-ink-5">
-        Contest Nháp chưa member nào thấy (US-10). Xuất bản rồi thì member trong phạm vi thấy nó ở mục
+        Contest Nháp chưa member nào thấy. Xuất bản rồi thì member trong phạm vi thấy nó ở mục
         “Sắp diễn ra” kèm đếm ngược, nhưng chưa thấy đề trước giờ bắt đầu.
       </p>
 
