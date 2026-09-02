@@ -31,6 +31,20 @@ Thêm `--judge` để xếp thêm một ít bài ở trạng thái `pending` cho
 cách nhanh nhất để kiểm chứng hàng đợi và sandbox còn chạy đúng. Script từ chối
 chạy nếu `DATABASE_URL` không trông giống máy dev.
 
+## Nạp contest từ đề .docx
+
+Đề "Code C hằng tuần" soạn tay trong Word. `contests/README.md` mô tả đủ; ngắn gọn:
+
+```bash
+cd server
+npm run db:import:contest -- "../<đề>.docx" --data ../contests/code-c-tuan-01 --validate
+```
+
+Script đọc .docx nguyên văn, áp `fix.json` (đính chính có ghi lý do, in ra mỗi lần
+nạp), tạo khoá + contest + bài + testcase, rồi `--validate` xếp lời giải mẫu qua đúng
+hàng đợi của sản phẩm để **máy chấm tự xác nhận bộ test** thay vì tin lời người nạp.
+File .docx của người ra đề không bị sửa.
+
 Kiểm chứng toàn hệ thống qua HTTP (cần API + worker đang chạy):
 
 ```bash
