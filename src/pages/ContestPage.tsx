@@ -8,30 +8,17 @@
  * Đếm ngược là con số to nhất màn hình và neo vào ĐỒNG HỒ MÁY CHỦ, không phải đồng hồ
  * máy người dùng (FR-I3).
  */
-import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { Markdown } from '@/components/markdown/Markdown'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { SideColumn } from '@/components/ui/patterns'
 import { useCountdown } from '@/hooks/useCountdown'
-import { api } from '@/lib/api'
 import { ContestProblems } from './contest/ContestProblems'
 import { ContestStandings } from './contest/ContestStandings'
+import { useContestDetail } from './contest/useContestDetail'
 import { MyScore } from './contest/MyScore'
 import { hhmm } from './home/recent'
-
-interface ContestDetail {
-  id: string
-  title: string
-  descriptionMd: string | null
-  startAt: string
-  endAt: string
-  phase: 'sap-dien-ra' | 'dang-dien-ra' | 'da-ket-thuc'
-  freezeMinutes: number
-  problemCount: number
-  problems: { id: string; label: string | null; title: string; maxScore: number }[]
-}
 
 const PHASE_LABEL = {
   'sap-dien-ra': 'Sắp diễn ra',
@@ -51,7 +38,7 @@ function ngay(iso: string): string {
 
 export function ContestPage() {
   const { contestId } = useParams()
-  const { data, meta, isLoading, refetch } = useContest(contestId)
+  const { contest: data, meta, isLoading, refetch } = useContestDetail(contestId, { refetchInterval: 30_000 })
 
   const target = data?.phase === 'sap-dien-ra' ? data.startAt : (data?.endAt ?? null)
   // Hết giờ thì tự refetch để đề mở ra mà không cần tải lại trang (FR-I3).
@@ -147,12 +134,3 @@ export function ContestPage() {
   )
 }
 
-function useContest(contestId: string | undefined) {
-  const query = useQuery({
-    queryKey: ['contest', contestId],
-    queryFn: () => api.getWithMeta<ContestDetail>(`/api/member/contests/${contestId}`),
-    enabled: Boolean(contestId),
-    refetchInterval: 30_000,
-  })
-  return { data: query.data?.data, meta: query.data?.meta, isLoading: query.isLoading, refetch: query.refetch }
-}

@@ -10,12 +10,9 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import { useContestDetail } from '@/pages/contest/useContestDetail'
 import type { SiblingLink } from './ContentHeader'
 import type { SyllabusSection } from './SyllabusPanel'
-
-interface ContestDetail {
-  problems: { id: string; label: string | null; title: string }[]
-}
 
 export interface Siblings {
   position: string | undefined
@@ -59,11 +56,10 @@ export function useSiblings(params: {
     queryFn: () => api.get<SyllabusSection[]>(`/api/member/courses/${courseId}/syllabus`),
     enabled: Boolean(courseId),
   })
-  const { data: contest } = useQuery({
-    queryKey: ['contest', contestId],
-    queryFn: () => api.get<ContestDetail>(`/api/member/contests/${contestId}`),
-    enabled: Boolean(contestId) && !courseId,
-  })
+  // Cùng hook với trang contest và panel danh sách bài — xem useContestDetail.ts:
+  // ba nơi từng tự gọi endpoint này dưới cùng queryKey nhưng lưu hai hình dạng khác
+  // nhau, và bên đọc phải hình dạng của bên kia thì nổ ở `list.findIndex` bên dưới.
+  const { contest } = useContestDetail(courseId ? undefined : contestId)
 
   if (courseId && itemId && sections) {
     // Loại của mục tra trên TOÀN BỘ danh sách, không phải trên `flat` (chỉ có bài tập):
@@ -110,7 +106,9 @@ export function useSiblings(params: {
   }
 
   if (contestId && contestProblemId && contest) {
-    const list = contest.problems
+    // Kiểu đã bảo đảm `problems` luôn có, nhưng vẫn chốt: màn hình TRẮNG vì TypeError
+    // tệ hơn nhiều so với thanh điều hướng trống, và chính chỗ này từng trắng thật.
+    const list = contest.problems ?? []
     const i = list.findIndex((x) => x.id === contestProblemId)
     if (i === -1) return { ...EMPTY, kind: 'problem', resolved: true }
     const { prev, next } = around(list, i)

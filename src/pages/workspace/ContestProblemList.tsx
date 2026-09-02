@@ -1,22 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { EmptyState, Spinner } from '@/components/ui'
-import { api } from '@/lib/api'
-
-interface ContestDetail {
-  id: string
-  title: string
-  phase: 'sap-dien-ra' | 'dang-dien-ra' | 'da-ket-thuc'
-  problems: { id: string; label: string | null; position: number; title: string; maxScore: number }[]
-}
+import { useContestDetail } from '@/pages/contest/useContestDetail'
 
 /** Mục "Giáo trình" khi đang ở trong contest: danh sách bài của contest (FR-E7). */
 export function ContestProblemList({ contestId, currentId }: { contestId?: string; currentId?: string }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['contest', contestId],
-    queryFn: () => api.get<ContestDetail>(`/api/member/contests/${contestId}`),
-    enabled: Boolean(contestId),
-  })
+  const { contest: data, isLoading } = useContestDetail(contestId)
 
   if (!contestId) return <EmptyState title="Không có danh sách bài ở đây" />
   if (isLoading) return <div className="p-4"><Spinner /></div>
