@@ -86,7 +86,7 @@ export function SystemLog() {
         </div>
       </div>
 
-      <p className="font-mono text-[11px] text-ink-5">chấm tự động cho Ban Công Nghệ</p>
+      <p className="font-mono text-[11px] text-ink-5">hệ thống code judge dành cho Ban Công Nghệ</p>
     </div>
   )
 }
