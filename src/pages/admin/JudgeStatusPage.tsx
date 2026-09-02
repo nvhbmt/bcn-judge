@@ -1,21 +1,18 @@
 /**
- * `/quan-tri` — trang tình trạng chấm (FR-H3) kèm thanh điều hướng quản trị.
+ * `/quan-tri` — trang tình trạng chấm (FR-H3).
  *
- * Là lớp bọc mỏng quanh `AdminPage` sẵn có thay vì sửa thẳng tệp đó: nội dung
- * trang cũ không đổi một dòng nào, chỉ được nối vào cụm quản trị. Nhờ vậy trang
- * tình trạng chấm không còn là ngõ cụt — từ đây sang được Tài khoản, Khoá học,
- * Team, Cài đặt và ngược lại.
+ * Đi qua `AdminShell` như bốn trang quản trị còn lại, nên thanh điều hướng đứng YÊN
+ * khi chuyển giữa năm mục. Bản trước tự bọc thanh nav trong một khung `max-w-3xl`
+ * riêng rồi mới gọi `AdminPage` (khung `max-w-5xl px-7` của chính nó) — hai bề rộng
+ * lệch nhau trên đúng một trang, và cả cụm nhảy ngang mỗi lần bấm vào mục này.
  */
 import { AdminPage } from '@/pages/AdminPage'
-import { AdminNav } from './AdminShell'
+import { AdminShell } from './AdminShell'
 
 export function AdminJudgePage() {
   return (
-    <>
-      <div className="mx-auto max-w-3xl px-4 pt-6">
-        <AdminNav />
-      </div>
+    <AdminShell title="Tình trạng chấm bài" description="Cập nhật mỗi 5 giây. Bài nộp chờ quá 2 phút là báo động.">
       <AdminPage />
-    </>
+    </AdminShell>
   )
 }

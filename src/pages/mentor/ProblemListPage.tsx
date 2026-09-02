@@ -13,6 +13,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { Button, EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { RowGroup, RowHead, StatStrip } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
@@ -56,7 +57,7 @@ export function ProblemListPage() {
   const chuaKiem = all.length - daKiem - khongTest
 
   return (
-    <div className="mx-auto h-full w-full max-w-6xl overflow-y-auto px-7 py-8">
+    <PageContainer>
       <header className="mb-6 flex items-start justify-between gap-5">
         <div className="min-w-0">
           <h1 className="font-display text-[28px] text-ink-1">Bài tập</h1>
@@ -136,6 +137,6 @@ export function ProblemListPage() {
           </div>
         </section>
       ) : null}
-    </div>
+    </PageContainer>
   )
 }

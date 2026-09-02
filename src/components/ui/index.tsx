@@ -28,6 +28,21 @@ const SIZE: Record<ButtonSize, string> = {
   lg: 'px-4 py-[9px] text-[13px]',
 }
 
+/**
+ * Class của nút, tách ra để thứ KHÔNG phải `<button>` cũng mang đúng hình dạng đó.
+ *
+ * Cần nó vì "đi tới trang khác" phải là `<a>`: lồng `<button>` trong `<Link>` là HTML
+ * sai, và mất luôn bấm-giữa-chuột, mở tab mới, copy địa chỉ. Trước đây mỗi trang tự
+ * chép lại chuỗi class nên chúng trôi lệch nhau từng chút một.
+ */
+export function buttonClass(variant: ButtonVariant = 'ghost', size: ButtonSize = 'md', extra = ''): string {
+  return `inline-flex items-center justify-center gap-2 rounded-none font-mono tracking-[0.06em]
+    transition-[background-color,color] duration-[120ms] ease-linear
+    disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5 disabled:opacity-100
+    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss
+    ${VARIANT[variant]} ${SIZE[size]} ${extra}`
+}
+
 export function Button({
   variant = 'ghost',
   size = 'md',

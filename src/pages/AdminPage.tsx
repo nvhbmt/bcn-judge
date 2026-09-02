@@ -1,6 +1,11 @@
 /**
  * Màn 08 của bản v2 — tình trạng chấm bài (FR-H3).
  *
+ * Chỉ là PHẦN THÂN: khung, tiêu đề và thanh điều hướng do `AdminShell` lo, giống hệt
+ * bốn trang quản trị còn lại. Trước đây trang này tự dựng khung riêng, nên chuyển sang
+ * nó là cả cụm quản trị trượt ngang một nấc — bốn trang `max-w-5xl px-4`, riêng nó
+ * `max-w-5xl px-7` với thanh nav bọc trong `max-w-3xl`.
+ *
  * Bản vẽ đặt "tình trạng chấm" và "tài khoản" cạnh nhau trên một màn. Ở đây hai cụm
  * đó là hai route riêng (`/quan-tri` và `/quan-tri/tai-khoan`) và giữ nguyên như vậy:
  * gộp lại thành một trang là bắt admin cuộn qua bảng tài khoản mỗi lần chỉ muốn liếc
@@ -74,12 +79,7 @@ export function AdminPage() {
 
   const cho = data.queue.oldestPendingSubmitSec
   return (
-    <div className="mx-auto h-full w-full max-w-5xl overflow-y-auto px-7 py-8">
-      <h1 className="font-display text-[26px] text-ink-1">Tình trạng chấm bài</h1>
-      <p className="mt-1.5 mb-6 text-[14px] text-ink-4">
-        Cập nhật mỗi 5 giây. Bài nộp chờ quá 2 phút là báo động.
-      </p>
-
+    <>
       {data.health.noLiveWorker ? (
         <Banner level="alarm">Không có worker nào sống — bài nộp đang xếp hàng.</Banner>
       ) : null}
@@ -159,6 +159,6 @@ export function AdminPage() {
           ~/quản-trị/tài-khoản
         </Link>
       </p>
-    </div>
+    </>
   )
 }

@@ -8,6 +8,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 
@@ -57,7 +58,7 @@ export function ContestListPage() {
   )
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
+    <PageContainer>
       <h1 className="mb-1 font-display text-[26px] text-ink-1">Contest</h1>
       <p className="mb-6 text-[13px] text-ink-5">
         Bài nộp trong khung thời gian mới tính vào bảng xếp hạng.
@@ -104,6 +105,6 @@ export function ContestListPage() {
           tốt nhất trong khung thời gian, không phải lần nộp cuối.
         </p>
       </div>
-    </div>
+    </PageContainer>
   )
 }

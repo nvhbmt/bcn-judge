@@ -11,6 +11,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { Avatar } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
@@ -112,5 +113,5 @@ export function TeamPage() {
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto h-full w-full max-w-5xl overflow-y-auto px-7 py-8">{children}</div>
+  return <PageContainer>{children}</PageContainer>
 }

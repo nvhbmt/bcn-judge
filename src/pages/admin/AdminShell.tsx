@@ -8,6 +8,7 @@
 import { Activity, ArrowLeft, GraduationCap, Settings, Users, UsersRound } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { PageContainer } from '@/components/layout/PageContainer'
 
 interface NavItem {
   to: string
@@ -55,23 +56,32 @@ export function AdminNav() {
 export function AdminShell({
   title,
   description,
+  back,
   children,
 }: {
   title: string
   description?: ReactNode
+  /** Lối về danh sách, cho các trang con. Shell vẽ nó TRƯỚC tiêu đề — để trang tự
+   *  vẽ thì nó rơi xuống dưới h1, đọc thành "tiêu đề rồi mới quay lại". */
+  back?: { to: string; label: string }
   children: ReactNode
 }) {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <PageContainer>
       <NavLink to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </NavLink>
       <AdminNav />
+      {back ? (
+        <NavLink to={back.to} className="mb-3 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
+          <ArrowLeft size={15} /> {back.label}
+        </NavLink>
+      ) : null}
       <header className="mb-4">
         <h1 className="font-display text-[26px] text-ink-1">{title}</h1>
         {description ? <p className="mt-1 text-sm text-ink-5">{description}</p> : null}
       </header>
       {children}
-    </div>
+    </PageContainer>
   )
 }

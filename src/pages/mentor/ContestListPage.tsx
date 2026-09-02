@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { Button, EmptyState, Spinner } from '@/components/ui'
 import { useAuth } from '@/stores/auth'
 import { ContestCard } from './ContestCard'
@@ -27,7 +28,7 @@ export function ContestListPage() {
   const contests = data ?? []
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <PageContainer>
       <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
         <ArrowLeft size={15} /> Trang chủ
       </Link>
@@ -36,7 +37,7 @@ export function ContestListPage() {
         <div>
           <h1 className="font-display text-[26px] text-ink-1">Contest</h1>
           <p className="text-sm text-ink-5">
-            Trạng thái <i>Sắp diễn ra / Đang diễn ra / Đã kết thúc</i> suy ra từ khung thời gian (FR-I1).
+            Trạng thái <i>Sắp diễn ra / Đang diễn ra / Đã kết thúc</i> suy ra từ khung thời gian.
           </p>
         </div>
         <Button variant="primary" onClick={() => setCreating((v) => !v)} aria-expanded={creating}>
@@ -93,6 +94,6 @@ export function ContestListPage() {
           />
         ))}
       </ul>
-    </div>
+    </PageContainer>
   )
 }

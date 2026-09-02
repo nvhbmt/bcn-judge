@@ -4,6 +4,7 @@
  */
 import { ArrowLeft } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import { PageContainer } from '@/components/layout/PageContainer'
 import { EmptyState, SectionRule, Spinner, VerdictBadge } from '@/components/ui'
 import { Notice } from './fields'
 import { groupByProblem, percent } from './contestStats'
@@ -24,7 +25,7 @@ export function ContestStatsPage() {
   const byProblem = groupByProblem(data?.byProblem ?? [])
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
+    <PageContainer>
       <Link
         to={`/mentor/contest/${contestId}`}
         className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline"
@@ -95,7 +96,7 @@ export function ContestStatsPage() {
           </section>
         </>
       )}
-    </div>
+    </PageContainer>
   )
 }
 
