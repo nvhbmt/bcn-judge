@@ -48,15 +48,32 @@ export function languageExtension(languageId: string): Extension {
  * KHÔNG dùng `oneDark`: nó là xám-xanh lạnh (#282c34), đá thẳng với thang trung
  * tính ấm của hệ này — nhìn ra ngay là editor "của thư viện khác" dán vào. Bảng
  * dưới đây đọc biến CSS nên tự đổi theo theme, một định nghĩa cho cả hai bản.
+ *
+ * Bảng phải phủ ĐỦ, không phủ một nửa. Bản trước chỉ khai tám dòng rồi để
+ * `defaultHighlightStyle` đỡ phần còn lại, mà bảng mặc định của CodeMirror là màu
+ * nguyên chất cho nền trắng của chính nó: `definition(variableName)` ra `#00f`,
+ * `local(variableName)` ra `#30a`, `comment` ra `#940`. Trên nền kem của bản sáng,
+ * `int main` thành tím-xanh chói đứng cạnh `#include` nâu ấm — trông đúng như editor
+ * chưa được làm cho bản sáng, dù bốn token `--syn-*` đều đạt 6,9–8,1:1.
+ *
+ * Nguyên tắc phân màu: chỉ tô thứ MANG NGHĨA. Định danh để nguyên màu chữ, dấu câu
+ * mờ đi một bậc — code nào cũng đầy hai loại này, tô chúng là biến màn hình thành
+ * cầu vồng và làm chìm mất thứ đáng chú ý.
  */
 const synHighlight = HighlightStyle.define([
-  { tag: [tags.comment, tags.lineComment, tags.blockComment], color: 'var(--syn-comment)', fontStyle: 'italic' },
-  { tag: [tags.keyword, tags.controlKeyword, tags.moduleKeyword, tags.operatorKeyword], color: 'var(--syn-keyword)' },
-  { tag: [tags.typeName, tags.standard(tags.typeName), tags.definitionKeyword], color: 'var(--syn-keyword)' },
-  { tag: [tags.function(tags.variableName), tags.function(tags.propertyName), tags.macroName], color: 'var(--syn-func)' },
-  { tag: [tags.number, tags.integer, tags.float, tags.bool, tags.null], color: 'var(--syn-number)' },
-  { tag: [tags.string, tags.special(tags.string), tags.character], color: 'var(--syn-string)' },
-  { tag: [tags.meta, tags.processingInstruction], color: 'var(--syn-func)' },
+  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: 'var(--syn-comment)', fontStyle: 'italic' },
+  { tag: [tags.keyword, tags.controlKeyword, tags.moduleKeyword, tags.operatorKeyword, tags.definitionKeyword, tags.modifier, tags.self], color: 'var(--syn-keyword)' },
+  { tag: [tags.typeName, tags.standard(tags.typeName), tags.className, tags.namespace], color: 'var(--syn-keyword)' },
+  { tag: [tags.function(tags.variableName), tags.function(tags.propertyName), tags.macroName, tags.labelName], color: 'var(--syn-func)' },
+  { tag: [tags.meta, tags.processingInstruction, tags.annotation], color: 'var(--syn-func)' },
+  { tag: [tags.number, tags.integer, tags.float, tags.bool, tags.null, tags.atom, tags.unit, tags.constant(tags.variableName)], color: 'var(--syn-number)' },
+  { tag: [tags.string, tags.special(tags.string), tags.character, tags.regexp, tags.escape], color: 'var(--syn-string)' },
+
+  // Định danh và dấu câu: KHÔNG tô. Khai tường minh để chúng không rơi xuống bảng
+  // mặc định của CodeMirror — đó chính là chỗ `#00f` lọt vào bản sáng.
+  { tag: [tags.variableName, tags.definition(tags.variableName), tags.local(tags.variableName), tags.special(tags.variableName), tags.propertyName, tags.definition(tags.propertyName), tags.attributeName], color: 'var(--ink-2)' },
+  { tag: [tags.operator, tags.punctuation, tags.separator, tags.bracket, tags.paren, tags.brace, tags.squareBracket, tags.angleBracket, tags.derefOperator], color: 'var(--ink-4)' },
+
   { tag: tags.invalid, color: 'var(--clay)' },
 ])
 

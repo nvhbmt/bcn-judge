@@ -7,7 +7,6 @@
  */
 import {
   bracketMatching,
-  defaultHighlightStyle,
   foldGutter,
   foldKeymap,
   indentOnInput,
@@ -154,7 +153,6 @@ export function CodeEditor({
         indentOnInput(),
         indentUnit.of('    '),
         bracketMatching(),
-        syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         // FR-E4 · ô tìm kiếm (Ctrl/⌘+F) và tô sáng các chỗ trùng
         search({ top: true }),
         highlightSelectionMatches(),
