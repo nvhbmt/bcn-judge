@@ -22,6 +22,8 @@ export function OutputDiff({
   got,
   want,
   compareMode,
+  gotLabel = 'output của bạn',
+  wantLabel = 'đáp án đúng',
 }: {
   position: number
   input: string | null
@@ -29,6 +31,13 @@ export function OutputDiff({
   want: string
   /** Luật so của bài — diff phải chuẩn hoá y hệt máy chấm, xem `normalize` trong diff.ts. */
   compareMode: string
+  /**
+   * Nhãn hai cột. Mặc định là lời của MEMBER; khung kiểm của mentor đổi lại, vì ở đó
+   * cột trái là output của LỜI GIẢI MẪU còn cột phải là expected trong bộ test —
+   * gọi nó "đáp án đúng" thì ngược hẳn ý: mentor mở bảng này chính vì nghi cột phải sai.
+   */
+  gotLabel?: string
+  wantLabel?: string
 }) {
   const d = diffOutput(got, want, compareMode)
 
@@ -64,8 +73,8 @@ export function OutputDiff({
             style={{ gridTemplateColumns: GRID }}
           >
             <span />
-            <span>output của bạn</span>
-            <span>đáp án đúng</span>
+            <span>{gotLabel}</span>
+            <span>{wantLabel}</span>
           </div>
 
           {d.lines.map((l) => (

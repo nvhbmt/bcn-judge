@@ -14,6 +14,8 @@
  * Date", số bộ test biến mất, bài của ngân hàng chung bị gán nhầm "Khoá khác", và
  * nặng nhất là MỌI bài đều đeo huy hiệu xanh "Đã kiểm" (xem `isValidated` bên dưới).
  */
+import type { SubmissionStatus, Verdict } from '@/types/api'
+
 
 export type Difficulty = 'easy' | 'medium' | 'hard'
 export type ProblemKind = 'stdio' | 'function'
@@ -69,6 +71,39 @@ export interface MentorProblemDetail {
   solutionVisibility: string
   hiddenTestcaseCount: number
   testcases: MentorTestcaseView[]
+}
+
+/**
+ * `GET /api/mentor/problems/:id/validate/:submissionId` — kết quả một lượt kiểm,
+ * qua serializer MENTOR.
+ *
+ * Khác đường `/api/member/submissions/:id` ở đúng một điểm, và điểm đó là lý do
+ * route này tồn tại: serializer member tước stdout/diff của testcase ẨN (NFR-2), nên
+ * đọc qua đó thì "testcase 7 WA" không kèm được bằng chứng nào — đúng tiêu chí US-2
+ * mà FR-D6 đòi. `mentorStdout` là bản sao riêng cho mentor, có ở MỌI testcase.
+ */
+export interface ValidateResultView {
+  position: number
+  isSample: boolean
+  verdict: Verdict
+  timeMs: number | null
+  memoryKb: number | null
+  exitCode: number | null
+  termSignal: number | null
+  detail: string | null
+  stdout: string | null
+  stderr: string | null
+  /** Output thật của lời giải mẫu, kể cả testcase ẩn. */
+  mentorStdout: string | null
+  firstDiffLine: number | null
+}
+
+export interface ValidateRunView {
+  id: string
+  status: SubmissionStatus
+  verdict: Verdict | null
+  compileOutput: string | null
+  results: ValidateResultView[]
 }
 
 /** `meta` của `GET /api/mentor/problems/:id` (FR-D6). */

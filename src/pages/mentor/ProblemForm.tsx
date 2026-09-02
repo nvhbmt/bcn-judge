@@ -20,7 +20,7 @@ export function ProblemForm({
 }) {
   return (
     <div className="px-4 py-4">
-      <Section title="Nội dung đề" hint="Markdown + LaTeX; khung bên phải hiện đúng thứ member sẽ đọc.">
+      <Section title="Nội dung đề">
         <Field id="f-title" label="Tiêu đề">
           <TextInput
             id="f-title"
@@ -131,7 +131,7 @@ export function ProblemForm({
               <option value="function">Chỉ một hàm (kiểu LeetCode)</option>
             </Select>
           </Field>
-          <Field id="f-compare" label="Cách so sánh output (FR-D5)">
+          <Field id="f-compare" label="Cách so sánh output">
             <Select
               id="f-compare"
               value={values.compareMode}

@@ -17,18 +17,28 @@ import { api, ApiFailure } from '@/lib/api'
 import { Notice } from './fields'
 import { TestcaseTable } from './TestcaseTable'
 import { TestcaseZipForm, type ZipImportResult } from './TestcaseZipForm'
+import { ValidateButton } from './ValidateButton'
 import { sampleCount, testcaseError, toDrafts, toPutPayload, type TestcaseDraft } from './testcases'
-import type { MentorTestcaseView } from './types'
+import type { CompareMode, MentorTestcaseView } from './types'
 
 export function TestcasePanel({
   problemId,
   testcaseRev,
   testcases,
+  compareMode,
+  hasSolution,
+  dirty,
+  validated,
   onReloaded,
 }: {
   problemId: string
   testcaseRev: number
   testcases: MentorTestcaseView[]
+  /** Bốn props dưới đây chỉ để chuyển tiếp cho nút kiểm ở bước 3 — xem ValidateButton. */
+  compareMode: CompareMode
+  hasSolution: boolean
+  dirty: boolean
+  validated: boolean
   onReloaded: () => void
 }) {
   const [drafts, setDrafts] = useState<TestcaseDraft[]>(() => toDrafts(testcases))
@@ -67,7 +77,7 @@ export function TestcasePanel({
 
   return (
     <div className="px-4 py-4">
-      <Step n={1} title="Tải bộ test bằng file zip">
+      <Step n={1} title="Nhập từ file">
         <TestcaseZipForm
           problemId={problemId}
           onUploaded={(result) => {
@@ -93,7 +103,7 @@ export function TestcasePanel({
 
       <Step
         n={2}
-        title="Đánh dấu testcase mẫu và soạn tay"
+        title="Bộ testcase"
         hint="Testcase mẫu là phần member nhìn thấy được; testcase ẩn chỉ lộ ra dưới dạng con số. Zip đã đặt sẵn theo ô “số testcase đầu làm mẫu”, sửa lại ở đây nếu cần."
       >
         <TestcaseTable drafts={drafts} onChange={setDrafts} />
@@ -107,7 +117,7 @@ export function TestcasePanel({
               <Notice tone="warn">
                 Lưu sẽ <strong>xoá toàn bộ {testcases.length} testcase hiện có</strong> và ghi lại{' '}
                 {drafts.length} testcase ({sampleCount(drafts)} mẫu). Số hiệu bộ test tăng lên {testcaseRev + 1}:
-                mọi bài nộp cũ bị đánh dấu là chấm trên bộ test cũ (FR-D9) và bài phải kiểm lại (FR-D6).
+                mọi bài nộp cũ bị đánh dấu là chấm trên bộ test cũ và bài phải kiểm lại.
               </Notice>
               <div className="flex gap-2">
                 <Button variant="danger" onClick={() => void save()} disabled={saving}>
@@ -127,10 +137,16 @@ export function TestcasePanel({
       </Step>
 
       <Step n={3} title="Kiểm bằng lời giải mẫu">
-        <p className="text-sm text-ink-5">
-          Nút <strong>Kiểm tra bằng lời giải mẫu</strong> nằm ở băng trên cùng của màn hình, luôn nhìn thấy. Chỉ
-          sau khi nó báo xanh thì bộ test mới coi là dùng được.
-        </p>
+        <ValidateButton
+          problemId={problemId}
+          testcases={testcases}
+          compareMode={compareMode}
+          testcaseCount={testcases.length}
+          hasSolution={hasSolution}
+          dirty={dirty}
+          validated={validated}
+          onFinished={onReloaded}
+        />
       </Step>
     </div>
   )

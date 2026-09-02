@@ -26,7 +26,6 @@ import { toFormValues, toPatchPayload, validateForm, type ProblemFormValues } fr
 import { ProblemForm } from './ProblemForm'
 import { StatementPreview } from './StatementPreview'
 import { TestcasePanel } from './TestcasePanel'
-import { ValidateButton } from './ValidateButton'
 import type { MentorProblemDetail, ProblemDetailMeta } from './types'
 
 export function ProblemEditorPage() {
@@ -69,7 +68,6 @@ export function ProblemEditorPage() {
 
   const patch = toPatchPayload(initial, values)
   const dirty = Object.keys(patch).length > 0
-  const samples = detail.testcases.filter((t) => t.kind === 'sample').length
   const validated = meta?.validated === true
 
   const save = async () => {
@@ -114,15 +112,6 @@ export function ProblemEditorPage() {
         ) : null}
       </header>
 
-      <ValidateButton
-        problemId={problemId}
-        testcaseCount={detail.testcases.length}
-        hasSolution={initial.solutionSource.trim().length > 0 && initial.solutionLanguageId !== ''}
-        dirty={dirty}
-        validated={validated}
-        onFinished={reload}
-      />
-
       <div className="min-h-0 flex-1">
         <SplitPane
           storageKey="bcn:mentor-editor"
@@ -160,6 +149,10 @@ export function ProblemEditorPage() {
                     problemId={detail.id}
                     testcaseRev={detail.testcaseRev}
                     testcases={detail.testcases}
+                    compareMode={values.compareMode}
+                    hasSolution={initial.solutionSource.trim().length > 0 && initial.solutionLanguageId !== ''}
+                    dirty={dirty}
+                    validated={validated}
                     onReloaded={reload}
                   />
                 </div>
@@ -167,11 +160,7 @@ export function ProblemEditorPage() {
             </div>
           }
           right={
-            <StatementPreview
-              values={values}
-              sampleCount={samples}
-              hiddenCount={detail.testcases.length - samples}
-            />
+            <StatementPreview values={values} testcases={detail.testcases} />
           }
         />
       </div>

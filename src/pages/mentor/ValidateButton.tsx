@@ -2,8 +2,11 @@
  * FR-D6 — nút quan trọng nhất của màn soạn bài: chạy LỜI GIẢI MẪU trên toàn bộ
  * testcase và nói thẳng bộ test có dùng được không.
  *
- * Nó nằm trên một băng riêng ngay dưới thanh tiêu đề, ngoài hai khung chia đôi, vì
- * đây là cửa ra của US-2: soạn xong mà chưa bấm nó thì bộ test vẫn chỉ là phỏng đoán.
+ * Nó nằm ở BƯỚC 3 của thẻ Testcase, ngay cạnh hai bước dựng bộ test — đọc theo đúng
+ * thứ tự US-2 (tải zip → đánh dấu mẫu → kiểm). Đánh đổi so với bản cũ (một băng cố
+ * định dưới thanh tiêu đề, luôn nhìn thấy): giờ phải mở thẻ Testcase mới thấy nút,
+ * nên trạng thái "đã kiểm / chưa kiểm" phải đọc được ở chỗ khác — huy hiệu trên
+ * thanh tiêu đề (ValidationBadge) chính là chỗ đó.
  *
  * Nút TỰ CHẶN thay vì để server trả 400, và ba lý do chặn nói ba việc khác nhau:
  *   - chưa có testcase → đi tải zip;
@@ -16,11 +19,15 @@
 import { ShieldCheck } from 'lucide-react'
 import { Button, Spinner } from '@/components/ui'
 import { Notice } from './fields'
+import type { CompareMode, MentorTestcaseView } from './types'
 import { useValidateRun } from './useValidateRun'
 import { ValidateReport } from './ValidateReport'
 
 export interface ValidateButtonProps {
   problemId: string | undefined
+  /** Nguồn input/expected để bảng so dựng được — xem ValidateReport. */
+  testcases: MentorTestcaseView[]
+  compareMode: CompareMode
   testcaseCount: number
   hasSolution: boolean
   /** Form còn thay đổi chưa lưu — xem chú thích đầu file. */
@@ -43,13 +50,10 @@ export function ValidateButton(props: ValidateButtonProps) {
   const { run, start } = useValidateRun(props.problemId, props.onFinished)
   const blocked = blockedReason(props)
   const waiting = run.phase === 'waiting'
-  const partial = run.submission?.results?.length ?? 0
+  const partial = run.result?.results?.length ?? 0
 
   return (
-    <section
-      aria-label="Kiểm tra testcase bằng lời giải mẫu"
-      className="shrink-0 border-b border-line bg-surface-2 px-4 py-3"
-    >
+    <section aria-label="Kiểm tra testcase bằng lời giải mẫu">
       <div className="flex flex-wrap items-center gap-3">
         <Button
           variant="primary"
@@ -62,7 +66,7 @@ export function ValidateButton(props: ValidateButtonProps) {
         </Button>
 
         <p className="text-xs text-ink-5">
-          Chạy lời giải mẫu trên cả {props.testcaseCount} testcase và đối chiếu expected output (FR-D6).
+          Chạy lời giải mẫu trên cả {props.testcaseCount} testcase và đối chiếu expected output.
         </p>
 
         {waiting ? (
@@ -75,14 +79,16 @@ export function ValidateButton(props: ValidateButtonProps) {
       <div className="mt-2 space-y-2">
         {blocked !== null ? <Notice tone="info">{blocked}</Notice> : null}
         {run.phase === 'error' && run.error ? <Notice tone="error">{run.error}</Notice> : null}
-        {run.phase === 'done' && run.submission ? <ValidateReport submission={run.submission} /> : null}
+        {run.phase === 'done' && run.result ? (
+          <ValidateReport result={run.result} testcases={props.testcases} compareMode={props.compareMode} />
+        ) : null}
         {/* Chưa kiểm lần nào trong phiên này nhưng server nhớ lần trước: đừng bắt bấm lại vô ích. */}
         {run.phase === 'idle' && blocked === null && props.validated ? (
           <Notice tone="ok">Bộ test hiện tại đã được lời giải mẫu xác nhận ở lần kiểm gần nhất.</Notice>
         ) : null}
         {run.phase === 'idle' && blocked === null && !props.validated ? (
           <Notice tone="warn">
-            Bộ test hiện tại chưa được kiểm. Xuất bản khi chưa kiểm vẫn được, nhưng phải xác nhận qua cảnh báo (FR-D6).
+            Bộ test hiện tại chưa được kiểm. Xuất bản khi chưa kiểm vẫn được, nhưng phải xác nhận qua cảnh báo.
           </Notice>
         ) : null}
       </div>

@@ -1,79 +1,108 @@
 /**
  * Báo cáo của một lượt kiểm (FR-D6) — trả lời đúng một câu: *bộ test này có dùng được không*.
  *
- * Thứ tự đặt trên màn hình là thứ tự người soạn cần biết, không phải thứ tự dữ liệu:
- * kết luận trước, rồi testcase HỎNG, rồi mới tới bảng đầy đủ. Mentor mở nó ra vì
- * nghi bộ test sai, nên "testcase 7 WA" phải đập vào mắt chứ không nằm lẫn giữa
- * chín dòng AC.
+ * Thứ tự trên màn hình là thứ tự người soạn cần biết, không phải thứ tự dữ liệu:
+ * kết luận trước, rồi từng testcase HỎNG kèm bằng chứng, rồi mới tới dải đầy đủ.
+ * Mentor mở nó ra vì nghi bộ test sai, nên "testcase 7 WA" phải đập vào mắt chứ
+ * không nằm lẫn giữa chín dòng AC.
  *
- * Giới hạn có thật, nói thẳng ra trong UI: lượt kiểm đọc qua
- * `GET /api/member/submissions/:id`, mà serializer member chỉ trả stdout/diff cho
- * testcase MẪU (NFR-2). Testcase ẩn sai thì chỉ có verdict, không có diff.
+ * Bằng chứng là một BẢNG SO thật (`OutputDiff` — đúng component member dùng), không
+ * phải một dòng "in ra: …". Hai thứ khiến nó dựng được:
+ *   - `mentorStdout` từ route mentor có ở MỌI testcase, kể cả ẩn;
+ *   - expected ghép theo `position` từ bảng testcase mà trình soạn đang giữ.
+ * Bản trước đọc qua đường member nên test ẩn chỉ có verdict trần, và mentor phải mở
+ * test ẩn thành mẫu mới xem được output — đúng thứ US-2 nói là không chấp nhận được.
  */
 import { VerdictBadge } from '@/components/ui'
-import type { ResultView, SubmissionView } from '@/types/api'
+import { OutputDiff } from '@/pages/workspace/OutputDiff'
 import { Notice } from './fields'
+import type { CompareMode, MentorTestcaseView, ValidateResultView, ValidateRunView } from './types'
 
-export function ValidateReport({ submission }: { submission: SubmissionView }) {
-  if (submission.compileOutput) {
+export function ValidateReport({
+  result,
+  testcases,
+  compareMode,
+}: {
+  result: ValidateRunView
+  /** Nguồn của input/expected để dựng bảng so — ghép theo `position`. */
+  testcases: MentorTestcaseView[]
+  compareMode: CompareMode
+}) {
+  if (result.compileOutput) {
     return (
       <div className="space-y-2">
         <Notice tone="error">Lời giải mẫu không biên dịch được — chưa kiểm được testcase nào.</Notice>
         <pre className="max-h-40 overflow-auto border border-line bg-[var(--surface-code)] p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
-          {submission.compileOutput}
+          {result.compileOutput}
         </pre>
       </div>
     )
   }
 
-  const results = submission.results ?? []
+  const results = result.results ?? []
   if (results.length === 0) {
     return <Notice tone="warn">Lượt kiểm chạy xong nhưng không có kết quả testcase nào.</Notice>
   }
 
   const failed = results.filter((r) => r.verdict !== 'AC')
-  if (failed.length === 0) {
-    return (
-      <Notice tone="ok">
-        <strong>{results.length}/{results.length} testcase khớp lời giải mẫu.</strong> Bộ test dùng được — bài
-        chuyển sang trạng thái “đã kiểm”.
-      </Notice>
-    )
-  }
+  const byPosition = new Map(testcases.map((t) => [t.position, t]))
 
   return (
-    <div className="space-y-2">
-      <Notice tone="error">
-        <strong>
-          {failed.length}/{results.length} testcase KHÔNG khớp lời giải mẫu:{' '}
-          {failed.map((r) => `#${r.position} ${r.verdict}`).join(', ')}.
-        </strong>{' '}
-        Sửa expected output của những testcase đó, hoặc sửa lời giải mẫu, rồi kiểm lại.
-      </Notice>
-      <ul className="space-y-2">
-        {failed.map((r) => (
-          <FailedRow key={r.position} result={r} />
+    <div className="space-y-3">
+      {failed.length === 0 ? (
+        <Notice tone="ok">
+          <strong>
+            {results.length}/{results.length} testcase khớp lời giải mẫu.
+          </strong>{' '}
+          Bộ test dùng được — bài chuyển sang trạng thái “đã kiểm”.
+        </Notice>
+      ) : (
+        <Notice tone="error">
+          <strong>
+            {failed.length}/{results.length} testcase KHÔNG khớp lời giải mẫu.
+          </strong>{' '}
+          Sửa expected output của những testcase đó, hoặc sửa lời giải mẫu, rồi kiểm lại.
+        </Notice>
+      )}
+
+      {/* Dải tổng quan luôn hiện: nó là bản đồ của cả lượt kiểm, và với bộ test dài
+          thì đây là chỗ duy nhất thấy được "hỏng ở đầu hay rải đều". */}
+      <ul className="flex flex-wrap gap-1" aria-label="Kết quả từng testcase">
+        {results.map((r) => (
+          <li
+            key={r.position}
+            className={`flex items-center gap-1.5 border px-1.5 py-0.5 ${
+              r.verdict === 'AC' ? 'border-line bg-surface-1' : 'border-clay bg-surface-2'
+            }`}
+          >
+            <span className="font-mono text-[11px] text-ink-5">#{r.position}</span>
+            <VerdictBadge verdict={r.verdict} />
+          </li>
         ))}
       </ul>
-      <details className="text-xs text-ink-5">
-        <summary className="cursor-pointer">Xem toàn bộ {results.length} testcase</summary>
-        <ul className="mt-1 flex flex-wrap gap-1">
-          {results.map((r) => (
-            <li key={r.position} className="flex items-center gap-1 bg-surface-1 px-1.5 py-0.5">
-              <span className="font-mono">#{r.position}</span>
-              <VerdictBadge verdict={r.verdict} />
-            </li>
-          ))}
-        </ul>
-      </details>
+
+      {failed.map((r) => (
+        <FailedCase key={r.position} result={r} testcase={byPosition.get(r.position)} compareMode={compareMode} />
+      ))}
     </div>
   )
 }
 
-function FailedRow({ result }: { result: ResultView }) {
+function FailedCase({
+  result,
+  testcase,
+  compareMode,
+}: {
+  result: ValidateResultView
+  testcase: MentorTestcaseView | undefined
+  compareMode: CompareMode
+}) {
+  const got = result.mentorStdout ?? result.stdout
+  const want = testcase?.expectedPreview ?? null
+
   return (
-    <li className="border border-clay px-2 py-1.5 text-xs">
-      <div className="flex items-center gap-2">
+    <section className="border border-clay">
+      <header className="flex flex-wrap items-center gap-2 border-b border-line bg-surface-2 px-2.5 py-1.5 text-xs">
         <span className="font-mono font-semibold">Testcase #{result.position}</span>
         <VerdictBadge verdict={result.verdict} />
         <span className="text-ink-5">{result.isSample ? 'mẫu' : 'ẩn'}</span>
@@ -81,20 +110,45 @@ function FailedRow({ result }: { result: ResultView }) {
           {result.timeMs ?? '—'} ms
           {result.memoryKb ? ` · ${Math.round(result.memoryKb / 1024)} MB` : ''}
         </span>
+      </header>
+
+      <div className="space-y-2 p-2.5">
+        {result.detail ? <p className="font-mono text-xs text-ink-5">{result.detail}</p> : null}
+
+        {/* WA là ca DUY NHẤT mà bảng so nói được điều gì: TLE/RE/MLE thì output dở
+            dang hoặc rỗng, đặt cạnh expected chỉ gây hiểu nhầm là "sai đáp án". */}
+        {result.verdict === 'WA' && got !== null && want !== null ? (
+          <OutputDiff
+            position={result.position}
+            input={testcase?.inputPreview ?? null}
+            got={got}
+            want={want}
+            compareMode={compareMode}
+            gotLabel="lời giải mẫu in ra"
+            wantLabel="expected trong bộ test"
+          />
+        ) : got ? (
+          <div>
+            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-ink-6 uppercase">
+              Lời giải mẫu in ra
+            </p>
+            <pre className="max-h-32 overflow-auto border border-line bg-surface-1 p-2 font-mono text-xs whitespace-pre-wrap">
+              {got}
+            </pre>
+          </div>
+        ) : (
+          <p className="text-xs text-ink-5">Lời giải mẫu không in ra gì.</p>
+        )}
+
+        {result.stderr ? (
+          <div>
+            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-ink-6 uppercase">stderr</p>
+            <pre className="max-h-24 overflow-auto border border-line bg-surface-1 p-2 font-mono text-xs whitespace-pre-wrap text-clay">
+              {result.stderr}
+            </pre>
+          </div>
+        ) : null}
       </div>
-      {result.detail ? <p className="mt-1 font-mono text-ink-5">{result.detail}</p> : null}
-      {result.isSample && result.stdout !== undefined && result.stdout !== null ? (
-        <pre className="mt-1 max-h-32 overflow-auto bg-surface-1 p-2 font-mono whitespace-pre-wrap">
-          Lời giải mẫu in ra: {result.stdout || '(rỗng)'}
-          {result.firstDiffLine ? `\nKhác expected từ dòng ${result.firstDiffLine}` : ''}
-        </pre>
-      ) : (
-        <p className="mt-1 text-ink-5">
-          {result.isSample
-            ? 'Không có output để đối chiếu.'
-            : 'Testcase ẩn: API chỉ trả verdict, không trả diff — mở nó thành testcase mẫu nếu cần xem output.'}
-        </p>
-      )}
-    </li>
+    </section>
   )
 }

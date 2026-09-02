@@ -5,7 +5,21 @@ import { DIFFICULTY_LABEL } from '@/pages/mentor/types'
 import type { ProblemView } from '@/types/api'
 
 /** Tab "Đề bài" (FR-D1): đề, mô tả input/output, ràng buộc, ví dụ, giới hạn. */
-export function StatementPanel({ problem }: { problem: ProblemView }) {
+export function StatementPanel({
+  problem,
+  headingLevel = 1,
+}: {
+  problem: ProblemView
+  /**
+   * Bậc thẻ tiêu đề. Mặc định `h1` vì ở màn làm bài, tên bài LÀ tiêu đề của trang.
+   *
+   * Khung xem trước của mentor truyền 2: ở đó tiêu đề trang đã là tên bài trên thanh
+   * trên cùng, nên để `h1` là trang có hai `h1` — trình đọc màn hình mất mốc điều
+   * hướng, và đó cũng đúng thứ bộ e2e bắt được khi khung xem trước dùng lại panel này.
+   */
+  headingLevel?: 1 | 2
+}) {
+  const Heading = headingLevel === 1 ? 'h1' : 'h2'
   return (
     <article className="space-y-5 px-5 py-5">
       <header>
@@ -24,7 +38,7 @@ export function StatementPanel({ problem }: { problem: ProblemView }) {
           </p>
         ) : null}
 
-        <h1 className="font-display text-[24px] text-ink-1">{problem.title}</h1>
+        <Heading className="font-display text-[24px] text-ink-1">{problem.title}</Heading>
 
         {/* Dải số liệu có NHÃN thay cho một dòng số trần: bản vẽ tách thời gian · bộ
             nhớ · test ẩn thành ba ô, vì "1000 ms · 256 MB · 3" đọc trần thì phải đoán

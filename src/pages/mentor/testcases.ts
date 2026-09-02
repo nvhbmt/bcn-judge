@@ -50,10 +50,6 @@ export function toDrafts(testcases: MentorTestcaseView[]): TestcaseDraft[] {
   }))
 }
 
-/** US-2: "đánh dấu testcase 1–2 là mẫu" — đúng N dòng đầu, phần còn lại thành ẩn. */
-export function markFirstAsSamples(drafts: TestcaseDraft[], count: number): TestcaseDraft[] {
-  return drafts.map((d, i) => ({ ...d, kind: i < count ? 'sample' : 'hidden' }))
-}
 
 export function sampleCount(drafts: TestcaseDraft[]): number {
   return drafts.filter((d) => d.kind === 'sample').length

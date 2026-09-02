@@ -12,7 +12,7 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { Notice, Select, TextArea, TextInput } from './fields'
-import { emptyDraft, markFirstAsSamples, sampleCount, utf8Bytes, type TestcaseDraft } from './testcases'
+import { emptyDraft, sampleCount, utf8Bytes, type TestcaseDraft } from './testcases'
 
 export function TestcaseTable({
   drafts,
@@ -33,13 +33,6 @@ export function TestcaseTable({
           {drafts.length} testcase · <strong>{samples} mẫu</strong> · {drafts.length - samples} ẩn
         </span>
         <div className="ml-auto flex gap-2">
-          {/* US-2 bước 2: "đánh dấu testcase 1–2 là mẫu" — hai cỡ hay dùng nhất. */}
-          <Button onClick={() => onChange(markFirstAsSamples(drafts, 1))} disabled={drafts.length === 0}>
-            1 đầu là mẫu
-          </Button>
-          <Button onClick={() => onChange(markFirstAsSamples(drafts, 2))} disabled={drafts.length < 2}>
-            2 đầu là mẫu
-          </Button>
           <Button onClick={() => onChange([...drafts, emptyDraft()])}>
             <Plus size={15} /> Thêm testcase
           </Button>

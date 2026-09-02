@@ -122,10 +122,3 @@ export function toPatchPayload(
 }
 
 /** Đề bài ghép lại đúng thứ tự FR-D1 để khung xem trước hiện y như member sẽ đọc. */
-export function previewSource(v: ProblemFormValues): string {
-  const parts = [`# ${v.title.trim() || 'Bài chưa đặt tên'}`, v.statementMd]
-  if (v.inputDescMd.trim()) parts.push('## Dữ liệu vào', v.inputDescMd)
-  if (v.outputDescMd.trim()) parts.push('## Kết quả ra', v.outputDescMd)
-  if (v.constraintsMd.trim()) parts.push('## Ràng buộc', v.constraintsMd)
-  return parts.join('\n\n')
-}

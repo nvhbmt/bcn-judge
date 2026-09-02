@@ -31,10 +31,7 @@ export function SolutionSection({
   })
 
   return (
-    <Section
-      title="Lời giải mẫu (chỉ mentor/admin thấy)"
-      hint="Member không bao giờ nhận được nội dung này qua API. Đây là thứ hệ thống chạy khi bấm “Kiểm tra bằng lời giải mẫu”."
-    >
+    <Section title="Lời giải mẫu (chỉ mentor/admin thấy)">
       <Notice tone="info">
         Lưu lời giải trước rồi mới bấm kiểm — máy chủ chạy bản đã lưu, không phải chữ đang gõ trong ô dưới.
       </Notice>
