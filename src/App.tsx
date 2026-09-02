@@ -3,6 +3,9 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { TopBar } from '@/components/layout/TopBar'
 import { Spinner } from '@/components/ui'
 import { AdminCoursesPage } from '@/pages/admin/CoursesPage'
+import { AdminCourseCreatePage } from '@/pages/admin/CourseCreatePage'
+import { AdminLanguageEditPage } from '@/pages/admin/LanguageEditPage'
+import { AdminTeamCreatePage, AdminTeamEditPage } from '@/pages/admin/TeamEditPage'
 import { AdminJudgePage } from '@/pages/admin/JudgeStatusPage'
 import { AdminSettingsPage } from '@/pages/admin/SettingsPage'
 import { AdminTeamsPage } from '@/pages/admin/TeamsPage'
@@ -89,8 +92,14 @@ function AppRoutes({ role }: { role: Me['role'] }) {
           <Route path="/quan-tri" element={<AdminJudgePage />} />
           <Route path="/quan-tri/tai-khoan" element={<AdminUsersPage />} />
           <Route path="/quan-tri/khoa-hoc" element={<AdminCoursesPage />} />
+          {/* `/moi` phải đứng TRƯỚC `/:courseId`, nếu không "moi" bị nuốt thành id
+              và trang tạo mở ra thành "không tìm thấy khoá học". */}
+          <Route path="/quan-tri/khoa-hoc/moi" element={<AdminCourseCreatePage />} />
           <Route path="/quan-tri/team" element={<AdminTeamsPage />} />
+          <Route path="/quan-tri/team/moi" element={<AdminTeamCreatePage />} />
+          <Route path="/quan-tri/team/:teamId" element={<AdminTeamEditPage />} />
           <Route path="/quan-tri/cai-dat" element={<AdminSettingsPage />} />
+          <Route path="/quan-tri/cai-dat/ngon-ngu/:languageId" element={<AdminLanguageEditPage />} />
         </>
       ) : null}
       {/* FR-D: màn soạn bài của mentor. Admin ngầm có mọi quyền của mentor (§3) nên
@@ -104,7 +113,10 @@ function AppRoutes({ role }: { role: Me['role'] }) {
           phải member" như trên; server chặn thật bằng requireStaff + isCourseStaff. */}
       {role !== 'member' ? (
         <>
+          {/* Một màn sửa khoá cho cả hai vai; tab nằm trong URL nên tải lại vẫn
+              đúng chỗ. Không tab thì trang tự đưa về tab đầu mà vai này thấy được. */}
           <Route path="/mentor/khoa-hoc/:courseId" element={<CourseContentPage />} />
+          <Route path="/mentor/khoa-hoc/:courseId/:tab" element={<CourseContentPage />} />
           <Route path="/mentor/contest" element={<ContestListPage />} />
           <Route path="/mentor/contest/:contestId" element={<ContestEditorPage />} />
           <Route path="/mentor/contest/:contestId/thong-ke" element={<ContestStatsPage />} />

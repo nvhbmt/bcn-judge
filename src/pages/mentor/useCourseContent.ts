@@ -1,7 +1,7 @@
 /** Query + mutation của màn soạn nội dung khoá (FR-C1/C3). */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { SyllabusSection } from './mentorTypes'
+import type { CourseMentorRow, MentorCourseDetail, SyllabusSection } from './mentorTypes'
 import type { MentorProblemRow } from './types'
 
 export function syllabusKey(courseId: string) {
@@ -13,6 +13,39 @@ export function useSyllabus(courseId: string) {
     queryKey: syllabusKey(courseId),
     queryFn: () => api.get<SyllabusSection[]>(`/api/mentor/courses/${courseId}/syllabus`),
     enabled: Boolean(courseId),
+  })
+}
+
+/**
+ * Chi tiết khoá cho khung TRÁI của màn soạn nội dung.
+ *
+ * `GET /api/mentor/courses` (danh sách) chỉ trả id/code/name/status — không có mô tả,
+ * mà mô tả chính là thứ duy nhất mentor sửa được ở đây (ma trận §3: đổi tên, mã,
+ * trạng thái là quyền admin). Nên phải đọc route chi tiết.
+ */
+export function useMentorCourse(courseId: string) {
+  return useQuery({
+    queryKey: ['mentor', 'course', courseId],
+    queryFn: () => api.get<MentorCourseDetail>(`/api/mentor/courses/${courseId}`),
+    enabled: Boolean(courseId),
+  })
+}
+
+export function useCourseMentors(courseId: string) {
+  return useQuery({
+    queryKey: ['mentor', 'course-mentors', courseId],
+    queryFn: () => api.get<CourseMentorRow[]>(`/api/mentor/courses/${courseId}/mentors`),
+    enabled: Boolean(courseId),
+  })
+}
+
+/** Chỉ mô tả — đúng phạm vi mà `PATCH /api/mentor/courses/:id` nhận. */
+export function useCourseDescription(courseId: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (descriptionMd: string) =>
+      api.patch<{ id: string }>(`/api/mentor/courses/${courseId}`, { descriptionMd }),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['mentor', 'course', courseId] }),
   })
 }
 

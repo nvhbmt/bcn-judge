@@ -1,14 +1,11 @@
 /** FR-B1/B2/B3 — trang khoá học: tạo/sửa khoá, gán mentor, ghi danh member. */
 import { useQuery } from '@tanstack/react-query'
-import { ChevronDown, ChevronRight, Pencil, Plus } from 'lucide-react'
-import { useState } from 'react'
-import { Button, EmptyState, Spinner } from '@/components/ui'
-import { api } from '@/lib/api'
+import { Pencil, Plus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { EmptyState, Spinner, buttonClass } from '@/components/ui'
 import { AdminShell } from './AdminShell'
-import { CourseEnrollments } from './CourseEnrollments'
-import { CourseForm } from './CourseForm'
-import { CourseMentors } from './CourseMentors'
-import type { AdminCourse, CourseStatus } from './types'
+import { useAdminCourses } from './useAdminLists'
+import type { CourseStatus } from './types'
 
 const STATUS: Record<CourseStatus, { label: string; className: string }> = {
   draft: { label: 'Nháp', className: 'bg-surface-sel text-ink-2' },
@@ -16,35 +13,20 @@ const STATUS: Record<CourseStatus, { label: string; className: string }> = {
   archived: { label: 'Lưu trữ', className: 'bg-[var(--tint-earth)] text-earth' },
 }
 
-export function AdminCoursesPage() {
-  const [openId, setOpenId] = useState<string | null>(null)
-  const [editing, setEditing] = useState<AdminCourse | null>(null)
-  const [creating, setCreating] = useState(false)
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin', 'courses'],
-    queryFn: () => api.get<AdminCourse[]>('/api/admin/courses'),
-  })
+export function AdminCoursesPage() {
+  const { data, isLoading } = useAdminCourses()
 
   return (
     <AdminShell
       title="Khoá học"
-      description="Tạo khoá ở trạng thái Nháp, gán mentor để họ soạn nội dung, rồi ghi danh member (US-1)."
+      description="Tạo khoá ở trạng thái Nháp, gán mentor để họ soạn nội dung, rồi ghi danh member."
     >
       <div className="mb-4">
-        <Button
-          variant="primary"
-          onClick={() => {
-            setCreating(true)
-            setEditing(null)
-          }}
-        >
+        <Link to="/quan-tri/khoa-hoc/moi" className={buttonClass('primary')}>
           <Plus size={15} /> Tạo khoá học
-        </Button>
+        </Link>
       </div>
-
-      {creating ? <CourseForm course={null} onDone={() => setCreating(false)} /> : null}
-      {editing ? <CourseForm course={editing} onDone={() => setEditing(null)} /> : null}
 
       {isLoading ? <Spinner /> : null}
       {data && data.length === 0 ? (
@@ -52,60 +34,35 @@ export function AdminCoursesPage() {
       ) : null}
 
       <ul className="space-y-2">
-        {data?.map((course) => {
-          const open = openId === course.id
-          return (
-            <li key={course.id} className="border border-line bg-surface-2">
-              <div className="flex flex-wrap items-center gap-2 p-3">
-                <button
-                  type="button"
-                  onClick={() => setOpenId(open ? null : course.id)}
-                  aria-expanded={open}
-                  className="flex min-w-0 items-center gap-2 text-left focus-visible:outline-2
- focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
-                >
-                  {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium">{course.name}</span>
-                    <span className="block truncate font-mono text-xs text-ink-5">{course.code}</span>
-                  </span>
-                </button>
+        {data?.map((course) => (
+          <li key={course.id} className="flex flex-wrap items-center gap-2 border border-line bg-surface-2 p-3">
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-medium">{course.name}</span>
+              <span className="block truncate font-mono text-xs text-ink-5">{course.code}</span>
+            </span>
 
-                <span className={` px-1.5 py-0.5 text-xs font-medium ${STATUS[course.status].className}`}>
-                  {STATUS[course.status].label}
-                </span>
-                {course.selfEnroll ? (
-                  <span className="bg-[var(--color-primary-soft)] px-1.5 py-0.5 text-xs text-[var(--color-primary)]">
-                    Tự ghi danh
-                  </span>
-                ) : null}
+            <span className={` px-1.5 py-0.5 text-xs font-medium ${STATUS[course.status].className}`}>
+              {STATUS[course.status].label}
+            </span>
+            {course.selfEnroll ? (
+              <span className="bg-[var(--color-primary-soft)] px-1.5 py-0.5 text-xs text-[var(--color-primary)]">
+                Tự ghi danh
+              </span>
+            ) : null}
 
-                <span className="ml-auto flex items-center gap-3 text-xs whitespace-nowrap text-ink-5">
-                  <span>{course.mentorCount} mentor</span>
-                  <span>{course.memberCount} member</span>
-                </span>
+            <span className="flex items-center gap-3 text-xs whitespace-nowrap text-ink-5">
+              <span>{course.mentorCount} mentor</span>
+              <span>{course.memberCount} member</span>
+            </span>
 
-                <Button
-                  onClick={() => {
-                    setEditing(course)
-                    setCreating(false)
-                  }}
-                >
-                  <Pencil size={14} /> Sửa
-                </Button>
-              </div>
-
-              {/* Mentor và ghi danh chỉ nạp khi mở: hai truy vấn mỗi khoá × N khoá
-                  là gánh vô ích cho một danh sách người ta chỉ mở từng cái một. */}
-              {open ? (
-                <div className="border-t border-line p-3">
-                  <CourseMentors courseId={course.id} />
-                  <CourseEnrollments courseId={course.id} />
-                </div>
-              ) : null}
-            </li>
-          )
-        })}
+            {/* MỘT lối ra: mọi phần của khoá — thông tin, giáo trình, ghi danh,
+                mentor — nằm chung một màn có tab. Trước đây tách hai nút và không nút
+                nào làm được hết việc. */}
+            <Link to={`/mentor/khoa-hoc/${course.id}/thong-tin`} className={buttonClass('ghost', 'sm')}>
+              <Pencil size={14} /> Sửa
+            </Link>
+          </li>
+        ))}
       </ul>
     </AdminShell>
   )

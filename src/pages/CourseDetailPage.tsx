@@ -59,7 +59,7 @@ export function CourseDetailPage() {
 
           {me && me.role !== 'member' ? (
             <Link
-              to={`/mentor/khoa-hoc/${courseId}`}
+              to={`/mentor/khoa-hoc/${courseId}/thong-tin`}
               className="inline-flex shrink-0 items-center gap-1.5 border border-line-strong px-3 py-1.5 font-mono text-[12px] text-ink-3 transition-colors duration-[120ms] ease-linear hover:bg-surface-sel"
             >
               <PencilRuler size={14} /> Soạn nội dung

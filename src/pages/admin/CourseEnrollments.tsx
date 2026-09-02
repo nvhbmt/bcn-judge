@@ -9,16 +9,30 @@ import { EnrollResult } from './EnrollResult'
 import type { CourseEnrollment, EnrollReport } from './types'
 import { Card, FailureBanner, TextArea } from './ui'
 
-export function CourseEnrollments({ courseId }: { courseId: string }) {
+export function CourseEnrollments({
+  courseId,
+  scope = 'admin',
+}: {
+  courseId: string
+  /**
+   * Đường API theo VAI. Mentor cũng ghi danh được cho khoá mình phụ trách
+   * (`/api/mentor/courses/:id/enrollments`, ma trận §3) — cắm cứng `admin` thì mentor
+   * mở tab này ra là 403, dù server cho phép.
+   */
+  scope?: 'admin' | 'mentor'
+}) {
   const client = useQueryClient()
   const [raw, setRaw] = useState('')
   const [invalid, setInvalid] = useState<string[]>([])
   const [notice, setNotice] = useState<FailureNotice | null>(null)
-  const key = ['admin', 'course', courseId, 'enrollments']
+  const base = `/api/${scope}/courses/${courseId}/enrollments`
+  // Key theo VAI luôn: hai đường trả cùng hình dạng, nhưng gộp cache thì đổi vai
+  // trong một phiên sẽ đọc lại kết quả của vai cũ.
+  const key = [scope, 'course', courseId, 'enrollments']
 
   const { data, isLoading } = useQuery({
     queryKey: key,
-    queryFn: () => api.get<CourseEnrollment[]>(`/api/admin/courses/${courseId}/enrollments`),
+    queryFn: () => api.get<CourseEnrollment[]>(base),
   })
 
   const refresh = () => {
@@ -27,7 +41,7 @@ export function CourseEnrollments({ courseId }: { courseId: string }) {
   }
 
   const enroll = useMutation({
-    mutationFn: (emails: string[]) => api.post<EnrollReport>(`/api/admin/courses/${courseId}/enrollments`, { emails }),
+    mutationFn: (emails: string[]) => api.post<EnrollReport>(base, { emails }),
     onSuccess: () => {
       setNotice(null)
       setRaw('')
@@ -37,7 +51,7 @@ export function CourseEnrollments({ courseId }: { courseId: string }) {
   })
 
   const unenroll = useMutation({
-    mutationFn: (userId: string) => api.del(`/api/admin/courses/${courseId}/enrollments/${userId}`),
+    mutationFn: (userId: string) => api.del(`${base}/${userId}`),
     onSuccess: () => {
       setNotice(null)
       refresh()

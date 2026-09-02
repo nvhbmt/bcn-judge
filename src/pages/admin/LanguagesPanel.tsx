@@ -4,26 +4,22 @@
  * US-8 nói "bật lên thì mentor thấy ngay, KHÔNG cần deploy lại ứng dụng" — nên
  * công tắc bật/tắt là thứ to nhất trên mỗi dòng, không giấu sau nút "Sửa".
  */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
-import { EmptyState, SectionRule, Spinner } from '@/components/ui'
+import { Link } from 'react-router-dom'
+import { EmptyState, SectionRule, Spinner, buttonClass } from '@/components/ui'
 import { api } from '@/lib/api'
 import { describeFailure, type FailureNotice } from './conflicts'
-import { LanguageForm } from './LanguageForm'
 import { toLanguagePayload } from './languagePayload'
+import { LANGUAGES_KEY, useAdminLanguages } from './useAdminLists'
 import type { Language } from './types'
 import { FailureBanner } from './ui'
 
 export function LanguagesPanel() {
   const client = useQueryClient()
-  const [editing, setEditing] = useState<string | null>(null)
   const [notice, setNotice] = useState<FailureNotice | null>(null)
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin', 'languages'],
-    queryFn: () => api.get<Language[]>('/api/admin/languages'),
-  })
+  const { data, isLoading } = useAdminLanguages()
 
   const toggle = useMutation({
     // PUT là upsert ghi đè cả hàng: phải gửi lại đủ mọi trường, không chỉ `enabled`.
@@ -31,7 +27,7 @@ export function LanguagesPanel() {
       api.put(`/api/admin/languages/${lang.id}`, toLanguagePayload(lang, { enabled: !lang.enabled })),
     onSuccess: () => {
       setNotice(null)
-      void client.invalidateQueries({ queryKey: ['admin', 'languages'] })
+      void client.invalidateQueries({ queryKey: LANGUAGES_KEY })
     },
     onError: (err) => setNotice(describeFailure(err, 'Không đổi được trạng thái ngôn ngữ.')),
   })
@@ -81,20 +77,15 @@ export function LanguagesPanel() {
 
               <span className="ml-auto flex items-center gap-3">
                 <span className="text-xs whitespace-nowrap text-ink-5">×{Number(lang.timeFactor) || 1} thời gian</span>
-                <button
-                  type="button"
-                  onClick={() => setEditing(editing === lang.id ? null : lang.id)}
-                  aria-expanded={editing === lang.id}
-                  className="inline-flex items-center gap-1 border border-line-strong px-2 py-1 text-xs
- hover:bg-surface-sel focus-visible:outline-2 focus-visible:outline-offset-1
- focus-visible:outline-[var(--color-primary)]"
+                <Link
+                  to={`/quan-tri/cai-dat/ngon-ngu/${lang.id}`}
+                  className={buttonClass('ghost', 'sm')}
                 >
                   <Pencil size={13} /> Sửa
-                </button>
+                </Link>
               </span>
             </div>
 
-            {editing === lang.id ? <LanguageForm lang={lang} onDone={() => setEditing(null)} /> : null}
           </li>
         ))}
       </ul>
