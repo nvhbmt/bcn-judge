@@ -1,7 +1,7 @@
 /** Query + mutation của khu contest mentor (FR-I2/I7/I9). */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { ContestStats, MentorContestRow } from './mentorTypes'
+import type { ContestStats, MentorContestDetail, MentorContestRow } from './mentorTypes'
 import type { MentorCourseRow } from './types'
 
 const CONTESTS_KEY = ['mentor', 'contests'] as const
@@ -13,15 +13,25 @@ export function useContests() {
   })
 }
 
-/**
- * Server KHÔNG có `GET /api/mentor/contests/:id`, nên trang sửa lấy contest ra từ
- * chính danh sách. Hệ quả phải sống chung: danh sách không trả `descriptionMd`,
- * `sequential`, `scoring`, `penaltyMinutes` — xem ContestForm để biết cách tránh
- * ghi đè mất những trường không đọc được.
- */
+/** Dòng contest lấy từ danh sách — đủ cho những chỗ chỉ cần tiêu đề và mốc giờ. */
 export function useContestRow(contestId: string) {
   const query = useContests()
   return { ...query, row: query.data?.find((c) => c.id === contestId) ?? null }
+}
+
+/**
+ * Contest KÈM danh sách bài hiện tại.
+ *
+ * Route này vẫn luôn có ở server; SPA từng chú thích nhầm là "không có" rồi đi vòng
+ * qua danh sách, khiến picker mở ra rỗng trong khi `PUT /:id/problems` thay thế cả
+ * bộ — mở form rồi bấm lưu là gỡ sạch bài của contest.
+ */
+export function useContestDetail(contestId: string) {
+  return useQuery({
+    queryKey: ['mentor', 'contest', contestId],
+    queryFn: () => api.get<MentorContestDetail>(`/api/mentor/contests/${contestId}`),
+    enabled: Boolean(contestId),
+  })
 }
 
 export function useMentorCourses() {

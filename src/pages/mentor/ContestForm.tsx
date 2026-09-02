@@ -115,7 +115,7 @@ export function ContestForm({
         </Field>
       </div>
 
-      <Field id={ids.freeze} label="Đóng băng bảng xếp hạng (phút cuối)" hint="0 = không đóng băng (FR-I10).">
+      <Field id={ids.freeze} label="Đóng băng bảng xếp hạng (phút cuối)" hint="0 = không đóng băng.">
         <TextInput
           id={ids.freeze}
           type="number"
@@ -130,11 +130,7 @@ export function ContestForm({
       <Field
         id={ids.desc}
         label="Mô tả (Markdown)"
-        hint={
-          mode === 'edit'
-            ? 'Để trống = giữ nguyên mô tả đang có: API không trả mô tả về nên ô này luôn mở ra rỗng.'
-            : undefined
-        }
+        hint={mode === 'edit' ? 'Xoá hết chữ rồi lưu là xoá mô tả của contest.' : undefined}
       >
         <TextArea
           id={ids.desc}
@@ -158,11 +154,11 @@ export function ContestForm({
               set('sequential', e.currentTarget.checked)
             }}
           />
-          Chuỗi tuần tự — phải AC bài trước mới mở bài sau (FR-I8)
+          Chuỗi tuần tự — phải AC bài trước mới mở bài sau
         </label>
         {mode === 'edit' ? (
           <p id={`${ids.seq}-hint`} className="mt-1 text-xs text-ink-5">
-            Chỉ được ghi khi bạn tự bấm vào ô này: API không trả giá trị hiện tại nên form không dám đoán.
+            Đang hiện đúng trạng thái của contest.
           </p>
         ) : null}
       </div>

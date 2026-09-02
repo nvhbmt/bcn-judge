@@ -81,9 +81,10 @@ export function toUpdateBody(
     const freeze = Number.parseInt(v.freezeMinutes, 10)
     if (Number.isFinite(freeze)) body.freezeMinutes = freeze
   }
-  // Mô tả rỗng KHÔNG gửi: '' không phải NULL nên COALESCE sẽ xoá sạch mô tả cũ,
-  // mà form thì không đọc được mô tả cũ để so sánh.
-  if (v.descriptionMd.trim()) body.descriptionMd = v.descriptionMd
+  // Form ĐỌC được mô tả cũ (GET /api/mentor/contests/:id) nên so sánh được: chỉ gửi
+  // khi thật sự đổi. Trước đây phải né bằng "rỗng thì không gửi" vì `initial` luôn là
+  // chuỗi rỗng, và hệ quả là không cách nào xoá mô tả — giờ xoá được.
+  if (v.descriptionMd !== initial.descriptionMd) body.descriptionMd = v.descriptionMd
   if (opts.sequentialTouched) body.sequential = v.sequential
   // courseId cố tình KHÔNG gửi: câu UPDATE của server không ghi cột course_id nên
   // gửi cũng vô ích, chỉ làm người đọc tưởng đổi được phạm vi contest.

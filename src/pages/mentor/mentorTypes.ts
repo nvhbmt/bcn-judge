@@ -37,6 +37,41 @@ export interface MentorContestRow {
   problemCount: number
 }
 
+/**
+ * `GET /api/mentor/contests/:id` — contest KÈM danh sách bài hiện tại.
+ *
+ * Danh sách `/api/mentor/contests` không trả `descriptionMd`, `scoring`,
+ * `penaltyMinutes`, `sequential` hay bài, nên trang sửa phải đọc ở đây. Trước đây
+ * SPA tưởng route này không tồn tại và đi vòng qua danh sách — hậu quả là picker mở
+ * ra rỗng trong khi PUT thay thế cả bộ, tức mở form rồi lưu là gỡ sạch bài.
+ */
+export interface MentorContestDetail {
+  id: string
+  title: string
+  descriptionMd: string | null
+  courseId: string | null
+  startAt: string
+  endAt: string
+  status: PublishStatus
+  scoring: string
+  penaltyMinutes: number
+  sequential: boolean
+  freezeMinutes: number
+  problems: MentorContestProblem[]
+}
+
+export interface MentorContestProblem {
+  /** id của dòng contest_problems, KHÔNG phải id bài. */
+  id: string
+  problemId: string
+  position: number
+  label: string | null
+  maxScore: number
+  title: string
+  /** Đã có người nộp — server từ chối gỡ bài này, và UI phải nói trước. */
+  hasSubmissions: boolean
+}
+
 /** Một dòng của `byProblem` = một (bài × verdict). Bài chưa ai nộp vẫn có đúng
  *  một dòng với `verdict: null` do LEFT JOIN — xem groupByProblem(). */
 export interface StatsRow {
@@ -63,4 +98,26 @@ export interface ContestProblemDraft {
   title: string
   label: string
   maxScore: string
+}
+
+/**
+ * `GET /api/mentor/courses/:id` — route trả nguyên dòng `courses`, nên có cả những
+ * cột mentor KHÔNG sửa được. Khai đủ để khung trái hiện đúng sự thật rồi nói rõ cái
+ * nào chỉ-đọc, thay vì giấu đi và để mentor tưởng mình đổi được.
+ */
+export interface MentorCourseDetail {
+  id: string
+  code: string
+  name: string
+  descriptionMd: string | null
+  status: string
+  selfEnroll: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CourseMentorRow {
+  id: string
+  displayName: string
+  email: string
 }
