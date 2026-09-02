@@ -23,8 +23,13 @@ adminCourseRoutes.get('/', async (c) => {
       status: courses.status,
       selfEnroll: courses.selfEnroll,
       createdAt: courses.createdAt,
-      mentorCount: sql<number>`(select count(*)::int from course_mentors cm where cm.course_id = ${courses.id})`,
-      memberCount: sql<number>`(select count(*)::int from course_enrollments ce where ce.course_id = ${courses.id} and ce.status = 'active')`,
+      // `courses.id` viết THẲNG, không phải `${courses.id}`: drizzle render nội suy cột
+      // thành `"id"` KHÔNG kèm tên bảng, nên trong truy vấn con nó dính vào cột `id`
+      // của bảng bên trong nếu bảng đó có. `course_enrollments` có `id`, thành
+      // `ce.course_id = ce.id` — không bao giờ đúng, và đếm ra 0 mà không báo lỗi gì.
+      // (`course_mentors` khoá chính ghép, không có `id`, nên nó đúng do MAY.)
+      mentorCount: sql<number>`(select count(*)::int from course_mentors cm where cm.course_id = courses.id)`,
+      memberCount: sql<number>`(select count(*)::int from course_enrollments ce where ce.course_id = courses.id and ce.status = 'active')`,
     })
     .from(courses)
     .orderBy(asc(courses.code))
