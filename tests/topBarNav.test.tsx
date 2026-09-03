@@ -94,19 +94,29 @@ describe('TopBar — lối vào theo vai trò', () => {
 })
 
 describe('TopBar — đổi theme', () => {
-  it('nút đổi theme nói rõ nó sẽ chuyển sang bên nào', () => {
-    renderAs('member')
+  // Nút đổi theme nay nằm TRONG menu tài khoản (UserMenu). Test vẫn đi đúng đường
+  // người dùng đi: mở menu rồi bấm, chứ không gọi thẳng toggleTheme().
+  const moMenu = async () => {
+    const { default: userEvent } = await import('@testing-library/user-event')
+    await userEvent.click(screen.getByRole('button', { name: /Người dùng thử/ }))
+    return userEvent
+  }
 
-    expect(screen.getByRole('button', { name: 'Chuyển sang nền tối' })).toBeInTheDocument()
+  it('mục đổi theme nói rõ nó sẽ chuyển sang bên nào', async () => {
+    renderAs('member')
+    await moMenu()
+
+    expect(screen.getByRole('menuitem', { name: 'Chuyển sang nền tối' })).toBeInTheDocument()
   })
 
   it('bấm một lần thì đổi sang tối và ghi lên thẻ html', async () => {
-    const { default: userEvent } = await import('@testing-library/user-event')
     renderAs('member')
+    const userEvent = await moMenu()
 
-    await userEvent.click(screen.getByRole('button', { name: 'Chuyển sang nền tối' }))
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Chuyển sang nền tối' }))
 
     expect(document.documentElement.dataset.theme).toBe('dark')
-    expect(screen.getByRole('button', { name: 'Chuyển sang nền sáng' })).toBeInTheDocument()
+    // Menu KHÔNG đóng: đổi theme là thứ người ta bật lên xem thử rồi đổi lại ngay.
+    expect(screen.getByRole('menuitem', { name: 'Chuyển sang nền sáng' })).toBeInTheDocument()
   })
 })

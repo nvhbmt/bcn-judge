@@ -9,19 +9,24 @@ import { authFile, theme } from './helpers'
 
 test.use({ storageState: authFile('member') })
 
+/** Nút đổi theme nay nằm trong menu tài khoản — mở menu rồi mới bấm được. */
+async function doiTheme(page: import('@playwright/test').Page, sang: 'tối' | 'sáng') {
+  await page.locator('header button[aria-haspopup="menu"]').click()
+  await page.getByRole('menuitem', { name: `Chuyển sang nền ${sang}` }).click()
+}
+
 test('đổi theme và nhớ lại sau khi tải lại trang', async ({ page }) => {
   await page.goto('/')
   expect(await theme(page)).toBe('light')
 
-  await page.getByRole('button', { name: 'Chuyển sang nền tối' }).click()
+  await doiTheme(page, 'tối')
   expect(await theme(page)).toBe('dark')
 
   // Nhớ qua lần tải lại, và đặt TRƯỚC lần vẽ đầu nên không chớp sáng.
   await page.reload()
   expect(await theme(page)).toBe('dark')
-  await expect(page.getByRole('button', { name: 'Chuyển sang nền sáng' })).toBeVisible()
 
-  await page.getByRole('button', { name: 'Chuyển sang nền sáng' }).click()
+  await doiTheme(page, 'sáng')
   expect(await theme(page)).toBe('light')
 })
 
@@ -38,7 +43,7 @@ test('color-scheme đi theo theme, không để trình duyệt tự đoán', asy
   await page.goto('/')
   await expect(page.locator('html')).toHaveCSS('color-scheme', 'light')
 
-  await page.getByRole('button', { name: 'Chuyển sang nền tối' }).click()
+  await doiTheme(page, 'tối')
   await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
 
   // Và nhớ qua lần tải lại, cùng nhịp với token màu — không được lệch nhau một nhịp,

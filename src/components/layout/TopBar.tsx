@@ -17,11 +17,8 @@
  *
  * Xem design-system/readme.md.
  */
-import { LogOut, Moon, Sun } from 'lucide-react'
-import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Avatar } from '@/components/ui/patterns'
-import { currentTheme, toggleTheme, type Theme } from '@/lib/theme'
+import { UserMenu } from '@/components/layout/UserMenu'
 import { useAuth } from '@/stores/auth'
 
 interface NavItem {
@@ -56,8 +53,7 @@ function RoleChip({ role }: { role: string }) {
 }
 
 export function TopBar() {
-  const { me, logout } = useAuth()
-  const [theme, setTheme] = useState<Theme>(() => currentTheme())
+  const { me } = useAuth()
   if (!me) return null
 
   return (
@@ -86,27 +82,11 @@ export function TopBar() {
       </nav>
 
       <div className="ml-auto flex shrink-0 items-center gap-3">
+        {/* Chip vai trò ở NGOÀI menu: nó là thứ liếc một cái là thấy — đang ngồi trong
+            tài khoản admin hay không — chứ không phải thứ đi tìm trong menu. */}
         <RoleChip role={me.role} />
-        <span className="hidden font-mono text-[13px] text-ink-2 sm:inline">{me.displayName}</span>
-        <Avatar name={me.displayName} chars={1} />
-        <button
-          type="button"
-          onClick={() => setTheme(toggleTheme())}
-          aria-label={theme === 'dark' ? 'Chuyển sang nền sáng' : 'Chuyển sang nền tối'}
-          title={theme === 'dark' ? 'Chuyển sang nền sáng' : 'Chuyển sang nền tối'}
-          className="inline-flex size-7 items-center justify-center text-ink-5 transition-colors duration-[120ms] ease-linear hover:text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
-        >
-          {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-        </button>
-        <button
-          type="button"
-          onClick={() => void logout()}
-          aria-label="Đăng xuất"
-          title="Đăng xuất"
-          className="inline-flex size-7 items-center justify-center text-ink-5 transition-colors duration-[120ms] ease-linear hover:text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
-        >
-          <LogOut size={15} />
-        </button>
+        {/* Theme, đổi mật khẩu, đăng xuất gom vào đây. Xem UserMenu.tsx. */}
+        <UserMenu />
       </div>
     </header>
   )

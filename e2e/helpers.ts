@@ -60,7 +60,9 @@ export async function login(page: Page, who: keyof typeof ACCOUNTS): Promise<voi
 }
 
 export async function logout(page: Page): Promise<void> {
-  await page.getByRole('button', { name: 'Đăng xuất' }).click()
+  // Đăng xuất nay nằm trong menu tài khoản ở góc phải thanh trên (UserMenu.tsx).
+  await page.locator('header button[aria-haspopup="menu"]').click()
+  await page.getByRole('menuitem', { name: 'Đăng xuất' }).click()
   await expect(page.getByRole('button', { name: 'Đăng nhập' })).toBeVisible()
 }
 

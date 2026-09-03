@@ -4,7 +4,7 @@
 /* `layer(base)` là BẮT BUỘC, không phải cho đẹp. CSS không nằm trong layer nào luôn
    thắng mọi @layer, mà class tiện ích của Tailwind v4 nằm trong `@layer utilities`.
    Để nguyên thì `a { color: var(--moss) }` của base.css nuốt luôn `text-on-accent`
-   đặt trên một <a> — nút "MỞ EDITOR" và mọi nút-dạng-link khác thành chữ xanh rêu
+   đặt trên một <a> — nút "LÀM TIẾP" và mọi nút-dạng-link khác thành chữ xanh rêu
    trên nền xanh rêu, gần như không đọc được. Đưa nền tảng vào `base` cho đúng thứ tự
    thiết kế của Tailwind: theme → base → components → utilities. */
 @import '../design-system/styles.css' layer(base);

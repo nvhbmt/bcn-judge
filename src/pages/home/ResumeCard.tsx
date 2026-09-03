@@ -2,8 +2,8 @@
  * Thẻ "Làm tiếp dở dang" — khối nổi bật nhất của trang chủ (màn 02).
  *
  * Ý của thiết kế: người học mở judge lên là để làm tiếp bài hôm qua còn dở, nên thứ
- * đầu tiên trong tầm mắt phải là đúng bài đó cùng một nút mở thẳng editor — không
- * phải danh sách khoá để họ tự đi tìm.
+ * đầu tiên trong tầm mắt phải là đúng bài đó cùng một nút vào thẳng màn làm bài —
+ * không phải danh sách khoá để họ tự đi tìm.
  *
  * "Dở dang" = lần nộp gần nhất KHÔNG phải AC và còn link về màn làm bài. Bài đã AC
  * thì không còn gì để làm tiếp; bài không dựng được link thì nút sẽ dẫn đi đâu.
@@ -12,7 +12,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
-import type { CourseSummary } from '@/types/api'
+import { VERDICT_LABEL, type CourseSummary } from '@/types/api'
 import type { SyllabusSection } from '../workspace/SyllabusPanel'
 import { workspaceLink, type RecentRow } from './recent'
 
@@ -74,8 +74,14 @@ export function ResumeCard() {
         <p className="num mt-1.5 truncate font-mono text-[12px] text-ink-4">
           {meta.length > 0 ? `${meta.join(' · ')} · ` : ''}
           lần cuối{' '}
-          <span className={row.verdict === 'TLE' || row.verdict === 'MLE' ? 'text-earth' : 'text-clay'}>
-            {row.verdict}
+          {/* Tên tiếng Việt, không phải mã: "WA" là tiếng lóng của giới thi lập trình,
+              mà đây là dòng chữ đầu tiên người mới vào CLB đọc trên trang chủ. Mã gốc
+              lùi về `title`, đúng cách VerdictBadge đang làm. */}
+          <span
+            title={row.verdict ?? undefined}
+            className={row.verdict === 'TLE' || row.verdict === 'MLE' ? 'text-earth' : 'text-clay'}
+          >
+            {row.verdict ? VERDICT_LABEL[row.verdict] : 'chưa chấm xong'}
           </span>
           {row.score !== null ? ` · ${row.score} đ` : null}
         </p>
@@ -84,7 +90,7 @@ export function ResumeCard() {
         to={href}
         className="flex shrink-0 items-center gap-2.5 bg-[var(--moss-solid,var(--moss))] px-5 py-3 font-mono text-[13px] font-semibold text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
       >
-        Mở editor <span aria-hidden>→</span>
+        Làm tiếp <span aria-hidden>→</span>
       </Link>
     </section>
   )

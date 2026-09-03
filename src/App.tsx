@@ -85,6 +85,10 @@ function AppRoutes({ role }: { role: Me['role'] }) {
       <Route path="/contest/:contestId" element={<ContestPage />} />
       <Route path="/contest/:contestId/bai/:contestProblemId" element={<WorkspacePage />} />
       <Route path="/team" element={<TeamPage />} />
+      {/* Đổi mật khẩu TỰ NGUYỆN. Trước đây route này chỉ có trong nhánh bắt đổi lần
+          đầu, nên đổi xong một lần là không còn lối vào — dù `/auth/change-password`
+          ở server vẫn nhận với mọi tài khoản đã đăng nhập. Lối vào ở UserMenu. */}
+      <Route path="/doi-mat-khau" element={<ChangePasswordPage />} />
       {/* Cụm quản trị (FR-A/B/H/J). Đây chỉ là lớp che UI — quyền thật do
           requireAuth + requireAdmin ở server quyết định (app.ts:43). */}
       {role === 'admin' ? (
