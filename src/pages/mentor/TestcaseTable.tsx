@@ -47,7 +47,14 @@ export function TestcaseTable({
         {drafts.map((draft, index) => (
           <li
             key={draft.key}
-            className={` border p-2 ${
+            /* `relative` KHÔNG phải để định vị gì ở đây, mà để GIỮ nhãn `sr-only` bên
+               trong. `sr-only` của Tailwind là `position: absolute`; không có tổ tiên
+               nào được định vị thì nó neo vào khung ban đầu của trang, ở đúng toạ độ
+               tài liệu của nó — với dòng testcase thứ 3–4 là y ≈ 1060 — và kéo dài cả
+               trang thêm 160px. Hậu quả: mở tab Testcase là mọc ra một thanh cuộn
+               TRANG chồng lên thanh cuộn của khung, đúng thứ bố cục `h-full` này
+               không được phép có. */
+            className={`relative border p-2 ${
               draft.truncated ? 'border-[var(--color-wa)] bg-[var(--tint-clay)]/50' : 'border-line'
             }`}
           >

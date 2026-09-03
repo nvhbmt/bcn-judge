@@ -181,3 +181,21 @@ test('mentor bấm "Xem như member" thì mở được, không phải 404', asy
   await expect(page.getByText('Không tìm thấy khoá học')).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+test('màn soạn bài: đổi sang tab Testcase KHÔNG mọc thêm thanh cuộn trang', async ({ page }) => {
+  // Nhãn `sr-only` của mỗi dòng testcase là `position: absolute`; không có tổ tiên nào
+  // được định vị thì nó neo vào khung ban đầu của trang, ở đúng toạ độ tài liệu của nó
+  // (dòng thứ 3–4 rơi vào y ≈ 1060) và kéo dài trang thêm 160px. Bố cục `h-full` này
+  // không được phép có thanh cuộn trang — nó chồng lên thanh cuộn của khung.
+  await page.goto('/mentor/bai-tap')
+  await page.locator('a[href^="/mentor/bai-tap/"]').first().click()
+  await expect(page).toHaveURL(/\/mentor\/bai-tap\/[0-9a-f-]{36}$/)
+
+  const thua = () =>
+    page.evaluate(() => document.documentElement.scrollHeight - document.documentElement.clientHeight)
+
+  expect(await thua()).toBeLessThanOrEqual(1)
+  await page.getByRole('tab', { name: /Testcase/ }).click()
+  await expect(page.getByRole('tab', { name: /Testcase/ })).toHaveAttribute('aria-selected', 'true')
+  expect(await thua(), 'tab Testcase mọc thêm thanh cuộn trang').toBeLessThanOrEqual(1)
+})

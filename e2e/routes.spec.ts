@@ -30,6 +30,19 @@ for (const role of ['member', 'mentor', 'admin'] as const) {
       // Và trang phải có một tiêu đề — trang trắng thì không có h1 nào.
       await expect(page.locator('h1').first()).toBeVisible()
       expect(errors, `lỗi khi mở ${route}`).toEqual([])
+
+      // KHÔNG được có thanh cuộn TRANG. Cả app là `h-full` với các khung tự cuộn
+      // bên trong; một thanh cuộn trang mọc thêm là dấu hiệu có gì đó thoát ra khỏi
+      // hộp, và nó chồng lên thanh cuộn của khung.
+      //
+      // Đã bắt được một ca thật: nhãn `sr-only` trong bảng testcase là
+      // `position: absolute` mà không có tổ tiên nào được định vị, nên nó neo vào
+      // khung ban đầu của trang ở đúng toạ độ tài liệu của nó và kéo dài trang thêm
+      // 160px. Lớp lỗi này im lặng và chỉ lộ ra ở một tab cụ thể.
+      const thua = await page.evaluate(
+        () => document.documentElement.scrollHeight - document.documentElement.clientHeight,
+      )
+      expect(thua, `${route} mọc thêm thanh cuộn trang`).toBeLessThanOrEqual(1)
     }
   })
 }
