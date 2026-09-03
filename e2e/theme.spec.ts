@@ -12,7 +12,7 @@ test.use({ storageState: authFile('member') })
 /** Nút đổi theme nay nằm trong menu tài khoản — mở menu rồi mới bấm được. */
 async function doiTheme(page: import('@playwright/test').Page, sang: 'tối' | 'sáng') {
   await page.locator('header button[aria-haspopup="menu"]').click()
-  await page.getByRole('menuitem', { name: `Chuyển sang nền ${sang}` }).click()
+  await page.getByRole('menuitem', { name: `Nền ${sang}` }).click()
 }
 
 test('đổi theme và nhớ lại sau khi tải lại trang', async ({ page }) => {

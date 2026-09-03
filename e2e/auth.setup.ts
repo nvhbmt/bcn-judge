@@ -18,7 +18,7 @@ for (const role of ['admin', 'mentor', 'leader', 'member'] as const) {
     const { email, password } = ACCOUNTS[role]
     await page.goto('/dang-nhap')
     await page.getByLabel('Email hoặc username').fill(email)
-    await page.getByLabel('Mật khẩu').fill(password)
+    await page.getByLabel('Mật khẩu', { exact: true }).fill(password)
     await page.getByRole('button', { name: 'Đăng nhập' }).click()
     await expect(page.getByRole('navigation', { name: 'Điều hướng chính' })).toBeVisible()
 

@@ -20,7 +20,7 @@ test('đăng nhập đúng thì vào trang chủ và thấy tên mình', async (
 test('sai mật khẩu thì báo lỗi và ở lại màn đăng nhập', async ({ page }) => {
   await page.goto('/dang-nhap')
   await page.getByLabel('Email hoặc username').fill(ACCOUNTS.member.email)
-  await page.getByLabel('Mật khẩu').fill('sai-mat-khau-roi')
+  await page.getByLabel('Mật khẩu', { exact: true }).fill('sai-mat-khau-roi')
   await page.getByRole('button', { name: 'Đăng nhập' }).click()
 
   await expect(page.getByRole('alert')).toBeVisible()
@@ -30,7 +30,7 @@ test('sai mật khẩu thì báo lỗi và ở lại màn đăng nhập', async 
 test('tài khoản bị khoá không đăng nhập được (FR-A4)', async ({ page }) => {
   await page.goto('/dang-nhap')
   await page.getByLabel('Email hoặc username').fill(ACCOUNTS.disabled.email)
-  await page.getByLabel('Mật khẩu').fill(ACCOUNTS.disabled.password)
+  await page.getByLabel('Mật khẩu', { exact: true }).fill(ACCOUNTS.disabled.password)
   await page.getByRole('button', { name: 'Đăng nhập' }).click()
 
   await expect(page.getByRole('alert')).toBeVisible()
@@ -39,13 +39,13 @@ test('tài khoản bị khoá không đăng nhập được (FR-A4)', async ({ p
 
 test('nút hiện mật khẩu đổi kiểu ô nhập', async ({ page }) => {
   await page.goto('/dang-nhap')
-  const field = page.getByLabel('Mật khẩu')
+  const field = page.getByLabel('Mật khẩu', { exact: true })
   await expect(field).toHaveAttribute('type', 'password')
 
-  await page.getByRole('button', { name: 'hiện' }).click()
+  await page.getByRole('button', { name: 'Hiện mật khẩu' }).click()
   await expect(field).toHaveAttribute('type', 'text')
 
-  await page.getByRole('button', { name: 'ẩn' }).click()
+  await page.getByRole('button', { name: 'Ẩn mật khẩu' }).click()
   await expect(field).toHaveAttribute('type', 'password')
 })
 
@@ -72,7 +72,7 @@ test('mật khẩu admin cấp phải đổi ở lần đăng nhập đầu (FR-
 
   await page.goto('/dang-nhap')
   await page.getByLabel('Email hoặc username').fill(email)
-  await page.getByLabel('Mật khẩu').fill(initialPassword)
+  await page.getByLabel('Mật khẩu', { exact: true }).fill(initialPassword)
   await page.getByRole('button', { name: 'Đăng nhập' }).click()
 
   await expect(page).toHaveURL(/doi-mat-khau/)

@@ -5,11 +5,12 @@
  * nhất với form thường và là chủ ý của thiết kế: dòng nhập trông như một dòng lệnh
  * đang gõ dở, không như một biểu mẫu hành chính. Dấu nhắc `>` đứng trước cũng vậy.
  *
- * Nút "hiện" mật khẩu có vì người ta gõ mật khẩu admin cấp (10 ký tự ngẫu nhiên)
- * trên bàn phím laptop lúc 11 giờ đêm.
+ * Con mắt bật/tắt mật khẩu có vì người ta gõ mật khẩu admin cấp (10 ký tự ngẫu
+ * nhiên) trên bàn phím laptop lúc 11 giờ đêm.
  */
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
+import { PasswordEye } from "@/components/ui";
 import { DISCORD_REASON } from "@/lib/discord";
 import { useAuth } from "@/stores/auth";
 import { DiscordLogin } from "./login/DiscordLogin";
@@ -113,13 +114,12 @@ export function LoginPage() {
             onChange={setPassword}
             autoComplete="current-password"
             trailing={
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="ml-auto shrink-0 font-mono text-[11px] text-ink-6 hover:text-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
-              >
-                {showPassword ? "ẩn" : "hiện"}
-              </button>
+              <span className="ml-auto">
+                <PasswordEye
+                  shown={showPassword}
+                  onToggle={() => setShowPassword((v) => !v)}
+                />
+              </span>
             }
           />
 

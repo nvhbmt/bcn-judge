@@ -107,17 +107,17 @@ describe('TopBar — đổi theme', () => {
     renderAs('member')
     await moMenu()
 
-    expect(screen.getByRole('menuitem', { name: 'Chuyển sang nền tối' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Nền tối' })).toBeInTheDocument()
   })
 
   it('bấm một lần thì đổi sang tối và ghi lên thẻ html', async () => {
     renderAs('member')
     const userEvent = await moMenu()
 
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Chuyển sang nền tối' }))
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Nền tối' }))
 
     expect(document.documentElement.dataset.theme).toBe('dark')
     // Menu KHÔNG đóng: đổi theme là thứ người ta bật lên xem thử rồi đổi lại ngay.
-    expect(screen.getByRole('menuitem', { name: 'Chuyển sang nền sáng' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Nền sáng' })).toBeInTheDocument()
   })
 })

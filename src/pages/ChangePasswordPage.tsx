@@ -12,7 +12,7 @@
  */
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui'
+import { Button, PasswordEye } from '@/components/ui'
 import { useAuth } from '@/stores/auth'
 
 export function ChangePasswordPage() {
@@ -76,21 +76,7 @@ export function ChangePasswordPage() {
         { id: 'new', label: 'Mật khẩu mới (tối thiểu 8 ký tự)', value: newPassword, set: setNext, ac: 'new-password' },
         { id: 'cfm', label: 'Nhập lại mật khẩu mới', value: confirm, set: setConfirm, ac: 'new-password' },
       ].map((f) => (
-        <div key={f.id} className="mb-3">
-          <label className="block text-sm font-medium" htmlFor={f.id}>
-            {f.label}
-          </label>
-          <input
-            id={f.id}
-            type="password"
-            value={f.value}
-            autoComplete={f.ac}
-            required
-            minLength={f.id === 'cur' ? 1 : 8}
-            onChange={(e) => f.set(e.target.value)}
-            className="mt-1 w-full border border-line-strong px-3 py-2 text-sm"
-          />
-        </div>
+        <OMatKhau key={f.id} {...f} minLength={f.id === 'cur' ? 1 : 8} />
       ))}
 
       {mismatch ? (
@@ -121,6 +107,57 @@ export function ChangePasswordPage() {
         </Link>
       )}
     </Khung>
+  )
+}
+
+/**
+ * Một ô mật khẩu kèm con mắt bật/tắt.
+ *
+ * Tách thành component RIÊNG chứ không giữ một Set id đang mở ở trang: mỗi ô tự giữ
+ * trạng thái của mình, nên bật ô "mật khẩu hiện tại" không kéo theo hai ô mới lộ ra.
+ *
+ * Con mắt nằm TRONG khung viền (absolute) và ô chừa `pr-10`: đặt ngoài thì ba ô so
+ * le nhau vì nhãn dài ngắn khác nhau, còn không chừa lề thì mật khẩu dài chui xuống
+ * dưới icon.
+ */
+function OMatKhau({
+  id,
+  label,
+  value,
+  set,
+  ac,
+  minLength,
+}: {
+  id: string
+  label: string
+  value: string
+  set: (v: string) => void
+  ac: string
+  minLength: number
+}) {
+  const [hien, setHien] = useState(false)
+
+  return (
+    <div className="mb-3">
+      <label className="block text-sm font-medium" htmlFor={id}>
+        {label}
+      </label>
+      <div className="relative mt-1">
+        <input
+          id={id}
+          type={hien ? 'text' : 'password'}
+          value={value}
+          autoComplete={ac}
+          required
+          minLength={minLength}
+          onChange={(e) => set(e.target.value)}
+          className="w-full border border-line-strong py-2 pr-10 pl-3 text-sm"
+        />
+        <span className="absolute top-1/2 right-1.5 -translate-y-1/2">
+          <PasswordEye shown={hien} onToggle={() => setHien((v) => !v)} />
+        </span>
+      </div>
+    </div>
   )
 }
 

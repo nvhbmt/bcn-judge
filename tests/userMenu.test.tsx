@@ -67,7 +67,7 @@ describe('UserMenu', () => {
     dung()
     await mo()
     expect(screen.getByRole('menuitem', { name: 'Tài khoản' })).toBeInTheDocument()
-    expect(screen.getByRole('menuitem', { name: 'Chuyển sang nền tối' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Nền tối' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Đổi mật khẩu' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Đăng xuất' })).toBeInTheDocument()
   })
@@ -84,7 +84,7 @@ describe('UserMenu', () => {
     expect(document.activeElement).toHaveAccessibleName('Tài khoản')
 
     await userEvent.keyboard('{ArrowDown}')
-    expect(document.activeElement).toHaveAccessibleName('Chuyển sang nền tối')
+    expect(document.activeElement).toHaveAccessibleName('Nền tối')
     // Vòng lại từ cuối lên đầu, không kẹt ở mục cuối.
     await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}')
     expect(document.activeElement).toHaveAccessibleName('Tài khoản')
@@ -108,11 +108,11 @@ describe('UserMenu', () => {
   it('đổi theme thì menu Ở NGUYÊN — để so hai bản không phải mở lại', async () => {
     dung()
     await mo()
-    await userEvent.click(screen.getByRole('menuitem', { name: 'Chuyển sang nền tối' }))
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Nền tối' }))
 
     expect(document.documentElement.dataset.theme).toBe('dark')
     expect(screen.getByRole('menu')).toBeInTheDocument()
-    expect(screen.getByRole('menuitem', { name: 'Chuyển sang nền sáng' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Nền sáng' })).toBeInTheDocument()
   })
 
   it('đổi mật khẩu đi tới trang đổi mật khẩu và đóng menu', async () => {

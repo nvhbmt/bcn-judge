@@ -7,6 +7,7 @@
  *   - mọi con số và verdict dùng mono; nhãn nút ALL-CAPS
  * Xem design-system/readme.md, mục VISUAL FOUNDATIONS.
  */
+import { Eye, EyeOff } from 'lucide-react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { VERDICT_LABEL, type Verdict } from '@/types/api'
 
@@ -164,5 +165,32 @@ export function SectionRule({
         <div aria-hidden className="h-1.5 w-[18px] bg-line-strong" />
       )}
     </div>
+  )
+}
+
+/**
+ * Nút con mắt bật/tắt hiện mật khẩu.
+ *
+ * `type="button"` KHÔNG phải cho đẹp: nút không khai type nằm trong <form> mặc định
+ * là submit, nên bấm để xem mật khẩu sẽ gửi luôn form — ở màn đăng nhập là gửi một
+ * lần đăng nhập với mật khẩu gõ dở, ăn một nhịp của giới hạn 10 lần/phút.
+ *
+ * Ý nghĩa icon theo lối quen: đang GIẤU thì hiện con mắt mở (bấm để xem), đang HIỆN
+ * thì mắt gạch (bấm để giấu) — icon nói HÀNH ĐỘNG sắp làm, không phải trạng thái.
+ * Trạng thái do `aria-pressed` nói, vì icon thì trình đọc màn hình không thấy.
+ */
+export function PasswordEye({ shown, onToggle }: { shown: boolean; onToggle: () => void }) {
+  const nhan = shown ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={nhan}
+      aria-pressed={shown}
+      title={nhan}
+      className="inline-flex shrink-0 items-center justify-center p-1 text-ink-6 transition-colors duration-[120ms] ease-linear hover:text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+    >
+      {shown ? <EyeOff size={15} aria-hidden /> : <Eye size={15} aria-hidden />}
+    </button>
   )
 }

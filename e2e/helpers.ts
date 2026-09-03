@@ -36,7 +36,9 @@ export async function submitLogin(page: Page, email: string, password: string): 
   const attempt = async () => {
     await page.goto('/dang-nhap')
     await page.getByLabel('Email hoặc username').fill(email)
-    await page.getByLabel('Mật khẩu').fill(password)
+    // `exact` là BẮT BUỘC: getByLabel khớp chuỗi con và khớp cả aria-label của nút,
+    // nên 'Mật khẩu' dính luôn nút con mắt "Hiện mật khẩu" đứng cạnh ô.
+    await page.getByLabel('Mật khẩu', { exact: true }).fill(password)
     await page.getByRole('button', { name: 'Đăng nhập' }).click()
   }
 

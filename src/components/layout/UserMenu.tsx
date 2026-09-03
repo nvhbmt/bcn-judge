@@ -122,7 +122,9 @@ export function UserMenu() {
             icon={theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
             onClick={() => setTheme(toggleTheme())}
           >
-            {theme === 'dark' ? 'Chuyển sang nền sáng' : 'Chuyển sang nền tối'}
+            {/* Chỉ tên đích, không "Chuyển sang…": icon mặt trời/mặt trăng đã nói
+                đây là hành động, và mục menu thì vốn dĩ để bấm. */}
+            {theme === 'dark' ? 'Nền sáng' : 'Nền tối'}
           </MenuItem>
 
           <MenuItem
