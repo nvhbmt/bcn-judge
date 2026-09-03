@@ -42,11 +42,25 @@ export function ContentHeader({
   // xem src/index.css. Cắm cứng ở đây thì hai bên lệch nhau lúc bên kia đổi.
   return (
     <div className="flex h-[var(--panel-header-h)] shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-5">
-      <Label className="font-mono text-[13px] font-semibold tracking-[0.12em] text-ink-1 uppercase">{label}</Label>
-      {position ? <span className="num font-mono text-[13px] text-ink-5">{position}</span> : null}
+      <Label className="shrink-0 font-mono text-[13px] font-semibold tracking-[0.12em] whitespace-nowrap text-ink-1 uppercase">
+        {label}
+      </Label>
+      {/* Chiều cao dòng này ĐÃ CHỐT (`--panel-header-h`, khớp với dòng tiêu đề khung
+          editor), nên chữ dài không có chỗ mà xuống dòng — nó chỉ bị ép chồng lên nhau
+          trông như lỗi render. Cắt bằng `…`, giữ nguyên văn ở `title`.
+          `min-w-0` là bắt buộc: mặc định flex item không co xuống dưới nội dung, nên
+          thiếu nó thì `truncate` chẳng cắt gì cả. */}
+      {position ? (
+        <span title={position} className="num min-w-0 flex-1 truncate font-mono text-[13px] text-ink-5">
+          {position}
+        </span>
+      ) : null}
 
       {prev || next ? (
-        <nav aria-label="Bài kề" className="num ml-auto flex items-center gap-3 font-mono text-[13px]">
+        <nav
+          aria-label="Bài kề"
+          className="num ml-auto flex shrink-0 items-center gap-3 font-mono text-[13px] whitespace-nowrap"
+        >
           {prev ? (
             <Link to={prev.href} title={prev.title} className="text-ink-5 hover:text-ink-2">
               ← bài trước

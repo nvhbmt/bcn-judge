@@ -303,3 +303,17 @@ export async function renderMarkdown(source: string): Promise<string> {
 
   return sanitizeHtml(html);
 }
+
+/**
+ * Tô màu một khối mã ĐỘC LẬP (không qua markdown) — dùng cho mã bài nộp.
+ *
+ * Dùng lại đúng `renderCodeBlock` của markdown nên bộ ngôn ngữ, cách escape và tên
+ * class `hljs-*` giống hệt; không có bản tô màu thứ hai để trôi lệch.
+ *
+ * Vẫn đẩy qua `sanitizeHtml` dù `renderCodeBlock` đã escape hai nhánh: chuỗi này là
+ * MÃ NGƯỜI KHÁC NỘP và nó sẽ đi vào `dangerouslySetInnerHTML`. Một lớp lọc nữa gần
+ * như không tốn gì, còn bỏ nó đi thì cả tính an toàn treo vào việc hljs escape đủ.
+ */
+export function highlightCode(code: string, language: string | null): string {
+  return sanitizeHtml(renderCodeBlock(code, language ?? undefined));
+}

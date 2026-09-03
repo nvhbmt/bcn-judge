@@ -10,19 +10,16 @@
  * frontend chưa gọi cái nào, nên cả tính năng nằm đó không ai dùng được.
  */
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
-import { Avatar, SideColumn, SidePanel } from '@/components/ui/patterns'
+import { SideColumn, SidePanel } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import { LeaderNote } from './team/LeaderNote'
+import { TeamMembers } from './team/TeamMembers'
 import { TeamStandings } from './team/TeamStandings'
-import { TeamProgress } from './team/TeamProgress'
-import { TeamSubmissions } from './team/TeamSubmissions'
 import type { TeamView } from './team/types'
 
 export function TeamPage() {
-  const [openMember, setOpenMember] = useState<string | null>(null)
   const { data: team, isLoading, isError } = useQuery({
     queryKey: ['team', 'mine'],
     queryFn: () => api.get<TeamView | null>('/api/member/teams/mine'),
@@ -61,7 +58,6 @@ export function TeamPage() {
     )
   }
 
-  const openName = team.members.find((m) => m.id === openMember)?.displayName ?? ''
 
   return (
     <Shell>
@@ -82,32 +78,16 @@ export function TeamPage() {
 
       <section className="mb-8">
         <SectionRule label="Thành viên" meta={`${team.members.length} người`} />
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {team.members.map((m) => (
-            <li
-              key={m.id}
-              className={`inline-flex items-center gap-2.5 border px-3 py-2 text-[13px] ${
-                m.isLeader ? 'border-brass text-ink-1' : 'border-line text-ink-3'
-              }`}
-            >
-              <Avatar name={m.displayName} size={24} />
-              {m.displayName}
-              {m.isLeader ? <span className="font-mono text-[10px] text-brass uppercase">leader</span> : null}
-            </li>
-          ))}
-        </ul>
+        {/* Bấm một người là sang TRANG RIÊNG của họ (TeamMemberPage) — xem
+            TeamMembers.tsx. Trước đây mọi thứ đổ ra cùng lúc và thứ bấm được lại
+            trông giống chữ thường nhất. */}
+        <div className="mt-3">
+          <TeamMembers team={team} />
+        </div>
       </section>
 
       {team.isLeader ? (
-        <>
-          <TeamProgress teamId={team.id} onPick={setOpenMember} />
-          <LeaderNote teamId={team.id} members={team.members} />
-          {openMember ? (
-            <TeamSubmissions teamId={team.id} userId={openMember} memberName={openName} />
-          ) : (
-            <p className="text-[13px] text-ink-5">Bấm tên một thành viên ở bảng trên để xem bài nộp của họ.</p>
-          )}
-        </>
+        <LeaderNote teamId={team.id} members={team.members} />
       ) : (
         <p className="text-[13px] text-ink-5">Chỉ leader xem được tiến độ và bài nộp của cả team.</p>
       )}

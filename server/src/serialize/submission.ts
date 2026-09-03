@@ -155,6 +155,8 @@ export interface LeaderSubmissionView {
   id: string
   userId: string
   problemId: string
+  /** Tên bài, để danh sách nói "bài nào" chứ không chỉ "lúc nào". `null` nếu bài đã xoá. */
+  problemTitle: string | null
   languageId: string
   status: string
   verdict: Verdict | null
@@ -175,7 +177,7 @@ export interface LeaderSubmissionView {
 
 export function toLeaderSubmission(
   row: RawSubmissionRow,
-  opts: { contestEndsAt: Date | null; now?: Date },
+  opts: { contestEndsAt: Date | null; now?: Date; problemTitle?: string | null },
 ): LeaderSubmissionView {
   const now = opts.now ?? new Date()
   const embargoed = opts.contestEndsAt !== null && now < opts.contestEndsAt
@@ -183,6 +185,7 @@ export function toLeaderSubmission(
     id: row.id,
     userId: row.userId,
     problemId: row.problemId,
+    problemTitle: opts.problemTitle ?? null,
     languageId: row.languageId,
     status: row.status,
     verdict: row.verdict as Verdict | null,

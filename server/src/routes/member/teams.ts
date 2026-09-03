@@ -179,16 +179,27 @@ memberTeamRoutes.get('/:teamId/submissions', async (c) => {
   if (!role.isLeader) return errors.forbidden(c, 'Chỉ leader xem được bài nộp của cả team.')
 
   const userId = c.req.query('userId')
-  const rows = await q<RawSubmissionRow & { received_at: string; finished_at: string | null; contest_end_at: string | null }>(sql`
+  const rows = await q<
+    RawSubmissionRow & {
+      received_at: string
+      finished_at: string | null
+      contest_end_at: string | null
+      problem_title: string | null
+    }
+  >(sql`
     SELECT s.id, s.kind, s.user_id AS "userId", s.problem_id AS "problemId", s.item_id AS "itemId",
            s.contest_id AS "contestId", s.contest_problem_id AS "contestProblemId",
            s.language_id AS "languageId", s.source, s.source_bytes AS "sourceBytes", s.status, s.verdict,
            s.passed_weight AS "passedWeight", s.total_weight AS "totalWeight", s.time_ms_max AS "timeMsMax",
            s.memory_kb_max AS "memoryKbMax", s.compile_output AS "compileOutput", s.received_at,
            s.finished_at, s.queued_ms AS "queuedMs", s.judge_ms AS "judgeMs", s.attempt,
-           ct.end_at AS contest_end_at
+           ct.end_at AS contest_end_at,
+           -- Tên bài: danh sách chỉ có verdict + giờ thì leader không biết đang xem
+           -- bài nào. LEFT JOIN vì bài xoá mềm vẫn còn bài nộp trỏ tới.
+           p.title AS problem_title
     FROM submissions s
     JOIN team_members tm ON tm.user_id = s.user_id AND tm.team_id = ${teamId}
+    LEFT JOIN problems p ON p.id = s.problem_id
     LEFT JOIN contests ct ON ct.id = s.contest_id
     WHERE s.kind = 'submit'
       ${userId ? sql`AND s.user_id = ${userId}` : sql``}
@@ -200,7 +211,10 @@ memberTeamRoutes.get('/:teamId/submissions', async (c) => {
     rows.map((r) =>
       toLeaderSubmission(
         { ...r, receivedAt: r.received_at, finishedAt: r.finished_at },
-        { contestEndsAt: r.contest_end_at ? new Date(r.contest_end_at) : null },
+        {
+          contestEndsAt: r.contest_end_at ? new Date(r.contest_end_at) : null,
+          problemTitle: r.problem_title,
+        },
       ),
     ),
   )

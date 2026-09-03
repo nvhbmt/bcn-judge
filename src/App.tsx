@@ -24,6 +24,7 @@ import { ContestStatsPage } from '@/pages/mentor/ContestStatsPage'
 import { CourseContentPage } from '@/pages/mentor/CourseContentPage'
 import { ProblemEditorPage } from '@/pages/mentor/ProblemEditorPage'
 import { ProblemListPage } from '@/pages/mentor/ProblemListPage'
+import { TeamMemberPage } from '@/pages/TeamMemberPage'
 import { TeamPage } from '@/pages/TeamPage'
 import { WorkspacePage } from '@/pages/workspace/WorkspacePage'
 import { useAuth } from '@/stores/auth'
@@ -86,6 +87,10 @@ function AppRoutes({ role }: { role: Me['role'] }) {
       <Route path="/contest/:contestId" element={<ContestPage />} />
       <Route path="/contest/:contestId/bai/:contestProblemId" element={<WorkspacePage />} />
       <Route path="/team" element={<TeamPage />} />
+      {/* Bài nộp của MỘT thành viên — trang riêng vì danh sách đó dài hàng nghìn
+          pixel, xem TeamMemberPage.tsx. Chỉ leader mở được; server chặn 403 và
+          trang tự đưa về /team nếu không phải leader. */}
+      <Route path="/team/thanh-vien/:userId" element={<TeamMemberPage />} />
       {/* Trang tài khoản: gắn/bỏ gắn Discord, và là chỗ hạ cánh của callback OAuth —
           xem AccountPage.tsx. */}
       <Route path="/tai-khoan" element={<AccountPage />} />

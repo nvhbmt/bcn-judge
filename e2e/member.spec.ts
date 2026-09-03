@@ -259,14 +259,33 @@ test('danh sách contest → chi tiết → bảng xếp hạng', async ({ page 
   expect(errors).toEqual([])
 })
 
-test('leader xem được tiến độ và bài nộp của nhóm (FR-J)', async ({ page }) => {
+test('leader: danh sách thành viên → trang riêng hai panel (FR-J)', async ({ page }) => {
   const { errors } = watchForErrors(page)
   await page.goto('/')
 
   await page.getByRole('link', { name: '~/team' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Nhóm')
-  await expect(page.getByText('Tiến độ theo khoá')).toBeVisible()
-  // Bảng tiến độ có dòng cho từng thành viên.
-  await expect(page.getByText(/\d+\/\d+/).first()).toBeVisible()
+
+  // Danh sách MỘT dòng mỗi người, và dòng đó là liên kết. Bản trước đổ ra một bảng
+  // một dòng mỗi cặp (người × khoá) rồi mới mời bấm, ở tận đáy trang.
+  const dong = page.locator('main a[href^="/team/thanh-vien/"]')
+  await expect(dong.first()).toBeVisible()
+  const soNguoi = await dong.count()
+  await dong.first().click()
+
+  // Trang riêng: panel trái chọn người + chọn lượt nộp, panel phải là chi tiết.
+  await expect(page).toHaveURL(/\/team\/thanh-vien\/[0-9a-f-]{36}/)
+  const chuyen = page.getByRole('navigation', { name: 'Chuyển thành viên' })
+  await expect(chuyen.getByRole('link')).toHaveCount(soNguoi)
+  await expect(chuyen.locator('[aria-current="page"]')).toBeVisible()
+
+  // Đổi người bằng thanh chuyển: URL đổi, và người đang xem đổi theo.
+  if (soNguoi > 1) {
+    const truoc = page.url()
+    await chuyen.getByRole('link').nth(1).click()
+    await expect(page).not.toHaveURL(truoc)
+    await expect(chuyen.locator('[aria-current="page"]')).toBeVisible()
+  }
+
   expect(errors).toEqual([])
 })

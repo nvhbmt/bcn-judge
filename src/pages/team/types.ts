@@ -24,6 +24,8 @@ export interface TeamProgressRow {
 export interface TeamSubmissionRow {
   id: string
   userId: string
+  /** Tên bài — `null` nếu bài đã bị xoá. */
+  problemTitle: string | null
   languageId: string
   verdict: Verdict | null
   score: number | null
