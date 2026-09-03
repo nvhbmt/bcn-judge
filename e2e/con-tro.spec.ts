@@ -1,0 +1,70 @@
+/**
+ * Con trỏ trên những thứ bấm được.
+ *
+ * Preflight của Tailwind v4 bỏ `cursor: pointer` mặc định của <button> (v3 có), nên cả
+ * app trỏ mũi tên trên MỌI nút — nút và chữ thường trông giống hệt nhau cho tới lúc bấm
+ * thử. Luật ở `design-system/tokens/base.css` trả lại tín hiệu đó.
+ *
+ * Kiểm bằng trình duyệt thật chứ không đọc file CSS: luật này sống hay chết là chuyện
+ * của cascade (base thua utilities, `:has()` có thể bị trình duyệt vứt cả luật), mà chỉ
+ * `getComputedStyle` mới trả lời được. Và quét TẤT CẢ nút trên trang, không lấy mẫu một
+ * cái — một nút lẻ đặt `cursor-default` cũng phải lộ ra.
+ */
+import { expect, test } from '@playwright/test'
+import { authFile } from './helpers'
+
+/** Nút nào lệch so với kỳ vọng: tắt thì `not-allowed`, còn lại `pointer`. */
+async function lech(page: import('@playwright/test').Page): Promise<string[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('button')]
+      .filter((el) => el.getBoundingClientRect().width > 0)
+      .map((el) => {
+        const mong = (el as HTMLButtonElement).disabled ? 'not-allowed' : 'pointer'
+        const that = getComputedStyle(el).cursor
+        return that === mong ? null : `${(el.textContent || '(không chữ)').trim().slice(0, 30)} → ${that}`
+      })
+      .filter((v): v is string => v !== null),
+  )
+}
+
+test.describe('member', () => {
+  test.use({ storageState: authFile('member') })
+
+  test('mọi nút trên trang chủ đều có con trỏ bàn tay', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.getByRole('button').first()).toBeVisible()
+    expect(await lech(page)).toEqual([])
+  })
+
+  test('cả nút trong màn làm bài — kể cả dải tab và ô chọn ngôn ngữ', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('link', { name: /C cơ bản/ }).click()
+    await page.getByRole('link', { name: 'Tổng hai số' }).first().click()
+    await page.locator('.cm-content').waitFor()
+
+    expect(await lech(page)).toEqual([])
+    // <select> cũng mất bàn tay ở v4, mà đây là chỗ đổi ngôn ngữ — bấm nhiều.
+    await expect(page.locator('select').first()).toHaveCSS('cursor', 'pointer')
+  })
+})
+
+test.describe('admin', () => {
+  test.use({ storageState: authFile('admin') })
+
+  test('ô tick và nhãn của nó cùng có bàn tay, nhãn ô chữ thì không', async ({ page }) => {
+    await page.goto('/quan-tri/cai-dat')
+    const tick = page.locator('input[type="checkbox"]').first()
+    await expect(tick).toBeVisible()
+    await expect(tick).toHaveCSS('cursor', 'pointer')
+    // Bấm vào chữ cũng tick, nên chữ cũng phải báo là bấm được.
+    await expect(page.locator('label:has(input[type="checkbox"])').first()).toHaveCSS('cursor', 'pointer')
+
+    // Và luật KHÔNG được quét quá tay: nhãn của ô nhập chữ bấm vào chỉ đặt con nháy,
+    // không phải một hành động — để bàn tay ở đó là hứa nhầm.
+    await expect(page.locator('label:has(input[type="number"])').first()).toHaveCSS('cursor', 'default')
+
+    // Nút đang tắt nói rõ là đang tắt, không im lặng trông như bấm được.
+    const tat = page.getByRole('button', { name: 'Chưa có thay đổi' })
+    if (await tat.count()) await expect(tat).toHaveCSS('cursor', 'not-allowed')
+  })
+})

@@ -48,7 +48,7 @@ export function LanguagesPanel() {
         {data?.map((lang) => (
           <li key={lang.id} className="border border-line bg-surface-2">
             <div className="flex flex-wrap items-center gap-3 p-3">
-              <label className="flex cursor-pointer items-center gap-2">
+              <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={lang.enabled}

@@ -29,6 +29,35 @@ code, pre, .num { font-family: var(--font-mono); }
 .num { font-variant-numeric: tabular-nums; }
 :focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
 
+/* Con trỏ bàn tay cho thứ bấm được.
+   Preflight của Tailwind v4 KHÔNG còn đặt `cursor: pointer` cho <button> — v3 có,
+   v4 bỏ để bám theo mặc định của trình duyệt. Cả app dựng trên v4 nên MỌI nút đều
+   trỏ mũi tên: đo trên trang chạy thật thì <button>, <button role="tab"> và <select>
+   đều ra `cursor: default`, chỉ <a href> còn bàn tay (cái đó là của trình duyệt).
+   Mất tín hiệu này thì nút và chữ thường trông giống hệt nhau cho tới lúc bấm thử.
+
+   Đặt ở base chứ không rắc class `cursor-pointer` vào ~85 chỗ gọi onClick: một luật
+   thì nút mới thêm sau này cũng đúng sẵn, còn rắc tay thì sai ở chỗ nào không ai biết.
+   Nút đang tắt giữ `not-allowed` — đúng thứ <Button> đã dùng, nay áp cho cả nút trần. */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+select,
+input[type='checkbox'],
+input[type='radio'],
+input[type='file'] {
+  cursor: pointer;
+}
+button:disabled { cursor: not-allowed; }
+
+/* Nhãn bọc ô tick: bấm vào chữ cũng tick, nên chữ cũng phải có bàn tay.
+   Tách thành luật RIÊNG vì `:has()` — trình duyệt cũ không hiểu `:has()` sẽ vứt cả
+   luật chứa nó, mà gộp chung thì vứt luôn phần nút ở trên. Tách ra thì chỗ cũ chỉ
+   mất bàn tay trên nhãn, nút vẫn còn. */
+label:has(input[type='checkbox']),
+label:has(input[type='radio']) {
+  cursor: pointer;
+}
+
 /* Ô vừa được trình duyệt tự điền.
    Chrome tô nền xanh/vàng cho ô autofill bằng một luật trong UA stylesheet có
    `!important`, nên KHÔNG đè được bằng `background` hay class `bg-transparent` —
