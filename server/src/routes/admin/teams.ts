@@ -20,7 +20,26 @@ adminTeamRoutes.get('/', async (c) => {
   const rows = await q(sql`
     SELECT t.id, t.name, t.description_md AS "descriptionMd", t.leader_id AS "leaderId",
            u.display_name AS "leaderName",
-           (SELECT count(*)::int FROM team_members tm WHERE tm.team_id = t.id) AS "memberCount"
+           (SELECT count(*)::int FROM team_members tm WHERE tm.team_id = t.id) AS "memberCount",
+           -- Tên thành viên gộp luôn vào đây thay vì để trang gọi /:id/members cho
+           -- TỪNG team: danh sách team là chỗ admin nhìn để biết ai đang ở đâu, mà
+           -- 20 team là 20 lượt gọi cho một màn chỉ để liếc. Bọc coalesce vì team vừa
+           -- tạo chưa có dòng nào và json_agg trả NULL chứ không phải mảng rỗng.
+           -- (Chú thích trong khối SQL này KHÔNG được chứa dấu backtick: nó nằm trong
+           --  template literal của JS, một dấu là chuỗi đứt ngay tại đó.)
+           coalesce(
+             (SELECT json_agg(
+                       json_build_object(
+                         'id', mu.id,
+                         'displayName', mu.display_name,
+                         'isLeader', mu.id = t.leader_id
+                       )
+                       ORDER BY (mu.id = t.leader_id) DESC, mu.display_name
+                     )
+              FROM team_members mtm JOIN users mu ON mu.id = mtm.user_id
+              WHERE mtm.team_id = t.id),
+             '[]'::json
+           ) AS members
     FROM teams t JOIN users u ON u.id = t.leader_id
     ORDER BY t.name
   `)

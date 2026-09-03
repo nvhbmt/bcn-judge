@@ -284,3 +284,50 @@ describe.skipIf(!INTEGRATION)('BXH các team', () => {
     expect((await call('/api/member/teams/standings')).status).toBe(401)
   })
 })
+
+/**
+ * Danh sách team của admin trả kèm TÊN thành viên.
+ *
+ * Trước đây chỉ có `memberCount`, nên câu hỏi thường gặp nhất của admin — "ai đang ở
+ * team nào" — phải mở lần lượt từng team mới trả lời được. Gộp vào một truy vấn thay
+ * vì để trang gọi /:id/members cho từng team: 20 team là 20 lượt cho một màn chỉ để
+ * liếc.
+ */
+describe.skipIf(!INTEGRATION)('danh sách team kèm thành viên', () => {
+  let admin: TestUser
+  let leader: TestUser
+  let teammate: TestUser
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    admin = await makeUser('admin')
+    leader = await makeUser('member')
+    teammate = await makeUser('member')
+  })
+
+  it('trả tên từng người, leader đứng đầu và được đánh dấu', async () => {
+    const t = await call('/api/admin/teams', { as: admin, body: { name: 'Alpha', leaderId: leader.id } })
+    await call(`/api/admin/teams/${t.body.data.id}/members`, { as: admin, body: { userId: teammate.id } })
+
+    const res = await call('/api/admin/teams', { as: admin })
+    const team = res.body.data.find((x: { name: string }) => x.name === 'Alpha')
+    expect(team.memberCount).toBe(2)
+    expect(team.members).toHaveLength(2)
+    expect(team.members[0].isLeader).toBe(true)
+    expect(team.members[0].id).toBe(leader.id)
+    expect(team.members.map((m: { id: string }) => m.id)).toContain(teammate.id)
+  })
+
+  it('team chỉ có leader vẫn trả MẢNG, không trả null', async () => {
+    // json_agg trả NULL khi không có dòng nào; thiếu coalesce là client nổ khi .map.
+    await call('/api/admin/teams', { as: admin, body: { name: 'Beta', leaderId: leader.id } })
+    const res = await call('/api/admin/teams', { as: admin })
+    const team = res.body.data.find((x: { name: string }) => x.name === 'Beta')
+    expect(Array.isArray(team.members)).toBe(true)
+    expect(team.members).toHaveLength(1)
+  })
+})

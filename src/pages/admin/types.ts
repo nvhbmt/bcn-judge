@@ -101,6 +101,8 @@ export interface AdminTeam {
   leaderId: string
   leaderName: string
   memberCount: number
+  /** Trả kèm trong chính lượt gọi danh sách — xem routes/admin/teams.ts. */
+  members: { id: string; displayName: string; isLeader: boolean }[]
 }
 
 // ── Hệ thống (FR-H1/H2) ────────────────────────────────────────────────────

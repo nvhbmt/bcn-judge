@@ -153,6 +153,19 @@ test('trang team hiện các nhóm và nút tạo team', async ({ page }) => {
   // Dữ liệu mẫu tạo 5 nhóm, mỗi nhóm 6 người.
   await expect(page.getByText(/Nhóm Alpha/)).toBeVisible()
   await expect(page.getByText(/6 thành viên/).first()).toBeVisible()
+
+  // TÊN từng người phải hiện ngay ở đây. Trước đó chỉ có con số "6 thành viên", nên
+  // câu hỏi thường gặp nhất của admin — "ai đang ở team nào" — phải mở lần lượt từng
+  // team mới trả lời được.
+  const nhom = page.locator('li', { hasText: 'Nhóm Alpha' }).first()
+  await expect(nhom.locator('ul li')).toHaveCount(6)
+
+  // Và chỉ MỘT lượt gọi danh sách team, không phải một lượt cho mỗi nhóm.
+  const soGoi = await page.evaluate(
+    () => performance.getEntriesByType('resource').filter((r) => /\/api\/admin\/teams/.test(r.name)).length,
+  )
+  expect(soGoi, 'không được gọi /members cho từng team').toBeLessThanOrEqual(2)
+
   expect(errors).toEqual([])
 })
 
