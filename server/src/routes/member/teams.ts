@@ -15,6 +15,7 @@ import { created, errors, ok } from '../../lib/apiResponse'
 import { parseBody } from '../../lib/http'
 import { iso } from '../../lib/time'
 import { toLeaderSubmission, type RawSubmissionRow } from '../../serialize/submission'
+import { bestSubmissions } from './syllabus'
 
 export const memberTeamRoutes = new Hono()
 
@@ -44,6 +45,81 @@ memberTeamRoutes.get('/mine', async (c) => {
     ORDER BY (u.id = ${team.leaderId}) DESC, u.display_name
   `)
   return ok(c, { ...team, createdAt: iso(team.createdAt), isLeader: team.leaderId === me.id, members })
+})
+
+/**
+ * GET /api/member/teams/standings — bảng xếp hạng các team trong CÙNG khoá.
+ *
+ * Đặt TRƯỚC `/:teamId/...`: `standings` là một đoạn đường dẫn, để sau thì có nguy cơ
+ * bị nuốt thành một teamId — đúng lớp lỗi mà repo đã dính với `/moi` và `/:courseId`.
+ *
+ * Điểm tính bằng ĐÚNG công thức của BXH khoá (`bestSubmissions`): bài tốt nhất của
+ * mỗi người ở mỗi mục, quy về thang 100. Dùng chung một định nghĩa để hai bảng trên
+ * cùng một màn hình không nói hai con số khác nhau về cùng một người.
+ *
+ * Xếp theo SỐ BÀI AC trước, rồi tổng điểm — cùng thứ tự với BXH khoá và standings
+ * contest (§2.7). Tổng chứ không phải trung bình: team đông hơn thì tổng cao hơn, nên
+ * số thành viên được trả kèm để người đọc tự thấy điều đó thay vì bị giấu đi.
+ *
+ * Team KHÔNG gắn khoá nào thì xếp trong phạm vi TOÀN CLB (mọi mục đã xuất bản), và
+ * `scope` nói rõ đang dùng phạm vi nào.
+ */
+memberTeamRoutes.get('/standings', async (c) => {
+  const me = c.get('user')
+
+  const [team] = await q<{ id: string; courseId: string | null }>(sql`
+    SELECT t.id, t.course_id AS "courseId"
+    FROM team_members tm JOIN teams t ON t.id = tm.team_id
+    WHERE tm.user_id = ${me.id}
+  `)
+
+  const [course] = team?.courseId
+    ? await q<{ id: string; code: string; name: string }>(sql`
+        SELECT id, code, name FROM courses WHERE id = ${team.courseId}
+      `)
+    : []
+
+  /* Hai phạm vi, và phạm vi nào đang dùng thì NÓI RA ở `scope` để giao diện ghi lên
+     đầu bảng — hai bảng cùng tên "BXH các team" mà một bảng tính trong khoá, một bảng
+     tính toàn CLB thì con số không so được với nhau, và không có gì trên màn hình nói
+     điều đó.
+
+     Vì sao vẫn phải có nhánh toàn CLB: `teams.course_id` có trong lược đồ nhưng API
+     admin KHÔNG đặt được (routes/admin/teams.ts chỉ nhận name/description/leader), nên
+     mọi team tạo qua app đều NULL. Chỉ làm nhánh theo khoá là tính năng chết ngay khi
+     rời khỏi dữ liệu seed. */
+  const rows = await q<{
+    id: string
+    name: string
+    acCount: number
+    totalPoints: string
+    memberCount: number
+  }>(sql`
+    WITH best AS (${bestSubmissions(course?.id ?? null)})
+    SELECT t.id, t.name,
+           count(best.user_id) FILTER (WHERE best.verdict = 'AC')::int AS "acCount",
+           COALESCE(sum(best.points), 0) AS "totalPoints",
+           count(DISTINCT tm.user_id)::int AS "memberCount"
+    FROM teams t
+    JOIN team_members tm ON tm.team_id = t.id
+    LEFT JOIN best ON best.user_id = tm.user_id
+    WHERE ${course ? sql`t.course_id = ${course.id}` : sql`t.course_id IS NULL`}
+    GROUP BY t.id, t.name
+    ORDER BY "acCount" DESC, "totalPoints" DESC, t.name ASC
+  `)
+
+  return ok(c, {
+    scope: course ? { kind: 'khoa', label: course.name } : { kind: 'clb', label: 'toàn câu lạc bộ' },
+    rows: rows.map((r, i) => ({
+      rank: i + 1,
+      id: r.id,
+      name: r.name,
+      acCount: r.acCount,
+      totalPoints: Math.round(Number(r.totalPoints)),
+      memberCount: r.memberCount,
+      isMine: r.id === team?.id,
+    })),
+  })
 })
 
 /** GET /api/member/teams/:id/progress — bảng tiến độ team (FR-J2, chỉ leader). */

@@ -211,3 +211,73 @@ describe.skipIf(!INTEGRATION)('team & leader (FR-J)', () => {
     expect(text).not.toContain('STDERR_KHONG_DUOC_LO')
   })
 })
+
+/**
+ * GET /api/member/teams/standings — bảng xếp hạng các team.
+ *
+ * Hai phạm vi phải cùng chạy được. Nhánh TOÀN CLB không phải cho đẹp: `teams.course_id`
+ * có trong lược đồ nhưng API admin không đặt được (chỉ nhận name/description/leader),
+ * nên mọi team tạo qua app đều NULL — chỉ làm nhánh theo khoá là tính năng chết ngay
+ * khi rời khỏi dữ liệu seed.
+ */
+describe.skipIf(!INTEGRATION)('BXH các team', () => {
+  let admin: TestUser
+  let a1: TestUser
+  let b1: TestUser
+  let ngoai: TestUser
+
+  const lapTeam = async (name: string, leaderId: string) =>
+    (await call('/api/admin/teams', { as: admin, body: { name, leaderId } })).body.data.id as string
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    admin = await makeUser('admin')
+    a1 = await makeUser('member')
+    b1 = await makeUser('member')
+    ngoai = await makeUser('member')
+  })
+
+  it('xếp mọi team, đánh dấu team của mình', async () => {
+    await lapTeam('Alpha', a1.id)
+    await lapTeam('Beta', b1.id)
+
+    const res = await call('/api/member/teams/standings', { as: a1 })
+    expect(res.status).toBe(200)
+    expect(res.body.data.rows.map((r: { name: string }) => r.name).sort()).toEqual(['Alpha', 'Beta'])
+    expect(res.body.data.rows.find((r: { name: string }) => r.name === 'Alpha').isMine).toBe(true)
+    expect(res.body.data.rows.find((r: { name: string }) => r.name === 'Beta').isMine).toBe(false)
+  })
+
+  it('nói rõ đang tính theo phạm vi nào', async () => {
+    await lapTeam('Alpha', a1.id)
+    const res = await call('/api/member/teams/standings', { as: a1 })
+    // Team tạo qua API admin không có course_id, nên phạm vi là toàn CLB. Hai bảng
+    // cùng tên mà khác phạm vi thì con số không so được — giao diện in nhãn này ra.
+    expect(res.body.data.scope.kind).toBe('clb')
+  })
+
+  it('team chưa ai nộp bài vẫn có mặt với 0 điểm, không biến mất khỏi bảng', async () => {
+    await lapTeam('Alpha', a1.id)
+    const res = await call('/api/member/teams/standings', { as: a1 })
+    const alpha = res.body.data.rows[0]
+    expect(alpha.acCount).toBe(0)
+    expect(alpha.totalPoints).toBe(0)
+    expect(alpha.memberCount).toBe(1)
+  })
+
+  it('người chưa thuộc team nào vẫn XEM được bảng, chỉ là không có dòng nào của mình', async () => {
+    await lapTeam('Alpha', a1.id)
+    const res = await call('/api/member/teams/standings', { as: ngoai })
+    expect(res.status).toBe(200)
+    expect(res.body.data.rows.length).toBe(1)
+    expect(res.body.data.rows.every((r: { isMine: boolean }) => !r.isMine)).toBe(true)
+  })
+
+  it('chưa đăng nhập thì không đọc được', async () => {
+    expect((await call('/api/member/teams/standings')).status).toBe(401)
+  })
+})

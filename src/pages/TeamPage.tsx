@@ -13,9 +13,10 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
-import { Avatar } from '@/components/ui/patterns'
+import { Avatar, SideColumn, SidePanel } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import { LeaderNote } from './team/LeaderNote'
+import { TeamStandings } from './team/TeamStandings'
 import { TeamProgress } from './team/TeamProgress'
 import { TeamSubmissions } from './team/TeamSubmissions'
 import type { TeamView } from './team/types'
@@ -29,9 +30,11 @@ export function TeamPage() {
 
   if (isLoading) {
     return (
-      <div className="grid h-full place-items-center">
-        <Spinner />
-      </div>
+      <Shell>
+        <div className="grid h-64 place-items-center">
+          <Spinner />
+        </div>
+      </Shell>
     )
   }
 
@@ -112,6 +115,25 @@ export function TeamPage() {
   )
 }
 
+/**
+ * Khung hai cột của màn team: nội dung trái, BXH các team ở cột phải.
+ *
+ * Cột phải nằm TRONG Shell nên nó có mặt ở cả ba trạng thái — kể cả lúc lỗi hay
+ * lúc chưa thuộc team nào. Đặt riêng ở nhánh "có team" thì layout nhảy một nhịp
+ * khi dữ liệu về, và người chưa có team thì không xem được bảng nào cả dù bảng đó
+ * chẳng cần team để đọc.
+ */
 function Shell({ children }: { children: React.ReactNode }) {
-  return <PageContainer>{children}</PageContainer>
+  return (
+    <div className="grid h-full lg:grid-cols-[minmax(0,1fr)_420px]">
+      <main className="min-w-0 overflow-y-auto">
+        <PageContainer>{children}</PageContainer>
+      </main>
+      <SideColumn className="min-w-0 overflow-y-auto">
+        <SidePanel label="BXH các team" flush>
+          <TeamStandings />
+        </SidePanel>
+      </SideColumn>
+    </div>
+  )
 }

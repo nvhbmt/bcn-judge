@@ -15,7 +15,13 @@ import { isEnrolledInOpenCourse } from './courses'
 export const memberSyllabusRoutes = new Hono()
 
 /** Bài nộp TỐT NHẤT của mỗi (user, item) trong phạm vi khoá — dùng chung 3 chỗ. */
-const bestSubmissions = (courseId: string) => sql`
+/**
+ * Bài nộp TỐT NHẤT của mỗi người ở mỗi mục, quy về thang 100.
+ *
+ * `courseId = null` = không giới hạn khoá, dùng cho bảng xếp hạng toàn CLB (team
+ * không gắn khoá nào). Ba chỗ gọi cũ đều truyền một chuỗi nên hành vi không đổi.
+ */
+const bestSubmissions = (courseId: string | null) => sql`
   SELECT DISTINCT ON (s.user_id, s.item_id)
          s.user_id, s.item_id, s.problem_id, s.verdict,
          ROUND(s.passed_weight::numeric / NULLIF(s.total_weight, 0) * 100, 2) AS points,
@@ -23,7 +29,7 @@ const bestSubmissions = (courseId: string) => sql`
   FROM submissions s
   JOIN items i ON i.id = s.item_id
   JOIN sections sec ON sec.id = i.section_id
-  WHERE sec.course_id = ${courseId}
+  WHERE ${courseId === null ? sql`TRUE` : sql`sec.course_id = ${courseId}`}
     AND i.status = 'published'
     AND s.kind = 'submit' AND s.status = 'done'
     AND s.verdict NOT IN ('CE', 'IE')
