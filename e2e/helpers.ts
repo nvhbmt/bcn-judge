@@ -102,14 +102,44 @@ export function watchForErrors(page: Page): { errors: string[] } {
 }
 
 /**
- * Chờ một bài nộp chấm xong rồi trả verdict.
+ * Tên tiếng Việt của verdict — bản sao của VERDICT_LABEL trong src/types/api.ts.
+ *
+ * Chép sang đây thay vì import: e2e chạy trong tiến trình Node của Playwright, không
+ * đi qua alias `@/` của Vite. Bù lại, chép thì nó có thể trôi lệch — nên hàm dưới
+ * ĐỔI NGƯỢC về mã và mọi chỗ gọi vẫn so bằng mã, tức bảng này sai một chữ là test đỏ
+ * ngay chứ không âm thầm bỏ qua.
+ */
+const TEN_VERDICT: Record<string, string> = {
+  'Chấp nhận': 'AC',
+  'Sai đáp án': 'WA',
+  'Quá thời gian': 'TLE',
+  'Quá bộ nhớ': 'MLE',
+  'Lỗi chạy': 'RE',
+  'Lỗi biên dịch': 'CE',
+  'Lỗi hệ thống': 'IE',
+}
+
+/** Chữ đang hiện của một verdict, dùng để khẳng định "thấy được trên màn hình". */
+export function nhanVerdict(ma: keyof typeof TEN_VERDICT | string): string {
+  const found = Object.entries(TEN_VERDICT).find(([, code]) => code === ma)
+  if (!found) throw new Error(`Không có verdict ${ma}`)
+  return found[0]
+}
+
+/**
+ * Chờ một bài nộp chấm xong rồi trả verdict (dưới dạng MÃ).
  *
  * Chọn bằng CHỮ hiện trên màn hình chứ không bằng data-testid: verdict là thứ
  * người dùng đọc, nên nếu không tìm được bằng chữ thì người dùng cũng không thấy.
+ * Huy hiệu giờ hiện tên tiếng Việt, mã lùi về `title`.
  * Chấm đi qua Docker thật nên có thể mất vài giây.
  */
 export async function waitForVerdict(page: Page, timeout = 60_000): Promise<string> {
-  const badge = page.getByText(/^(AC|WA|TLE|MLE|RE|CE|IE)$/).first()
+  const ten = Object.keys(TEN_VERDICT)
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|')
+  const badge = page.getByText(new RegExp(`^(${ten})$`)).first()
   await expect(badge).toBeVisible({ timeout })
-  return ((await badge.textContent()) ?? '').trim()
+  const text = ((await badge.textContent()) ?? '').trim()
+  return TEN_VERDICT[text] ?? text
 }

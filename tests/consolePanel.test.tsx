@@ -9,6 +9,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { VERDICT_LABEL } from '@/types/api'
 import { ConsolePanel } from '@/pages/workspace/ConsolePanel'
 import type { ResultView, SampleIO, SubmissionView } from '@/types/api'
 
@@ -96,14 +97,17 @@ describe('tab stdin tự nhập — gõ, chạy, đọc tại chỗ', () => {
     expect(screen.queryByText('ba ba ba')).not.toBeInTheDocument()
   })
 
+  // Bám vào VERDICT_LABEL chứ không chép cứng chữ: huy hiệu hiện TÊN tiếng Việt
+  // ("Chấp nhận", "Quá thời gian"), mã gốc lùi về tooltip. Đổi cách gọi verdict là
+  // việc của sản phẩm, không nên làm đỏ những test canh chuyện khác.
   it('lượt tự nhập không có đáp án để so, nên không dán nhãn AC', () => {
     panel({ customRun: run([{ stdout: '15\n', verdict: 'AC' }]) })
-    expect(screen.queryByText('AC')).not.toBeInTheDocument()
+    expect(screen.queryByText(VERDICT_LABEL.AC)).not.toBeInTheDocument()
   })
 
   it('nhưng TLE thì vẫn phải hiện — đó là tin thật về lượt chạy', () => {
     panel({ customRun: run([{ stdout: '', verdict: 'TLE' }]) })
-    expect(screen.getByText('TLE')).toBeInTheDocument()
+    expect(screen.getByText(VERDICT_LABEL.TLE)).toBeInTheDocument()
   })
 
   it('vừa bấm xong, kết quả chưa về: vẫn là "đang chạy", không quay lại lời mời bấm', () => {

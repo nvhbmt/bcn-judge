@@ -79,9 +79,11 @@ export function VerdictBadge({ verdict, pending }: { verdict: Verdict | null; pe
     <span
       className="num rounded-none border px-1.5 py-0.5 font-mono text-[11px] font-semibold"
       style={{ color, borderColor: color }}
-      title={VERDICT_LABEL[verdict]}
+      // Mã gốc lùi về tooltip: người quen thuật ngữ vẫn tra được, còn người mới
+      // không phải đoán "TLE" nghĩa là gì ngay lúc đang lo bài mình sai chỗ nào.
+      title={verdict}
     >
-      {verdict}
+      {VERDICT_LABEL[verdict]}
     </span>
   )
 }

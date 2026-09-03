@@ -93,8 +93,15 @@ export interface LanguageOption {
   cmMode: string | null
 }
 
+/**
+ * Tên tiếng Việt của verdict — thứ HIỆN RA, không phải tooltip.
+ *
+ * Mã AC/WA/TLE là tiếng lóng của giới thi lập trình; người mới vào CLB không đọc được
+ * chúng, mà đây đúng là chỗ họ cần hiểu ngay: bài mình vừa nộp ra sao. Mã gốc vẫn giữ
+ * trong `title` để ai quen thuật ngữ vẫn tra được.
+ */
 export const VERDICT_LABEL: Record<Verdict, string> = {
-  AC: 'Đúng',
+  AC: 'Chấp nhận',
   WA: 'Sai đáp án',
   TLE: 'Quá thời gian',
   MLE: 'Quá bộ nhớ',

@@ -6,7 +6,7 @@
  * phần còn lại — đó là cái giá của việc kiểm THẬT thay vì mock.
  */
 import { expect, test, type Page } from '@playwright/test'
-import { authFile, waitForVerdict, watchForErrors } from './helpers'
+import { authFile, nhanVerdict, waitForVerdict, watchForErrors } from './helpers'
 
 /* Nạp sẵn phiên của leader — xem e2e/auth.setup.ts. */
 test.use({ storageState: authFile('leader') })
@@ -141,7 +141,7 @@ test('chạy thử trên testcase mẫu, không tính vào lịch sử nộp (FR
   await expect(console_.getByRole('tab', { name: 'chạy thử' })).toHaveAttribute('aria-selected', 'true')
   const row = page.getByRole('row').filter({ hasText: '#1' }).first()
   await expect(row).toContainText('mẫu')
-  await expect(row.getByText('AC')).toBeVisible({ timeout: 60_000 })
+  await expect(row.getByText(nhanVerdict('AC'))).toBeVisible({ timeout: 60_000 })
 })
 
 test('tab stdin tự nhập: gõ input, chạy và đọc output ngay tại chỗ', async ({ page }) => {
@@ -224,8 +224,8 @@ test('nộp bài đúng → AC, nộp bài sai → WA, cả hai vào lịch sử
   // rail chứ không còn là tab riêng dưới khung nội dung.
   const rail = page.getByRole('navigation').filter({ hasNot: page.getByText('~/khoá-học') })
   await rail.getByRole('button', { name: 'Bài nộp' }).click()
-  await expect(page.getByText('AC', { exact: true }).first()).toBeVisible()
-  await expect(page.getByText('WA', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText(nhanVerdict('AC'), { exact: true }).first()).toBeVisible()
+  await expect(page.getByText(nhanVerdict('WA'), { exact: true }).first()).toBeVisible()
   expect(errors).toEqual([])
 })
 

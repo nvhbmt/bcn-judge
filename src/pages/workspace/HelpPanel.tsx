@@ -22,7 +22,9 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
           {(Object.keys(VERDICT_LABEL) as Verdict[]).map((v) => (
             <div key={v} className="contents">
-              <dt className="font-mono text-xs font-semibold">{v}</dt>
+              <dt className="font-mono text-[13px] font-semibold whitespace-nowrap">
+                {VERDICT_LABEL[v]} <span className="font-normal text-ink-6">{v}</span>
+              </dt>
               <dd className="text-ink-3">{VERDICT_EXPLAIN[v]}</dd>
             </div>
           ))}
