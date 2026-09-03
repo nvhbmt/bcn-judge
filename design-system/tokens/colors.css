@@ -14,6 +14,10 @@
      đúng là chỗ người ta nhìn lâu nhất. */
   --surface-editor: #151310;
   --surface-sel: #221f19;  /* dòng đang chọn */
+  /* Nền "đang chọn" MANG MÀU. Ở nền tối, be trung tính là đủ vì chữ moss L 0.74 sáng
+     rực đã gánh tín hiệu; nên bản này trỏ thẳng vào surface-sel, không đổi gì. Bản
+     sáng thì khác hẳn — xem khối [data-theme=light]. */
+  --primary-soft: #221f19;
   /* Nền dòng đang gõ trong editor. Phải TRONG SUỐT: CodeMirror đặt lớp vùng chọn ở
      z-index -2, tức sau nội dung, nên nền đục trên .cm-line che mất vệt bôi đen ngay
      trên chính dòng đó. Alpha .45 hợp thành đúng #221f19 trên nền editor, nên khi
@@ -62,8 +66,22 @@
   --verdict-tle: var(--earth);
   --verdict-mle: var(--earth);
   --verdict-re:  var(--clay);
-  --verdict-ce:  var(--ink-4);
+  /* CE là HỎNG THẬT, không phải trạng thái trung tính — và VERDICT_TONE.CE ở tầng dữ
+     liệu vốn đã là 'wa'. Để ink-4 ở đây thì cùng một verdict ra hai màu tuỳ nhìn chỗ
+     nào: xám ở huy hiệu, đỏ gạch ở log hoạt động. IE mới là cái xám, đúng nghĩa
+     "không phải lỗi của bạn". */
+  --verdict-ce:  var(--clay);
   --verdict-ie:  var(--ink-5);
+  /* Nền wash của huy hiệu verdict cấp `soft` (dùng trong bảng dày). KHÔNG màu mới:
+     trỏ thẳng vào ba wash đã có, nên bảng màu verdict vẫn đúng 1:1 với VERDICT_TONE
+     và không sinh thêm một hệ màu song song để trôi lệch. */
+  --verdict-ac-soft:  var(--primary-soft);
+  --verdict-wa-soft:  var(--tint-clay);
+  --verdict-tle-soft: var(--tint-earth);
+  --verdict-mle-soft: var(--tint-earth);
+  --verdict-re-soft:  var(--tint-clay);
+  --verdict-ce-soft:  var(--tint-clay);
+  --verdict-ie-soft:  var(--surface-sel);
 
   /* tô màu cú pháp trong editor */
   --syn-comment: var(--ink-6);
@@ -91,6 +109,16 @@
   --surface-sel: #ece9dc;
   /* Xem chú thích ở bản tối. Alpha .45 hợp thành đúng #ece9dc trên nền editor. */
   --line-active: rgba(216, 212, 189, 0.45);
+
+  /* Nền "đang chọn" của bản sáng, và đây là chỗ nó KHÁC hẳn bản tối.
+     Trước đây nó trỏ vào --surface-sel, tức be trung tính chroma 0, nên chín chỗ vẽ
+     trạng thái "đang chọn" — thanh tab, mục giáo trình, dòng BXH, danh sách bài —
+     không có màu nào cả. Ở nền tối chữ moss L 0.74 gánh được tín hiệu; ở nền sáng
+     moss L 0.42 tối hơn nền nên đọc ra là mực, không phải là điểm nhấn.
+     Giải từ ràng buộc: nổi 1.50:1 so với nền trang (cũ 1.16), chữ ink-2 trên nó
+     9.4:1, chữ moss 5.3:1. Chroma ghìm ở 35% gamut — 75% cho ra xanh lá chanh, lạc
+     hẳn thang trung tính ấm. */
+  --primary-soft: oklch(0.846 0.077 128);
   --surface-code:#ebe6db;
 
   --line:        #dcd6c8;
@@ -116,8 +144,15 @@
   --clay:  oklch(0.46 0.12 30);
   --brass: oklch(0.51 0.08 86);
 
-  --tint-earth: oklch(0.90 0.05 80 / 0.65);
-  --tint-clay:  oklch(0.88 0.06 30 / 0.45);
+  /* Băng cảnh báo. ĐẶC chứ không phủ alpha: chênh giữa các mặt phẳng nền bản sáng chỉ
+     1.07 nên alpha chẳng lợi gì, mà giá trị đo được thì thôi đúng ở mọi chỗ.
+     Nổi 1.47–1.50:1 so với nền trang, cũ chỉ 1.16–1.18 — tức băng gần như tàng hình.
+     tint-earth nhạt hơn hai cái kia một chút (1.45 thay vì 1.50) và đó là ràng buộc
+     chứ không phải tuỳ ý: earth là màu sáng nhất trong ba, nên nền earth đậm thêm là
+     chữ earth trên nó tụt dưới 4.5:1. Giá trị này giữ chữ ở 4.62:1 — có biên thật,
+     không chạm ngưỡng. */
+  --tint-earth: oklch(0.866 0.036 70);
+  --tint-clay:  oklch(0.856 0.027 30);
 
   --diff-got:  oklch(0.86 0.09 30);
   --diff-want: oklch(0.87 0.10 128);

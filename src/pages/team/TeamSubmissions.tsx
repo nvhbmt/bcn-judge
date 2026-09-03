@@ -39,7 +39,7 @@ export function TeamSubmissions({
           {data.map((s) => (
             <li key={s.id} className="border border-line bg-surface-2">
               <div className="flex items-center gap-3 border-b border-line px-4 py-2.5">
-                <VerdictBadge verdict={s.verdict} />
+                <VerdictBadge tone="soft" verdict={s.verdict} />
                 <span className="num font-mono text-[12px] text-ink-3">{s.score ?? '—'} đ</span>
                 <span className="num font-mono text-[11px] text-ink-5">{s.languageId}</span>
                 <span className="num ml-auto font-mono text-[11px] text-ink-6">

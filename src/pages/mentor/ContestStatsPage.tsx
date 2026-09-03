@@ -70,7 +70,7 @@ export function ContestStatsPage() {
                       <ul className="mt-2 flex flex-wrap gap-2">
                         {p.counts.map((c) => (
                           <li key={c.verdict} className="inline-flex items-center gap-1">
-                            <VerdictBadge verdict={c.verdict} />
+                            <VerdictBadge tone="soft" verdict={c.verdict} />
                             <span className="font-mono text-xs tabular-nums text-ink-5">×{c.n}</span>
                           </li>
                         ))}

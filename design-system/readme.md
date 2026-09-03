@@ -36,6 +36,38 @@ Hệ quả thực tế đã gặp: `disabled:opacity-40/50/60` kéo tương ph�
 **không dùng opacity để làm mờ điều khiển đã tắt** — đổi màu chữ sang `--ink-5` và làm
 nhạt đường viền, giữ `opacity-100`. "Đã tắt" không có nghĩa là "không đọc được".
 
+## Vì sao bản sáng từng "hoà tan"
+
+Cảm giác bản sáng nhạt hơn bản tối **không phải** do thiếu tương phản. Đo ra thì bản
+sáng còn hơn ở mọi chỉ số: tách mặt phẳng nền 1.07–1.19 (tối chỉ 1.02–1.05), băng cảnh
+báo 1.16–1.18 (tối 1.06), và bão hoà **tương đối** so với gamut đạt 65–88% (tối chỉ
+52–63%).
+
+Nguyên nhân là **hướng** tương phản. Nền tối, màu điểm sáng hơn nền (L 0.64–0.74 trên
+nền L≈0.15) nên mắt đọc ra là ánh sáng phát ra, nó tiến về trước. Nền sáng, màu điểm
+tối hơn nền (L 0.42–0.51 trên nền L≈0.97) nên mắt đọc ra là mực trên giấy — trông y
+như chữ thường. Cùng tỉ lệ tương phản, ngược vai trò thị giác.
+
+Và có trần vật lý: ở L 0.42–0.51 thì sRGB chỉ chứa nổi C 0.10–0.18, mà palette đã dùng
+tới 65–88% mức đó. **Không còn chỗ tăng độ rực nếu vẫn giữ độ tối ấy.** Nên cách chữa
+là tăng **diện tích** màu, không phải tăng độ rực:
+
+- huy hiệu verdict có hai cấp — `solid` (nền đặc, chữ `--on-accent`) cho chỗ đứng một
+  mình, `soft` (nền wash, chữ giữ màu verdict) cho bảng dày. Năm mươi khối đặc xếp dọc
+  thành một mảng loang, lúc đó chẳng dòng nào nổi nữa;
+- `--primary-soft` mang sắc thật thay vì trỏ vào `--surface-sel`. Đây là lỗi nặng nhất:
+  chín chỗ vẽ trạng thái "đang chọn" ở bản sáng trước đây không có màu nào cả;
+- băng cảnh báo bỏ alpha, dùng màu đặc đậm hơn — chênh giữa các mặt phẳng nền bản sáng
+  chỉ 1.07 nên alpha chẳng lợi gì, mà giá trị đo được thì thôi đúng ở mọi chỗ.
+
+Chroma của các wash ghìm ở **35% gamut**. Thử 75% cho ra `#a8db5e` xanh lá chanh, lạc
+hẳn thang trung tính ấm — đúng thứ mục 3 ở trên cấm.
+
+`tint-earth` nhạt hơn hai wash kia (1.45 thay vì 1.50) và đó là ràng buộc chứ không
+phải tuỳ ý: earth là màu sáng nhất trong ba, nên nền earth đậm thêm một nấc là chữ
+earth trên nó tụt dưới 4.5:1. `tests/lightAccents.test.ts` canh mọi ngưỡng này, đọc
+thẳng từ file token.
+
 `--select-bg` (vệt bôi đen trong editor) tách riêng khỏi `--surface-sel`: dòng đang gõ
 đã dùng `--surface-sel`, nếu vùng chọn dùng chung thì bôi đen trên chính dòng đó không
 thấy gì. Đặt ~2.1:1 so với nền editor — đủ rõ mà chữ bên trên vẫn đọc được. Ngưỡng

@@ -39,7 +39,7 @@ export function SubmissionsPanel({
             }`}
           >
             <button onClick={() => onSelect(s.id)} className="flex flex-1 items-center gap-3 text-left">
-              <VerdictBadge verdict={s.verdict} pending={s.status !== 'done'} />
+              <VerdictBadge tone="soft" verdict={s.verdict} pending={s.status !== 'done'} />
               <span className="tabular-nums">{s.score === null ? '—' : `${s.score} đ`}</span>
               <span className="font-mono text-xs text-ink-5">{s.languageId}</span>
               <span className="ml-auto text-xs text-ink-6">{formatTime(s.receivedAt)}</span>

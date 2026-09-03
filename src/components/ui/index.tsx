@@ -66,7 +66,27 @@ export function Button({
  * Chữ đặt trên nền mờ cùng tông chứ không phải nền đặc — `--clay` phải đọc được
  * trên chính `--tint-clay`, đó là nền xấu nhất và ngưỡng 4.5:1 đo ở đó.
  */
-export function VerdictBadge({ verdict, pending }: { verdict: Verdict | null; pending?: boolean }) {
+/**
+ * Huy hiệu verdict, HAI CẤP — và cấp là quyết định về mật độ, không phải về thẩm mỹ.
+ *
+ * `solid` (mặc định): nền đặc, chữ --on-accent. Dùng ở chỗ huy hiệu ĐỨNG MỘT MÌNH —
+ * kết quả nộp, thanh editor, báo cáo kiểm. Ở nền sáng, viền 1px + chữ màu gần như
+ * tàng hình: màu điểm TỐI hơn nền nên mắt đọc ra là chữ thường, không phải điểm nhấn.
+ * Khối đặc thì đọc được ngay vì nó có diện tích.
+ *
+ * `soft`: nền wash của tông, chữ giữ màu verdict. Dùng trong BẢNG DÀY — dòng kết quả
+ * từng testcase, bảng xếp hạng, danh sách bài nộp. Năm mươi khối đặc xếp dọc thành
+ * một mảng màu loang, và lúc đó chẳng dòng nào nổi nữa.
+ */
+export function VerdictBadge({
+  verdict,
+  pending,
+  tone = 'solid',
+}: {
+  verdict: Verdict | null
+  pending?: boolean
+  tone?: 'solid' | 'soft'
+}) {
   if (!verdict) {
     return (
       <span className="num rounded-none bg-surface-sel px-1.5 py-0.5 font-mono text-[11px] text-ink-5">
@@ -74,11 +94,16 @@ export function VerdictBadge({ verdict, pending }: { verdict: Verdict | null; pe
       </span>
     )
   }
-  const color = `var(--verdict-${verdict.toLowerCase()})`
+  const key = verdict.toLowerCase()
+  const color = `var(--verdict-${key})`
+  const style =
+    tone === 'solid'
+      ? { background: color, color: 'var(--on-accent)', borderColor: color }
+      : { background: `var(--verdict-${key}-soft)`, color, borderColor: color }
   return (
     <span
       className="num rounded-none border px-1.5 py-0.5 font-mono text-[11px] font-semibold"
-      style={{ color, borderColor: color }}
+      style={style}
       // Mã gốc lùi về tooltip: người quen thuật ngữ vẫn tra được, còn người mới
       // không phải đoán "TLE" nghĩa là gì ngay lúc đang lo bài mình sai chỗ nào.
       title={verdict}

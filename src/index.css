@@ -20,7 +20,7 @@
   /* Ánh xạ token cũ → token mới, GIỮ NGUYÊN API cũ: components/ui/index.tsx và mọi
      chỗ đang gọi var(--color-primary/ac/wa/tle) không phải sửa một dòng nào. */
   --color-primary: var(--moss);
-  --color-primary-soft: var(--surface-sel);
+  --color-primary-soft: var(--primary-soft);
   --color-ac: var(--moss);
   --color-wa: var(--clay);
   --color-tle: var(--earth);

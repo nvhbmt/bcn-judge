@@ -85,7 +85,7 @@ function ResultRow({
           {result.isSample ? <span className="text-ink-6">mẫu</span> : <span className="text-ink-6">ẩn</span>}
         </td>
         <td>
-          <VerdictBadge verdict={result.verdict} />
+          <VerdictBadge tone="soft" verdict={result.verdict} />
           {result.detail ? <span className="ml-1 text-ink-6">{result.detail}</span> : null}
         </td>
         <td className="text-right tabular-nums">{result.timeMs ?? '—'} ms</td>

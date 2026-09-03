@@ -76,7 +76,7 @@ export function ValidateReport({
             }`}
           >
             <span className="font-mono text-[11px] text-ink-5">#{r.position}</span>
-            <VerdictBadge verdict={r.verdict} />
+            <VerdictBadge tone="soft" verdict={r.verdict} />
           </li>
         ))}
       </ul>
