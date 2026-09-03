@@ -14,6 +14,11 @@
      đúng là chỗ người ta nhìn lâu nhất. */
   --surface-editor: #151310;
   --surface-sel: #221f19;  /* dòng đang chọn */
+  /* Nền dòng đang gõ trong editor. Phải TRONG SUỐT: CodeMirror đặt lớp vùng chọn ở
+     z-index -2, tức sau nội dung, nên nền đục trên .cm-line che mất vệt bôi đen ngay
+     trên chính dòng đó. Alpha .45 hợp thành đúng #221f19 trên nền editor, nên khi
+     không bôi đen thì trông y như cũ. */
+  --line-active: rgba(50, 46, 36, 0.45);
   --surface-code:#1f1c17;  /* code inline */
 
   /* đường kẻ */
@@ -84,6 +89,8 @@
   --surface-3:   #f2efe6;
   --surface-editor: #fcfaf5;
   --surface-sel: #ece9dc;
+  /* Xem chú thích ở bản tối. Alpha .45 hợp thành đúng #ece9dc trên nền editor. */
+  --line-active: rgba(216, 212, 189, 0.45);
   --surface-code:#ebe6db;
 
   --line:        #dcd6c8;

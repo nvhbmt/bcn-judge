@@ -95,12 +95,33 @@ const makeSurfaceTheme = (dark: boolean) =>
       border: 'none',
       borderRight: '1px solid var(--line)',
     },
-    '.cm-activeLine': { backgroundColor: 'var(--surface-sel)' },
-    '.cm-activeLineGutter': { backgroundColor: 'var(--surface-sel)', color: 'var(--ink-4)' },
-    '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-      backgroundColor: 'var(--surface-sel)',
+    // `--line-active` TRONG SUỐT, không phải `--surface-sel` đục: lớp vùng chọn của
+    // CodeMirror nằm ở z-index -2 (sau nội dung), nên nền đục trên .cm-line che mất
+    // vệt bôi đen ngay trên dòng đang gõ. Alpha của token hợp thành đúng màu cũ khi
+    // không có vùng chọn, nên giao diện lúc gõ bình thường không đổi.
+    '.cm-activeLine': { backgroundColor: 'var(--line-active)' },
+    '.cm-activeLineGutter': { backgroundColor: 'var(--line-active)', color: 'var(--ink-4)' },
+    /*
+     * Vùng chọn: `--select-bg`, KHÔNG phải `--surface-sel`. Dòng đang gõ đã dùng
+     * `--surface-sel`, nên vùng chọn dùng chung màu thì bôi đen ngay trên dòng đó
+     * không thấy gì — design-system tách riêng token này đúng vì lẽ đó.
+     *
+     * Selector phải viết ĐỦ DÀI. baseTheme của CodeMirror khai
+     * `&light.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground`
+     * (5 lớp); rule ngắn hơn thua độ đặc hiệu và vùng chọn lặng lẽ giữ nguyên màu
+     * mặc định #d7d4f0 — tím xanh lạnh, lạc hẳn khỏi thang màu ấm của hệ này.
+     * Dùng `background` chứ không `backgroundColor` để khớp đúng thuộc tính nó đặt.
+     */
+    '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
+      background: 'var(--select-bg)',
     },
-    '.cm-selectionMatch': { backgroundColor: 'var(--surface-sel)' },
+    '& > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
+      background: 'var(--select-bg)',
+    },
+    '.cm-content ::selection': { background: 'var(--select-bg)' },
+    // Chỗ trùng với vùng đang chọn: cùng họ nghĩa với `.cm-searchMatch` ("những chỗ
+    // khác khớp với cái này") nên dùng chung màu, và cũng để không đụng `--surface-sel`.
+    '.cm-selectionMatch': { backgroundColor: 'var(--tint-earth)' },
     '.cm-matchingBracket, &.cm-focused .cm-matchingBracket': {
       backgroundColor: 'transparent',
       outline: '1px solid var(--line-strong)',

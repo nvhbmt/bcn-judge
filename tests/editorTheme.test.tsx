@@ -56,6 +56,19 @@ describe('bảng màu cú pháp của editor', () => {
     }
   })
 
+  it.each(['light', 'dark'] as const)('bản %s: vùng chọn và dòng đang gõ KHÔNG dùng chung màu', (theme) => {
+    mount(theme)
+    const css = injectedCss()
+    // Bôi đen ngay trên dòng đang gõ mà hai thứ cùng màu thì không thấy gì —
+    // design-system tách `--select-bg` khỏi `--surface-sel` đúng vì lẽ đó.
+    expect(css.includes('background: var(--select-bg)')).toBe(true)
+    expect(css.includes('background-color: var(--surface-sel)')).toBe(false)
+
+    // Và nền dòng đang gõ phải TRONG SUỐT: lớp vùng chọn của CodeMirror ở z-index -2,
+    // tức sau nội dung, nên nền đục trên .cm-line che mất vệt bôi đen.
+    expect(css.includes('background-color: var(--line-active)')).toBe(true)
+  })
+
   it.each(['light', 'dark'] as const)('bản %s tô đủ mọi vai, và tô bằng token', (theme) => {
     mount(theme)
     const css = injectedCss()

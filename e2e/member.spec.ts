@@ -55,6 +55,27 @@ test('mở khoá → giáo trình theo chương → mở bài', async ({ page })
   // Màn làm bài: đề bên trái, editor bên phải.
   await expect(page.getByText('Dữ liệu vào')).toBeVisible()
   await expect(page.locator('.cm-content')).toBeVisible()
+
+  /*
+   * Bôi đen một dòng phải THẤY được vệt chọn, kể cả trên chính dòng đang gõ.
+   *
+   * Hai cách hỏng, và chỉ trình duyệt thật bắt được cách thứ hai:
+   *   1. vùng chọn dùng chung `--surface-sel` với dòng đang gõ → cùng màu, vô hình;
+   *   2. rule ngắn hơn baseTheme của CodeMirror (5 lớp) thua độ đặc hiệu, nên màu
+   *      lặng lẽ giữ nguyên #d7d4f0 mặc định — nguồn trông đúng mà màn hình thì sai.
+   */
+  await page.locator('.cm-content').click()
+  await page.keyboard.insertText('int main(void) { return 0; }')
+  await page.keyboard.press('ControlOrMeta+a')
+  // CodeMirror vẽ lớp chọn ở nhịp sau, nên phải chờ nó có mặt rồi mới đo màu.
+  await expect(page.locator('.cm-selectionBackground').first()).toBeVisible()
+  const mauChon = await page.evaluate(() => {
+    const e = document.querySelector('.cm-selectionBackground')
+    return e ? getComputedStyle(e).backgroundColor : null
+  })
+  expect(mauChon, 'không có lớp vùng chọn nào được vẽ').not.toBeNull()
+  expect(mauChon).toContain('oklch')
+  expect(mauChon).not.toContain('215, 212, 240')
 })
 
 test('thanh icon đổi panel bên trái (FR-E7)', async ({ page }) => {
