@@ -47,6 +47,8 @@ export interface DiscordUser {
   /** `null` khi người dùng không có email hoặc CHƯA xác minh — xem `verified`. */
   email: string | null
   verified: boolean
+  /** Hash ảnh đại diện; `null` = đang dùng ảnh mặc định của Discord. */
+  avatar: string | null
 }
 
 /**
@@ -93,6 +95,7 @@ export async function exchangeCodeForUser(code: string): Promise<DiscordLogin | 
         username: typeof me.username === 'string' ? me.username : me.id,
         email: typeof me.email === 'string' && me.email !== '' ? me.email : null,
         verified: me.verified === true,
+        avatar: typeof me.avatar === 'string' && me.avatar !== '' ? me.avatar : null,
       },
     }
   } catch {
@@ -125,4 +128,17 @@ export async function fetchGuildMember(
   } catch {
     return 'loi'
   }
+}
+
+/**
+ * URL ảnh đại diện trên CDN của Discord.
+ *
+ * Luôn `.png` kể cả với ảnh động (hash bắt đầu bằng `a_`): Discord vẫn phục vụ bản
+ * tĩnh cho đuôi .png, và một cái GIF nhấp nháy ở góc thanh trên là thứ không ai xin.
+ *
+ * `size=64` vì chỗ hiện lớn nhất là 28px — lấy 64 để màn hình 2x vẫn nét, không hơn.
+ */
+export function avatarUrl(discordId: string | null, hash: string | null): string | null {
+  if (!discordId || !hash) return null
+  return `https://cdn.discordapp.com/avatars/${discordId}/${hash}.png?size=64`
 }

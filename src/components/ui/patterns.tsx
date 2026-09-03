@@ -9,7 +9,7 @@
  *
  * Xem design-system/readme.md, mục VISUAL FOUNDATIONS.
  */
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 
 /**
  * Nhóm dòng "khe 1px" — cách trình bày danh sách DUY NHẤT của hệ thiết kế.
@@ -146,14 +146,35 @@ export function initials(name: string, count = 2): string {
 }
 
 /** Ô vuông chữ cái đầu. Vuông chứ không tròn — bo góc 0 là luật của hệ. */
-export function Avatar({ name, size = 26, chars = 2 }: { name: string; size?: number; chars?: number }) {
+export function Avatar({
+  name,
+  size = 26,
+  chars = 2,
+  src = null,
+}: {
+  name: string
+  size?: number
+  chars?: number
+  /** Ảnh thật (hiện chỉ có từ Discord); `null` = dùng chữ cái đầu tên. */
+  src?: string | null
+}) {
+  // Ảnh 404 (người ta đổi ảnh giữa hai lần đăng nhập nên hash đã cũ) thì lùi về chữ
+  // cái đầu, chứ không để lại cái khung vỡ. `useState` chứ không `onError` đổi thẳng
+  // DOM: đổi src rồi thì phải cho React vẽ lại đúng nhánh kia.
+  const [hong, setHong] = useState(false)
+  const anh = src && !hong
+
   return (
     <span
       aria-hidden
-      className="grid shrink-0 place-items-center bg-line font-mono font-semibold text-moss"
+      className="grid shrink-0 place-items-center overflow-hidden bg-line font-mono font-semibold text-moss"
       style={{ width: size, height: size, fontSize: chars > 1 ? 11 : 12 }}
     >
-      {initials(name, chars)}
+      {anh ? (
+        <img src={src} alt="" width={size} height={size} className="size-full object-cover" onError={() => setHong(true)} />
+      ) : (
+        initials(name, chars)
+      )}
     </span>
   )
 }

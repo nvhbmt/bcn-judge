@@ -188,6 +188,44 @@ describe.skipIf(!INTEGRATION)('đăng nhập bằng Discord', () => {
       expect(coPhien(res)).toBe(true)
     })
 
+    it('ảnh Discord vào DB dạng HASH, và /auth/me trả URL dựng sẵn', async () => {
+      await db.update(users).set({ discordId: '42' }).where(sql`id = ${member.id}`)
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '42', username: 'x', email: null, verified: false, avatar: 'abc123' })
+      const res = await callback(`code=abc&state=${state}`, cookie)
+
+      const rows = await q<{ a: string }>(sql`SELECT discord_avatar AS a FROM users WHERE id = ${member.id}`)
+      // Lưu hash, KHÔNG lưu URL: URL do CDN của Discord quy định, họ đổi lúc nào cũng được.
+      expect(rows[0]!.a).toBe('abc123')
+
+      const phien = /bcn_session=([^;]+)/.exec(res.headers.get('set-cookie') ?? '')![1]
+      const me = await app.request('/auth/me', {
+        headers: { cookie: `bcn_session=${phien}`, 'x-api-response-version': '2' },
+      })
+      const body = (await me.json()) as { data: { avatarUrl: string } }
+      expect(body.data.avatarUrl).toBe('https://cdn.discordapp.com/avatars/42/abc123.png?size=64')
+    })
+
+    it('đổi ảnh giữa hai lần đăng nhập thì hash được làm mới', async () => {
+      await db.update(users).set({ discordId: '42', discordAvatar: 'anh_cu' }).where(sql`id = ${member.id}`)
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '42', username: 'x', email: null, verified: false, avatar: 'anh_moi' })
+      await callback(`code=abc&state=${state}`, cookie)
+
+      const rows = await q<{ a: string }>(sql`SELECT discord_avatar AS a FROM users WHERE id = ${member.id}`)
+      expect(rows[0]!.a).toBe('anh_moi')
+    })
+
+    it('để ảnh mặc định của Discord thì không có hash — giao diện lùi về chữ cái đầu', async () => {
+      await db.update(users).set({ discordId: '42' }).where(sql`id = ${member.id}`)
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '42', username: 'x', email: null, verified: false, avatar: null })
+      await callback(`code=abc&state=${state}`, cookie)
+
+      const rows = await q<{ a: string | null }>(sql`SELECT discord_avatar AS a FROM users WHERE id = ${member.id}`)
+      expect(rows[0]!.a).toBeNull()
+    })
+
     it('username Discord đổi thì cập nhật theo — định danh là id, tên chỉ để hiện', async () => {
       await db.update(users).set({ discordId: '42', discordUsername: 'ten-cu' }).where(sql`id = ${member.id}`)
       const { state, cookie } = await batDau('login')
@@ -249,17 +287,21 @@ describe.skipIf(!INTEGRATION)('đăng nhập bằng Discord', () => {
     })
 
     it('bỏ gắn thì xoá sạch dấu vết Discord', async () => {
-      await db.update(users).set({ discordId: '42', discordUsername: 'x' }).where(sql`id = ${member.id}`)
+      await db
+        .update(users)
+        .set({ discordId: '42', discordUsername: 'x', discordAvatar: 'abc' })
+        .where(sql`id = ${member.id}`)
       const res = await app.request('/auth/discord/unlink', {
         method: 'POST',
         headers: { cookie: member.cookie, 'x-api-response-version': '2' },
       })
 
       expect(res.status).toBe(200)
-      const rows = await q<{ d: string | null; u: string | null }>(
-        sql`SELECT discord_id AS d, discord_username AS u FROM users WHERE id = ${member.id}`,
+      const rows = await q<{ d: string | null; u: string | null; a: string | null }>(
+        sql`SELECT discord_id AS d, discord_username AS u, discord_avatar AS a FROM users WHERE id = ${member.id}`,
       )
-      expect(rows[0]).toEqual({ d: null, u: null })
+      // Cả ảnh cũng phải đi: bỏ gắn mà còn ảnh Discord nằm lại là còn dấu vết.
+      expect(rows[0]).toEqual({ d: null, u: null, a: null })
     })
 
     it('tài khoản KHÔNG có mật khẩu thì chặn bỏ gắn — bỏ xong là mất đường vào', async () => {

@@ -13,6 +13,8 @@ export interface Me {
   /** Tên Discord đang gắn; `null` = chưa gắn. Chỉ để HIỆN — định danh là discord_id
    *  ở server, vì Discord cho đổi username. */
   discordUsername: string | null
+  /** URL ảnh Discord do server dựng; `null` = dùng chữ cái đầu tên. */
+  avatarUrl: string | null
 }
 
 export interface CourseSummary {

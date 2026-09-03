@@ -55,6 +55,8 @@ export const users = pgTable(
        vì Discord cho đổi username. */
     discordId: text('discord_id'),
     discordUsername: text('discord_username'),
+    /** Hash ảnh Discord, không phải URL — xem drizzle/0005. */
+    discordAvatar: text('discord_avatar'),
     discordLinkedAt: timestamp('discord_linked_at', { withTimezone: true }),
     disabled: boolean('disabled').notNull().default(false),
     createdAt: createdAt(),

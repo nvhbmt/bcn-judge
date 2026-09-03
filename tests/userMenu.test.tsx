@@ -21,6 +21,7 @@ const ME: Me = {
   role: 'member',
   mustChangePassword: false,
   discordUsername: null,
+  avatarUrl: null,
 }
 
 function dung() {

@@ -155,6 +155,20 @@ Hỏi Discord không được (mạng hỏng, token sai) thì **chặn**, và b�
 riêng chứ không gộp vào "ngoài server": gộp thành cho-qua là một sự cố mạng mở toang
 cổng, gộp thành ngoài-server là báo oan người đang ở trong server.
 
+### Ảnh đại diện
+
+Gắn Discord xong thì ảnh Discord thay chữ cái đầu tên ở thanh trên. Lưu **hash**
+Discord trả về, không lưu URL và không tải ảnh về máy chủ: URL do CDN của Discord
+quy định, còn tải về là tự nhận việc lưu trữ cho một thứ người ta đổi liên tục. Hash
+được làm mới ở mỗi lần đăng nhập bằng Discord.
+
+Không có ảnh riêng (Discord trả `avatar: null`), hoặc ảnh 404 vì hash đã cũ, thì lùi
+về chữ cái đầu tên — không để lại khung ảnh vỡ.
+
+Điều dễ quên khi deploy: **CSP ở `server/Caddyfile` phải cho `cdn.discordapp.com`
+trong `img-src`.** Dev không có CSP nên ảnh hiện bình thường, còn production chặn
+CÂM — không lỗi mạng, không dòng log nào ngoài console của người dùng.
+
 Scope xin là `guilds.members.read`, không phải `guilds`: `guilds` trả về danh sách
 **mọi** server người đó tham gia — dữ liệu riêng tư không liên quan gì tới việc họ
 có ở CLB hay không.

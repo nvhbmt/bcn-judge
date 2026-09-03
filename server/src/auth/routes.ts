@@ -6,7 +6,7 @@ import { db } from '../db/pool'
 import { users } from '../db/schema'
 import { errors, ok } from '../lib/apiResponse'
 import { clearSessionCookie, clientIp, parseBody, rateLimit, readSessionCookie, setSessionCookie } from '../lib/http'
-import { discordEnabled } from './discordApi'
+import { avatarUrl, discordEnabled } from './discordApi'
 import { discordRoutes } from './discordRoutes'
 import { hashPassword, verifyPassword } from './hash'
 import { requireAuth } from './middleware'
@@ -66,6 +66,7 @@ authRoutes.post('/login', async (c) => {
     role: user.role,
     mustChangePassword: user.mustChangePassword,
     discordUsername: user.discordUsername,
+    avatarUrl: avatarUrl(user.discordId, user.discordAvatar),
   })
 })
 

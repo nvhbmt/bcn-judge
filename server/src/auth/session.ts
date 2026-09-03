@@ -7,6 +7,7 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { and, eq, gt, isNull, sql } from 'drizzle-orm'
 import { config } from '../config'
+import { avatarUrl } from './discordApi'
 import { db } from '../db/pool'
 import { userSessions, users } from '../db/schema'
 
@@ -18,6 +19,8 @@ export interface AuthUser {
   mustChangePassword: boolean
   /** Tên Discord đang gắn, `null` nếu chưa gắn — màn tài khoản hiện gắn hay bỏ gắn. */
   discordUsername: string | null
+  /** URL ảnh Discord dựng sẵn ở server; `null` = dùng chữ cái đầu tên. */
+  avatarUrl: string | null
 }
 
 function hashToken(token: string): Buffer {
@@ -52,6 +55,8 @@ export async function resolveSession(token: string | null): Promise<AuthUser | n
       role: users.role,
       mustChangePassword: users.mustChangePassword,
       discordUsername: users.discordUsername,
+      discordId: users.discordId,
+      discordAvatar: users.discordAvatar,
       disabled: users.disabled,
       deletedAt: users.deletedAt,
     })
@@ -75,6 +80,7 @@ export async function resolveSession(token: string | null): Promise<AuthUser | n
     role: row.role as AuthUser['role'],
     mustChangePassword: row.mustChangePassword,
     discordUsername: row.discordUsername,
+    avatarUrl: avatarUrl(row.discordId, row.discordAvatar),
   }
 }
 

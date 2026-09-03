@@ -143,7 +143,7 @@ async function quaCongGuild(accessToken: string): Promise<Reason | null> {
 
 async function doLink(
   c: Parameters<typeof setSessionCookie>[0],
-  profile: { id: string; username: string },
+  profile: { id: string; username: string; avatar: string | null },
 ): Promise<Response> {
   const me = await resolveSession(readSessionCookie(c))
   // Phiên hết hạn giữa lúc đi vòng qua Discord: về màn đăng nhập, không nuốt im.
@@ -154,7 +154,12 @@ async function doLink(
 
   await db
     .update(users)
-    .set({ discordId: profile.id, discordUsername: profile.username, discordLinkedAt: sql`now()` })
+    .set({
+      discordId: profile.id,
+      discordUsername: profile.username,
+      discordAvatar: profile.avatar,
+      discordLinkedAt: sql`now()`,
+    })
     .where(eq(users.id, me.id))
   await audit(me.id, 'user.discord_link', 'user', me.id, null, { discordId: profile.id })
 
@@ -163,7 +168,7 @@ async function doLink(
 
 async function doLogin(
   c: Parameters<typeof setSessionCookie>[0],
-  profile: { id: string; username: string; email: string | null; verified: boolean },
+  profile: { id: string; username: string; email: string | null; verified: boolean; avatar: string | null },
   accessToken: string,
 ): Promise<Response> {
   const byDiscord = await findLive(eq(users.discordId, profile.id))
@@ -201,12 +206,21 @@ async function doLogin(
   if (!byDiscord) {
     await db
       .update(users)
-      .set({ discordId: profile.id, discordUsername: profile.username, discordLinkedAt: sql`now()` })
+      .set({
+        discordId: profile.id,
+        discordUsername: profile.username,
+        discordAvatar: profile.avatar,
+        discordLinkedAt: sql`now()`,
+      })
       .where(eq(users.id, user.id))
     await audit(user.id, 'user.discord_link', 'user', user.id, null, { discordId: profile.id, qua: 'email' })
-  } else if (user.discordUsername !== profile.username) {
-    // Discord cho đổi username; giữ bản mới để màn tài khoản khỏi hiện tên đã cũ.
-    await db.update(users).set({ discordUsername: profile.username }).where(eq(users.id, user.id))
+  } else if (user.discordUsername !== profile.username || user.discordAvatar !== profile.avatar) {
+    // Discord cho đổi username lẫn ảnh; làm mới cả hai để màn tài khoản khỏi hiện
+    // tên và ảnh đã cũ. Ảnh lưu dạng hash nên so sánh thẳng được.
+    await db
+      .update(users)
+      .set({ discordUsername: profile.username, discordAvatar: profile.avatar })
+      .where(eq(users.id, user.id))
   }
 
   const session = await createSession(user.id, clientIp(c), c.req.header('user-agent') ?? null)
@@ -222,6 +236,7 @@ async function findLive(where: Parameters<typeof and>[0]) {
       id: users.id,
       disabled: users.disabled,
       discordUsername: users.discordUsername,
+      discordAvatar: users.discordAvatar,
       passwordHash: users.passwordHash,
     })
     .from(users)
@@ -245,7 +260,7 @@ async function findLive(where: Parameters<typeof and>[0]) {
  */
 async function taoTaiKhoanTuGuild(
   c: Parameters<typeof setSessionCookie>[0],
-  profile: { id: string; username: string; email: string | null; verified: boolean },
+  profile: { id: string; username: string; email: string | null; verified: boolean; avatar: string | null },
 ): Promise<Response> {
   // Cột `email` là NOT NULL + UNIQUE. Discord không cho email (hoặc chưa xác minh)
   // thì dựng địa chỉ theo id — không gửi thư tới được, và đó là chủ ý: nó chỉ đóng
@@ -264,6 +279,7 @@ async function taoTaiKhoanTuGuild(
       mustChangePassword: false,
       discordId: profile.id,
       discordUsername: profile.username,
+      discordAvatar: profile.avatar,
       discordLinkedAt: sql`now()`,
     })
     .onConflictDoNothing()
@@ -303,7 +319,7 @@ discordRoutes.post('/unlink', requireAuth, async (c) => {
 
   await db
     .update(users)
-    .set({ discordId: null, discordUsername: null, discordLinkedAt: null })
+    .set({ discordId: null, discordUsername: null, discordAvatar: null, discordLinkedAt: null })
     .where(eq(users.id, me.id))
   await audit(me.id, 'user.discord_unlink', 'user', me.id, null, null)
 

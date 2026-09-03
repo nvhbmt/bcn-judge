@@ -1,0 +1,12 @@
+-- Ảnh đại diện lấy từ Discord.
+--
+-- Lưu HASH mà Discord trả (ví dụ `a1b2c3…`), không lưu URL đầy đủ và cũng không tải
+-- ảnh về: URL do CDN của Discord quy định và họ đổi được bất cứ lúc nào, còn tải ảnh
+-- về là tự nhận việc lưu trữ + dọn rác cho một thứ đổi liên tục.
+--
+-- Hash được làm mới ở MỖI lần đăng nhập bằng Discord, cùng lúc với discord_username —
+-- người ta đổi ảnh thì lần đăng nhập sau là đúng ảnh mới.
+--
+-- NULL = không có ảnh riêng (Discord trả `avatar: null` khi người dùng để ảnh mặc
+-- định). Lúc đó giao diện dùng chữ cái đầu tên, đẹp hơn cái blob xanh mặc định.
+ALTER TABLE users ADD COLUMN discord_avatar text;

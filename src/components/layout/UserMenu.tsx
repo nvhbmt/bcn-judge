@@ -87,7 +87,7 @@ export function UserMenu() {
           open ? 'border-line bg-surface-code' : 'border-transparent hover:border-line hover:bg-surface-code'
         }`}
       >
-        <Avatar name={me.displayName} chars={1} />
+        <Avatar name={me.displayName} chars={1} src={me.avatarUrl} />
         <span className="hidden max-w-[10rem] truncate font-mono text-[13px] text-ink-2 sm:inline">
           {me.displayName}
         </span>

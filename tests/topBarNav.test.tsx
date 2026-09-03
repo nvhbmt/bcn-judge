@@ -25,6 +25,7 @@ function renderAs(role: Role) {
     role,
     mustChangePassword: false,
     discordUsername: null,
+  avatarUrl: null,
   }
   useAuth.setState({ me, loading: false })
   render(
