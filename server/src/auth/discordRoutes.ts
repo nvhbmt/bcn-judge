@@ -25,12 +25,13 @@
 import { randomBytes } from 'node:crypto'
 import { and, eq, isNull, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { config } from '../config'
 import { db } from '../db/pool'
 import { users } from '../db/schema'
 import { errors, ok } from '../lib/apiResponse'
 import { audit } from '../lib/audit'
 import { clientIp, rateLimit, readSessionCookie, setSessionCookie } from '../lib/http'
-import { authorizeUrl, discordEnabled, exchangeCodeForUser } from './discordApi'
+import { authorizeUrl, discordEnabled, exchangeCodeForUser, fetchGuildMember, guildGateOn } from './discordApi'
 import { requireAuth } from './middleware'
 import { createSession, resolveSession } from './session'
 
@@ -42,7 +43,18 @@ const STATE_TTL_SEC = 600
 type Intent = 'login' | 'link'
 
 /** Mã lý do đưa về SPA qua query `?discord=…`; chữ tiếng Việt do SPA dựng. */
-type Reason = 'tat' | 'state' | 'tu_choi' | 'loi' | 'chua_gan' | 'gan_nguoi_khac' | 'bi_khoa' | 'da_gan'
+type Reason =
+  | 'tat'
+  | 'state'
+  | 'tu_choi'
+  | 'loi'
+  | 'chua_gan'
+  | 'gan_nguoi_khac'
+  | 'bi_khoa'
+  | 'da_gan'
+  | 'ngoai_server'
+  | 'thieu_vai_tro'
+  | 'khong_kiem_duoc'
 
 function setStateCookie(c: Parameters<typeof setSessionCookie>[0], value: string, maxAgeSec: number): void {
   const parts = [
@@ -104,11 +116,30 @@ discordRoutes.get('/callback', async (c) => {
   const code = c.req.query('code')
   if (!code) return back(c, '/dang-nhap', 'loi')
 
-  const profile = await exchangeCodeForUser(code)
-  if (!profile) return back(c, '/dang-nhap', 'loi')
+  const phien = await exchangeCodeForUser(code)
+  if (!phien) return back(c, '/dang-nhap', 'loi')
 
-  return intent === 'link' ? await doLink(c, profile) : await doLogin(c, profile)
+  return intent === 'link'
+    ? await doLink(c, phien.user)
+    : await doLogin(c, phien.user, phien.accessToken)
 })
+
+/**
+ * Tư cách thành viên guild — `null` là qua cổng, còn lại là lý do chặn.
+ *
+ * Ba trạng thái của `fetchGuildMember` được xử KHÁC NHAU, và đó là điểm quan trọng:
+ * "Discord nói không phải thành viên" (404) là một câu trả lời, còn "không hỏi được
+ * Discord" (mạng hỏng) thì KHÔNG. Gộp hai thứ lại thành "chặn" nghĩa là một sự cố
+ * mạng sẽ khoá cả CLB ra ngoài; gộp lại thành "cho qua" thì một sự cố mạng mở toang
+ * cổng. Nên trạng thái thứ ba có mã riêng, và nó CHẶN — hỏng thì đóng, không mở.
+ */
+async function quaCongGuild(accessToken: string): Promise<Reason | null> {
+  const member = await fetchGuildMember(accessToken, config.discordGuildId)
+  if (member === 'loi') return 'khong_kiem_duoc'
+  if (member === null) return 'ngoai_server'
+  if (config.discordRoleId && !member.roles.includes(config.discordRoleId)) return 'thieu_vai_tro'
+  return null
+}
 
 async function doLink(
   c: Parameters<typeof setSessionCookie>[0],
@@ -133,6 +164,7 @@ async function doLink(
 async function doLogin(
   c: Parameters<typeof setSessionCookie>[0],
   profile: { id: string; username: string; email: string | null; verified: boolean },
+  accessToken: string,
 ): Promise<Response> {
   const byDiscord = await findLive(eq(users.discordId, profile.id))
 
@@ -142,7 +174,26 @@ async function doLogin(
     byDiscord || !profile.email || !profile.verified ? null : await findLive(eq(users.email, profile.email))
 
   const user = byDiscord ?? byEmail
-  if (!user) return back(c, '/dang-nhap', 'chua_gan')
+
+  /* Cổng guild áp cho AI:
+   *   - người CHƯA có tài khoản → quyết định có tạo hay không;
+   *   - tài khoản KHÔNG mật khẩu → đó là tài khoản do chính cổng này sinh ra, nên
+   *     rời server Discord là mất quyền vào. Đúng ý "server Discord là danh sách
+   *     thành viên".
+   * KHÔNG áp cho tài khoản CÓ mật khẩu: đó là tài khoản admin cấp tay, admin đã
+   * đứng ra bảo lãnh rồi — chuyện họ có ở trong server Discord hay không là việc
+   * khác. Không thì một mentor rời server Discord sẽ mất luôn nút đăng nhập.
+   */
+  if (guildGateOn() && (!user || !user.hasPassword)) {
+    const chan = await quaCongGuild(accessToken)
+    if (chan) return back(c, '/dang-nhap', chan)
+  }
+
+  if (!user) {
+    // Cổng guild TẮT thì giữ nguyên hành vi cũ: Discord không tạo tài khoản.
+    if (!guildGateOn()) return back(c, '/dang-nhap', 'chua_gan')
+    return await taoTaiKhoanTuGuild(c, profile)
+  }
   if (user.disabled) return back(c, '/dang-nhap', 'bi_khoa')
 
   // Gắn luôn ở lần khớp email đầu tiên: lần sau đăng nhập bằng discord_id, không
@@ -171,11 +222,69 @@ async function findLive(where: Parameters<typeof and>[0]) {
       id: users.id,
       disabled: users.disabled,
       discordUsername: users.discordUsername,
+      passwordHash: users.passwordHash,
     })
     .from(users)
     .where(and(where, isNull(users.deletedAt)))
     .limit(1)
-  return rows[0] ?? null
+  const row = rows[0]
+  return row ? { ...row, hasPassword: row.passwordHash !== null } : null
+}
+
+/**
+ * Tạo tài khoản cho người trong guild. CHỈ gọi sau khi `quaCongGuild` đã cho qua.
+ *
+ * Ba thứ cố định, không cấu hình được:
+ *   - vai trò LUÔN là `member`. Không có đường nào để một cú đăng nhập Discord sinh
+ *     ra mentor hay admin — nâng vai trò vẫn phải qua trang quản trị.
+ *   - KHÔNG ghi danh vào khoá nào. Người mới vào thấy trang chủ rỗng cho tới khi
+ *     mentor xếp lớp. Cổng guild trả lời "được vào nhà", không phải "được vào lớp".
+ *   - `mustChangePassword: false` — mặc định của cột là true, mà tài khoản này KHÔNG
+ *     CÓ mật khẩu để đổi. Để nguyên true thì middleware chặn mọi API và người ta kẹt
+ *     ở màn đổi mật khẩu, phải nhập "mật khẩu hiện tại" mà không ai từng cấp.
+ */
+async function taoTaiKhoanTuGuild(
+  c: Parameters<typeof setSessionCookie>[0],
+  profile: { id: string; username: string; email: string | null; verified: boolean },
+): Promise<Response> {
+  // Cột `email` là NOT NULL + UNIQUE. Discord không cho email (hoặc chưa xác minh)
+  // thì dựng địa chỉ theo id — không gửi thư tới được, và đó là chủ ý: nó chỉ đóng
+  // vai khoá định danh, không phải kênh liên lạc. Dùng email chưa xác minh làm khoá
+  // thì hai người khai trùng email sẽ đánh nhau ở ràng buộc UNIQUE.
+  const email = profile.email && profile.verified ? profile.email : `discord-${profile.id}@discord.local`
+
+  const rows = await db
+    .insert(users)
+    .values({
+      email,
+      displayName: profile.username,
+      role: 'member',
+      passwordHash: null,
+      hashAlgo: null,
+      mustChangePassword: false,
+      discordId: profile.id,
+      discordUsername: profile.username,
+      discordLinkedAt: sql`now()`,
+    })
+    .onConflictDoNothing()
+    .returning({ id: users.id })
+
+  const created = rows[0]
+  // Đụng UNIQUE nghĩa là email đó đã thuộc về một tài khoản khác mà nhánh khớp email
+  // ở trên không nhận (email chưa xác minh, hoặc tài khoản đã xoá mềm). Không ghi đè
+  // ai cả — trả về đúng câu "chưa gắn" để người ta đi hỏi mentor.
+  if (!created) return back(c, '/dang-nhap', 'chua_gan')
+
+  await audit(created.id, 'user.discord_provision', 'user', created.id, null, {
+    discordId: profile.id,
+    guildId: config.discordGuildId,
+  })
+
+  const session = await createSession(created.id, clientIp(c), c.req.header('user-agent') ?? null)
+  setSessionCookie(c, session.token, session.maxAgeSec)
+  await db.update(users).set({ lastLogin: sql`now()` }).where(eq(users.id, created.id))
+
+  return back(c, '/')
 }
 
 discordRoutes.post('/unlink', requireAuth, async (c) => {

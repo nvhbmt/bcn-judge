@@ -128,6 +128,37 @@ Một tài khoản gắn được Discord theo hai đường:
 Bỏ gắn ở `/tai-khoan`. Tài khoản **chưa có mật khẩu** thì bị chặn bỏ gắn — bỏ xong
 là không còn đường nào vào tài khoản của chính mình.
 
+### Cho cả server Discord vào thẳng (tuỳ chọn)
+
+Khai `DISCORD_GUILD_ID` là **đổi chính sách truy cập**, không phải bật một tiện ích:
+
+> Ai ở trong server Discord đó, đăng nhập bằng Discord sẽ được **tạo tài khoản
+> `member` ngay**, không cần mentor cấp. Danh sách thành viên CLB chuyển từ "admin
+> duyệt từng người" sang "ai vào được server Discord". **Link mời Discord công khai
+> ⇒ judge công khai.**
+
+Thêm `DISCORD_ROLE_ID` để siết một nấc: phải mang đúng role đó trong server mới vào
+được — dùng khi server Discord mở cho cả người ngoài CLB.
+
+Tài khoản do cổng này sinh ra luôn là `member`, **không được ghi danh khoá nào**
+(trang chủ rỗng cho tới khi mentor xếp lớp), và không có mật khẩu. Không có đường
+nào để một cú đăng nhập Discord sinh ra mentor hay admin.
+
+Cổng áp cho ai:
+
+| Tài khoản | Rời server Discord thì sao |
+|---|---|
+| Do cổng sinh ra (không mật khẩu) | Mất quyền vào — đúng ý "server là danh sách thành viên" |
+| Admin cấp tay (có mật khẩu) | Không ảnh hưởng — admin đã bảo lãnh khi tạo |
+
+Hỏi Discord không được (mạng hỏng, token sai) thì **chặn**, và báo bằng một mã
+riêng chứ không gộp vào "ngoài server": gộp thành cho-qua là một sự cố mạng mở toang
+cổng, gộp thành ngoài-server là báo oan người đang ở trong server.
+
+Scope xin là `guilds.members.read`, không phải `guilds`: `guilds` trả về danh sách
+**mọi** server người đó tham gia — dữ liệu riêng tư không liên quan gì tới việc họ
+có ở CLB hay không.
+
 ## Trạng thái
 
 | Phase | Nội dung | Trạng thái |

@@ -36,6 +36,21 @@ export const config = {
   discordClientSecret: process.env.DISCORD_CLIENT_SECRET ?? '',
   discordRedirectUri: process.env.DISCORD_REDIRECT_URI ?? '',
 
+  /**
+   * Chặn theo server Discord. RỖNG = tắt, và khi tắt thì hành vi y như trước:
+   * Discord chỉ xác thực tài khoản ĐÃ CÓ, không tạo ai cả.
+   *
+   * Khai vào là ĐỔI CHÍNH SÁCH TRUY CẬP: ai ở trong guild này mà đăng nhập Discord
+   * sẽ được TẠO tài khoản `member` ngay, không cần mentor cấp. Nghĩa là danh sách
+   * thành viên CLB chuyển từ "admin duyệt từng người" sang "ai vào được server
+   * Discord". Link mời Discord công khai ⇒ judge công khai.
+   *
+   * `DISCORD_ROLE_ID` (tuỳ chọn) siết thêm một nấc: phải mang đúng role đó trong
+   * guild mới được vào — dùng khi server Discord mở cho cả người ngoài CLB.
+   */
+  discordGuildId: process.env.DISCORD_GUILD_ID ?? '',
+  discordRoleId: process.env.DISCORD_ROLE_ID ?? '',
+
   /** Tài khoản admin khởi tạo cho seed. */
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL ?? 'admin@bcn.local',
   seedAdminPassword: process.env.SEED_ADMIN_PASSWORD ?? 'bcnjudge',

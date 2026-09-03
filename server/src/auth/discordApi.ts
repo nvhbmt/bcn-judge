@@ -1,10 +1,14 @@
 /**
  * Nói chuyện với Discord OAuth2 — tách khỏi route để test được mà không dựng HTTP.
  *
- * Chỉ xin hai scope: `identify` (lấy id + username) và `email`. KHÔNG xin `guilds`
- * hay `guilds.members.read`: hệ này không cấp tài khoản theo tư cách thành viên
- * server Discord, nên biết người ta ở trong những server nào là dữ liệu thừa —
- * và scope thừa là quyền thừa.
+ * Scope xin theo cấu hình, không xin thừa:
+ *   - luôn: `identify` (id + username) và `email`;
+ *   - chỉ khi có `DISCORD_GUILD_ID`: thêm `guilds.members.read`.
+ *
+ * `guilds.members.read` chứ KHÔNG phải `guilds`, dù `guilds` dễ dùng hơn: `guilds`
+ * trả về DANH SÁCH MỌI SERVER người đó tham gia — dữ liệu riêng tư không liên quan
+ * gì tới việc họ có ở CLB hay không. `guilds.members.read` phải nêu đích danh một
+ * guild, và chỉ trả về tư cách thành viên ở đúng guild đó.
  */
 import { config } from '../config'
 
@@ -17,12 +21,17 @@ export function discordEnabled(): boolean {
   return Boolean(config.discordClientId && config.discordClientSecret && config.discordRedirectUri)
 }
 
+/** Có chặn theo server Discord hay không — bật bằng cách khai `DISCORD_GUILD_ID`. */
+export function guildGateOn(): boolean {
+  return discordEnabled() && config.discordGuildId !== ''
+}
+
 export function authorizeUrl(state: string): string {
   const params = new URLSearchParams({
     client_id: config.discordClientId,
     redirect_uri: config.discordRedirectUri,
     response_type: 'code',
-    scope: 'identify email',
+    scope: guildGateOn() ? 'identify email guilds.members.read' : 'identify email',
     state,
     // Buộc Discord hỏi lại mỗi lần thay vì im lặng dùng lại uỷ quyền cũ. Máy dùng
     // chung ở CLB là chuyện thường, và `prompt=none` sẽ đăng nhập thẳng vào tài
@@ -47,7 +56,13 @@ export interface DiscordUser {
  * ném: đây là đường người dùng đang đi giữa chừng, và một stack trace 500 ở đây thì
  * họ chỉ thấy trang trắng. Route gọi hàm này sẽ đưa họ về màn đăng nhập kèm lý do.
  */
-export async function exchangeCodeForUser(code: string): Promise<DiscordUser | null> {
+export interface DiscordLogin {
+  user: DiscordUser
+  /** Giữ lại để hỏi tiếp tư cách thành viên guild; KHÔNG lưu xuống DB. */
+  accessToken: string
+}
+
+export async function exchangeCodeForUser(code: string): Promise<DiscordLogin | null> {
   try {
     const tokenRes = await fetch(TOKEN, {
       method: 'POST',
@@ -72,12 +87,42 @@ export async function exchangeCodeForUser(code: string): Promise<DiscordUser | n
     if (typeof me.id !== 'string' || me.id === '') return null
 
     return {
-      id: me.id,
-      username: typeof me.username === 'string' ? me.username : me.id,
-      email: typeof me.email === 'string' && me.email !== '' ? me.email : null,
-      verified: me.verified === true,
+      accessToken: token.access_token,
+      user: {
+        id: me.id,
+        username: typeof me.username === 'string' ? me.username : me.id,
+        email: typeof me.email === 'string' && me.email !== '' ? me.email : null,
+        verified: me.verified === true,
+      },
     }
   } catch {
     return null
+  }
+}
+
+/**
+ * Người này có ở trong guild đã cấu hình không, và mang những role nào.
+ *
+ * Discord trả 404 khi KHÔNG phải thành viên — đó là câu trả lời, không phải lỗi.
+ * Phân biệt rõ ba trạng thái, vì gộp lại thì một sự cố mạng sẽ bị đọc thành "người
+ * này không ở trong server" và khoá oan người đang ở trong đó:
+ *   - `{ roles }` — là thành viên;
+ *   - `null`      — chắc chắn KHÔNG phải thành viên (404);
+ *   - `'loi'`     — không biết (mạng hỏng, token sai, Discord lỗi).
+ */
+export async function fetchGuildMember(
+  accessToken: string,
+  guildId: string,
+): Promise<{ roles: string[] } | null | 'loi'> {
+  try {
+    const res = await fetch(`${ME}/guilds/${encodeURIComponent(guildId)}/member`, {
+      headers: { authorization: `Bearer ${accessToken}` },
+    })
+    if (res.status === 404) return null
+    if (!res.ok) return 'loi'
+    const body = (await res.json()) as { roles?: unknown }
+    return { roles: Array.isArray(body.roles) ? body.roles.filter((r): r is string => typeof r === 'string') : [] }
+  } catch {
+    return 'loi'
   }
 }
