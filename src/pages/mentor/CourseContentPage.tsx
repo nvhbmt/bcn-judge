@@ -82,7 +82,13 @@ export function CourseContentPage() {
         </Link>
         <h1 className="truncate font-display text-[16px] text-ink-1">{course.name}</h1>
         <span className="font-mono text-xs text-ink-6">{course.code}</span>
-        <Link to={`/khoa-hoc/${courseId}`} className="ml-auto text-sm text-[var(--color-primary)] hover:underline">
+        <Link
+          to={`/mentor/khoa-hoc/${courseId}/bai-nop`}
+          className="ml-auto text-sm text-[var(--color-primary)] hover:underline"
+        >
+          Bài nộp của học viên
+        </Link>
+        <Link to={`/khoa-hoc/${courseId}`} className="text-sm text-[var(--color-primary)] hover:underline">
           Xem như member
         </Link>
       </header>

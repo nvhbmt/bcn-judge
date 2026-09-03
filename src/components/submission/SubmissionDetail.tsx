@@ -1,5 +1,10 @@
 /**
- * Panel phải: chi tiết MỘT lượt nộp — CHỈ ĐỌC (FR-J3/J4).
+ * Panel phải: chi tiết MỘT lượt nộp — CHỈ ĐỌC.
+ *
+ * Dùng chung cho leader xem đồng đội (FR-J3/J4) và mentor xem học viên (FR-G3). Hai
+ * bên nhận dữ liệu từ hai endpoint khác nhau, nhưng thứ HIỆN RA thì giống hệt, nên
+ * `CodeView` chỉ nêu đúng những trường được vẽ — không buộc phía gọi phải có nguyên
+ * hình dạng của bên kia.
  *
  * Contest còn đang chạy thì source bị khoá tới giờ đóng: leader cũng là thí sinh, nên
  * cho họ đọc code của đồng đội giữa contest là mở một đường gian lận.
@@ -13,14 +18,24 @@
 import { useMemo } from 'react'
 import { highlightCode } from '@/components/markdown/render'
 import { EmptyState, VerdictBadge } from '@/components/ui'
-import type { LanguageOption } from '@/types/api'
-import type { TeamSubmissionRow } from './types'
+import type { LanguageOption, Verdict } from '@/types/api'
+
+export interface CodeView {
+  problemTitle: string | null
+  verdict: Verdict | null
+  score: number | null
+  languageId: string
+  receivedAt: string
+  source: string | null
+  /** Chỉ leader mới có khái niệm này (source bị hoãn tới hết contest). */
+  sourceEmbargoedUntil?: string | null
+}
 
 export function SubmissionDetail({
   submission,
   languages,
 }: {
-  submission: TeamSubmissionRow | null
+  submission: CodeView | null
   /** Để tra `cmMode` — chính bảng `languages` nói ngôn ngữ nào tô kiểu gì, không
    *  phải một bảng ánh xạ chép tay ở client sẽ lệch khi admin thêm ngôn ngữ. */
   languages: LanguageOption[]

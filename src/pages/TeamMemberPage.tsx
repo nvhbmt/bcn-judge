@@ -19,7 +19,7 @@ import { SplitPane } from '@/components/layout/SplitPane'
 import { EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import { MemberPicker } from './team/MemberPicker'
-import { SubmissionDetail } from './team/SubmissionDetail'
+import { SubmissionDetail } from '@/components/submission/SubmissionDetail'
 import type { LanguageOption } from '@/types/api'
 import type { TeamSubmissionRow, TeamView } from './team/types'
 

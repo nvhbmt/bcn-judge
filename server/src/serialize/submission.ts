@@ -223,9 +223,15 @@ export function toMentorResult(row: RawResultRow): MentorResultView {
   }
 }
 
-export function toMentorSubmission(row: RawSubmissionRow, results?: RawResultRow[]) {
+export function toMentorSubmission(
+  row: RawSubmissionRow,
+  results?: RawResultRow[],
+  /** Tên bài — danh sách chỉ có verdict + giờ thì không biết đang xem bài nào. */
+  opts: { problemTitle?: string | null } = {},
+) {
   return {
     ...toMemberSubmission(row, undefined, { includeSource: true }),
+    problemTitle: opts.problemTitle ?? null,
     userId: row.userId,
     contestId: row.contestId,
     itemId: row.itemId,

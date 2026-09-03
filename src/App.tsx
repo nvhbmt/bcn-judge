@@ -22,6 +22,7 @@ import { ContestEditorPage } from '@/pages/mentor/ContestEditorPage'
 import { ContestListPage } from '@/pages/mentor/ContestListPage'
 import { ContestStatsPage } from '@/pages/mentor/ContestStatsPage'
 import { CourseContentPage } from '@/pages/mentor/CourseContentPage'
+import { CourseSubmissionsPage } from '@/pages/mentor/CourseSubmissionsPage'
 import { ProblemEditorPage } from '@/pages/mentor/ProblemEditorPage'
 import { ProblemListPage } from '@/pages/mentor/ProblemListPage'
 import { TeamMemberPage } from '@/pages/TeamMemberPage'
@@ -128,6 +129,12 @@ function AppRoutes({ role }: { role: Me['role'] }) {
         <>
           {/* Một màn sửa khoá cho cả hai vai; tab nằm trong URL nên tải lại vẫn
               đúng chỗ. Không tab thì trang tự đưa về tab đầu mà vai này thấy được. */}
+          {/* Đặt TRƯỚC `/:tab` cho dễ đọc. React Router v6 xếp hạng theo độ cụ thể
+              (đoạn tĩnh thắng đoạn động) nên thứ tự không quyết định, nhưng để sau
+              thì người đọc phải tự suy ra luật xếp hạng mới biết cái nào thắng.
+              Là trang RIÊNG chứ không phải một tab: courseTabs.ts chốt "thấy tab
+              nghĩa là sửa được trong đó", mà đây là màn chỉ đọc. */}
+          <Route path="/mentor/khoa-hoc/:courseId/bai-nop" element={<CourseSubmissionsPage />} />
           <Route path="/mentor/khoa-hoc/:courseId" element={<CourseContentPage />} />
           <Route path="/mentor/khoa-hoc/:courseId/:tab" element={<CourseContentPage />} />
           <Route path="/mentor/contest" element={<ContestListPage />} />

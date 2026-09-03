@@ -89,18 +89,28 @@ mentorProgressRoutes.get('/:courseId/submissions', async (c) => {
   const itemId = c.req.query('itemId')
   const verdict = c.req.query('verdict')
 
-  const rows = await q<RawSubmissionRow & { received_at: string; finished_at: string | null; display_name: string }>(sql`
+  const rows = await q<
+    RawSubmissionRow & {
+      received_at: string
+      finished_at: string | null
+      display_name: string
+      problem_title: string | null
+    }
+  >(sql`
     SELECT s.id, s.kind, s.user_id AS "userId", s.problem_id AS "problemId", s.item_id AS "itemId",
            s.contest_id AS "contestId", s.contest_problem_id AS "contestProblemId",
            s.language_id AS "languageId", s.source, s.source_bytes AS "sourceBytes", s.status, s.verdict,
            s.passed_weight AS "passedWeight", s.total_weight AS "totalWeight", s.time_ms_max AS "timeMsMax",
            s.memory_kb_max AS "memoryKbMax", s.compile_output AS "compileOutput", s.received_at,
            s.finished_at, s.queued_ms AS "queuedMs", s.judge_ms AS "judgeMs", s.attempt,
-           u.display_name
+           u.display_name,
+           -- LEFT JOIN vì bài xoá mềm vẫn còn bài nộp trỏ tới.
+           p.title AS problem_title
     FROM submissions s
     JOIN items i ON i.id = s.item_id
     JOIN sections sec ON sec.id = i.section_id
     JOIN users u ON u.id = s.user_id
+    LEFT JOIN problems p ON p.id = s.problem_id
     WHERE sec.course_id = ${courseId} AND s.kind = 'submit'
       ${userId ? sql`AND s.user_id = ${userId}` : sql``}
       ${itemId ? sql`AND s.item_id = ${itemId}` : sql``}
@@ -111,7 +121,9 @@ mentorProgressRoutes.get('/:courseId/submissions', async (c) => {
   return ok(
     c,
     rows.map((r) => ({
-      ...toMentorSubmission({ ...r, receivedAt: r.received_at, finishedAt: r.finished_at }),
+      ...toMentorSubmission({ ...r, receivedAt: r.received_at, finishedAt: r.finished_at }, undefined, {
+        problemTitle: r.problem_title,
+      }),
       displayName: r.display_name,
     })),
   )

@@ -276,3 +276,55 @@ async function app_login(emailOrUsername: string, password: string) {
   })
   return { status: res.status, cookie: res.headers.get('set-cookie') ?? '' }
 }
+
+/**
+ * FR-G3: mentor đọc bài nộp của học viên trong khoá MÌNH PHỤ TRÁCH.
+ *
+ * Endpoint có sẵn ở server từ lâu nhưng SPA chưa từng gọi, nên nó cũng chưa từng có
+ * test quyền. Ba ô của ma trận được canh ở đây, và ô giữa là ô dễ sai nhất: mentor
+ * KHÁC khoá phải bị chặn, không thì "phụ trách khoá" chỉ còn là cái nhãn.
+ */
+describe.skipIf(!INTEGRATION)('FR-G3 · mentor đọc bài nộp trong khoá', () => {
+  let admin: TestUser
+  let mentorA: TestUser
+  let mentorB: TestUser
+  let hocVien: TestUser
+  let courseA: { id: string; code: string }
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    admin = await makeUser('admin')
+    mentorA = await makeUser('mentor')
+    mentorB = await makeUser('mentor')
+    hocVien = await makeUser('member')
+    courseA = await makeCourse(admin.id)
+    await assignMentor(courseA.id, mentorA.id)
+    await enroll(courseA.id, hocVien.id)
+  })
+
+  const doc = (as: TestUser) => call(`/api/mentor/courses/${courseA.id}/submissions?userId=${hocVien.id}`, { as })
+
+  it('mentor phụ trách đọc được', async () => {
+    const res = await doc(mentorA)
+    expect(res.status).toBe(200)
+    expect(Array.isArray(res.body.data)).toBe(true)
+  })
+
+  it('mentor KHÁC khoá thì không — "phụ trách khoá" phải có nghĩa', async () => {
+    expect((await doc(mentorB)).status).toBe(404)
+  })
+
+  it('admin đọc được (admin ngầm có mọi quyền của mentor, §3)', async () => {
+    expect((await doc(admin)).status).toBe(200)
+  })
+
+  it('học viên KHÔNG đọc được, kể cả bài của chính mình qua đường này', async () => {
+    // Có đường riêng cho member (/api/member/submissions). Đường của mentor mở ra cho
+    // member nghĩa là mở luôn bài của mọi người khác trong khoá.
+    expect((await doc(hocVien)).status).toBe(403)
+  })
+})

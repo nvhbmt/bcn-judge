@@ -138,3 +138,24 @@ test('trang sửa contest: hai khung, và khung bài nạp sẵn bài đang có 
   await expect(row.getByRole('button', { name: 'Đưa xuống dưới' })).toBeVisible()
   expect(errors).toEqual([])
 })
+
+test('mentor đọc được bài nộp của học viên trong khoá (FR-G3)', async ({ page }) => {
+  // Endpoint này có sẵn ở server từ lâu mà SPA chưa từng gọi — cả tính năng nằm đó
+  // không ai dùng được. Test đi đúng đường người dùng đi: từ màn sửa khoá bấm sang.
+  const { errors } = watchForErrors(page)
+  const res = await page.request.get('/api/mentor/courses', { headers: { 'x-api-response-version': '2' } })
+  const courses = (await res.json()).data as { id: string }[]
+  expect(courses.length).toBeGreaterThan(0)
+
+  await page.goto(`/mentor/khoa-hoc/${courses[0]!.id}/thong-tin`)
+  await page.getByRole('link', { name: 'Bài nộp của học viên' }).click()
+  await expect(page).toHaveURL(/\/bai-nop$/)
+
+  // Panel trái có học viên; bấm một người thì panel phải có mã ĐƯỢC TÔ MÀU.
+  const hocVien = page.locator('ul li button').first()
+  await expect(hocVien).toBeVisible()
+  await hocVien.click()
+  await expect(page.locator('.markdown-body [class^="hljs-"]').first()).toBeVisible({ timeout: 20_000 })
+
+  expect(errors).toEqual([])
+})
