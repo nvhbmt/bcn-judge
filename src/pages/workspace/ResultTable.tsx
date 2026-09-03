@@ -1,12 +1,23 @@
 /**
- * Bảng kết quả chấm dùng chung cho tab "kết quả" và tab "chạy thử".
+ * Kết quả chấm dùng chung cho tab "kết quả" và tab "chạy thử".
  *
- * Testcase mẫu sai thì mở thẳng bảng so output (kiểu LeetCode) ngay dưới dòng đó. Test
- * ẩn không bao giờ có stdout để mà so — NFR-2 chặn ở serializer, không phải ở đây.
+ * Bố cục theo kiểu bảng testcase của LeetCode: một dòng tổng kết, một dải chip mỗi test
+ * một chip, rồi chi tiết của ĐÚNG MỘT test bên dưới.
+ *
+ * Vì sao bỏ bảng cũ: bảng liệt kê mọi test rồi mở bảng so ngay dưới mỗi test sai, nên
+ * sai 5 test là 5 khối diff xếp chồng, lặp lại y nguyên tiêu đề "input / output của bạn
+ * / đáp án đúng". Chiều dài tăng theo số test sai, còn thứ đọc được vẫn chỉ là một khối
+ * tại một thời điểm. Dải chip trả lại cái mà bảng cũ làm tốt — nhìn một phát thấy toàn
+ * cảnh test nào đạt test nào trượt — mà không tốn chiều cao, và diff giữ nguyên.
+ *
+ * Mặc định mở test SAI ĐẦU TIÊN, vì đó là câu hỏi người ta mở panel này để hỏi. Test
+ * đúng thì mở ra cũng chỉ để xác nhận, không gấp.
  */
+import { useState } from 'react'
 import { VerdictBadge } from '@/components/ui'
 import type { ResultView, SampleIO, SubmissionView } from '@/types/api'
-import { OutputDiff } from './OutputDiff'
+import { VERDICT_LABEL } from '@/types/api'
+import { ResultCase } from './ResultCase'
 
 export function ResultTable({
   submission,
@@ -41,79 +52,135 @@ export function ResultTable({
     )
   }
 
+  // `key`: lượt chấm khác là câu hỏi khác, nên test đang chọn phải trở về mặc định.
+  return <Cases key={submission.id} submission={submission} results={results} samples={samples} compareMode={compareMode} />
+}
+
+function Cases({
+  submission,
+  results,
+  samples,
+  compareMode,
+}: {
+  submission: SubmissionView
+  results: ResultView[]
+  samples: SampleIO[]
+  compareMode: string
+}) {
+  const [picked, setPicked] = useState<number | null>(null)
+  const failed = results.find((r) => r.verdict !== 'AC')
+  const current = results.find((r) => r.position === picked) ?? failed ?? results[0]!
+
+  // Bàn phím: dải này tự nhận là tablist thì phải đi được bằng mũi tên, không thì lời
+  // hứa với trình đọc màn hình là hứa suông.
+  const move = (delta: number) => {
+    const i = results.findIndex((r) => r.position === current.position)
+    setPicked(results[(i + delta + results.length) % results.length]!.position)
+  }
+
   return (
-    <table className="w-full text-xs">
-      <thead className="text-left text-ink-5">
-        <tr>
-          <th className="py-1">Test</th>
-          <th>Verdict</th>
-          <th className="text-right">Thời gian</th>
-          <th className="text-right">Bộ nhớ</th>
-        </tr>
-      </thead>
-      <tbody className="font-mono">
+    <div className="flex flex-col gap-2">
+      <Summary submission={submission} results={results} />
+
+      <div
+        role="tablist"
+        aria-label="Testcase"
+        className="flex flex-wrap gap-1"
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            e.preventDefault()
+            move(e.key === 'ArrowRight' ? 1 : -1)
+          }
+        }}
+      >
         {results.map((r) => (
-          <ResultRow
+          <Chip
             key={r.position}
             result={r}
-            sample={samples.find((s) => s.position === r.position) ?? null}
-            compareMode={compareMode}
+            selected={r.position === current.position}
+            onSelect={() => setPicked(r.position)}
           />
         ))}
-      </tbody>
-    </table>
+      </div>
+
+      <div role="tabpanel" aria-label={`Chi tiết test #${current.position}`}>
+        <ResultCase
+          result={current}
+          sample={samples.find((s) => s.position === current.position) ?? null}
+          compareMode={compareMode}
+        />
+      </div>
+    </div>
   )
 }
 
-function ResultRow({
-  result,
-  sample,
-  compareMode,
-}: {
-  result: ResultView
-  sample: SampleIO | null
-  compareMode: string
-}) {
-  // Diff chỉ có ở testcase MẪU — test ẩn không bao giờ trả stdout (NFR-2).
-  const wrong = result.isSample && result.verdict === 'WA' && result.stdout !== undefined && result.stdout !== null
+/**
+ * Dòng tổng kết: bao nhiêu test đạt, và mốc thời gian / bộ nhớ CAO NHẤT.
+ *
+ * Cao nhất chứ không phải của test đang xem: giới hạn chấm áp lên test nặng nhất, nên
+ * "còn cách trần bao xa" chỉ trả lời được bằng con số lớn nhất trong cả lượt.
+ */
+function Summary({ submission, results }: { submission: SubmissionView; results: ResultView[] }) {
+  const passed = results.filter((r) => r.verdict === 'AC').length
+  const time = peak(results.map((r) => r.timeMs))
+  const mem = peak(results.map((r) => r.memoryKb))
 
   return (
-    <>
-      <tr className="border-t border-line">
-        <td className="py-1">
-          #{result.position}{' '}
-          {result.isSample ? <span className="text-ink-6">mẫu</span> : <span className="text-ink-6">ẩn</span>}
-        </td>
-        <td>
-          <VerdictBadge tone="soft" verdict={result.verdict} />
-          {result.detail ? <span className="ml-1 text-ink-6">{result.detail}</span> : null}
-        </td>
-        <td className="text-right tabular-nums">{result.timeMs ?? '—'} ms</td>
-        <td className="text-right tabular-nums">{result.memoryKb ? `${Math.round(result.memoryKb / 1024)} MB` : '—'}</td>
-      </tr>
-
-      {wrong ? (
-        <tr>
-          <td colSpan={4} className="pb-2">
-            {sample?.expected != null ? (
-              <OutputDiff
-                position={result.position}
-                input={sample.input}
-                got={result.stdout ?? ''}
-                want={sample.expected}
-                compareMode={compareMode}
-              />
-            ) : (
-              // Không ghép được testcase mẫu (bài trong contest có thể không công bố
-              // mẫu) thì vẫn đưa output ra, chứ không nuốt mất thông tin duy nhất có.
-              <pre className="overflow-x-auto border border-line bg-surface-2 p-2 whitespace-pre-wrap">
-                Output của bạn: {result.stdout || '(rỗng)'}
-                {result.firstDiffLine ? `\nKhác từ dòng ${result.firstDiffLine}` : ''}
-              </pre>
-            )}
-          </td>
-        </tr>
-      ) : null}
-    </>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <VerdictBadge verdict={submission.verdict} pending={submission.status !== 'done'} />
+      <span className="num font-mono text-[13px] text-ink-3">
+        {passed}/{results.length} test đạt
+      </span>
+      <span className="num ml-auto font-mono text-[12px] text-ink-6">
+        cao nhất: {time === null ? '—' : `${time} ms`} · {mem === null ? '—' : formatMemory(mem)}
+      </span>
+    </div>
   )
+}
+
+function Chip({
+  result,
+  selected,
+  onSelect,
+}: {
+  result: ResultView
+  selected: boolean
+  onSelect: () => void
+}) {
+  const ok = result.verdict === 'AC'
+  const color = `var(--verdict-${result.verdict.toLowerCase()})`
+
+  return (
+    <button
+      role="tab"
+      aria-selected={selected}
+      // Nhãn đầy đủ cho trình đọc màn hình: trên màn hình chip chỉ có số và một dấu,
+      // còn "mẫu hay ẩn" với "verdict nào" thì nằm ở màu — thứ không đọc thành lời được.
+      aria-label={`Test ${result.position}, ${result.isSample ? 'mẫu' : 'ẩn'}, ${VERDICT_LABEL[result.verdict]}`}
+      tabIndex={selected ? 0 : -1}
+      onClick={onSelect}
+      style={{
+        color,
+        borderColor: selected ? color : 'var(--line)',
+        background: selected ? `var(--verdict-${result.verdict.toLowerCase()}-soft)` : 'transparent',
+      }}
+      // Nét đứt cho test ẩn: khác biệt này có thật (bấm vào không có gì để so) nên nói
+      // trước ở chip, đỡ hơn để người ta bấm vào rồi mới biết.
+      className={`num border px-2 py-0.5 font-mono text-[12px] transition-colors duration-[120ms] ease-linear ${
+        result.isSample ? '' : 'border-dashed'
+      } ${selected ? 'font-semibold' : 'hover:bg-surface-sel'}`}
+    >
+      {/* Không chỉ dựa vào màu: dấu ✓/✗ đọc được cả khi không phân biệt được màu. */}
+      {ok ? '✓' : '✗'} {result.position}
+    </button>
+  )
+}
+
+function peak(values: (number | null)[]): number | null {
+  const nums = values.filter((v): v is number => v !== null)
+  return nums.length === 0 ? null : Math.max(...nums)
+}
+
+function formatMemory(kb: number): string {
+  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`
 }

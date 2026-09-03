@@ -137,11 +137,14 @@ test('chạy thử trên testcase mẫu, không tính vào lịch sử nộp (FR
   // Bám vào chính BẢNG kết quả, không phải vào một con số nào đó có trên màn hình:
   // bản trước khẳng định "thấy chữ 8" trong khi 8 đã nằm sẵn ở khối ví dụ của đề từ
   // trước lúc bấm, nên nó xanh kể cả khi nút Chạy thử không làm gì cả.
-  const console_ = page.locator('[role="tablist"]').last()
+  const console_ = page.getByRole('tablist', { name: 'Bảng điều khiển' })
   await expect(console_.getByRole('tab', { name: 'chạy thử' })).toHaveAttribute('aria-selected', 'true')
-  const row = page.getByRole('row').filter({ hasText: '#1' }).first()
-  await expect(row).toContainText('mẫu')
-  await expect(row.getByText(nhanVerdict('AC'))).toBeVisible({ timeout: 60_000 })
+
+  // Chip của test #1 mang đủ ba tin trong nhãn trợ năng: số test, mẫu hay ẩn, verdict.
+  // Trên màn hình hai tin sau nằm ở màu và nét viền — thứ không đọc thành lời được.
+  const chip = page.getByRole('tab', { name: /^Test 1,/ })
+  await expect(chip).toBeVisible({ timeout: 60_000 })
+  await expect(chip).toHaveAccessibleName(`Test 1, mẫu, ${nhanVerdict('AC')}`)
 })
 
 test('tab stdin tự nhập: gõ input, chạy và đọc output ngay tại chỗ', async ({ page }) => {
@@ -167,8 +170,9 @@ test('testcase mẫu sai thì chỉ ra đúng chỗ lệch, không bắt tự d�
 
   await page.getByRole('button', { name: 'Chạy thử' }).click()
 
-  // Bài mẫu có HAI testcase mẫu và cả hai đều sai, nên trên màn hình có hai bảng so
-  // giống hệt nhau — chỉ đích danh bảng của test #1 bằng tên trợ năng của nó.
+  // Cả hai testcase mẫu đều sai, nhưng chỉ MỘT bảng so được mở — bảng của test sai đầu
+  // tiên, tức #1. Vẫn gọi đích danh bằng tên trợ năng: nếu mặc định trôi sang test khác
+  // thì test này phải đỏ, chứ không được lặng lẽ soi nhầm bảng.
   const diff = page.getByRole('group', { name: 'So output testcase mẫu #1' })
   await expect(diff).toBeVisible({ timeout: 60_000 })
   await expect(diff.getByText('khác từ dòng 1')).toBeVisible()

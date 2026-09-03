@@ -64,7 +64,10 @@ export function ConsolePanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-surface-1">
-      <div role="tablist" className="flex shrink-0 items-center border-b border-line">
+      {/* Có tên hẳn hoi: dải chip testcase bên trong tab "kết quả" cũng là một tablist,
+          nên trên màn hình có hai dải. Không đặt tên thì "dải tab" là câu hỏi mơ hồ với
+          cả trình đọc màn hình lẫn test tự động. */}
+      <div role="tablist" aria-label="Bảng điều khiển" className="flex shrink-0 items-center border-b border-line">
         {TABS.map((t) => (
           <button
             key={t.id}
