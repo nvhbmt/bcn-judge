@@ -22,6 +22,7 @@ import { memberTeamRoutes } from './routes/member/teams'
 import { mentorContentRoutes } from './routes/mentor/content'
 import { mentorContestRoutes } from './routes/mentor/contests'
 import { mentorCourseRoutes } from './routes/mentor/courses'
+import { mentorMemberRoutes } from './routes/mentor/members'
 import { mentorProblemRoutes } from './routes/mentor/problems'
 import { mentorProgressRoutes } from './routes/mentor/progress'
 
@@ -52,6 +53,7 @@ export function createApp(): Hono {
   mentor.use('*', requireAuth, requireStaff)
   // Prefix cụ thể trước prefix chung: /courses/:id/progress phải khớp trước
   // handler /courses/:id của mentorCourseRoutes (§5, thứ tự mount có ý nghĩa).
+  mentor.route('/members', mentorMemberRoutes)
   mentor.route('/courses', mentorContentRoutes)
   mentor.route('/courses', mentorProgressRoutes)
   mentor.route('/courses', mentorCourseRoutes)

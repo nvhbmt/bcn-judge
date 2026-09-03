@@ -328,3 +328,56 @@ describe.skipIf(!INTEGRATION)('FR-G3 · mentor đọc bài nộp trong khoá', (
     expect((await doc(hocVien)).status).toBe(403)
   })
 })
+
+/**
+ * FR-B3: mentor tìm member để ghi danh (`GET /api/mentor/members`).
+ *
+ * Đường riêng cho mentor vì `/api/admin/users` là requireAdmin — mentor mở ô chọn ra
+ * là 403, dù ma trận §3 cho họ ghi danh vào khoá mình phụ trách. Bề mặt hẹp hơn hẳn
+ * đường của admin, và bộ test này canh đúng chỗ hẹp đó.
+ */
+describe.skipIf(!INTEGRATION)('FR-B3 · mentor tìm member để ghi danh', () => {
+  let admin: TestUser
+  let mentor: TestUser
+  let member: TestUser
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    admin = await makeUser('admin')
+    mentor = await makeUser('mentor')
+    member = await makeUser('member', { email: 'tim-thay-toi@test.local' })
+  })
+
+  it('mentor tìm được theo email', async () => {
+    const res = await call('/api/mentor/members?q=tim-thay-toi', { as: mentor })
+    expect(res.status).toBe(200)
+    expect(res.body.data.map((u: { id: string }) => u.id)).toContain(member.id)
+  })
+
+  it('KHÔNG có q thì trả rỗng — liệt kê sạch danh bạ không phải việc của ô chọn', async () => {
+    const res = await call('/api/mentor/members', { as: mentor })
+    expect(res.body.data).toEqual([])
+  })
+
+  it('chỉ trả MEMBER, không trả mentor hay admin', async () => {
+    // Ô chọn này để ghi danh học viên. Trả cả mentor/admin là mời ghi danh nhầm vai.
+    const res = await call('/api/mentor/members?q=test.local', { as: mentor })
+    const ids = res.body.data.map((u: { id: string }) => u.id)
+    expect(ids).toContain(member.id)
+    expect(ids).not.toContain(mentor.id)
+    expect(ids).not.toContain(admin.id)
+  })
+
+  it('chỉ trả id/email/tên — không rò disabled, lastLogin hay mustChangePassword', async () => {
+    const res = await call('/api/mentor/members?q=tim-thay-toi', { as: mentor })
+    expect(Object.keys(res.body.data[0]).sort()).toEqual(['displayName', 'email', 'id'])
+  })
+
+  it('member không gọi được', async () => {
+    expect((await call('/api/mentor/members?q=a', { as: member })).status).toBe(403)
+  })
+})

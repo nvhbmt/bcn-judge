@@ -9,7 +9,7 @@ import type { FormEvent } from 'react'
 import { Button, SectionRule } from '@/components/ui'
 import { api } from '@/lib/api'
 import { describeFailure, type FailureNotice } from './conflicts'
-import type { AdminUser } from './types'
+import type { PickableUser } from './UserPicker'
 import { Field, FailureBanner, TextArea, TextInput } from './ui'
 import { UserPicker } from './UserPicker'
 
@@ -17,7 +17,7 @@ export function TeamCreateForm({ onDone }: { onDone: () => void }) {
   const client = useQueryClient()
   const [name, setName] = useState('')
   const [descriptionMd, setDescriptionMd] = useState('')
-  const [leader, setLeader] = useState<AdminUser | null>(null)
+  const [leader, setLeader] = useState<PickableUser | null>(null)
   const [notice, setNotice] = useState<FailureNotice | null>(null)
 
   const create = useMutation({

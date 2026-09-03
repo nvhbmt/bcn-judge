@@ -1,5 +1,5 @@
 /** Khoá học dưới góc nhìn mentor — quyền theo TỪNG khoá được gán (ma trận §3). */
-import { and, asc, eq, sql } from 'drizzle-orm'
+import { and, asc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { z } from 'zod'
 import { isCourseStaff } from '../../auth/middleware'

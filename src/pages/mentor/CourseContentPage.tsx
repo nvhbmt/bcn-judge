@@ -14,73 +14,81 @@
  * ẩn hẳn thay vì hiện ra rồi khoá. Bảng ai-thấy-gì nằm ở `courseTabs.ts` và phải khớp
  * ma trận quyền ở server.
  */
-import { ArrowLeft } from 'lucide-react'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import { SplitPane } from '@/components/layout/SplitPane'
-import { EmptyState, SectionRule, Spinner } from '@/components/ui'
-import { CourseEnrollments } from '@/pages/admin/CourseEnrollments'
-import { CourseForm } from '@/pages/admin/CourseForm'
-import { CourseMentors } from '@/pages/admin/CourseMentors'
-import { useAdminCourse } from '@/pages/admin/useAdminLists'
-import { useAuth } from '@/stores/auth'
-import { CourseInfoPanel } from './CourseInfoPanel'
-import { CourseSyllabusTab } from './CourseSyllabusTab'
-import { CourseTabRail } from './CourseTabRail'
-import { resolveTab, tabsFor } from './courseTabs'
-import { useCourseDescription, useCourseMentors, useMentorCourse } from './useCourseContent'
-import { readApiMessage } from './publishGate'
-import { useState } from 'react'
+import { SplitPane } from "@/components/layout/SplitPane";
+import { EmptyState, SectionRule, Spinner } from "@/components/ui";
+import { CourseEnrollments } from "@/pages/admin/CourseEnrollments";
+import { CourseForm } from "@/pages/admin/CourseForm";
+import { CourseMentors } from "@/pages/admin/CourseMentors";
+import { useAdminCourse } from "@/pages/admin/useAdminLists";
+import { useAuth } from "@/stores/auth";
+import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { CourseInfoPanel } from "./CourseInfoPanel";
+import { CourseSyllabusTab } from "./CourseSyllabusTab";
+import { CourseTabRail } from "./CourseTabRail";
+import { resolveTab, tabsFor } from "./courseTabs";
+import { readApiMessage } from "./publishGate";
+import {
+  useCourseDescription,
+  useCourseMentors,
+  useMentorCourse,
+} from "./useCourseContent";
 
 export function CourseContentPage() {
-  const { courseId = '', tab: rawTab } = useParams()
-  const navigate = useNavigate()
-  const role = useAuth((s) => s.me?.role)
-  const tabs = tabsFor(role)
-  const tab = resolveTab(rawTab, tabs)
+  const { courseId = "", tab: rawTab } = useParams();
+  const navigate = useNavigate();
+  const role = useAuth((s) => s.me?.role);
+  const tabs = tabsFor(role);
+  const tab = resolveTab(rawTab, tabs);
 
-  const { data: course, isLoading, isError } = useMentorCourse(courseId)
-  const { data: mentors } = useCourseMentors(courseId)
-  const saveDescription = useCourseDescription(courseId)
-  const [descError, setDescError] = useState<string | null>(null)
-  const [descSaved, setDescSaved] = useState(false)
+  const { data: course, isLoading, isError } = useMentorCourse(courseId);
+  const { data: mentors } = useCourseMentors(courseId);
+  const saveDescription = useCourseDescription(courseId);
+  const [descError, setDescError] = useState<string | null>(null);
+  const [descSaved, setDescSaved] = useState(false);
 
   // Form đầy đủ của admin cần dòng `courses` bản admin (có `mentorCount`…), thứ chỉ
   // danh sách admin mới trả. Mentor không gọi được endpoint đó nên `found` là undefined
   // — và đúng như vậy: mentor không có form đầy đủ để dựng.
-  const { found: adminCourse } = useAdminCourse(courseId, role === 'admin')
+  const { found: adminCourse } = useAdminCourse(courseId, role === "admin");
 
-  if (rawTab === undefined) return <Navigate to={`/mentor/khoa-hoc/${courseId}/${tab}`} replace />
+  if (rawTab === undefined)
+    return <Navigate to={`/mentor/khoa-hoc/${courseId}/${tab}`} replace />;
 
   if (isLoading) {
     return (
       <div className="grid h-full place-items-center">
         <Spinner />
       </div>
-    )
+    );
   }
   if (isError || !course) {
     return (
       <div className="mx-auto w-full max-w-5xl px-7 py-8">
-        <Link to="/" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-5 hover:underline">
-          <ArrowLeft size={15} /> Trang chủ
-        </Link>
-        <EmptyState title="Không mở được khoá học" hint="Kiểm tra bạn có phụ trách khoá này không." />
+        <EmptyState
+          title="Không mở được khoá học"
+          hint="Kiểm tra bạn có phụ trách khoá này không."
+        />
       </div>
-    )
+    );
   }
 
-  const active = tabs.find((t) => t.id === tab)!
+  const active = tabs.find((t) => t.id === tab)!;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-line px-4 py-2">
         <Link
-          to={role === 'admin' ? '/quan-tri/khoa-hoc' : '/'}
+          to={role === "admin" ? "/quan-tri/khoa-hoc" : "/"}
           className="inline-flex items-center gap-1 text-sm text-ink-5 hover:underline"
         >
-          <ArrowLeft size={15} /> {role === 'admin' ? 'Danh sách khoá học' : 'Trang chủ'}
+          <ArrowLeft size={15} />{" "}
+          {role === "admin" ? "Danh sách khoá học" : "Trang chủ"}
         </Link>
-        <h1 className="truncate font-display text-[16px] text-ink-1">{course.name}</h1>
+        <h1 className="truncate font-display text-[16px] text-ink-1">
+          {course.name}
+        </h1>
         <span className="font-mono text-xs text-ink-6">{course.code}</span>
         <Link
           to={`/mentor/khoa-hoc/${courseId}/bai-nop`}
@@ -88,7 +96,10 @@ export function CourseContentPage() {
         >
           Bài nộp của học viên
         </Link>
-        <Link to={`/khoa-hoc/${courseId}`} className="text-sm text-[var(--color-primary)] hover:underline">
+        <Link
+          to={`/khoa-hoc/${courseId}`}
+          className="text-sm text-[var(--color-primary)] hover:underline"
+        >
           Xem như member
         </Link>
       </header>
@@ -100,16 +111,23 @@ export function CourseContentPage() {
           minPx={380}
           left={
             <div className="flex h-full min-h-0 flex-col sm:flex-row">
-              <CourseTabRail courseId={courseId} tabs={tabs} />
+              <CourseTabRail
+                courseId={courseId}
+                tabs={tabs}
+                active={active.id}
+              />
               <div className="min-h-0 flex-1 overflow-auto px-5 py-4">
                 <SectionRule label={active.label} />
                 <p className="mt-1 mb-4 text-xs text-ink-5">{active.hint}</p>
 
-                {tab === 'thong-tin' ? (
-                  role === 'admin' && adminCourse ? (
+                {tab === "thong-tin" ? (
+                  role === "admin" && adminCourse ? (
                     // `onDone` chạy cả khi lưu xong lẫn khi bấm Huỷ. Để no-op thì "Huỷ"
                     // thành nút chết, nên cả hai đưa về danh sách — đúng như màn sửa cũ.
-                    <CourseForm course={adminCourse} onDone={() => navigate('/quan-tri/khoa-hoc')} />
+                    <CourseForm
+                      course={adminCourse}
+                      onDone={() => navigate("/quan-tri/khoa-hoc")}
+                    />
                   ) : (
                     <CourseInfoPanel
                       key={course.id}
@@ -119,21 +137,29 @@ export function CourseContentPage() {
                       saved={descSaved}
                       error={descError}
                       onSave={(descriptionMd) => {
-                        setDescError(null)
-                        setDescSaved(false)
+                        setDescError(null);
+                        setDescSaved(false);
                         saveDescription.mutate(descriptionMd, {
                           onSuccess: () => setDescSaved(true),
-                          onError: (err) => setDescError(readApiMessage(err, 'Không lưu được mô tả khoá.')),
-                        })
+                          onError: (err) =>
+                            setDescError(
+                              readApiMessage(err, "Không lưu được mô tả khoá."),
+                            ),
+                        });
                       }}
                     />
                   )
                 ) : null}
 
-                {tab === 'ghi-danh' ? (
-                  <CourseEnrollments courseId={courseId} scope={role === 'admin' ? 'admin' : 'mentor'} />
+                {tab === "ghi-danh" ? (
+                  <CourseEnrollments
+                    courseId={courseId}
+                    scope={role === "admin" ? "admin" : "mentor"}
+                  />
                 ) : null}
-                {tab === 'mentor' ? <CourseMentors courseId={courseId} /> : null}
+                {tab === "mentor" ? (
+                  <CourseMentors courseId={courseId} />
+                ) : null}
               </div>
             </div>
           }
@@ -149,5 +175,5 @@ export function CourseContentPage() {
         />
       </div>
     </div>
-  )
+  );
 }

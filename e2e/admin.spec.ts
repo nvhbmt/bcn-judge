@@ -47,7 +47,12 @@ test('trang Khoá học: đếm member đúng và có lối sang màn soạn n�
   await row.getByRole('link', { name: 'Sửa' }).click()
   await expect(page).toHaveURL(/\/mentor\/khoa-hoc\/[0-9a-f-]{36}\/thong-tin$/)
   const rail = page.getByRole('navigation', { name: 'Phần của khoá học' })
-  await expect(rail.getByRole('link')).toHaveText(['Thông tin', 'Ghi danh', 'Mentor'])
+  // Thanh nay là ICON: chữ nằm ở `aria-label`, không phải nội dung thẻ — khẳng định
+  // đi qua TÊN TRỢ NĂNG, cũng là thứ người dùng trình đọc màn hình nghe thấy.
+  await expect(rail.getByRole('link')).toHaveCount(3)
+  for (const ten of ['Thông tin', 'Ghi danh', 'Mentor']) {
+    await expect(rail.getByRole('link', { name: ten })).toBeVisible()
+  }
 
   // Giáo trình là panel PHẢI cố định — có mặt ở mọi tab, không phải bấm mới ra.
   await expect(page.getByLabel('Chương mới')).toBeVisible()

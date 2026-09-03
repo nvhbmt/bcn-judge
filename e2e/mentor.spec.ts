@@ -64,9 +64,9 @@ test('soạn bài mới → nạp testcase → kiểm bằng lời giải mẫu 
 
 test('trang sửa khoá: tab bên trái theo quyền, giáo trình là panel bên phải', async ({ page }) => {
   const { errors } = watchForErrors(page)
-  // Vào thẳng bằng URL: mentor KHÔNG được ghi danh khoá nào nên trang chủ liệt kê
-  // "0 khoá", và thanh điều hướng chưa có mục nào dẫn tới màn soạn khoá. Lấy id qua
-  // chính API mentor thay vì cắm cứng — dữ liệu mẫu có thể đổi id giữa các lần dựng.
+  // Lấy id qua chính API mentor thay vì cắm cứng — dữ liệu mẫu có thể đổi id giữa các
+  // lần dựng. (Trang chủ nay CÓ mục "Khoá bạn phụ trách" dẫn tới đây; test này vào
+  // thẳng bằng URL để chỉ kiểm màn sửa khoá, không kéo theo trang chủ.)
   const res = await page.request.get('/api/mentor/courses', {
     headers: { 'x-api-response-version': '2' },
   })
@@ -77,8 +77,15 @@ test('trang sửa khoá: tab bên trái theo quyền, giáo trình là panel bê
 
   // Mentor CHỈ thấy hai tab: "Mentor" bị ẩn vì mentor chỉ đọc được danh sách mentor,
   // không gán/gỡ được. Thấy tab nghĩa là sửa được trong đó.
+  //
+  // Thanh nay là ICON nên chữ nằm ở `aria-label`, không phải nội dung thẻ — khẳng
+  // định phải đi qua TÊN TRỢ NĂNG, và đó cũng chính là thứ người dùng trình đọc màn
+  // hình nghe thấy.
   const rail = page.getByRole('navigation', { name: 'Phần của khoá học' })
-  await expect(rail.getByRole('link')).toHaveText(['Thông tin', 'Ghi danh'])
+  await expect(rail.getByRole('link')).toHaveCount(2)
+  await expect(rail.getByRole('link', { name: 'Thông tin' })).toBeVisible()
+  await expect(rail.getByRole('link', { name: 'Ghi danh' })).toBeVisible()
+  await expect(rail.getByRole('link', { name: 'Mentor' })).toHaveCount(0)
 
   // Khung TRÁI — thông tin khoá. Ô mô tả phải mang mô tả THẬT: panel giữ nó trong
   // state một lần, nên dựng trước khi tải xong là ô rỗng và bấm lưu sẽ xoá mất.

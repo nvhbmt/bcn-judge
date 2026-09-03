@@ -12,7 +12,8 @@
  *    không có trạng thái hover để đọc nhãn trước khi bấm.
  */
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import type { ComponentPropsWithoutRef, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 
 /** Nhãn tạm sau khi chạm sống bao lâu (ms) — "vài giây" của FR-E7. */
 const TOUCH_LABEL_MS = 2000
@@ -32,6 +33,14 @@ export interface RailItem {
    * một panel nội dung nữa.
    */
   atBottom?: boolean
+  /**
+   * Có URL riêng thì mục này là LIÊN KẾT thật (`<a>`), không phải nút.
+   *
+   * Màn sửa khoá dùng nhánh đó: mỗi phần có URL riêng nên tải lại trang vẫn ở đúng
+   * chỗ, gửi link cho đồng nghiệp thì họ mở ra đúng chỗ mình đang nói, và chuột giữa
+   * mở được tab mới. Khu làm bài thì ngược lại — panel không có URL nên nó là nút.
+   */
+  href?: string
 }
 
 export interface IconRailProps {
@@ -42,10 +51,47 @@ export interface IconRailProps {
    * không tự ép chọn một mục khi nhận null.
    */
   activeKey: string | null
+  /** Chỉ gọi cho mục KHÔNG có `href`; mục có href thì router lo việc điều hướng. */
   onSelect: (key: string) => void
+  /** Nhãn trợ năng của cả thanh — mỗi màn dùng nó cho một việc khác nhau. */
+  ariaLabel?: string
 }
 
-export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
+/**
+ * Một ô của thanh: `<Link>` khi mục có URL riêng, `<button>` khi không.
+ *
+ * Tách ra để phần tooltip/badge/trạng thái chỉ có MỘT bản — nếu chép thành hai thanh
+ * riêng thì phần xử lý chạm (nhãn tự tắt sau 2s) sẽ trôi lệch giữa hai chỗ, mà đó
+ * đúng là đoạn khó nhất ở đây.
+ */
+function Item({
+  item,
+  onSelect,
+  className,
+  children,
+  ...rest
+}: {
+  item: RailItem
+  onSelect: () => void
+  className: string
+  children: ReactNode
+} & Omit<ComponentPropsWithoutRef<'button'>, 'onSelect' | 'className' | 'children'>) {
+  if (item.href !== undefined) {
+    const { type: _type, ...linkProps } = rest as Record<string, unknown>
+    return (
+      <Link to={item.href} className={className} {...linkProps}>
+        {children}
+      </Link>
+    )
+  }
+  return (
+    <button type="button" className={className} onClick={onSelect} {...rest}>
+      {children}
+    </button>
+  )
+}
+
+export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hướng khu làm bài' }: IconRailProps) {
   const tipIdBase = useId()
   // Tách hover/focus khỏi chạm: nhãn do chạm phải tự tắt theo giờ, còn hover tắt theo con trỏ.
   const [pointedKey, setPointedKey] = useState<string | null>(null)
@@ -61,7 +107,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
 
   useEffect(() => clearTouchTimer, [clearTouchTimer])
 
-  const onPointerDown = (e: ReactPointerEvent<HTMLButtonElement>, key: string) => {
+  const onPointerDown = (e: ReactPointerEvent<Element>, key: string) => {
     if (e.pointerType !== 'touch') return
     clearTouchTimer()
     // Chạm xong, di động còn bắn tiếp mouseenter/focus giả lập; nhường hẳn quyền hiện nhãn cho
@@ -84,7 +130,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
 
   return (
     <nav
-      aria-label="Điều hướng khu làm bài"
+      aria-label={ariaLabel}
       data-testid="icon-rail"
       // 48px cố định (w-12) — FR-E1 tính phần còn lại cho hai khung dựa trên con số này.
       className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface-2 py-2"
@@ -101,14 +147,15 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
           const hasBadge = typeof item.badge === 'number' && item.badge > 0
           return (
             <li key={item.key} className="relative">
-              <button
-                type="button"
+              <Item
+                item={item}
                 // aria-label đè nội dung con, nên số badge phải nằm trong chính nhãn này
                 // thì trình đọc màn hình mới đọc được.
                 aria-label={hasBadge ? `${item.label} (${item.badge})` : item.label}
                 title={item.label}
                 aria-current={isActive ? 'page' : undefined}
                 data-testid={`rail-item-${item.key}`}
+                onSelect={() => onSelect(item.key)}
                 // Kích thước 56×44 và vạch TRONG 2px bên trái theo bản vẽ (màn 04).
                 // `shadow-[inset_…]` ở đây không phải bóng đổ — hệ thiết kế không có
                 // bóng — mà là cách CSS duy nhất vẽ một vạch nằm BÊN TRONG mép trái mà
@@ -118,8 +165,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                     ? 'bg-surface-sel text-moss shadow-[inset_2px_0_0_var(--moss)]'
                     : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2'
                 }`}
-                onClick={() => onSelect(item.key)}
-                onPointerDown={(e) => onPointerDown(e, item.key)}
+                onPointerDown={(e: ReactPointerEvent) => onPointerDown(e, item.key)}
                 onMouseEnter={() => showByPointer(item.key)}
                 onMouseLeave={() => setPointedKey((k) => (k === item.key ? null : k))}
                 onFocus={() => showByPointer(item.key)}
@@ -137,7 +183,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                     {item.badge}
                   </span>
                 ) : null}
-              </button>
+              </Item>
 
               {/*
                 Tooltip cố ý **không** nối bằng aria-describedby: nội dung nó trùng hệt aria-label

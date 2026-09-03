@@ -5,6 +5,10 @@
  * Không dùng `<select>` liệt kê hết: `GET /users` trả tối đa 500 dòng, và một
  * CLB vài trăm thành viên thì cuộn `<select>` là vô vọng. Lọc phía server bằng
  * tham số `q` (ILIKE trên email và họ tên) nên danh sách luôn ngắn.
+ *
+ * `scope` chọn ĐƯỜNG API theo vai. `/api/admin/users` là requireAdmin, nên mentor
+ * dùng nó là 403 dù họ ghi danh được cho khoá mình phụ trách (§3); đường của mentor
+ * (`/api/mentor/members`) hẹp hơn — chỉ member, chỉ id/email/tên.
  */
 import { useQuery } from '@tanstack/react-query'
 import { Search } from 'lucide-react'
@@ -13,6 +17,14 @@ import { Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { Role } from '@/types/api'
 import type { AdminUser } from './types'
+
+/** Tối thiểu để dựng một dòng chọn. `AdminUser` là tập cha nên bên admin vẫn khớp. */
+export interface PickableUser {
+  id: string
+  email: string
+  displayName: string
+  role?: string
+}
 import { TextInput } from './ui'
 
 /** Gõ đến đâu gọi API đến đó là phí; 250 ms đủ ngắn để không thấy trễ. */
@@ -27,15 +39,17 @@ function useDebounced(value: string, delay = 250): string {
 
 export function UserPicker({
   role,
+  scope = 'admin',
   actionLabel,
   onPick,
   disabledIds = [],
   pending = false,
 }: {
-  /** Lọc theo vai trò; bỏ trống là mọi vai trò. */
+  /** Lọc theo vai trò; bỏ trống là mọi vai trò. Đường mentor luôn chỉ trả member. */
   role?: Role
+  scope?: 'admin' | 'mentor'
   actionLabel: string
-  onPick: (user: AdminUser) => void
+  onPick: (user: PickableUser) => void
   /** Người đã ở trong danh sách — vẫn hiện nhưng không bấm được nữa. */
   disabledIds?: string[]
   pending?: boolean
@@ -44,9 +58,13 @@ export function UserPicker({
   const q = useDebounced(term.trim())
 
   const { data, isFetching } = useQuery({
-    queryKey: ['admin', 'users', 'picker', q, role ?? 'all'],
+    queryKey: [scope, 'users', 'picker', q, role ?? 'all'],
     queryFn: () =>
-      api.get<AdminUser[]>(`/api/admin/users?q=${encodeURIComponent(q)}${role ? `&role=${role}` : ''}`),
+      api.get<PickableUser[]>(
+        scope === 'mentor'
+          ? `/api/mentor/members?q=${encodeURIComponent(q)}`
+          : `/api/admin/users?q=${encodeURIComponent(q)}${role ? `&role=${role}` : ''}`,
+      ),
     // Chỉ tìm khi đã gõ: nạp sẵn 500 tài khoản cho một ô tìm kiếm là lãng phí.
     enabled: q.length > 0,
   })
@@ -84,7 +102,12 @@ export function UserPicker({
                 <span className="block truncate">{user.displayName}</span>
                 <span className="block truncate font-mono text-xs text-ink-5">{user.email}</span>
               </span>
-              <span className="ml-auto shrink-0 text-xs text-ink-6">{ROLE_LABEL[user.role]}</span>
+              {/* Đường mentor không trả `role` (chỉ có member), nên chỉ hiện khi có. */}
+              {user.role ? (
+                <span className="ml-auto shrink-0 text-xs text-ink-6">{ROLE_LABEL[user.role as Role] ?? user.role}</span>
+              ) : (
+                <span className="ml-auto" />
+              )}
               <button
                 type="button"
                 disabled={pending || blocked.has(user.id)}

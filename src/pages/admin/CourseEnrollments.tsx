@@ -1,4 +1,13 @@
-/** FR-B3 / US-1: ghi danh member bằng danh sách email dán vào, và gỡ ghi danh. */
+/**
+ * FR-B3 / US-1: ghi danh member vào khoá, và gỡ ghi danh.
+ *
+ * HAI cách, và thứ tự phản ánh việc người ta làm nhiều hơn:
+ *   1. CHỌN TỪ DANH SÁCH — gõ vài chữ, bấm "Ghi danh". Thêm một hai người là việc
+ *      hằng tuần, mà bắt gõ đúng nguyên địa chỉ email cho một cú thêm là quá đắt;
+ *      gõ sai một ký tự thì không có gì xảy ra và cũng không rõ vì sao.
+ *   2. DÁN DANH SÁCH EMAIL — giữ lại, thu vào sau một nút. Đây là US-1: dán 40 dòng
+ *      từ Excel hay Zalo lúc mở khoá mới. Bỏ nó đi là bắt người ta thêm 40 lượt.
+ */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { UserMinus } from 'lucide-react'
 import { useState } from 'react'
@@ -8,6 +17,7 @@ import { describeFailure, parseEmailList, splitValidEmails, type FailureNotice }
 import { EnrollResult } from './EnrollResult'
 import type { CourseEnrollment, EnrollReport } from './types'
 import { Card, FailureBanner, TextArea } from './ui'
+import { UserPicker } from './UserPicker'
 
 export function CourseEnrollments({
   courseId,
@@ -23,6 +33,7 @@ export function CourseEnrollments({
 }) {
   const client = useQueryClient()
   const [raw, setRaw] = useState('')
+  const [moDan, setMoDan] = useState(false)
   const [invalid, setInvalid] = useState<string[]>([])
   const [notice, setNotice] = useState<FailureNotice | null>(null)
   const base = `/api/${scope}/courses/${courseId}/enrollments`
@@ -80,7 +91,29 @@ export function CourseEnrollments({
     <Card title={`Ghi danh member (${active.length} đang học)`}>
       <FailureBanner notice={notice} />
 
-      <label className="mb-1 block text-xs font-medium text-ink-3" htmlFor="enroll-emails">
+      {/* Cách chính: chọn từ danh sách. Endpoint theo vai — mentor không gọi được
+          `/api/admin/users`, xem UserPicker. */}
+      <UserPicker
+        scope={scope}
+        role="member"
+        actionLabel="Ghi danh"
+        pending={enroll.isPending}
+        disabledIds={(data ?? []).filter((e) => e.status === 'active').map((e) => e.id)}
+        onPick={(user) => enroll.mutate([user.email])}
+      />
+
+      <button
+        type="button"
+        onClick={() => setMoDan((v) => !v)}
+        aria-expanded={moDan}
+        className="mt-3 font-mono text-[12px] text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+      >
+        {moDan ? 'Ẩn ô dán danh sách email' : 'Hoặc dán cả danh sách email…'}
+      </button>
+
+      {moDan ? (
+        <>
+      <label className="mt-2 mb-1 block text-xs font-medium text-ink-3" htmlFor="enroll-emails">
         Dán danh sách email
       </label>
       <TextArea
@@ -103,6 +136,8 @@ export function CourseEnrollments({
           {enroll.isPending ? 'Đang ghi danh…' : `Ghi danh ${valid.length} email`}
         </Button>
       </div>
+        </>
+      ) : null}
 
       {enroll.data ? <EnrollResult report={enroll.data} invalid={invalid} /> : null}
 

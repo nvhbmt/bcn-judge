@@ -83,8 +83,14 @@ test.describe('Full luồng: admin mở khoá → mentor soạn bài → member 
     expect(courseId).toMatch(/^[0-9a-f-]{36}$/)
 
     await page.getByRole('navigation', { name: 'Phần của khoá học' }).getByRole('link', { name: 'Ghi danh' }).click()
-    await page.getByLabel(/email/i).first().fill(EMAIL)
-    await page.getByRole('button', { name: /Ghi danh/ }).click()
+
+    // Đi đúng đường mặc định của admin bây giờ: GÕ TÌM rồi bấm chọn. Ô dán cả danh
+    // sách vẫn còn (US-1) nhưng đã thu sau một nút, và nó có test đơn vị riêng.
+    await page.getByLabel('Tìm tài khoản').fill(EMAIL)
+    const dong = page.locator('li', { hasText: EMAIL }).filter({ has: page.getByRole('button', { name: 'Ghi danh' }) })
+    await dong.first().getByRole('button', { name: 'Ghi danh' }).click()
+
+    // Xuất hiện ở danh sách "Đã ghi danh" bên dưới.
     await expect(page.getByText(EMAIL).first()).toBeVisible({ timeout: 20_000 })
     expect(errors).toEqual([])
     await page.close()

@@ -30,12 +30,14 @@ export interface CourseTab {
   label: string
   /** Câu mô tả ngắn dưới tiêu đề tab đang mở. */
   hint: string
+  /** Tên icon lucide — thanh bên dựng icon từ đây (xem CourseTabRail). */
+  icon: 'info' | 'users' | 'shield'
 }
 
 const ALL: Record<CourseTabId, CourseTab> = {
-  'thong-tin': { id: 'thong-tin', label: 'Thông tin', hint: 'Tên, mã, trạng thái và mô tả khoá.' },
-  'ghi-danh': { id: 'ghi-danh', label: 'Ghi danh', hint: 'Thêm và gỡ member khỏi khoá.' },
-  mentor: { id: 'mentor', label: 'Mentor', hint: 'Gán và gỡ mentor phụ trách khoá.' },
+  'thong-tin': { id: 'thong-tin', label: 'Thông tin', hint: 'Tên, mã, trạng thái và mô tả khoá.', icon: 'info' },
+  'ghi-danh': { id: 'ghi-danh', label: 'Ghi danh', hint: 'Thêm và gỡ member khỏi khoá.', icon: 'users' },
+  mentor: { id: 'mentor', label: 'Mentor', hint: 'Gán và gỡ mentor phụ trách khoá.', icon: 'shield' },
 }
 
 export function tabsFor(role: string | undefined): CourseTab[] {
