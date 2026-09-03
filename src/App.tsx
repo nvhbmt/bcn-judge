@@ -24,6 +24,7 @@ import { ContestStatsPage } from '@/pages/mentor/ContestStatsPage'
 import { CourseContentPage } from '@/pages/mentor/CourseContentPage'
 import { CourseSubmissionsPage } from '@/pages/mentor/CourseSubmissionsPage'
 import { ProblemEditorPage } from '@/pages/mentor/ProblemEditorPage'
+import { ProblemSubmissionsPage } from '@/pages/mentor/ProblemSubmissionsPage'
 import { ProblemListPage } from '@/pages/mentor/ProblemListPage'
 import { TeamMemberPage } from '@/pages/TeamMemberPage'
 import { TeamPage } from '@/pages/TeamPage'
@@ -121,7 +122,14 @@ function AppRoutes({ role }: { role: Me['role'] }) {
           là lớp che UI; quyền thật do requireStaff + canEdit() ở server quyết định. */}
       {role !== 'member' ? <Route path="/mentor/bai-tap" element={<ProblemListPage />} /> : null}
       {role !== 'member' ? (
-        <Route path="/mentor/bai-tap/:problemId" element={<ProblemEditorPage />} />
+        <>
+          {/* Màn xem bài nộp là màn RIÊNG vì nó cần cả hai khung (danh sách + mã
+              nguồn), mà khung phải của màn soạn đang là bản xem trước đề — xem
+              ProblemSubmissionsPage.tsx. Đặt trước cho dễ đọc; React Router xếp hạng
+              theo độ cụ thể nên thứ tự không quyết định. */}
+          <Route path="/mentor/bai-tap/:problemId/bai-nop" element={<ProblemSubmissionsPage />} />
+          <Route path="/mentor/bai-tap/:problemId" element={<ProblemEditorPage />} />
+        </>
       ) : null}
       {/* FR-C1/C3 + FR-I: soạn giáo trình khoá và cụm contest. Cùng lý do "không
           phải member" như trên; server chặn thật bằng requireStaff + isCourseStaff. */}

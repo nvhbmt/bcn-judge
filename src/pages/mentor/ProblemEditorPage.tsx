@@ -14,7 +14,7 @@
  *     (xem `form.ts`).
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Users } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { SplitPane } from '@/components/layout/SplitPane'
@@ -101,6 +101,14 @@ export function ProblemEditorPage() {
 
         <div className="ml-auto flex items-center gap-2">
           {dirty ? <span className="text-xs text-earth">Có thay đổi chưa lưu</span> : null}
+          {/* Sửa xong bài thì câu hỏi kế tiếp là "học viên làm ra sao". Là màn RIÊNG
+              chứ không phải tab thứ ba ở đây: nó cần cả hai khung (danh sách + mã
+              nguồn), mà khung phải của màn này đang là bản xem trước đề. */}
+          <Link to={`/mentor/bai-tap/${detail.id}/bai-nop`}>
+            <Button>
+              <Users size={16} /> Xem bài nộp
+            </Button>
+          </Link>
           <Button variant="primary" onClick={() => void save()} disabled={saving || !dirty}>
             <Save size={16} /> {saving ? 'Đang lưu…' : 'Lưu'}
           </Button>
@@ -129,6 +137,7 @@ export function ProblemEditorPage() {
                 <EditorTab id="testcase" active={tab} onTab={setTab}>
                   {`Testcase (${detail.testcases.length})`}
                 </EditorTab>
+
               </div>
               {/* Cả hai thẻ luôn mount, chỉ ẩn bằng CSS — cùng kỷ luật với SplitPane
                   lúc thu gọn khung ("nội dung khung phải sống qua thu gọn/mở lại").

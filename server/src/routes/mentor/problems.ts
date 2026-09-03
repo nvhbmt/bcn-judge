@@ -12,6 +12,7 @@ import { audit } from '../../lib/audit'
 import { parseBody } from '../../lib/http'
 import { getSettings } from '../../lib/settings'
 import { iso } from '../../lib/time'
+import { scoreOf } from '../../serialize/submission'
 import { ZipImportError, parseTestcaseZip } from '../../lib/zipImport'
 import { toMentorProblem, type RawProblemRow, type RawTestcaseRow } from '../../serialize/problem'
 
@@ -139,6 +140,110 @@ mentorProblemRoutes.post('/', async (c) => {
   `)
   await audit(me.id, 'problem.create', 'problem', row!.id, null, { title: body.data.title })
   return created(c, { id: row!.id })
+})
+
+/**
+ * GET /api/mentor/problems/:id/submissions — ai đã nộp bài NÀY (FR-G3).
+ *
+ * Vì sao không dùng lại đường của khoá (`/courses/:id/submissions?itemId=`): bài tập
+ * không nhất thiết thuộc một khoá. `problems.scope_course_id` được phép NULL (ngân
+ * hàng chung của CLB) và cùng một bài có thể nằm ở nhiều mục, nhiều contest — hỏi
+ * "ai đã nộp bài này" mà phải đi vòng qua một khoá là hỏi sai câu.
+ *
+ * Cùng cổng `canEdit` với chính màn soạn bài: mở được bài để sửa thì đọc được bài nộp
+ * của nó. Không thêm một luật quyền thứ hai để về sau trôi lệch với luật thứ nhất.
+ *
+ * KHÔNG trả `source` ở đây: đây là danh sách để chọn, mã nguồn đọc ở màn bài nộp theo
+ * khoá. Danh sách 200 dòng kèm mã là vài trăm KB cho một khung chọn.
+ */
+mentorProblemRoutes.get('/:id/submissions', async (c) => {
+  const me = c.get('user')
+  const problemId = c.req.param('id')
+  if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
+
+  const rows = await q<{
+    id: string
+    userId: string
+    displayName: string
+    languageId: string
+    verdict: string | null
+    passedWeight: number | null
+    totalWeight: number | null
+    receivedAt: string
+  }>(sql`
+    SELECT s.id, s.user_id AS "userId", u.display_name AS "displayName", s.language_id AS "languageId",
+           s.verdict, s.passed_weight AS "passedWeight", s.total_weight AS "totalWeight",
+           s.received_at AS "receivedAt"
+    FROM submissions s
+    JOIN users u ON u.id = s.user_id
+    WHERE s.problem_id = ${problemId} AND s.kind = 'submit'
+    ORDER BY s.seq DESC LIMIT 200
+  `)
+
+  return ok(
+    c,
+    rows.map((r) => ({
+      id: r.id,
+      userId: r.userId,
+      displayName: r.displayName,
+      languageId: r.languageId,
+      verdict: r.verdict,
+      score: scoreOf(r.passedWeight, r.totalWeight),
+      receivedAt: iso(r.receivedAt),
+    })),
+  )
+})
+
+/**
+ * GET /api/mentor/problems/:id/submissions/:submissionId — MỘT lượt nộp, kèm mã nguồn.
+ *
+ * Tách khỏi danh sách chứ không nhét `source` vào đó: danh sách trả tới 200 dòng và
+ * còn dùng để đếm "bao nhiêu người đã qua", nên kéo theo mã của cả 200 lượt là vài
+ * trăm KB cho một khung chỉ để liếc. Đổi lại là một lượt gọi mỗi lần bấm — react-query
+ * nhớ lại nên bấm qua bấm lại giữa vài lượt chỉ tốn đúng lần đầu.
+ *
+ * Cùng cổng `canEdit` với màn soạn bài, và ràng thêm `problem_id` khớp: thiếu vế đó
+ * thì biết một submissionId bất kỳ là đọc được nó qua một bài mình có quyền — đúng
+ * kiểu IDOR mà §8 nói tới.
+ */
+mentorProblemRoutes.get('/:id/submissions/:submissionId', async (c) => {
+  const me = c.get('user')
+  const problemId = c.req.param('id')
+  if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
+
+  const [row] = await q<{
+    id: string
+    displayName: string
+    languageId: string
+    verdict: string | null
+    passedWeight: number | null
+    totalWeight: number | null
+    receivedAt: string
+    source: string | null
+    problemTitle: string | null
+  }>(sql`
+    SELECT s.id, u.display_name AS "displayName", s.language_id AS "languageId", s.verdict,
+           s.passed_weight AS "passedWeight", s.total_weight AS "totalWeight",
+           s.received_at AS "receivedAt", s.source, p.title AS "problemTitle"
+    FROM submissions s
+    JOIN users u ON u.id = s.user_id
+    LEFT JOIN problems p ON p.id = s.problem_id
+    WHERE s.id = ${c.req.param('submissionId')} AND s.problem_id = ${problemId}
+  `)
+  if (!row) return errors.notFound(c, 'Không tìm thấy bài nộp.')
+
+  return ok(c, {
+    id: row.id,
+    displayName: row.displayName,
+    // Panel chi tiết hiện TÊN NGƯỜI NỘP ở dòng đầu: ở màn này mọi lượt cùng một bài,
+    // nên "bài nào" là thông tin thừa còn "của ai" mới là thứ đang tìm.
+    problemTitle: row.displayName,
+    languageId: row.languageId,
+    verdict: row.verdict,
+    score: scoreOf(row.passedWeight, row.totalWeight),
+    receivedAt: iso(row.receivedAt),
+    source: row.source,
+  })
 })
 
 mentorProblemRoutes.get('/:id', async (c) => {

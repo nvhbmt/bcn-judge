@@ -168,3 +168,57 @@ describe.skipIf(!INTEGRATION)('mentor · bài tập giữ đủ trường (FR-D1
     expect(got.body.data.title).toBe('Tên mới')
   })
 })
+
+/**
+ * FR-G3: mentor xem ai đã nộp MỘT BÀI, ngay trong màn soạn bài.
+ *
+ * Đường riêng chứ không đi vòng qua khoá: `problems.scope_course_id` được phép NULL
+ * (ngân hàng chung của CLB) và cùng một bài nằm được ở nhiều mục, nhiều contest — hỏi
+ * "ai đã nộp bài này" mà phải nêu một khoá là hỏi sai câu.
+ */
+describe.skipIf(!INTEGRATION)('FR-G3 · bài nộp theo BÀI', () => {
+  let admin: TestUser
+  let mentor: TestUser
+  let nguoiLa: TestUser
+  let member: TestUser
+  let problemId: string
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    admin = await makeUser('admin')
+    mentor = await makeUser('mentor')
+    nguoiLa = await makeUser('mentor')
+    member = await makeUser('member')
+    problemId = await makeProblem(mentor.id)
+  })
+
+  it('mở được và trả mảng, dù bài KHÔNG thuộc khoá nào', async () => {
+    const res = await call(`/api/mentor/problems/${problemId}/submissions`, { as: mentor })
+    expect(res.status).toBe(200)
+    expect(res.body.data).toEqual([])
+  })
+
+  it('cùng cổng với màn soạn bài — ai không sửa được bài thì không đọc được', async () => {
+    // Không thêm luật quyền thứ hai để về sau trôi lệch với luật thứ nhất.
+    const sua = await call(`/api/mentor/problems/${problemId}`, { as: nguoiLa })
+    const doc = await call(`/api/mentor/problems/${problemId}/submissions`, { as: nguoiLa })
+    expect(doc.status).toBe(sua.status)
+  })
+
+  it('admin đọc được', async () => {
+    expect((await call(`/api/mentor/problems/${problemId}/submissions`, { as: admin })).status).toBe(200)
+  })
+
+  it('member không đọc được', async () => {
+    expect((await call(`/api/mentor/problems/${problemId}/submissions`, { as: member })).status).toBe(403)
+  })
+
+  it('KHÔNG trả mã nguồn — đây là danh sách để liếc, không phải chỗ đọc code', async () => {
+    const res = await call(`/api/mentor/problems/${problemId}/submissions`, { as: mentor })
+    expect(JSON.stringify(res.body)).not.toContain('"source"')
+  })
+})
