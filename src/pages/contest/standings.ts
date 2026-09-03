@@ -1,9 +1,10 @@
 /**
  * Kiểu bảng xếp hạng contest — dùng chung giữa bảng và dải "Điểm của bạn".
  *
- * `problems` là bản đồ theo NHÃN bài (A, B, C…), đúng thứ máy chủ trả về; nhờ vậy
- * bảng dựng được một cột cho mỗi bài như bản vẽ màn 05, thay vì chỉ một cột tổng.
- * Bản trước bỏ qua trường này nên mất hẳn cách nhìn "ai làm được bài nào".
+ * `problems` là bản đồ theo contestProblemId, đúng thứ máy chủ trả về. Bảng xếp hạng
+ * KHÔNG còn dựng một cột cho mỗi bài (cột tên bị bóp còn "Phạ…" trong side column
+ * hẹp — xem ContestStandings.tsx); trường này giờ chỉ còn `attemptsOf` dùng để cộng
+ * tổng số lần nộp cho dải "Điểm của bạn".
  */
 export interface ContestStandingRow {
   rank: number
