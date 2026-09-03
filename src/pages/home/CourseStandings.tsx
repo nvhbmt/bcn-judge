@@ -9,7 +9,7 @@
  * không cho người ta thấy chỗ đứng của chính họ thì gần như vô dụng.
  */
 import { useQuery } from '@tanstack/react-query'
-import { Row, RowGroup, SideLabel } from '@/components/ui/patterns'
+import { Row, RowGroup, SidePanel } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 
 interface StandingRow {
@@ -38,8 +38,7 @@ export function CourseStandings({ courseId, courseCode }: { courseId: string; co
   const rows = me && !top.some((r) => r.isMe) ? [...top, me] : top
 
   return (
-    <section>
-      <SideLabel>BXH khoá {courseCode}</SideLabel>
+    <SidePanel label={`BXH khoá ${courseCode}`} flush>
       <RowGroup className="border-0">
         {rows.map((row) => (
           <Row key={row.userId} accent={row.isMe ? 'moss' : null} className="gap-3 px-2.5 py-2">
@@ -55,6 +54,6 @@ export function CourseStandings({ courseId, courseCode }: { courseId: string; co
           </Row>
         ))}
       </RowGroup>
-    </section>
+    </SidePanel>
   )
 }

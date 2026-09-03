@@ -1,5 +1,8 @@
 /**
- * Ngưỡng tương phản của điểm nhấn bản sáng — đọc THẲNG từ token, không phải bản chép.
+ * Ngưỡng tương phản của điểm nhấn — đọc THẲNG từ token, không phải bản chép.
+ *
+ * Phần lớn file canh BẢN SÁNG (xem lý do ngay dưới); khối cuối canh dải tiêu đề của
+ * khung bên ở CẢ HAI theme, vì đó là chỗ hai theme cần hai giá trị khác nhau.
  *
  * Vì sao cần: bản sáng từng bị "hoà tan" không phải do thiếu tương phản (đo ra nó còn
  * hơn bản tối ở mọi chỉ số) mà do HƯỚNG — màu điểm tối hơn nền nên mắt đọc ra là mực,
@@ -22,11 +25,27 @@ const CSS = readFileSync(resolve(process.cwd(), 'design-system/tokens/colors.css
 
 /** Khối `[data-theme='light']` — bản sáng ghi đè, nên phải đọc đúng khối đó. */
 const LIGHT = CSS.slice(CSS.indexOf("[data-theme='light']"))
+/** Phần trước khối đó là `:root`, tức bản TỐI (mặc định của hệ). */
+const DARK = CSS.slice(0, CSS.indexOf("[data-theme='light']"))
+
+function tokenIn(block: string, name: string): string {
+  const m = new RegExp(`--${name}:\\s*([^;]+);`).exec(block)
+  if (!m) {
+    // Token chỉ khai ở bản tối thì bản sáng dùng lại giá trị đó — đúng cách hệ này
+    // xếp lớp: `:root` là nền, `[data-theme=light]` chỉ ghi đè phần khác.
+    if (block === LIGHT) return tokenIn(DARK, name)
+    throw new Error(`Không thấy token --${name}`)
+  }
+  let v = m[1]!.trim()
+  // `--panel-head: var(--primary-soft)` ở bản sáng — phải lần theo mới đo được.
+  for (let i = 0; i < 5 && v.startsWith('var('); i++) {
+    v = tokenIn(block, v.slice(6, -1).trim())
+  }
+  return v
+}
 
 function token(name: string): string {
-  const m = new RegExp(`--${name}:\\s*([^;]+);`).exec(LIGHT)
-  if (!m) throw new Error(`Không thấy token --${name} trong khối bản sáng`)
-  return m[1]!.trim()
+  return tokenIn(LIGHT, name)
 }
 
 type RGB = [number, number, number]
@@ -123,5 +142,28 @@ describe('bảng màu verdict', () => {
       expect(CSS).toContain(`--verdict-${v}:`)
       expect(CSS).toContain(`--verdict-${v}-soft:`)
     }
+  })
+})
+
+describe('dải tiêu đề khung bên — phải nhìn ra là một dải, ở cả hai theme', () => {
+  // Vì sao `--panel-head` không dùng lại `--primary-soft`: ở bản TỐI, primary-soft là
+  // #221f19, đo ra 1.09:1 so với surface-2 — mắt không thấy có dải nào. Mọi mặt phẳng
+  // bản tối nằm trong 1.02–1.09 của nhau (chủ ý của hệ: bản tối tách nhau bằng đường
+  // kẻ), nên một dải NHÌN RA ĐƯỢC buộc phải có giá trị riêng cho bản tối.
+  it.each([
+    ['sáng', LIGHT],
+    ['tối', DARK],
+  ])('bản %s: dải nổi ≥ 1.25:1 so với thân khung', (_ten, block) => {
+    const dai = tokenIn(block, 'panel-head')
+    const than = tokenIn(block, 'surface-2')
+    expect(contrast(dai, than)).toBeGreaterThanOrEqual(1.25)
+  })
+
+  it.each([
+    ['sáng', LIGHT],
+    ['tối', DARK],
+  ])('bản %s: chữ tiêu đề trên dải ≥ 4.5:1', (_ten, block) => {
+    // Chữ tiêu đề là ink-3, cỡ 11px — tức chữ nhỏ, nên ngưỡng 4.5 chứ không phải 3.
+    expect(contrast(tokenIn(block, 'ink-3'), tokenIn(block, 'panel-head'))).toBeGreaterThanOrEqual(4.5)
   })
 })

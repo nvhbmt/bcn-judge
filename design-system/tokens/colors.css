@@ -26,6 +26,14 @@
      rực đã gánh tín hiệu; nên bản này trỏ thẳng vào surface-sel, không đổi gì. Bản
      sáng thì khác hẳn — xem khối [data-theme=light]. */
   --primary-soft: #221f19;
+  /* Dải tiêu đề của khung bên (SidePanel).
+     Vì sao KHÔNG dùng lại --primary-soft: ở bản tối nó là #221f19, đo ra chỉ 1.09:1
+     so với --surface-2, tức mắt không thấy có dải nào. Mọi mặt phẳng bản tối đều
+     nằm trong 1.02–1.09 của nhau — đó là chủ ý của hệ (bản tối tách nhau bằng
+     ĐƯỜNG KẺ), nên muốn có một dải NHÌN RA ĐƯỢC thì phải có giá trị riêng.
+     1.32:1 so với surface-2, và còn mang sắc moss thật (chroma .035) chứ không phải
+     xám ấm — chữ ink-3 trên đó vẫn 6.3:1. */
+  --panel-head: oklch(0.30 0.035 128);
   /* Nền dòng đang gõ trong editor. Phải TRONG SUỐT: CodeMirror đặt lớp vùng chọn ở
      z-index -2, tức sau nội dung, nên nền đục trên .cm-line che mất vệt bôi đen ngay
      trên chính dòng đó. Alpha .45 hợp thành đúng #221f19 trên nền editor, nên khi
@@ -129,6 +137,9 @@
      9.4:1, chữ moss 5.3:1. Chroma ghìm ở 35% gamut — 75% cho ra xanh lá chanh, lạc
      hẳn thang trung tính ấm. */
   --primary-soft: oklch(0.846 0.077 128);
+  /* Bản sáng dùng lại đúng wash moss: 1.50:1 so với surface-2 — dải hiện rõ, và
+     chữ ink-3 trên đó 6.84:1. */
+  --panel-head: var(--primary-soft);
   --surface-code:#ebe6db;
 
   --line:        #dcd6c8;

@@ -12,7 +12,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { Markdown } from '@/components/markdown/Markdown'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
-import { SideColumn } from '@/components/ui/patterns'
+import { SideColumn, SidePanel } from '@/components/ui/patterns'
 import { useCountdown } from '@/hooks/useCountdown'
 import { ContestProblems } from './contest/ContestProblems'
 import { ContestStandings } from './contest/ContestStandings'
@@ -123,12 +123,11 @@ export function ContestPage() {
       </main>
 
       <SideColumn className="min-w-0 overflow-y-auto">
-        <section>
-          <SectionRule label="Bảng xếp hạng" meta="cập nhật mỗi 5s" />
-          <div className="mt-3">
-            <ContestStandings contestId={contestId!} problems={data.problems} />
-          </div>
-        </section>
+        {/* Cùng khung với cột bên trang chủ — hai cột bên trông như nhau thì người
+            dùng không phải học lại bố cục ở mỗi màn. */}
+        <SidePanel label="Bảng xếp hạng" meta="cập nhật mỗi 5s" flush>
+          <ContestStandings contestId={contestId!} problems={data.problems} />
+        </SidePanel>
       </SideColumn>
     </div>
   )

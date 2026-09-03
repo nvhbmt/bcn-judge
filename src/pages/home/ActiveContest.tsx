@@ -11,6 +11,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { SidePanel } from '@/components/ui/patterns'
 import { useCountdown } from '@/hooks/useCountdown'
 import { api } from '@/lib/api'
 import { hhmm } from './recent'
@@ -50,10 +51,9 @@ export function ActiveContest() {
   if (!data) return null
   if (!contest) {
     return (
-      <section>
-        <h2 className="mb-3.5 font-mono text-[11px] font-normal tracking-[0.14em] text-ink-6 uppercase">Contest</h2>
+      <SidePanel label="Contest">
         <p className="text-[13px] text-ink-5">Chưa có contest nào sắp tới.</p>
-      </section>
+      </SidePanel>
     )
   }
 
@@ -62,12 +62,7 @@ export function ActiveContest() {
   const freezeAt = freeze > 0 ? new Date(new Date(contest.endAt).getTime() - freeze * 60_000) : null
 
   return (
-    <section>
-      <h2 className="mb-3.5 flex items-center gap-2 font-mono text-[11px] font-normal tracking-[0.14em] text-ink-4 uppercase">
-        <span aria-hidden className={`size-[7px] rounded-full ${running ? 'bg-earth' : 'bg-line-strong'}`} />
-        {running ? 'Đang diễn ra' : 'Sắp diễn ra'}
-      </h2>
-
+    <SidePanel label={running ? 'Đang diễn ra' : 'Sắp diễn ra'} tone={running ? 'earth' : 'moss'}>
       <Link to={`/contest/${contest.id}`} className="block hover:underline">
         <p className="text-[16px] font-semibold text-ink-1">{contest.title}</p>
       </Link>
@@ -80,6 +75,6 @@ export function ActiveContest() {
         {contest.problemCount} bài · {hhmm(contest.startAt)} → {hhmm(contest.endAt)}
         {freezeAt ? ` · đóng băng BXH lúc ${hhmm(freezeAt.toISOString())}` : null}
       </p>
-    </section>
+    </SidePanel>
   )
 }

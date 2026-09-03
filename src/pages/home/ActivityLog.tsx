@@ -10,6 +10,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { SidePanel } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import { VERDICT_TONE, type Verdict } from '@/types/api'
 import { hhmm, workspaceLink, type RecentRow } from './recent'
@@ -33,9 +34,7 @@ export function ActivityLog() {
   })
 
   return (
-    <section>
-      <h2 className="mb-3.5 font-mono text-[11px] font-normal tracking-[0.14em] text-ink-6 uppercase">Log của bạn</h2>
-
+    <SidePanel label="Log của bạn">
       {data && data.length === 0 ? <p className="text-[13px] text-ink-5">Chưa nộp bài nào.</p> : null}
 
       <ul className="flex flex-col gap-2.5">
@@ -66,6 +65,6 @@ export function ActivityLog() {
           )
         })}
       </ul>
-    </section>
+    </SidePanel>
   )
 }

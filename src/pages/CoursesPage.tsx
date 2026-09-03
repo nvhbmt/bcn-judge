@@ -10,7 +10,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import { EmptyState, SectionRule, Spinner } from '@/components/ui'
-import { Divider, RowGroup, SideColumn } from '@/components/ui/patterns'
+import { RowGroup, SideColumn } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import { useAuth } from '@/stores/auth'
 import type { CourseSummary } from '@/types/api'
@@ -76,16 +76,12 @@ export function CoursesPage() {
         ) : null}
       </main>
 
+      {/* Không còn <Divider /> giữa các vùng: mỗi vùng nay là một khung có viền
+          riêng (SidePanel), thêm đường kẻ ở giữa là kẻ đôi. */}
       <SideColumn className="min-w-0 overflow-y-auto">
         <ActiveContest />
-        <Divider />
         <ActivityLog />
-        {primary ? (
-          <>
-            <Divider />
-            <CourseStandings courseId={primary.id} courseCode={primary.code} />
-          </>
-        ) : null}
+        {primary ? <CourseStandings courseId={primary.id} courseCode={primary.code} /> : null}
       </SideColumn>
     </div>
   )
