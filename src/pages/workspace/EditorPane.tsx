@@ -65,7 +65,7 @@ export function EditorPane({
           aria-label="Ngôn ngữ"
           value={languageId}
           onChange={(e) => onLanguage(e.target.value)}
-          className="border border-line-strong px-2 py-1 font-mono text-xs"
+          className="border border-line-strong py-1 pr-7 pl-2 font-mono text-xs"
         >
           {languages.map((l) => (
             <option key={l.id} value={l.id}>

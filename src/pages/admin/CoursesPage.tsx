@@ -20,16 +20,15 @@ export function AdminCoursesPage() {
     <AdminShell
       title="Khoá học"
       description="Tạo khoá ở trạng thái Nháp, gán mentor để họ soạn nội dung, rồi ghi danh member."
-    >
-      <div className="mb-4">
+      actions={
         <Link to="/quan-tri/khoa-hoc/moi" className={buttonClass('primary')}>
           <Plus size={15} /> Tạo khoá học
         </Link>
-      </div>
-
+      }
+    >
       {isLoading ? <Spinner /> : null}
       {data && data.length === 0 ? (
-        <EmptyState title="Chưa có khoá học nào" hint="Tạo khoá đầu tiên bằng nút phía trên." />
+        <EmptyState title="Chưa có khoá học nào" hint="Tạo khoá đầu tiên bằng nút ở góc phải." />
       ) : null}
 
       <ul className="space-y-2">

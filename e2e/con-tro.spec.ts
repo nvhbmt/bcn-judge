@@ -69,6 +69,18 @@ test.describe('member', () => {
       const o = page.locator('select[aria-label="Ngôn ngữ"] option').first()
       const nen = await o.evaluate((e) => getComputedStyle(e).backgroundColor)
       expect(nen, `theme ${theme}: nền option`).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
+
+      // Mũi tên xổ xuống do HỆ THIẾT KẾ vẽ (appearance: none), nên nó phải có khoảng
+      // cách với mép — mũi tên mặc định của trình duyệt dính sát ~6px và `padding`
+      // không đẩy được nó. Và ô phải chừa đủ chỗ để chữ không chui xuống dưới nó.
+      const s = page.locator('select[aria-label="Ngôn ngữ"]')
+      const kieu = await s.evaluate((e) => {
+        const cs = getComputedStyle(e)
+        return { appearance: cs.appearance, anh: cs.backgroundImage, pr: parseFloat(cs.paddingRight) }
+      })
+      expect(kieu.appearance, `theme ${theme}`).toBe('none')
+      expect(kieu.anh, `theme ${theme}: phải có mũi tên tự vẽ`).toContain('svg')
+      expect(kieu.pr, `theme ${theme}: chữ sẽ chui xuống dưới mũi tên`).toBeGreaterThanOrEqual(24)
     }
   })
 })

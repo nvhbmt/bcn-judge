@@ -64,10 +64,22 @@ export function AdminShell({
   title,
   description,
   back,
+  actions,
   children,
 }: {
   title: string;
   description?: ReactNode;
+  /**
+   * Nút hành động của trang, đặt ở góc PHẢI cùng hàng tiêu đề.
+   *
+   * Trước đây mỗi trang tự vẽ nút của mình ngay dưới khối tiêu đề, nên nút bị đẩy
+   * xuống một hàng riêng và ba trang quản trị đặt nó ở ba độ cao khác nhau — mắt
+   * phải đi tìm lại ở mỗi trang. Ở đây thì nó luôn nằm một chỗ.
+   *
+   * CHỈ dành cho hành động của cả trang (Tạo team, Tạo khoá). Ô tìm và bộ lọc KHÔNG
+   * lên đây: chúng thuộc về danh sách bên dưới và phải đứng cạnh danh sách đó.
+   */
+  actions?: ReactNode;
   /** Lối về danh sách, cho các trang con. Shell vẽ nó TRƯỚC tiêu đề — để trang tự
    *  vẽ thì nó rơi xuống dưới h1, đọc thành "tiêu đề rồi mới quay lại". */
   back?: { to: string; label: string };
@@ -84,10 +96,15 @@ export function AdminShell({
           <ArrowLeft size={15} /> {back.label}
         </NavLink>
       ) : null}
-      <header className="mb-4">
-        <h1 className="font-display text-[26px] text-ink-1">{title}</h1>
-        {description ? (
-          <p className="mt-1 text-sm text-ink-5">{description}</p>
+      <header className="mb-4 flex flex-wrap items-start gap-x-4 gap-y-2">
+        <div className="min-w-0 flex-1">
+          <h1 className="font-display text-[26px] text-ink-1">{title}</h1>
+          {description ? (
+            <p className="mt-1 text-sm text-ink-5">{description}</p>
+          ) : null}
+        </div>
+        {actions ? (
+          <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
         ) : null}
       </header>
       {children}

@@ -66,6 +66,38 @@ option {
   color: var(--ink-2);
 }
 
+/* Mũi tên xổ xuống của <select>: tự vẽ, không dùng của trình duyệt.
+   Mũi tên mặc định do trình duyệt vẽ nên `padding-right` KHÔNG đẩy được nó — nó dính
+   sát mép phải khoảng 6px, chật hơn hẳn mọi khoảng cách khác trong hệ. `appearance:
+   none` bỏ nó đi rồi đặt lại bằng background-image, lúc đó `background-position` mới
+   nói được nó đứng ở đâu.
+
+   Hai ảnh cho hai theme vì màu nằm TRONG data URI, không đọc được biến CSS: bản tối
+   dùng --ink-5 #a3998a, bản sáng #5f5747. Đổi token thì phải sửa cả ở đây — đánh đổi
+   để giữ <select> là một thẻ trần, không phải bọc thêm div (ba chỗ gọi đang truyền
+   class kích thước cho chính ô, kể cả `py-1`).
+
+   Ô nào cũng cần `pr-8` để chữ không chui xuống dưới mũi tên; CONTROL của admin và
+   mentor đã có. */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a3998a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 12px;
+}
+
+[data-theme='light'] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f5747' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* <select> nhiều dòng vẫn là danh sách, không có mũi tên nào để vẽ. */
+select[multiple],
+select[size]:not([size='1']) {
+  appearance: auto;
+  background-image: none;
+}
+
 /* Nhãn bọc ô tick: bấm vào chữ cũng tick, nên chữ cũng phải có bàn tay.
    Tách thành luật RIÊNG vì `:has()` — trình duyệt cũ không hiểu `:has()` sẽ vứt cả
    luật chứa nó, mà gộp chung thì vứt luôn phần nút ở trên. Tách ra thì chỗ cũ chỉ

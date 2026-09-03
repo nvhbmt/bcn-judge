@@ -12,13 +12,12 @@ export function AdminTeamsPage() {
     <AdminShell
       title="Team"
       description="Mỗi member thuộc tối đa một team, và leader luôn phải là thành viên của chính team đó — hai ràng buộc này do database giữ, nên vi phạm sẽ bị chặn kèm hướng xử lý."
-    >
-      <div className="mb-4">
+      actions={
         <Link to="/quan-tri/team/moi" className={buttonClass('primary')}>
           <Plus size={15} /> Tạo team
         </Link>
-      </div>
-
+      }
+    >
       {isLoading ? <Spinner /> : null}
       {data && data.length === 0 ? (
         <EmptyState title="Chưa có team nào" hint="Tạo team đầu tiên và chọn một member làm leader." />

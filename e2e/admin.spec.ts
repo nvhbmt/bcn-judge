@@ -177,3 +177,23 @@ test('trang cài đặt hiện ngôn ngữ chấm và giới hạn hệ thống'
   await expect(page.getByText(/c11|C11/).first()).toBeVisible()
   expect(errors).toEqual([])
 })
+
+test('trang Tài khoản: ô tìm và bộ lọc nằm CÙNG một hàng, mũi tên select có chỗ thở', async ({ page }) => {
+  // Hai lỗi từng cùng tồn tại ở đây:
+  //  - `w-40` trên <Select> THUA `w-full` trong CONTROL (cùng độ ưu tiên, thứ tự file
+  //    CSS quyết định), nên select giãn hết hàng và bị đẩy xuống dòng riêng;
+  //  - mũi tên xổ xuống do TRÌNH DUYỆT vẽ, đè lên mép phải, mà padding chỉ 10px nên
+  //    "Mọi vai trò" chạy sát vào nó.
+  // Cả hai chỉ đo được bằng bố cục thật, jsdom không tính được.
+  await page.goto('/quan-tri/tai-khoan')
+  const o = page.getByLabel('Tìm tài khoản')
+  const s = page.getByLabel('Lọc theo vai trò')
+  await expect(o).toBeVisible()
+
+  const [ro, rs] = [await o.boundingBox(), await s.boundingBox()]
+  expect(Math.abs(ro!.y - rs!.y), 'ô tìm và bộ lọc phải cùng hàng').toBeLessThan(4)
+  expect(rs!.width, 'bộ lọc không được giãn hết hàng').toBeLessThan(ro!.width)
+
+  const pr = await s.evaluate((e) => parseFloat(getComputedStyle(e).paddingRight))
+  expect(pr, 'mũi tên select cần chỗ, không để chữ chạy sát').toBeGreaterThanOrEqual(24)
+})

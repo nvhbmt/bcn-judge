@@ -31,11 +31,23 @@ export function AdminUsersPage() {
     <AdminShell
       title="Tài khoản"
       description="Không có đăng ký tự do: mọi tài khoản do admin cấp và bị bắt đổi mật khẩu ở lần đăng nhập đầu."
+      actions={
+        <>
+          <Button variant="primary" onClick={() => setPanel(panel === 'create' ? 'none' : 'create')}>
+            <UserPlus size={15} /> Tạo tài khoản
+          </Button>
+          <Button onClick={() => setPanel(panel === 'import' ? 'none' : 'import')}>
+            <Upload size={15} /> Nhập CSV
+          </Button>
+        </>
+      }
     >
       {/* Mật khẩu một lần đặt trên cùng và tồn tại qua mọi thao tác khác cho tới
           khi admin tự đóng — không component con nào được phép nuốt nó. */}
       {secret ? <OneTimeSecret data={secret} onDismiss={() => setSecret(null)} /> : null}
 
+      {/* Ô tìm và bộ lọc KHÔNG lên hàng tiêu đề: chúng thuộc về danh sách bên dưới
+          và phải đứng cạnh danh sách đó. Chỉ hành động của cả trang mới lên đó. */}
       <div className="mb-4 flex flex-wrap items-end gap-2">
         <div className="relative min-w-56 flex-1">
           <Search size={14} className="pointer-events-none absolute top-2.5 left-2.5 text-ink-6" />
@@ -51,19 +63,17 @@ export function AdminUsersPage() {
           value={role}
           onChange={(e) => setRole(e.target.value as Role | '')}
           aria-label="Lọc theo vai trò"
-          className="w-40"
+          /* `max-w-40` chứ KHÔNG phải `w-40`: CONTROL đã có `w-full`, hai class cùng
+             độ ưu tiên nên thứ tự trong file CSS quyết định — `w-40` thua, select
+             giãn hết hàng và bị đẩy xuống dòng riêng. Đây là lần thứ ba repo dính
+             đúng bẫy này (xem TestcaseZipForm, ContestProblemRow). */
+          className="w-40 max-w-40 shrink-0"
         >
           <option value="">Mọi vai trò</option>
           <option value="member">Member</option>
           <option value="mentor">Mentor</option>
           <option value="admin">Admin</option>
         </Select>
-        <Button variant="primary" onClick={() => setPanel(panel === 'create' ? 'none' : 'create')}>
-          <UserPlus size={15} /> Tạo tài khoản
-        </Button>
-        <Button onClick={() => setPanel(panel === 'import' ? 'none' : 'import')}>
-          <Upload size={15} /> Nhập CSV
-        </Button>
       </div>
 
       {panel === 'create' ? (

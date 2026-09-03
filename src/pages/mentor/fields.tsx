@@ -47,8 +47,14 @@ export function TextArea({ className = '', ...props }: TextareaHTMLAttributes<HT
   return <textarea {...props} className={`${CONTROL} font-mono ${className}`} />
 }
 
+/**
+ * Chừa chỗ cho mũi tên xổ xuống: `pr-8` thay cho `px-2.5` của CONTROL.
+ *
+ * Mũi tên là do TRÌNH DUYỆT vẽ, đè lên mép phải của ô, nên với padding 10px thì chữ
+ * dài ("Mọi vai trò") chạy sát vào nó và trông như bị cắt.
+ */
 export function Select({ className = '', ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${CONTROL} ${className}`} />
+  return <select {...props} className={`${CONTROL} pr-8 ${className}`} />
 }
 
 /** Băng lỗi/cảnh báo. `alert` cho lỗi (đọc ngay), `status` cho tin lành (đọc lịch sự). */
