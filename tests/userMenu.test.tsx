@@ -20,6 +20,7 @@ const ME: Me = {
   displayName: 'Nguyễn Văn A',
   role: 'member',
   mustChangePassword: false,
+  discordUsername: null,
 }
 
 function dung() {
@@ -61,9 +62,10 @@ describe('UserMenu', () => {
     expect(nut()).toHaveAttribute('aria-haspopup', 'menu')
   })
 
-  it('mở ra có đủ ba việc của tài khoản', async () => {
+  it('mở ra có đủ bốn việc của tài khoản', async () => {
     dung()
     await mo()
+    expect(screen.getByRole('menuitem', { name: 'Tài khoản' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Chuyển sang nền tối' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Đổi mật khẩu' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Đăng xuất' })).toBeInTheDocument()
@@ -78,13 +80,13 @@ describe('UserMenu', () => {
   it('mở ra là con trỏ bàn phím đã nằm trong menu, mũi tên đi được', async () => {
     dung()
     await mo()
-    expect(document.activeElement).toHaveAccessibleName('Chuyển sang nền tối')
+    expect(document.activeElement).toHaveAccessibleName('Tài khoản')
 
     await userEvent.keyboard('{ArrowDown}')
-    expect(document.activeElement).toHaveAccessibleName('Đổi mật khẩu')
-    // Vòng lại từ cuối lên đầu, không kẹt ở mục cuối.
-    await userEvent.keyboard('{ArrowDown}{ArrowDown}')
     expect(document.activeElement).toHaveAccessibleName('Chuyển sang nền tối')
+    // Vòng lại từ cuối lên đầu, không kẹt ở mục cuối.
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}')
+    expect(document.activeElement).toHaveAccessibleName('Tài khoản')
   })
 
   it('Esc đóng menu và trả tiêu điểm về nút — không bỏ rơi bàn phím giữa trang', async () => {

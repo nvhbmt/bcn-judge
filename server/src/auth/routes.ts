@@ -6,11 +6,27 @@ import { db } from '../db/pool'
 import { users } from '../db/schema'
 import { errors, ok } from '../lib/apiResponse'
 import { clearSessionCookie, clientIp, parseBody, rateLimit, readSessionCookie, setSessionCookie } from '../lib/http'
+import { discordEnabled } from './discordApi'
+import { discordRoutes } from './discordRoutes'
 import { hashPassword, verifyPassword } from './hash'
 import { requireAuth } from './middleware'
 import { createSession, revokeAllSessionsOf, revokeSession } from './session'
 
 export const authRoutes = new Hono()
+
+// Gắn Ở ĐÂY chứ không mount riêng trong app.ts: `/auth/discord` phải đứng trước
+// `/auth` để khỏi bị nuốt, mà thứ tự mount là thứ dễ quên nhất khi thêm nhóm route.
+// Lồng vào thì không có thứ tự nào để quên.
+authRoutes.route('/discord', discordRoutes)
+
+/**
+ * Những cách đăng nhập đang BẬT. Màn đăng nhập hỏi trước khi vẽ nút.
+ *
+ * Không có endpoint này thì SPA phải đoán, và đoán sai theo hướng tệ nhất: vẽ nút
+ * Discord ở một hệ chưa cấu hình, ai bấm cũng bị đá về đúng chỗ cũ mà không hiểu
+ * vì sao. Công khai, vì đây đúng là thứ hiện ra trước khi đăng nhập.
+ */
+authRoutes.get('/providers', (c) => ok(c, { discord: discordEnabled() }))
 
 const loginSchema = z.object({
   emailOrUsername: z.string().min(1).max(200),
@@ -49,6 +65,7 @@ authRoutes.post('/login', async (c) => {
     displayName: user.displayName,
     role: user.role,
     mustChangePassword: user.mustChangePassword,
+    discordUsername: user.discordUsername,
   })
 })
 

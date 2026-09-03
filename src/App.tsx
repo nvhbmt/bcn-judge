@@ -16,6 +16,7 @@ import { ContestPage } from '@/pages/ContestPage'
 import { CourseDetailPage } from '@/pages/CourseDetailPage'
 import { CoursesPage } from '@/pages/CoursesPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { AccountPage } from '@/pages/AccountPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
 import { ContestEditorPage } from '@/pages/mentor/ContestEditorPage'
 import { ContestListPage } from '@/pages/mentor/ContestListPage'
@@ -85,6 +86,9 @@ function AppRoutes({ role }: { role: Me['role'] }) {
       <Route path="/contest/:contestId" element={<ContestPage />} />
       <Route path="/contest/:contestId/bai/:contestProblemId" element={<WorkspacePage />} />
       <Route path="/team" element={<TeamPage />} />
+      {/* Trang tài khoản: gắn/bỏ gắn Discord, và là chỗ hạ cánh của callback OAuth —
+          xem AccountPage.tsx. */}
+      <Route path="/tai-khoan" element={<AccountPage />} />
       {/* Đổi mật khẩu TỰ NGUYỆN. Trước đây route này chỉ có trong nhánh bắt đổi lần
           đầu, nên đổi xong một lần là không còn lối vào — dù `/auth/change-password`
           ở server vẫn nhận với mọi tài khoản đã đăng nhập. Lối vào ở UserMenu. */}

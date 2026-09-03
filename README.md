@@ -75,6 +75,44 @@ minh testcase ẩn không rò, chạy thử (mẫu và input tự nhập), giớ
 người nộp đồng thời, contest và bảng xếp hạng, chấm lại hai chiều kèm vết kiểm
 toán, bài dạng function, và các cổng chặn quanh luồng nộp.
 
+## Đăng nhập bằng Discord
+
+Tuỳ chọn. Thiếu cấu hình thì tính năng tắt hẳn và nút Discord **không hiện** ở màn
+đăng nhập — không phải hiện rồi bấm vào mới lỗi.
+
+Bật trong bốn bước:
+
+1. https://discord.com/developers/applications → **New Application**.
+2. Tab **OAuth2** → **Redirects** → thêm đúng URL callback, ví dụ
+   `https://judge.example.vn/auth/discord/callback` (dev: `http://localhost:8099/auth/discord/callback`).
+   Discord so khớp **nguyên văn**, lệch một dấu `/` là `invalid_redirect_uri`.
+3. Copy **Client ID** và **Client Secret**.
+4. Đặt ba biến vào `.env.api` rồi khởi động lại API:
+
+```bash
+DISCORD_CLIENT_ID=...
+DISCORD_CLIENT_SECRET=...
+DISCORD_REDIRECT_URI=https://judge.example.vn/auth/discord/callback
+```
+
+**Discord KHÔNG cấp tài khoản mới.** Nó chỉ là cách xác thực một tài khoản admin đã
+cấp — đúng như màn đăng nhập vẫn nói ("Liên hệ ngay các mentor để được cấp tài
+khoản"). Callback không bao giờ `INSERT` vào `users`; test tích hợp đếm số tài khoản
+trước và sau mỗi nhánh từ chối để canh đúng điều đó. Nếu tự tạo user thì bất kỳ ai
+có Discord đều vào được judge, và vai trò / ghi danh / team do admin cấp mất nghĩa.
+
+Một tài khoản gắn được Discord theo hai đường:
+
+- **Gắn chủ động** — đăng nhập bằng mật khẩu, vào `/tai-khoan`, bấm *Gắn Discord*.
+  Đây là đường luôn chạy được, kể cả khi email tài khoản không gửi thư tới được
+  (seed dùng `@bcn.local` — không ai đăng ký Discord bằng email đó).
+- **Khớp email ở lần đăng nhập đầu** — chỉ khi Discord xác nhận email **đã xác
+  minh**. Mức tin cậy đúng bằng "đặt lại mật khẩu qua email". Email chưa xác minh
+  bị bỏ qua hẳn, vì lúc đó chuỗi email chỉ là chữ người ta tự gõ vào hồ sơ.
+
+Bỏ gắn ở `/tai-khoan`. Tài khoản **chưa có mật khẩu** thì bị chặn bỏ gắn — bỏ xong
+là không còn đường nào vào tài khoản của chính mình.
+
 ## Trạng thái
 
 | Phase | Nội dung | Trạng thái |

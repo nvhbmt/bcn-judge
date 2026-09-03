@@ -10,6 +10,9 @@ export interface Me {
   displayName: string
   role: Role
   mustChangePassword: boolean
+  /** Tên Discord đang gắn; `null` = chưa gắn. Chỉ để HIỆN — định danh là discord_id
+   *  ở server, vì Discord cho đổi username. */
+  discordUsername: string | null
 }
 
 export interface CourseSummary {

@@ -10,10 +10,10 @@ import { login, watchForErrors } from './helpers'
 
 /** Route tĩnh theo vai trò. Route có tham số kiểm ở các spec luồng. */
 const ROUTES = {
-  member: ['/', '/contest', '/team'],
-  mentor: ['/', '/contest', '/team', '/mentor/bai-tap', '/mentor/contest'],
+  member: ['/', '/contest', '/team', '/tai-khoan'],
+  mentor: ['/', '/contest', '/team', '/tai-khoan', '/mentor/bai-tap', '/mentor/contest'],
   admin: [
-    '/', '/contest', '/team', '/mentor/bai-tap', '/mentor/contest',
+    '/', '/contest', '/team', '/tai-khoan', '/mentor/bai-tap', '/mentor/contest',
     '/quan-tri', '/quan-tri/tai-khoan', '/quan-tri/khoa-hoc', '/quan-tri/team', '/quan-tri/cai-dat',
   ],
 } as const

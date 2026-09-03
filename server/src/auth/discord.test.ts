@@ -1,0 +1,281 @@
+/**
+ * Đăng nhập bằng Discord.
+ *
+ * Điều được canh gắt nhất ở đây là điều KHÔNG được xảy ra: callback không bao giờ
+ * tạo user. Discord là cách xác thực tài khoản đã có, không phải cửa đăng ký — tự
+ * tạo user nghĩa là bất kỳ ai có Discord đều vào được judge, và vai trò / ghi danh /
+ * team do admin cấp mất hết ý nghĩa. Vì vậy mọi nhánh "không khớp" đều kèm một phép
+ * đếm số user trước và sau.
+ *
+ * Dùng `app.request` thẳng thay vì `call()` của harness: bộ này đọc Location và
+ * Set-Cookie, mà `call()` chỉ trả JSON.
+ */
+import { sql } from 'drizzle-orm'
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+
+// Chạy TRƯỚC mọi import: `config` chụp env một lần lúc nạp module, nên đặt env trong
+// beforeEach là muộn — lúc đó config đã đông cứng với giá trị rỗng.
+vi.hoisted(() => {
+  process.env.DISCORD_CLIENT_ID = 'client-thu'
+  process.env.DISCORD_CLIENT_SECRET = 'secret-thu'
+  process.env.DISCORD_REDIRECT_URI = 'http://localhost:8099/auth/discord/callback'
+})
+
+import { db, q } from '../db/pool'
+import { users } from '../db/schema'
+import { INTEGRATION, app, makeUser, resetDb, setupDb, type TestUser } from '../testing/harness'
+
+/** Giả lập hai lượt gọi Discord: đổi code lấy token, rồi hỏi /users/@me. */
+function gaLapDiscord(me: Record<string, unknown> | null, tokenOk = true) {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+    const url = String(input)
+    if (url.includes('/oauth2/token')) {
+      return tokenOk
+        ? new Response(JSON.stringify({ access_token: 'tok' }), { status: 200 })
+        : new Response('nope', { status: 400 })
+    }
+    if (url.includes('/users/@me')) {
+      return me
+        ? new Response(JSON.stringify(me), { status: 200 })
+        : new Response('nope', { status: 401 })
+    }
+    throw new Error(`gọi ngoài dự kiến: ${url}`)
+  })
+}
+
+/** Bắt đầu luồng: trả state đã ký trong cookie để bước callback dùng lại. */
+async function batDau(intent: 'login' | 'link', cookie?: string): Promise<{ state: string; cookie: string }> {
+  const res = await app.request(`/auth/discord${intent === 'link' ? '?intent=link' : ''}`, {
+    headers: cookie ? { cookie } : {},
+  })
+  const setCookie = res.headers.get('set-cookie') ?? ''
+  const value = /bcn_discord_state=([^;]+)/.exec(setCookie)?.[1] ?? ''
+  const state = new URL(res.headers.get('location') ?? 'http://x').searchParams.get('state') ?? ''
+  return { state, cookie: `bcn_discord_state=${value}` }
+}
+
+const callback = (qs: string, cookie: string) =>
+  app.request(`/auth/discord/callback?${qs}`, { headers: { cookie } })
+
+// Location là đường dẫn TƯƠNG ĐỐI (`/dang-nhap?discord=…`) nên `new URL` cần base.
+const dich = (res: Response) => new URL(res.headers.get('location') ?? '/', 'http://x')
+const lyDo = (res: Response) => dich(res).searchParams.get('discord')
+const duongDan = (res: Response) => dich(res).pathname
+const coPhien = (res: Response) => /bcn_session=[^;]+/.test(res.headers.get('set-cookie') ?? '')
+
+async function demUser(): Promise<number> {
+  const rows = await q<{ n: number }>(sql`SELECT count(*)::int AS n FROM users`)
+  return rows[0]!.n
+}
+
+describe.skipIf(!INTEGRATION)('đăng nhập bằng Discord', () => {
+  let member: TestUser
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    vi.restoreAllMocks()
+    member = await makeUser('member')
+  })
+
+  describe('bắt đầu luồng', () => {
+    it('/auth/providers nói tính năng đang bật để màn đăng nhập biết có nên vẽ nút', async () => {
+      const res = await app.request('/auth/providers', { headers: { 'x-api-response-version': '2' } })
+      const body = (await res.json()) as { data: unknown }
+      expect(body.data).toEqual({ discord: true })
+    })
+
+    it('đưa sang Discord với đúng client, redirect_uri và scope tối thiểu', async () => {
+      const res = await app.request('/auth/discord')
+      const url = new URL(res.headers.get('location')!)
+
+      expect(url.origin + url.pathname).toBe('https://discord.com/api/oauth2/authorize')
+      expect(url.searchParams.get('client_id')).toBe('client-thu')
+      expect(url.searchParams.get('redirect_uri')).toBe('http://localhost:8099/auth/discord/callback')
+      // Chỉ identify + email. Xin thêm `guilds` là xin quyền không dùng đến.
+      expect(url.searchParams.get('scope')).toBe('identify email')
+    })
+
+    it('state trong URL trùng state trong cookie HttpOnly — đó là toàn bộ lớp chống CSRF', async () => {
+      const res = await app.request('/auth/discord')
+      const setCookie = res.headers.get('set-cookie')!
+      const state = new URL(res.headers.get('location')!).searchParams.get('state')!
+
+      expect(setCookie).toContain(`bcn_discord_state=${state}.login`)
+      expect(setCookie).toContain('HttpOnly')
+      // Lax chứ KHÔNG Strict: callback là điều hướng từ discord.com sang, Strict thì
+      // cookie không được gửi kèm và mọi lần đăng nhập đều hỏng.
+      expect(setCookie).toContain('SameSite=Lax')
+    })
+  })
+
+  describe('chặn ở callback', () => {
+    it('state không khớp thì từ chối, không mở phiên', async () => {
+      const { cookie } = await batDau('login')
+      gaLapDiscord({ id: '1', username: 'ai-do', email: member.email, verified: true })
+
+      const res = await callback('code=abc&state=state-gia', cookie)
+
+      expect(lyDo(res)).toBe('state')
+      expect(coPhien(res)).toBe(false)
+    })
+
+    it('thiếu hẳn cookie state cũng từ chối — không có cookie thì không có gì để đối chiếu', async () => {
+      gaLapDiscord({ id: '1', username: 'ai-do', email: member.email, verified: true })
+      const res = await callback('code=abc&state=bat-ky', '')
+
+      expect(lyDo(res)).toBe('state')
+      expect(coPhien(res)).toBe(false)
+    })
+
+    it('người dùng bấm Cancel ở Discord: nói là đã huỷ, không báo như lỗi hệ thống', async () => {
+      const { cookie } = await batDau('login')
+      const res = await callback('error=access_denied&state=x', cookie)
+      expect(lyDo(res)).toBe('tu_choi')
+    })
+
+    it('Discord trả lỗi lúc đổi code thì về màn đăng nhập, không 500 trang trắng', async () => {
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord(null, false)
+      const res = await callback(`code=abc&state=${state}`, cookie)
+
+      expect(lyDo(res)).toBe('loi')
+      expect(coPhien(res)).toBe(false)
+    })
+  })
+
+  describe('KHÔNG BAO GIỜ tạo tài khoản mới', () => {
+    it('Discord lạ hoắc: từ chối và số tài khoản không đổi', async () => {
+      const truoc = await demUser()
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '999', username: 'nguoi-la', email: 'nguoi-la@gmail.com', verified: true })
+
+      const res = await callback(`code=abc&state=${state}`, cookie)
+
+      expect(lyDo(res)).toBe('chua_gan')
+      expect(coPhien(res)).toBe(false)
+      expect(await demUser()).toBe(truoc)
+    })
+
+    it('email TRÙNG nhưng Discord chưa xác minh email đó: vẫn từ chối', async () => {
+      // Email chưa xác minh chỉ là chữ người ta tự gõ vào hồ sơ. Nhận nó nghĩa là ai
+      // cũng chiếm được tài khoản người khác bằng cách gõ đúng email của họ.
+      const truoc = await demUser()
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '999', username: 'gia-mao', email: member.email, verified: false })
+
+      const res = await callback(`code=abc&state=${state}`, cookie)
+
+      expect(lyDo(res)).toBe('chua_gan')
+      expect(coPhien(res)).toBe(false)
+      expect(await demUser()).toBe(truoc)
+    })
+  })
+
+  describe('đăng nhập được', () => {
+    it('Discord đã gắn sẵn thì vào thẳng', async () => {
+      await db.update(users).set({ discordId: '42', discordUsername: 'cu' }).where(sql`id = ${member.id}`)
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '42', username: 'moi', email: null, verified: false })
+
+      const res = await callback(`code=abc&state=${state}`, cookie)
+
+      expect(duongDan(res)).toBe('/')
+      expect(lyDo(res)).toBeNull()
+      expect(coPhien(res)).toBe(true)
+    })
+
+    it('username Discord đổi thì cập nhật theo — định danh là id, tên chỉ để hiện', async () => {
+      await db.update(users).set({ discordId: '42', discordUsername: 'ten-cu' }).where(sql`id = ${member.id}`)
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '42', username: 'ten-moi', email: null, verified: false })
+      await callback(`code=abc&state=${state}`, cookie)
+
+      const rows = await q<{ u: string }>(sql`SELECT discord_username AS u FROM users WHERE id = ${member.id}`)
+      expect(rows[0]!.u).toBe('ten-moi')
+    })
+
+    it('lần đầu: email ĐÃ XÁC MINH trùng thì gắn luôn, lần sau không cần email nữa', async () => {
+      const truoc = await demUser()
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '77', username: 'chinh-chu', email: member.email, verified: true })
+
+      const res = await callback(`code=abc&state=${state}`, cookie)
+
+      expect(coPhien(res)).toBe(true)
+      expect(await demUser()).toBe(truoc)
+      const rows = await q<{ d: string }>(sql`SELECT discord_id AS d FROM users WHERE id = ${member.id}`)
+      expect(rows[0]!.d).toBe('77')
+    })
+
+    it('tài khoản bị khoá thì Discord cũng không mở được', async () => {
+      await db.update(users).set({ discordId: '42', disabled: true }).where(sql`id = ${member.id}`)
+      const { state, cookie } = await batDau('login')
+      gaLapDiscord({ id: '42', username: 'x', email: null, verified: false })
+
+      const res = await callback(`code=abc&state=${state}`, cookie)
+
+      expect(lyDo(res)).toBe('bi_khoa')
+      expect(coPhien(res)).toBe(false)
+    })
+  })
+
+  describe('gắn và bỏ gắn', () => {
+    it('đang đăng nhập thì gắn được Discord vào chính tài khoản mình', async () => {
+      const { state, cookie } = await batDau('link', member.cookie)
+      gaLapDiscord({ id: '55', username: 'toi', email: null, verified: false })
+
+      const res = await callback(`code=abc&state=${state}`, `${cookie}; ${member.cookie}`)
+
+      expect(lyDo(res)).toBe('da_gan')
+      const rows = await q<{ d: string }>(sql`SELECT discord_id AS d FROM users WHERE id = ${member.id}`)
+      expect(rows[0]!.d).toBe('55')
+    })
+
+    it('một Discord không gắn được vào hai tài khoản', async () => {
+      const nguoiKhac = await makeUser('member')
+      await db.update(users).set({ discordId: '55' }).where(sql`id = ${nguoiKhac.id}`)
+
+      const { state, cookie } = await batDau('link', member.cookie)
+      gaLapDiscord({ id: '55', username: 'toi', email: null, verified: false })
+      const res = await callback(`code=abc&state=${state}`, `${cookie}; ${member.cookie}`)
+
+      expect(lyDo(res)).toBe('gan_nguoi_khac')
+      const rows = await q<{ d: string | null }>(sql`SELECT discord_id AS d FROM users WHERE id = ${member.id}`)
+      expect(rows[0]!.d).toBeNull()
+    })
+
+    it('bỏ gắn thì xoá sạch dấu vết Discord', async () => {
+      await db.update(users).set({ discordId: '42', discordUsername: 'x' }).where(sql`id = ${member.id}`)
+      const res = await app.request('/auth/discord/unlink', {
+        method: 'POST',
+        headers: { cookie: member.cookie, 'x-api-response-version': '2' },
+      })
+
+      expect(res.status).toBe(200)
+      const rows = await q<{ d: string | null; u: string | null }>(
+        sql`SELECT discord_id AS d, discord_username AS u FROM users WHERE id = ${member.id}`,
+      )
+      expect(rows[0]).toEqual({ d: null, u: null })
+    })
+
+    it('tài khoản KHÔNG có mật khẩu thì chặn bỏ gắn — bỏ xong là mất đường vào', async () => {
+      await db
+        .update(users)
+        .set({ discordId: '42', passwordHash: null, hashAlgo: null })
+        .where(sql`id = ${member.id}`)
+
+      const res = await app.request('/auth/discord/unlink', {
+        method: 'POST',
+        headers: { cookie: member.cookie, 'x-api-response-version': '2' },
+      })
+
+      expect(res.status).toBe(400)
+      const rows = await q<{ d: string | null }>(sql`SELECT discord_id AS d FROM users WHERE id = ${member.id}`)
+      expect(rows[0]!.d).toBe('42')
+    })
+  })
+})

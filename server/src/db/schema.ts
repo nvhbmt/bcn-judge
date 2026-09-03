@@ -50,6 +50,12 @@ export const users = pgTable(
     hashAlgo: text('hash_algo'),
     mustChangePassword: boolean('must_change_password').notNull().default(true),
     totpSecret: text('totp_secret'),
+    /* Đăng nhập bằng Discord — xem drizzle/0004. `discordId` là snowflake (text, vì
+       nó vượt 2^53); `discordUsername` chỉ để hiện, không bao giờ dùng để định danh
+       vì Discord cho đổi username. */
+    discordId: text('discord_id'),
+    discordUsername: text('discord_username'),
+    discordLinkedAt: timestamp('discord_linked_at', { withTimezone: true }),
     disabled: boolean('disabled').notNull().default(false),
     createdAt: createdAt(),
     lastLogin: timestamp('last_login', { withTimezone: true }),

@@ -13,7 +13,7 @@
  * Hệ thiết kế không có bóng đổ (xem IconRail), nên tấm menu tách khỏi nền bằng viền
  * đậm + mặt phẳng riêng, không phải bằng shadow.
  */
-import { ChevronDown, KeyRound, LogOut, Moon, Sun } from 'lucide-react'
+import { ChevronDown, KeyRound, LogOut, Moon, Sun, UserRound } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '@/components/ui/patterns'
@@ -107,6 +107,16 @@ export function UserMenu() {
             <p className="truncate font-mono text-[13px] text-ink-1">{me.displayName}</p>
             <p className="truncate font-mono text-[12px] text-ink-5">{me.email}</p>
           </div>
+
+          <MenuItem
+            icon={<UserRound size={14} />}
+            onClick={() => {
+              dong(false)
+              navigate('/tai-khoan')
+            }}
+          >
+            Tài khoản
+          </MenuItem>
 
           <MenuItem
             icon={theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}

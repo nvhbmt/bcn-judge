@@ -24,6 +24,7 @@ function renderAs(role: Role) {
     displayName: 'Người dùng thử',
     role,
     mustChangePassword: false,
+    discordUsername: null,
   }
   useAuth.setState({ me, loading: false })
   render(

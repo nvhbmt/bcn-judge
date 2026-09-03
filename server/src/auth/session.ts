@@ -16,6 +16,8 @@ export interface AuthUser {
   displayName: string
   role: 'admin' | 'mentor' | 'member'
   mustChangePassword: boolean
+  /** Tên Discord đang gắn, `null` nếu chưa gắn — màn tài khoản hiện gắn hay bỏ gắn. */
+  discordUsername: string | null
 }
 
 function hashToken(token: string): Buffer {
@@ -49,6 +51,7 @@ export async function resolveSession(token: string | null): Promise<AuthUser | n
       displayName: users.displayName,
       role: users.role,
       mustChangePassword: users.mustChangePassword,
+      discordUsername: users.discordUsername,
       disabled: users.disabled,
       deletedAt: users.deletedAt,
     })
@@ -71,6 +74,7 @@ export async function resolveSession(token: string | null): Promise<AuthUser | n
     displayName: row.displayName,
     role: row.role as AuthUser['role'],
     mustChangePassword: row.mustChangePassword,
+    discordUsername: row.discordUsername,
   }
 }
 

@@ -23,6 +23,7 @@ const me = (mustChangePassword: boolean): Me => ({
   displayName: 'Nguyễn Văn A',
   role: 'member',
   mustChangePassword,
+  discordUsername: null,
 })
 
 function dung(batBuoc: boolean) {

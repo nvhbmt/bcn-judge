@@ -8,30 +8,36 @@
  * Nút "hiện" mật khẩu có vì người ta gõ mật khẩu admin cấp (10 ký tự ngẫu nhiên)
  * trên bàn phím laptop lúc 11 giờ đêm.
  */
-import { useState, type FormEvent, type ReactNode } from 'react'
-import { useAuth } from '@/stores/auth'
-import { SystemLog } from './login/SystemLog'
+import { useState, type FormEvent, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
+import { DISCORD_REASON } from "@/lib/discord";
+import { useAuth } from "@/stores/auth";
+import { DiscordLogin } from "./login/DiscordLogin";
+import { SystemLog } from "./login/SystemLog";
 
 function PromptInput({
   id,
   label,
-  type = 'text',
+  type = "text",
   value,
   onChange,
   autoComplete,
   trailing,
 }: {
-  id: string
-  label: string
-  type?: string
-  value: string
-  onChange: (v: string) => void
-  autoComplete: string
-  trailing?: ReactNode
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoComplete: string;
+  trailing?: ReactNode;
 }) {
   return (
     <div className="mb-7">
-      <label className="mb-2 block font-mono text-[11px] tracking-[0.1em] text-ink-5 uppercase" htmlFor={id}>
+      <label
+        className="mb-2 block font-mono text-[11px] tracking-[0.1em] text-ink-5 uppercase"
+        htmlFor={id}
+      >
         {label}
       </label>
       {/* Gạch chân, không phải hộp. `focus-within` chứ không `:focus-visible`: vòng
@@ -53,21 +59,25 @@ function PromptInput({
         {trailing}
       </div>
     </div>
-  )
+  );
 }
 
 export function LoginPage() {
-  const { login, error } = useAuth()
-  const [emailOrUsername, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const { login, error } = useAuth();
+  // Callback Discord hỏng thì đá về đây kèm `?discord=<mã>`; không dịch mã ra chữ
+  // thì người dùng chỉ thấy mình quay lại chỗ cũ mà không hiểu vì sao.
+  const [params] = useSearchParams();
+  const discordLoi = DISCORD_REASON[params.get("discord") ?? ""];
+  const [emailOrUsername, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   async function onSubmit(e: FormEvent) {
-    e.preventDefault()
-    setBusy(true)
-    await login(emailOrUsername, password)
-    setBusy(false)
+    e.preventDefault();
+    setBusy(true);
+    await login(emailOrUsername, password);
+    setBusy(false);
   }
 
   return (
@@ -78,8 +88,12 @@ export function LoginPage() {
 
       <div className="flex flex-col justify-center bg-surface-1 px-12 py-14">
         <form onSubmit={onSubmit} className="w-full">
-          <p className="mb-2.5 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">Đăng nhập</p>
-          <h1 className="mb-2 font-display text-[26px] text-ink-1">Chào lại, coder.</h1>
+          <p className="mb-2.5 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">
+            Đăng nhập
+          </p>
+          <h1 className="mb-2 font-display text-[26px] text-ink-1">
+            Xin chào, coder.
+          </h1>
           <p className="mb-9 text-[14px] leading-[1.6] text-ink-4">
             Chưa có tài khoản? Liên hệ ngay các mentor để được cấp tài khoản.
           </p>
@@ -94,7 +108,7 @@ export function LoginPage() {
           <PromptInput
             id="password"
             label="Mật khẩu"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={setPassword}
             autoComplete="current-password"
@@ -104,13 +118,25 @@ export function LoginPage() {
                 onClick={() => setShowPassword((v) => !v)}
                 className="ml-auto shrink-0 font-mono text-[11px] text-ink-6 hover:text-ink-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
               >
-                {showPassword ? 'ẩn' : 'hiện'}
+                {showPassword ? "ẩn" : "hiện"}
               </button>
             }
           />
 
+          {discordLoi ? (
+            <p
+              role="alert"
+              className="mb-5 border-l-2 border-clay bg-[var(--tint-clay)] px-3 py-2 text-[13px] text-ink-3"
+            >
+              {discordLoi}
+            </p>
+          ) : null}
+
           {error ? (
-            <p role="alert" className="mb-5 border-l-2 border-clay bg-[var(--tint-clay)] px-3 py-2 text-[13px] text-ink-3">
+            <p
+              role="alert"
+              className="mb-5 border-l-2 border-clay bg-[var(--tint-clay)] px-3 py-2 text-[13px] text-ink-3"
+            >
               {error}
             </p>
           ) : null}
@@ -122,15 +148,17 @@ export function LoginPage() {
             disabled={busy}
             className="flex w-full items-center justify-center gap-2.5 bg-[var(--moss-solid,var(--moss))] px-4 py-4 font-mono text-[14px] font-semibold tracking-[0.04em] text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5"
           >
-            {busy ? 'Đang đăng nhập…' : 'Đăng nhập'}
+            {busy ? "Đang đăng nhập…" : "Đăng nhập"}
             {busy ? null : (
               <span aria-hidden className="opacity-55">
                 ↵
               </span>
             )}
           </button>
+
+          <DiscordLogin />
         </form>
       </div>
     </div>
-  )
+  );
 }
