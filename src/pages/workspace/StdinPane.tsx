@@ -20,6 +20,7 @@ export function StdinPane({
   busy,
   pending,
   result,
+  sampleInput,
 }: {
   value: string
   onChange: (v: string) => void
@@ -33,6 +34,14 @@ export function StdinPane({
   pending: boolean
   /** Kết quả của lượt chạy TỰ NHẬP gần nhất; `null` khi chưa chạy lần nào. */
   result: SubmissionView | null
+  /**
+   * Input của testcase mẫu đầu tiên, dùng làm placeholder.
+   *
+   * Ô trống không nói được định dạng đầu vào, mà đó đúng là thứ người ta gõ sai nhiều
+   * nhất — ba số một dòng hay mỗi số một dòng? Mẫu thật trả lời ngay, và nó vốn đã in
+   * trong đề nên không lộ gì thêm. Bài chưa có testcase mẫu thì rơi về câu chung.
+   */
+  sampleInput?: string
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
@@ -50,8 +59,13 @@ export function StdinPane({
           id="custom-input"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          placeholder={
+            sampleInput?.trim()
+              ? `Ví dụ — input của testcase mẫu:\n\n${sampleInput.trimEnd()}`
+              : 'Gõ dữ liệu vào ở đây, đúng định dạng đề mô tả.'
+          }
           spellCheck={false}
-          className="min-h-0 resize-none bg-surface-editor px-2.5 py-2 font-mono text-[12px] text-ink-2 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-moss"
+          className="min-h-0 resize-none bg-surface-editor px-2.5 py-2 font-mono text-[12px] text-ink-2 placeholder:text-ink-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-moss"
         />
         <div className="min-h-0 overflow-auto bg-surface-editor px-2.5 py-2">
           <Output busy={busy === 'run' || pending} result={result} />

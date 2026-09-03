@@ -91,6 +91,7 @@ export function ConsolePanel({
       <div className="min-h-0 flex-1 overflow-auto px-3.5 py-3">
         {tab === 'stdin' ? (
           <StdinPane
+            sampleInput={samples[0]?.input}
             value={customInput}
             onChange={onCustomInput}
             onRun={onRunCustom}

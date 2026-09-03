@@ -100,6 +100,22 @@ describe('tab stdin tự nhập — gõ, chạy, đọc tại chỗ', () => {
   // Bám vào VERDICT_LABEL chứ không chép cứng chữ: huy hiệu hiện TÊN tiếng Việt
   // ("Chấp nhận", "Quá thời gian"), mã gốc lùi về tooltip. Đổi cách gọi verdict là
   // việc của sản phẩm, không nên làm đỏ những test canh chuyện khác.
+  it('ô nhập lấy input mẫu làm placeholder — ô trống không nói được định dạng', () => {
+    panel()
+    // Đây là thứ người ta gõ sai nhiều nhất: ba số một dòng hay mỗi số một dòng?
+    // Mẫu thật trả lời ngay, và nó vốn đã in trong đề nên không lộ gì thêm.
+    expect(screen.getByLabelText(/Chương trình đọc đúng/)).toHaveAttribute(
+      'placeholder',
+      expect.stringContaining(SAMPLES[0]!.input.trim()),
+    )
+  })
+
+  it('bài chưa có testcase mẫu thì rơi về câu chung, không để ô trống trơn', () => {
+    panel({ samples: [] })
+    const box = screen.getByLabelText(/Chương trình đọc đúng/)
+    expect(box.getAttribute('placeholder')).toMatch(/đúng định dạng đề mô tả/)
+  })
+
   it('lượt tự nhập không có đáp án để so, nên không dán nhãn AC', () => {
     panel({ customRun: run([{ stdout: '15\n', verdict: 'AC' }]) })
     expect(screen.queryByText(VERDICT_LABEL.AC)).not.toBeInTheDocument()
