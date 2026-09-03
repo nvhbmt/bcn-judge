@@ -24,3 +24,25 @@ test('đổi theme và nhớ lại sau khi tải lại trang', async ({ page }) 
   await page.getByRole('button', { name: 'Chuyển sang nền sáng' }).click()
   expect(await theme(page)).toBe('light')
 })
+
+/**
+ * Thanh cuộn, ô tick và bảng chọn của <select> do TRÌNH DUYỆT vẽ, không phải CSS của
+ * mình. Trước đây `color-scheme` không được khai ở đâu cả, nên chúng luôn ở bảng màu
+ * sáng: nền tối mà thanh cuộn vẫn trắng, chạy dọc suốt màn hình.
+ *
+ * Kiểm bằng giá trị TÍNH ĐƯỢC trên <html> chứ không chụp ảnh thanh cuộn: macOS dùng
+ * thanh cuộn phủ rộng 0px nên ảnh chụp không có gì để so, còn `color-scheme` mới là
+ * thứ quyết định màu ấy trên mọi hệ.
+ */
+test('color-scheme đi theo theme, không để trình duyệt tự đoán', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'light')
+
+  await page.getByRole('button', { name: 'Chuyển sang nền tối' }).click()
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+
+  // Và nhớ qua lần tải lại, cùng nhịp với token màu — không được lệch nhau một nhịp,
+  // vì lệch thì có một khoảnh khắc nền tối mà thanh cuộn còn sáng.
+  await page.reload()
+  await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
+})

@@ -1,6 +1,14 @@
 /* Thang màu trung tính ấm + hai màu điểm. Mặc định là TỐI.
    Bản sáng bật bằng [data-theme="light"] trên <html>. */
 :root {
+  /* Nói cho TRÌNH DUYỆT biết đang ở nền nào, không chỉ nói bằng token.
+     Thanh cuộn, ô tick, nút xoay của input number và cả bảng chọn của <select> là do
+     trình duyệt vẽ, không phải CSS của mình — thiếu dòng này thì chúng vẫn trắng sáng
+     giữa màn hình tối, và thanh cuộn là thứ lộ rõ nhất vì nó chạy dọc suốt màn.
+     Cặp với `data-theme`, không phải với `prefers-color-scheme`: người dùng tự chọn
+     theme (xem src/lib/theme.ts), nên hệ điều hành không được quyền nói khác. */
+  color-scheme: dark;
+
   /* nền */
   --canvas:      #100f0d;
   --surface-0:   #131110;  /* nền màn hình */
@@ -100,6 +108,8 @@
 }
 
 [data-theme='light'] {
+  color-scheme: light;
+
   --canvas:      #efece5;
   --surface-0:   #fcfaf5;
   --surface-1:   #f5f2ea;
