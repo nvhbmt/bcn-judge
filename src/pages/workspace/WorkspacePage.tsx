@@ -198,6 +198,7 @@ export function WorkspacePage() {
           <SubmissionsPanel
             handleQuery={handleQuery}
             selectedId={watchedId}
+            languages={languages ?? []}
             onSelect={(id) => {
               setWatchedId(id)
               setConsoleTab('ket-qua')

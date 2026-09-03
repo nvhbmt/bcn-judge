@@ -1,20 +1,32 @@
 import { useQuery } from '@tanstack/react-query'
 import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
 import { api } from '@/lib/api'
-import type { SubmissionView } from '@/types/api'
+import type { LanguageOption, SubmissionView } from '@/types/api'
 
 /**
- * Tab "Bài nộp" (FR-E3/FR-G1): CHỈ danh sách với verdict tổng — chi tiết từng
- * testcase nằm ở tab Kết quả dưới editor (FR-E5 v0.5).
+ * Tab "Bài nộp" (FR-E3/FR-G1): danh sách lượt nộp với verdict, ngôn ngữ, thời gian,
+ * bộ nhớ và điểm. Chi tiết TỪNG TESTCASE vẫn nằm ở tab Kết quả dưới editor (FR-E5).
+ *
+ * Vì sao hiện đủ bốn cột thay vì mỗi verdict: dữ liệu đã nằm sẵn trong cùng một lượt
+ * gọi API (`timeMsMax`, `memoryKbMax` có trong danh sách, không phải xin thêm), mà
+ * đó đúng là thứ người học so giữa các lần nộp — "bản vừa rồi nhanh hơn bản trước
+ * bao nhiêu". Giấu đi thì họ phải bấm vào từng lượt mới thấy, hoặc tự nhớ.
+ *
+ * Số liệu là của lượt nộp ĐÃ CHẤM XONG. Bài chưa chấm hoặc lỗi biên dịch thì không
+ * có thời gian/bộ nhớ để nói, và ô đó ghi "—" chứ không ghi 0: 0 ms là một phép đo,
+ * còn "không có" là chuyện khác hẳn.
  */
 export function SubmissionsPanel({
   handleQuery,
   selectedId,
+  languages,
   onSelect,
   onLoadIntoEditor,
 }: {
   handleQuery: string
   selectedId: string | null
+  /** Để đổi `c11` thành "C" — mã ngôn ngữ là chuyện nội bộ, không phải thứ để đọc. */
+  languages: LanguageOption[]
   onSelect: (id: string) => void
   onLoadIntoEditor: (submission: SubmissionView) => void
 }) {
@@ -29,32 +41,70 @@ export function SubmissionsPanel({
     return <EmptyState title="Chưa nộp bài nào" hint="Bài nộp của bạn sẽ hiện ở đây." />
   }
 
+  const nameOf = (id: string) => languages.find((l) => l.id === id)?.name ?? id
+
   return (
-    <ul className="divide-y divide-line">
-      {data.map((s) => (
-        <li key={s.id}>
-          <div
-            className={`flex items-center gap-3 px-4 py-2 text-sm ${
-              s.id === selectedId ? 'bg-[var(--color-primary-soft)]' : ''
-            }`}
-          >
-            <button onClick={() => onSelect(s.id)} className="flex flex-1 items-center gap-3 text-left">
-              <VerdictBadge tone="soft" verdict={s.verdict} pending={s.status !== 'done'} />
-              <span className="tabular-nums">{s.score === null ? '—' : `${s.score} đ`}</span>
-              <span className="font-mono text-xs text-ink-5">{s.languageId}</span>
-              <span className="ml-auto text-xs text-ink-6">{formatTime(s.receivedAt)}</span>
-            </button>
-            <button
-              onClick={async () => onLoadIntoEditor(await api.get<SubmissionView>(`/api/member/submissions/${s.id}`))}
-              className="text-xs text-[var(--color-primary)] hover:underline"
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[34rem] border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.1em] text-ink-6 uppercase">
+            <th scope="col" className="px-4 py-2 font-medium">Kết quả</th>
+            <th scope="col" className="px-2 py-2 font-medium">Ngôn ngữ</th>
+            <th scope="col" className="px-2 py-2 text-right font-medium">Thời gian</th>
+            <th scope="col" className="px-2 py-2 text-right font-medium">Bộ nhớ</th>
+            <th scope="col" className="px-2 py-2 text-right font-medium">Điểm</th>
+            <th scope="col" className="px-4 py-2" />
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-line">
+          {data.map((s) => (
+            <tr
+              key={s.id}
+              className={s.id === selectedId ? 'bg-[var(--color-primary-soft)]' : 'hover:bg-surface-sel'}
             >
-              Nạp lại code
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
+              {/* Cả ô là nút chọn: hàng cao 2 dòng nên vùng bấm rộng hơn hẳn một chữ. */}
+              <td className="px-4 py-2">
+                <button onClick={() => onSelect(s.id)} className="flex flex-col items-start gap-1 text-left">
+                  <VerdictBadge tone="soft" verdict={s.verdict} pending={s.status !== 'done'} />
+                  <span className="num font-mono text-[11px] text-ink-6">{formatTime(s.receivedAt)}</span>
+                </button>
+              </td>
+              <td className="px-2 py-2">
+                <span className="bg-surface-sel px-1.5 py-0.5 font-mono text-[11px] whitespace-nowrap text-ink-4">
+                  {nameOf(s.languageId)}
+                </span>
+              </td>
+              <td className="num px-2 py-2 text-right font-mono text-[13px] whitespace-nowrap text-ink-3">
+                {s.timeMsMax === null ? '—' : `${s.timeMsMax} ms`}
+              </td>
+              <td className="num px-2 py-2 text-right font-mono text-[13px] whitespace-nowrap text-ink-3">
+                {formatMemory(s.memoryKbMax)}
+              </td>
+              <td className="num px-2 py-2 text-right font-mono text-[13px] whitespace-nowrap text-ink-3">
+                {s.score === null ? '—' : `${s.score}đ`}
+              </td>
+              <td className="px-4 py-2 text-right">
+                <button
+                  onClick={async () =>
+                    onLoadIntoEditor(await api.get<SubmissionView>(`/api/member/submissions/${s.id}`))
+                  }
+                  className="text-[13px] whitespace-nowrap text-[var(--color-primary)] hover:underline"
+                >
+                  Nạp lại code
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
+}
+
+/** KB → MB một chữ số thập phân. Dưới 1 MB thì giữ KB, vì "0.0 MB" không nói gì. */
+function formatMemory(kb: number | null): string {
+  if (kb === null) return '—'
+  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`
 }
 
 function formatTime(iso: string): string {
