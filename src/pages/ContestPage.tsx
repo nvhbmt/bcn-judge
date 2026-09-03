@@ -1,9 +1,10 @@
 /**
  * Màn 05 của bản v2 — trang contest (FR-I1/I3/I6).
  *
- * Hai cột `1fr | 520px`: đề và điểm của mình bên trái, bảng xếp hạng bên phải. Cột
- * phải rộng nhất trong cả app (520 so với 400 của trang chủ và 380 của khoá học) vì
- * nó chở một bảng nhiều cột — thiết kế đặt bề rộng theo lượng dữ liệu thật.
+ * Hai cột `1fr | 420px`: đề và điểm của mình bên trái, bảng xếp hạng bên phải.
+ * Cột phải từng là 520px khi bảng xếp hạng có MỘT CỘT CHO MỖI BÀI; bảng đó nay chỉ
+ * còn bốn cột (xem ContestStandings) nên 520 thành chỗ trống, và 420 cho khớp màn
+ * /team — thiết kế đặt bề rộng theo lượng dữ liệu thật.
  *
  * Đếm ngược là con số to nhất màn hình và neo vào ĐỒNG HỒ MÁY CHỦ, không phải đồng hồ
  * máy người dùng (FR-I3).
@@ -59,7 +60,7 @@ export function ContestPage() {
     data.freezeMinutes > 0 ? new Date(new Date(data.endAt).getTime() - data.freezeMinutes * 60_000) : null
 
   return (
-    <div className="grid h-full lg:grid-cols-[minmax(0,1fr)_520px]">
+    <div className="grid h-full lg:grid-cols-[minmax(0,1fr)_420px]">
       <main className="min-w-0 overflow-y-auto px-7 py-8">
         <Link to="/contest" className="mb-3 inline-flex items-center gap-1.5 font-mono text-[11px] text-ink-5 hover:text-ink-2">
           <ArrowLeft size={13} /> ~/contest
@@ -95,8 +96,12 @@ export function ContestPage() {
           </p>
         ) : null}
 
+        {/* Không còn trần 660px: thể lệ contest không phải văn xuôi đọc một mạch mà là
+            danh sách quy định + ví dụ mã, người ta QUÉT chứ không đọc từng dòng, và
+            660px làm gần nửa cột bỏ trống. Đánh đổi có thật: trên màn rất rộng, dòng
+            dài hơn khoảng 45–90 ký tự mà sách vở khuyên cho văn xuôi. */}
         {data.descriptionMd ? (
-          <div className="mt-6 max-w-[660px] text-[14px] leading-[1.7] text-ink-4">
+          <div className="mt-6 text-[14px] leading-[1.7] text-ink-4">
             <Markdown source={data.descriptionMd} />
           </div>
         ) : null}
