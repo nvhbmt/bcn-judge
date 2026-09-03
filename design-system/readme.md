@@ -187,7 +187,12 @@ Hợp đồng nội dung ở trên nói: chức năng chưa có thì bỏ khỏi
 
 ### Ngữ pháp bố cục dùng chung
 
-Tám mẫu lặp trên cả 8 màn nằm ở `src/components/ui/patterns.tsx`: `RowGroup`/`Row`
+Bảy mẫu lặp trên cả 8 màn nằm ở `src/components/ui/patterns.tsx`: `RowGroup`/`Row`
 (nhóm dòng ngăn nhau bằng khe 1px — cách trình bày danh sách DUY NHẤT của hệ),
-`Segments`, `StatStrip`, `KeyHint`, `Avatar`, `Divider`, `SideColumn`, `SideLabel`.
+`Segments`, `StatStrip`, `Avatar`, `Divider`, `SideColumn`, `SideLabel`.
 Dựng danh sách mới thì dùng lại chúng, đừng viết class rời.
+
+`KeyHint` (chip phím tắt `⌘K tìm bài`) từng nằm trong danh sách này và đã bị xoá: chỗ
+duy nhất dùng nó là ô tìm kiếm toàn cục, mà chính trang này đã gạch ô đó khỏi thiết kế
+ở mục trên. Một mẫu không màn nào dùng thì không phải mẫu — và giữ nó lại là mời người
+sau vẽ ra phím tắt chưa tồn tại. Cần lại thì dựng lại cùng lúc với tính năng.

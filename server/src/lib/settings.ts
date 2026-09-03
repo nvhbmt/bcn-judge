@@ -20,7 +20,13 @@ export interface JudgeSettings {
   judge_paused: boolean
 }
 
-const DEFAULTS: JudgeSettings = {
+/**
+ * Mặc định khi bảng `settings` chưa có dòng tương ứng — và cũng là thứ `db:seed` ghi
+ * vào DB. MỘT nguồn cho cả hai: trước đây seed.ts chép lại nguyên 15 giá trị này, nên
+ * sửa mặc định ở đây mà quên sửa bên kia thì DB mới seed vẫn mang giá trị CŨ — và dòng
+ * đã tồn tại thì luôn thắng mặc định, nên sai lặng lẽ và vĩnh viễn.
+ */
+export const DEFAULTS: JudgeSettings = {
   default_time_limit_ms: 1000,
   default_memory_limit_mb: 256,
   max_source_bytes: 65_536,

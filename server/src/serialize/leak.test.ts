@@ -22,7 +22,8 @@ import {
   setupDb,
   type TestUser,
 } from '../testing/harness'
-import { toMemberProblem, toMemberResult } from './index'
+import { toMemberProblem } from './problem'
+import { toMemberResult } from './submission'
 
 const CANARY_HIDDEN_INPUT = 'CANARY_HIDDEN_INPUT_9f3a'
 const CANARY_HIDDEN_EXPECTED = 'CANARY_HIDDEN_EXPECTED_7c1b'

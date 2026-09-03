@@ -106,7 +106,6 @@ export const LANGUAGES = {
   },
 } as const satisfies Record<string, LanguageConfig>
 
-export type LanguageId = keyof typeof LANGUAGES
 
 export function getLanguage(id: string): LanguageConfig {
   const lang = (LANGUAGES as Record<string, LanguageConfig>)[id]

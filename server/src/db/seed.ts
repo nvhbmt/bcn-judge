@@ -2,6 +2,7 @@
 import { sql } from 'drizzle-orm'
 import { hashPassword } from '../auth/hash'
 import { config } from '../config'
+import { DEFAULTS } from '../lib/settings'
 import { db, pool } from './pool'
 import { languages, settings, users } from './schema'
 
@@ -89,25 +90,18 @@ const LANGUAGE_SEED = [
   },
 ]
 
-/** FR-H2 v0.5 + FR-F5 — mọi mặc định đều cấu hình được qua trang admin. */
-const SETTINGS_SEED: Record<string, unknown> = {
-  default_time_limit_ms: 1000,
-  default_memory_limit_mb: 256,
-  max_source_bytes: 65_536,
-  max_custom_input_bytes: 65_536,
-  submissions_per_minute: 6,
-  runs_per_minute: 6,
-  max_pending_submissions_per_user: 3,
-  max_output_bytes: 8_388_608,
-  compile_time_limit_ms: 15_000,
-  compile_memory_mb: 1024,
-  max_testcase_file_bytes: 10_485_760,
-  max_testcases_total_bytes_per_problem: 134_217_728,
-  max_zip_bytes: 67_108_864,
-  tle_skip_threshold: 0,
-  judge_paused: false,
-  banner: null,
-}
+/**
+ * FR-H2 v0.5 + FR-F5 — mọi mặc định đều cấu hình được qua trang admin.
+ *
+ * Lấy THẲNG từ `DEFAULTS` của lib/settings, không chép lại: hai bản chép sẽ trôi khỏi
+ * nhau, mà hướng trôi lại lặng lẽ nhất có thể — DB seed ghi giá trị cũ thành một dòng
+ * thật, và dòng thật luôn thắng mặc định.
+ *
+ * Khoá `banner: null` cũ đã bỏ: nó không nằm trong `JudgeSettings` nên `getSettings()`
+ * không bao giờ trả về, `PATCH /settings` bỏ qua key lạ nên cũng không sửa được, và
+ * không có chỗ nào đọc. Một dòng DB không ai đọc được lẫn ghi được.
+ */
+const SETTINGS_SEED: Record<string, unknown> = { ...DEFAULTS }
 
 export async function seed(log: (m: string) => void = console.log): Promise<void> {
   for (const lang of LANGUAGE_SEED) {
