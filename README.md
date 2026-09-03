@@ -31,6 +31,21 @@ Thêm `--judge` để xếp thêm một ít bài ở trạng thái `pending` cho
 cách nhanh nhất để kiểm chứng hàng đợi và sandbox còn chạy đúng. Script từ chối
 chạy nếu `DATABASE_URL` không trông giống máy dev.
 
+### Cấu hình dev bằng `server/.env`
+
+`run-local.sh` tự truyền `DATABASE_URL` nên không cần file gì. Nhưng khi chạy tay
+từng lệnh trong `server/`, hoặc khi cần bật thêm biến (ví dụ `DISCORD_*`), thì tạo
+`server/.env` — các script đã kèm cờ `--env-file-if-exists=.env` của Node, không
+dùng gói `dotenv`. Chép mẫu từ `server/.env.example` (bản đó dành cho production,
+secret tách thành ba file theo ADR-5).
+
+**Biến đặt ở shell THẮNG file `.env`** (hành vi của `--env-file`, đã đo). Nhờ vậy
+`run-local.sh` và `npm run test:integration` — hai chỗ tự trỏ `DATABASE_URL` riêng —
+không bị một `.env` lạc trên máy kéo sang DB khác. `.env` chỉ lấp chỗ trống.
+
+Hai chỗ cố ý KHÔNG kèm cờ đó: `test` và `test:integration`. Đường chạy test không
+nên phụ thuộc vào một file không có trong git.
+
 ## Nạp contest từ đề .docx
 
 Đề "Code C hằng tuần" soạn tay trong Word. `contests/README.md` mô tả đủ; ngắn gọn:

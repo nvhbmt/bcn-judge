@@ -8,14 +8,14 @@
     "test": "vitest run",
     "test:sandbox": "DOCKER=1 vitest run src/judge/sandbox.test.ts",
     "images:build": "bash ../scripts/build-runner-images.sh",
-    "judge:demo": "node --import tsx src/judge/cli.ts",
-    "dev": "node --import tsx --watch src/index.ts",
-    "db:migrate": "node --import tsx src/db/migrate.ts",
-    "db:seed": "node --import tsx src/db/seed.ts",
-    "db:seed:demo": "node --import tsx src/db/seed-demo.ts",
-    "db:import:contest": "node --import tsx src/db/import-contest-docx.ts",
+    "judge:demo": "node --env-file-if-exists=.env --import tsx src/judge/cli.ts",
+    "dev": "node --env-file-if-exists=.env --import tsx --watch src/index.ts",
+    "db:migrate": "node --env-file-if-exists=.env --import tsx src/db/migrate.ts",
+    "db:seed": "node --env-file-if-exists=.env --import tsx src/db/seed.ts",
+    "db:seed:demo": "node --env-file-if-exists=.env --import tsx src/db/seed-demo.ts",
+    "db:import:contest": "node --env-file-if-exists=.env --import tsx src/db/import-contest-docx.ts",
     "test:integration": "INTEGRATION=1 DATABASE_URL=postgres://bcn:bcn@localhost:5434/bcn_judge_test vitest run src/routes src/auth src/db",
-    "db:grants": "node --import tsx src/db/grants.ts"
+    "db:grants": "node --env-file-if-exists=.env --import tsx src/db/grants.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
