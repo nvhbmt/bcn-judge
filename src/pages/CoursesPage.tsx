@@ -15,6 +15,7 @@ import { api } from '@/lib/api'
 import { useAuth } from '@/stores/auth'
 import type { CourseSummary } from '@/types/api'
 import { ActiveContest } from './home/ActiveContest'
+import { MentorCourses, vaiTroKhoa } from './home/MentorCourses'
 import { ActivityLog } from './home/ActivityLog'
 import { CourseRow } from './home/CourseRow'
 import { CourseStandings } from './home/CourseStandings'
@@ -50,11 +51,19 @@ export function CoursesPage() {
         <h1 className="mt-1.5 mb-1 font-display text-[28px] text-ink-1">
           Chào {me ? shortName(me.displayName) : 'bạn'}
         </h1>
+        {/* Câu chào phải đúng với vai: mentor KHÔNG ghi danh vào khoá mình dạy, nên
+            "Bạn đang theo 0 khoá" là câu vô nghĩa với họ. */}
         <p className="mb-7 text-[14px] text-ink-4">
-          {data ? `Bạn đang theo ${data.length} khoá.` : 'Đang tải khoá học của bạn…'}
+          {!data
+            ? 'Đang tải khoá học của bạn…'
+            : me?.role !== 'member'
+              ? `Khoá bạn ${vaiTroKhoa(me?.role ?? "")} và khoá bạn đang theo đều ở dưới.`
+              : `Bạn đang theo ${data.length} khoá.`}
         </p>
 
         <ResumeCard />
+
+        <MentorCourses role={me?.role ?? 'member'} />
 
         <SectionRule label="Khoá học của bạn" meta={data ? `${data.length} khoá` : undefined} />
 
@@ -64,7 +73,14 @@ export function CoursesPage() {
           </div>
         ) : null}
         {data && data.length === 0 ? (
-          <EmptyState title="Chưa có khoá học nào" hint="Liên hệ mentor để được ghi danh." />
+          <EmptyState
+            title="Chưa có khoá học nào"
+            hint={
+              me?.role === 'member'
+                ? 'Liên hệ mentor để được ghi danh.'
+                : `Bạn chưa được ghi danh làm học viên khoá nào — khác với khoá bạn ${vaiTroKhoa(me?.role ?? '')} ở trên.`
+            }
+          />
         ) : null}
 
         {data && data.length > 0 ? (
