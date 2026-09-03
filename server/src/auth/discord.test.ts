@@ -321,3 +321,100 @@ describe.skipIf(!INTEGRATION)('đăng nhập bằng Discord', () => {
     })
   })
 })
+
+/**
+ * Tự đổi tên hiển thị (PATCH /auth/me).
+ *
+ * Nằm cùng file với Discord vì điểm đáng canh nhất là chỗ hai thứ gặp nhau: tên do
+ * người dùng tự đặt KHÔNG được bị lần đăng nhập Discord sau đó ghi đè bằng username
+ * Discord. Đổi tên xong mà hôm sau đăng nhập lại thấy tên cũ là lỗi câm.
+ */
+describe.skipIf(!INTEGRATION)('đổi tên hiển thị', () => {
+  let member: TestUser
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+  beforeEach(async () => {
+    await resetDb()
+    vi.restoreAllMocks()
+    member = await makeUser('member')
+  })
+
+  const doiTen = (displayName: unknown, as = member) =>
+    app.request('/auth/me', {
+      method: 'PATCH',
+      headers: { cookie: as.cookie, 'content-type': 'application/json', 'x-api-response-version': '2' },
+      body: JSON.stringify({ displayName }),
+    })
+
+  const tenTrongDb = async (id: string) =>
+    (await q<{ n: string }>(sql`SELECT display_name AS n FROM users WHERE id = ${id}`))[0]!.n
+
+  it('đổi được, và /auth/me trả tên mới ngay', async () => {
+    const res = await doiTen('Bùi Thu Ngọc')
+    expect(res.status).toBe(200)
+    expect(await tenTrongDb(member.id)).toBe('Bùi Thu Ngọc')
+
+    const me = await app.request('/auth/me', {
+      headers: { cookie: member.cookie, 'x-api-response-version': '2' },
+    })
+    expect(((await me.json()) as { data: { displayName: string } }).data.displayName).toBe('Bùi Thu Ngọc')
+  })
+
+  it('cắt khoảng trắng hai đầu', async () => {
+    await doiTen('   Ngọc   ')
+    expect(await tenTrongDb(member.id)).toBe('Ngọc')
+  })
+
+  it('tên toàn khoảng trắng bị từ chối — nó qua được min(1) nhưng hiện ra là ô trống', async () => {
+    const truoc = await tenTrongDb(member.id)
+    expect((await doiTen('     ')).status).toBe(400)
+    expect(await tenTrongDb(member.id)).toBe(truoc)
+  })
+
+  it('tên rỗng và tên quá dài đều bị từ chối', async () => {
+    expect((await doiTen('')).status).toBe(400)
+    expect((await doiTen('x'.repeat(201))).status).toBe(400)
+  })
+
+  it('chưa đăng nhập thì không đổi được tên của ai cả', async () => {
+    const res = await app.request('/auth/me', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json', 'x-api-response-version': '2' },
+      body: JSON.stringify({ displayName: 'Kẻ lạ' }),
+    })
+    expect(res.status).toBe(401)
+  })
+
+  it('KHÔNG đổi được vai trò hay email qua đường này', async () => {
+    await app.request('/auth/me', {
+      method: 'PATCH',
+      headers: { cookie: member.cookie, 'content-type': 'application/json', 'x-api-response-version': '2' },
+      body: JSON.stringify({ displayName: 'Ngọc', role: 'admin', email: 'hacker@x.com' }),
+    })
+    const row = (
+      await q<{ r: string; e: string }>(sql`SELECT role AS r, email AS e FROM users WHERE id = ${member.id}`)
+    )[0]!
+    expect(row.r).toBe('member')
+    expect(row.e).toBe(member.email)
+  })
+
+  it('đăng nhập Discord sau đó KHÔNG ghi đè tên tự đặt', async () => {
+    await db.update(users).set({ discordId: '42', discordUsername: 'ten_discord' }).where(sql`id = ${member.id}`)
+    await doiTen('Tên tôi tự đặt')
+
+    const start = await app.request('/auth/discord')
+    const value = /bcn_discord_state=([^;]+)/.exec(start.headers.get('set-cookie') ?? '')?.[1] ?? ''
+    const state = new URL(start.headers.get('location')!).searchParams.get('state')!
+    gaLapDiscord({ id: '42', username: 'ten_discord_moi', email: null, verified: false, avatar: null })
+    await app.request(`/auth/discord/callback?code=abc&state=${state}`, {
+      headers: { cookie: `bcn_discord_state=${value}` },
+    })
+
+    // discord_username theo Discord, còn display_name là của người dùng.
+    expect(await tenTrongDb(member.id)).toBe('Tên tôi tự đặt')
+    const row = (await q<{ u: string }>(sql`SELECT discord_username AS u FROM users WHERE id = ${member.id}`))[0]!
+    expect(row.u).toBe('ten_discord_moi')
+  })
+})

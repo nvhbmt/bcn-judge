@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { db } from '../db/pool'
 import { users } from '../db/schema'
 import { errors, ok } from '../lib/apiResponse'
+import { audit } from '../lib/audit'
 import { clearSessionCookie, clientIp, parseBody, rateLimit, readSessionCookie, setSessionCookie } from '../lib/http'
 import { avatarUrl, discordEnabled } from './discordApi'
 import { discordRoutes } from './discordRoutes'
@@ -77,6 +78,35 @@ authRoutes.post('/logout', async (c) => {
 })
 
 authRoutes.get('/me', requireAuth, (c) => ok(c, c.get('user')))
+
+/**
+ * Tự đổi tên hiển thị.
+ *
+ * Đây là thứ DUY NHẤT người dùng tự sửa được trong hồ sơ của mình. Email là khoá
+ * định danh (và là thứ Discord khớp vào), vai trò do admin cấp — cả hai đổi được ở
+ * đây thì cổng quyền của hệ thống nằm trong tay chính người bị quản.
+ *
+ * `min(1).max(200)` khớp đúng ràng buộc admin đang dùng cho cùng cột (routes/admin/
+ * users.ts): hai đường ghi vào một cột mà nhận hai khoảng độ dài khác nhau thì có
+ * tên hợp lệ ở đường này lại vỡ ở đường kia.
+ */
+const renameSchema = z.object({ displayName: z.string().min(1).max(200) })
+
+authRoutes.patch('/me', requireAuth, async (c) => {
+  const body = await parseBody(c, renameSchema)
+  if (!body.ok) return body.response
+  const me = c.get('user')
+
+  // Cắt khoảng trắng hai đầu rồi mới kiểm lại: một chuỗi toàn dấu cách qua được
+  // `min(1)` nhưng hiện ra là một ô trống, và người đó biến mất khỏi mọi bảng.
+  const ten = body.data.displayName.trim()
+  if (ten === '') return errors.badRequest(c, 'Tên hiển thị không được để trống.')
+
+  await db.update(users).set({ displayName: ten }).where(eq(users.id, me.id))
+  await audit(me.id, 'user.rename', 'user', me.id, { displayName: me.displayName }, { displayName: ten })
+
+  return ok(c, { displayName: ten })
+})
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1).max(200),

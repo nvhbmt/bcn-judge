@@ -7,6 +7,7 @@
  * trang chủ trắng trơn thì hỏng cũng như thành công đều im lặng y nhau.
  */
 import { useMutation } from '@tanstack/react-query'
+import { useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
@@ -50,7 +51,10 @@ export function AccountPage() {
       ) : null}
 
       <dl className="mb-8 border border-line bg-surface-2">
-        <Field label="Tên hiển thị" value={me.displayName} />
+        <TenHienThi current={me.displayName} />
+        {/* Email và vai trò KHÔNG sửa được ở đây: email là khoá định danh (và là thứ
+            Discord khớp vào), vai trò do admin cấp. Cho sửa là đưa cổng quyền vào
+            tay chính người bị quản. */}
         <Field label="Email" value={me.email} />
         <Field label="Vai trò" value={ROLE_LABEL[me.role] ?? me.role} />
       </dl>
@@ -102,6 +106,75 @@ export function AccountPage() {
         <Button>Đổi mật khẩu</Button>
       </Link>
     </PageContainer>
+  )
+}
+
+/**
+ * Ô tên hiển thị, sửa tại chỗ.
+ *
+ * Nút Lưu chỉ bật khi tên THẬT SỰ khác bản đang có (đã cắt khoảng trắng) — bấm Lưu
+ * mà không đổi gì là một lượt ghi DB, một dòng nhật ký kiểm toán và một cú nhấp nháy
+ * đổi trạng thái, đổi lấy đúng con số không.
+ */
+function TenHienThi({ current }: { current: string }) {
+  const { bootstrap } = useAuth()
+  const [ten, setTen] = useState(current)
+  const [xong, setXong] = useState(false)
+
+  const luu = useMutation({
+    mutationFn: (displayName: string) => api.patch('/auth/me', { displayName }),
+    onSuccess: async (_data, daGui) => {
+      // Đưa ô về đúng chuỗi ĐÃ LƯU. Không làm thì ô còn khoảng trắng thừa trong khi
+      // DB đã cắt — nhìn thì tưởng đã lưu nguyên vẹn, mà lần sửa sau lại bắt đầu từ
+      // một chuỗi không tồn tại ở đâu cả.
+      setTen(daGui)
+      await bootstrap()
+      setXong(true)
+    },
+  })
+
+  const sach = ten.trim()
+  const doiThat = sach !== '' && sach !== current
+
+  function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (doiThat) luu.mutate(sach)
+  }
+
+  return (
+    <div className="border-b border-line px-4 py-2.5 last:border-b-0">
+      <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <label htmlFor="ten-hien-thi" className="min-w-[8rem] font-mono text-[12px] text-ink-6">
+          Tên hiển thị
+        </label>
+        {/* Ô nhập trần, cùng kiểu với trang đổi mật khẩu. KHÔNG dùng `TextInput` vì
+            component đó chỉ tồn tại riêng trong pages/admin/ và pages/mentor/ (hai bản
+            chép), kéo vào một trang của member là lệch tầng. */}
+        <input
+          id="ten-hien-thi"
+          value={ten}
+          maxLength={200}
+          onChange={(e) => {
+            setTen(e.target.value)
+            setXong(false)
+          }}
+          className="max-w-[18rem] flex-1 border border-line-strong bg-transparent px-3 py-1.5 text-sm text-ink-1"
+        />
+        <Button type="submit" size="sm" disabled={!doiThat || luu.isPending}>
+          {luu.isPending ? 'Đang lưu…' : 'Lưu'}
+        </Button>
+        {xong ? (
+          <span role="status" className="font-mono text-[12px] text-moss">
+            Đã lưu
+          </span>
+        ) : null}
+      </form>
+      {luu.error ? (
+        <p role="alert" className="mt-1.5 text-[13px] text-[var(--color-wa)]">
+          {luu.error instanceof ApiFailure ? luu.error.error.message : 'Không đổi được tên.'}
+        </p>
+      ) : null}
+    </div>
   )
 }
 
