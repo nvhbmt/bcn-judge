@@ -10,7 +10,7 @@ import { q } from '../../db/pool'
 import { errors, ok } from '../../lib/apiResponse'
 import { iso } from '../../lib/time'
 import { lessonForMember } from './access'
-import { isEnrolledInOpenCourse } from './courses'
+import { canViewCourseAsMember } from './courses'
 
 export const memberSyllabusRoutes = new Hono()
 
@@ -43,7 +43,7 @@ const bestSubmissions = (courseId: string | null) => sql`
 memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
   const me = c.get('user')
   const courseId = c.req.param('courseId')
-  if (!(await isEnrolledInOpenCourse(me.id, courseId))) return errors.notFound(c, 'Không tìm thấy khoá học.')
+  if (!(await canViewCourseAsMember(me, courseId))) return errors.notFound(c, 'Không tìm thấy khoá học.')
 
   const rows = await q<{
     sectionId: string
@@ -124,7 +124,7 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
 memberSyllabusRoutes.get('/:courseId/leaderboard', async (c) => {
   const me = c.get('user')
   const courseId = c.req.param('courseId')
-  if (!(await isEnrolledInOpenCourse(me.id, courseId))) return errors.notFound(c, 'Không tìm thấy khoá học.')
+  if (!(await canViewCourseAsMember(me, courseId))) return errors.notFound(c, 'Không tìm thấy khoá học.')
 
   const rows = await q<{
     userId: string

@@ -381,3 +381,51 @@ describe.skipIf(!INTEGRATION)('FR-B3 · mentor tìm member để ghi danh', () =
     expect((await call('/api/mentor/members?q=a', { as: member })).status).toBe(403)
   })
 })
+
+/**
+ * Nút "Xem như member" ở màn sửa khoá: staff của khoá đọc được bản xem của member.
+ *
+ * Trước đây mentor bấm nút đó là 404 "Không tìm thấy khoá học" — nút do chính app vẽ
+ * ra dẫn thẳng tới một màn báo lỗi. Nguyên nhân: mentor KHÔNG ghi danh vào khoá mình
+ * dạy (họ nằm ở `course_mentors`), mà cổng chỉ hỏi "có ghi danh không".
+ *
+ * Vế nới ra phải HẸP: chỉ staff của CHÍNH khoá đó, không phải mọi mentor.
+ */
+describe.skipIf(!INTEGRATION)('xem khoá như member', () => {
+  let admin: TestUser
+  let mentorCua: TestUser
+  let mentorKhac: TestUser
+  let nguoiLa: TestUser
+  let course: { id: string; code: string }
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    admin = await makeUser('admin')
+    mentorCua = await makeUser('mentor')
+    mentorKhac = await makeUser('mentor')
+    nguoiLa = await makeUser('member')
+    course = await makeCourse(admin.id)
+    await assignMentor(course.id, mentorCua.id)
+  })
+
+  it('mentor phụ trách xem được, dù KHÔNG ghi danh', async () => {
+    expect((await call(`/api/member/courses/${course.id}`, { as: mentorCua })).status).toBe(200)
+    expect((await call(`/api/member/courses/${course.id}/syllabus`, { as: mentorCua })).status).toBe(200)
+  })
+
+  it('mentor khoá KHÁC vẫn không xem được', async () => {
+    expect((await call(`/api/member/courses/${course.id}`, { as: mentorKhac })).status).toBe(404)
+  })
+
+  it('member chưa ghi danh vẫn không xem được', async () => {
+    expect((await call(`/api/member/courses/${course.id}`, { as: nguoiLa })).status).toBe(404)
+  })
+
+  it('admin xem được', async () => {
+    expect((await call(`/api/member/courses/${course.id}`, { as: admin })).status).toBe(200)
+  })
+})

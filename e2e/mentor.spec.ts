@@ -166,3 +166,18 @@ test('mentor đọc được bài nộp của học viên trong khoá (FR-G3)', 
 
   expect(errors).toEqual([])
 })
+
+test('mentor bấm "Xem như member" thì mở được, không phải 404', async ({ page }) => {
+  // Mentor KHÔNG ghi danh vào khoá mình dạy, mà cổng của bản xem member chỉ hỏi "có
+  // ghi danh không" — nên nút do chính app vẽ ra từng dẫn thẳng tới màn báo lỗi.
+  const { errors } = watchForErrors(page)
+  const res = await page.request.get('/api/mentor/courses', { headers: { 'x-api-response-version': '2' } })
+  const courses = (await res.json()).data as { id: string }[]
+  await page.goto(`/mentor/khoa-hoc/${courses[0]!.id}/thong-tin`)
+
+  await page.getByRole('link', { name: 'Xem như member' }).click()
+  await expect(page).toHaveURL(/\/khoa-hoc\/[0-9a-f-]{36}$/)
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(page.getByText('Không tìm thấy khoá học')).toHaveCount(0)
+  expect(errors).toEqual([])
+})

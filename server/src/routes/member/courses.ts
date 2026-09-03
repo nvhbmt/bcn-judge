@@ -1,6 +1,8 @@
 /** FR-B5: member chỉ thấy khoá ĐANG MỞ mà mình đã ghi danh. */
 import { and, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
+import { isCourseStaff } from '../../auth/middleware'
+import type { AuthUser } from '../../auth/session'
 import { db, q } from '../../db/pool'
 import { courseEnrollments, courses } from '../../db/schema'
 import { errors, ok } from '../../lib/apiResponse'
@@ -17,6 +19,21 @@ memberLanguageRoutes.get('/', async (c) => {
   `)
   return ok(c, rows)
 })
+
+/**
+ * true khi user MỞ ĐƯỢC bản xem của member: đang ghi danh active vào khoá đang mở,
+ * HOẶC là staff của chính khoá đó.
+ *
+ * Vế staff có vì nút "Xem như member" ở màn sửa khoá. Mentor không ghi danh vào khoá
+ * mình dạy (họ nằm ở `course_mentors`), nên trước đây bấm nút đó là 404 "Không tìm
+ * thấy khoá học" — nút do chính app vẽ ra dẫn tới một màn báo lỗi.
+ *
+ * Staff KHÔNG bị ràng `status = 'open'`: xem trước một khoá còn nháp đúng là lúc cần
+ * xem trước nhất.
+ */
+export async function canViewCourseAsMember(user: AuthUser, courseId: string): Promise<boolean> {
+  return (await isEnrolledInOpenCourse(user.id, courseId)) || (await isCourseStaff(user, courseId))
+}
 
 /** true khi user đang ghi danh active vào khoá đang mở. */
 export async function isEnrolledInOpenCourse(userId: string, courseId: string): Promise<boolean> {
@@ -67,7 +84,7 @@ memberCourseRoutes.get('/', async (c) => {
 memberCourseRoutes.get('/:id', async (c) => {
   const me = c.get('user')
   const courseId = c.req.param('id')
-  if (!(await isEnrolledInOpenCourse(me.id, courseId))) {
+  if (!(await canViewCourseAsMember(me, courseId))) {
     return errors.notFound(c, 'Không tìm thấy khoá học.')
   }
   const [row] = await db
