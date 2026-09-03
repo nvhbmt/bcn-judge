@@ -49,6 +49,23 @@ input[type='file'] {
 }
 button:disabled { cursor: not-allowed; }
 
+/* Nền cho <select> và <option>.
+   Preflight của Tailwind đặt `background-color: transparent` cho mọi form control.
+   Với <select> điều đó phá bảng chọn xổ xuống ở NỀN TỐI: bảng đó do trình duyệt vẽ
+   chứ không phải CSS của trang, nó lấy màu nền của chính thẻ select — trong suốt thì
+   Chrome rơi về nền TRẮNG mặc định, trong khi chữ vẫn là mực sáng của theme. Kết quả
+   là chữ xám nhạt trên nền trắng, gần như không đọc được.
+
+   `color-scheme: dark` KHÔNG cứu được ca này (đã đo: nó áp đúng mà bảng chọn vẫn
+   trắng) — nó chỉ quyết định khi control còn dùng màu mặc định của trình duyệt.
+
+   Đặt ở base nên class `bg-*` của Tailwind vẫn đè được ở từng chỗ cần khác đi. */
+select,
+option {
+  background-color: var(--surface-2);
+  color: var(--ink-2);
+}
+
 /* Nhãn bọc ô tick: bấm vào chữ cũng tick, nên chữ cũng phải có bàn tay.
    Tách thành luật RIÊNG vì `:has()` — trình duyệt cũ không hiểu `:has()` sẽ vứt cả
    luật chứa nó, mà gộp chung thì vứt luôn phần nút ở trên. Tách ra thì chỗ cũ chỉ

@@ -46,6 +46,31 @@ test.describe('member', () => {
     // <select> cũng mất bàn tay ở v4, mà đây là chỗ đổi ngôn ngữ — bấm nhiều.
     await expect(page.locator('select').first()).toHaveCSS('cursor', 'pointer')
   })
+
+  test('<select> và <option> có nền THẬT, không trong suốt', async ({ page }) => {
+    // Preflight của Tailwind đặt `background-color: transparent` cho form control.
+    // Bảng chọn xổ xuống do TRÌNH DUYỆT vẽ và nó lấy màu nền của thẻ select — trong
+    // suốt thì Chrome rơi về nền trắng mặc định, trong khi chữ vẫn là mực sáng của
+    // theme, nên ở nền tối bảng chọn thành chữ nhạt trên nền trắng.
+    //
+    // `color-scheme: dark` KHÔNG cứu được ca này (đã đo: nó áp đúng mà bảng vẫn
+    // trắng) — nó chỉ quyết định khi control còn dùng màu mặc định của trình duyệt.
+    // Kiểm ở CẢ HAI theme vì nền trong suốt hỏng câm ở bản tối, còn bản sáng thì
+    // trùng màu nên không ai thấy.
+    await page.goto('/')
+    await page.getByRole('link', { name: /C cơ bản/ }).click()
+    await page.getByRole('link', { name: 'Tổng hai số' }).first().click()
+    await page.locator('.cm-content').waitFor()
+
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate((t) => {
+        document.documentElement.dataset.theme = t
+      }, theme)
+      const o = page.locator('select[aria-label="Ngôn ngữ"] option').first()
+      const nen = await o.evaluate((e) => getComputedStyle(e).backgroundColor)
+      expect(nen, `theme ${theme}: nền option`).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
+    }
+  })
 })
 
 test.describe('admin', () => {
