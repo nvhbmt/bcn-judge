@@ -247,23 +247,26 @@ describe.skipIf(!INTEGRATION)('BXH các team', () => {
 
     const res = await call('/api/member/teams/standings', { as: a1 })
     expect(res.status).toBe(200)
-    expect(res.body.data.rows.map((r: { name: string }) => r.name).sort()).toEqual(['Alpha', 'Beta'])
-    expect(res.body.data.rows.find((r: { name: string }) => r.name === 'Alpha').isMine).toBe(true)
-    expect(res.body.data.rows.find((r: { name: string }) => r.name === 'Beta').isMine).toBe(false)
+    expect(res.body.data.map((r: { name: string }) => r.name).sort()).toEqual(['Alpha', 'Beta'])
+    expect(res.body.data.find((r: { name: string }) => r.name === 'Alpha').isMine).toBe(true)
+    expect(res.body.data.find((r: { name: string }) => r.name === 'Beta').isMine).toBe(false)
   })
 
-  it('nói rõ đang tính theo phạm vi nào', async () => {
+  it('MỘT phạm vi duy nhất: mọi team đều có mặt, không lọc theo khoá của ai', async () => {
+    // Bản trước chia hai nhánh (trong khoá của team / toàn CLB) và phải trả thêm nhãn
+    // `scope` để giao diện nói đang dùng nhánh nào. Một bảng mà ý nghĩa con số đổi
+    // theo hoàn cảnh thì người đọc phải kiểm nhãn trước mỗi lần nhìn.
     await lapTeam('Alpha', a1.id)
-    const res = await call('/api/member/teams/standings', { as: a1 })
-    // Team tạo qua API admin không có course_id, nên phạm vi là toàn CLB. Hai bảng
-    // cùng tên mà khác phạm vi thì con số không so được — giao diện in nhãn này ra.
-    expect(res.body.data.scope.kind).toBe('clb')
+    await lapTeam('Beta', b1.id)
+    const res = await call('/api/member/teams/standings', { as: ngoai })
+    expect(res.body.data).toHaveLength(2)
+    expect(res.body.data[0].scope).toBeUndefined()
   })
 
   it('team chưa ai nộp bài vẫn có mặt với 0 điểm, không biến mất khỏi bảng', async () => {
     await lapTeam('Alpha', a1.id)
     const res = await call('/api/member/teams/standings', { as: a1 })
-    const alpha = res.body.data.rows[0]
+    const alpha = res.body.data[0]
     expect(alpha.acCount).toBe(0)
     expect(alpha.totalPoints).toBe(0)
     expect(alpha.memberCount).toBe(1)
@@ -273,8 +276,8 @@ describe.skipIf(!INTEGRATION)('BXH các team', () => {
     await lapTeam('Alpha', a1.id)
     const res = await call('/api/member/teams/standings', { as: ngoai })
     expect(res.status).toBe(200)
-    expect(res.body.data.rows.length).toBe(1)
-    expect(res.body.data.rows.every((r: { isMine: boolean }) => !r.isMine)).toBe(true)
+    expect(res.body.data.length).toBe(1)
+    expect(res.body.data.every((r: { isMine: boolean }) => !r.isMine)).toBe(true)
   })
 
   it('chưa đăng nhập thì không đọc được', async () => {

@@ -61,11 +61,17 @@ export function SubmissionsPanel({
           {data.map((s) => (
             <tr
               key={s.id}
-              className={s.id === selectedId ? 'bg-[var(--color-primary-soft)]' : 'hover:bg-surface-sel'}
+              className={`relative ${s.id === selectedId ? 'bg-[var(--color-primary-soft)]' : 'hover:bg-surface-sel'}`}
             >
-              {/* Cả ô là nút chọn: hàng cao 2 dòng nên vùng bấm rộng hơn hẳn một chữ. */}
+              {/* CẢ HÀNG là vùng bấm, không chỉ ô đầu: `after:absolute after:inset-0`
+                  kéo vùng nhấn của nút trải kín hàng (hàng đã `relative`). Vẫn là MỘT
+                  <button> thật nên bàn phím và trình đọc màn hình không đổi gì — khác
+                  hẳn cách gắn onClick lên <tr>, vì <tr> không nhận được tiêu điểm. */}
               <td className="px-4 py-2">
-                <button onClick={() => onSelect(s.id)} className="flex flex-col items-start gap-1 text-left">
+                <button
+                  onClick={() => onSelect(s.id)}
+                  className="flex flex-col items-start gap-1 text-left after:absolute after:inset-0 after:content-['']"
+                >
                   <VerdictBadge tone="soft" verdict={s.verdict} pending={s.status !== 'done'} />
                   <span className="num font-mono text-[11px] text-ink-6">{formatTime(s.receivedAt)}</span>
                 </button>
@@ -84,7 +90,9 @@ export function SubmissionsPanel({
               <td className="num px-2 py-2 text-right font-mono text-[13px] whitespace-nowrap text-ink-3">
                 {s.score === null ? '—' : `${s.score}đ`}
               </td>
-              <td className="px-4 py-2 text-right">
+              {/* `relative z-10` để nút này nổi TRÊN vùng phủ của nút chọn hàng —
+                  không thì bấm "Nạp lại code" lại thành chọn hàng. */}
+              <td className="relative z-10 px-4 py-2 text-right">
                 <button
                   onClick={async () =>
                     onLoadIntoEditor(await api.get<SubmissionView>(`/api/member/submissions/${s.id}`))

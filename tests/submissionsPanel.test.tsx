@@ -97,6 +97,28 @@ describe('SubmissionsPanel', () => {
     expect(within(await rowOf(/Chấp nhận/)).getByText('512 KB')).toBeTruthy()
   })
 
+  it('bấm ở BẤT KỲ đâu trong hàng cũng chọn được lượt nộp đó', async () => {
+    // Vùng bấm của nút chọn được kéo phủ kín hàng (`after:inset-0`) chứ không gắn
+    // onClick lên <tr>: <tr> không nhận được tiêu điểm, nên cách kia là bỏ rơi bàn
+    // phím và trình đọc màn hình để đổi lấy vùng bấm rộng hơn.
+    //
+    // jsdom không tính bố cục nên ở đây chỉ canh được ĐÚNG hai class dựng nên vùng
+    // phủ. Phần "bấm thật vào ô giữa thì hàng được chọn" đã đo trên trình duyệt.
+    panel([sub({})])
+    const hang = await rowOf(/Chấp nhận/)
+    const chon = within(hang).getByRole('button', { name: /Chấp nhận/ })
+    expect(chon.className).toContain('after:inset-0')
+    expect(hang.className).toContain('relative')
+  })
+
+  it('nút "Nạp lại code" nổi trên vùng phủ đó, không bị nuốt thành chọn hàng', async () => {
+    panel([sub({})])
+    const hang = await rowOf(/Chấp nhận/)
+    const o = within(hang).getByRole('button', { name: 'Nạp lại code' }).closest('td')
+    expect(o?.className).toContain('z-10')
+    expect(o?.className).toContain('relative')
+  })
+
   it('chưa nộp lần nào thì nói rõ, không hiện bảng rỗng', async () => {
     panel([])
     await waitFor(() => expect(screen.getByText('Chưa nộp bài nào')).toBeTruthy())

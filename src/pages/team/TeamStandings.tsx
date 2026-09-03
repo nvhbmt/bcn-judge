@@ -1,6 +1,10 @@
 /**
  * Bảng xếp hạng các team trong cùng khoá — cột phải của màn 06.
  *
+ * MỘT phạm vi duy nhất: mọi team, cộng trên mọi khoá. Bản trước chia hai nhánh (trong
+ * khoá của team / toàn CLB) và phải in nhãn nói đang dùng nhánh nào — một bảng mà ý
+ * nghĩa con số đổi theo hoàn cảnh thì phải đọc nhãn trước mỗi lần nhìn.
+ *
  * Điểm do server tính bằng ĐÚNG công thức của BXH khoá, nên con số ở đây và ở trang
  * chủ nói cùng một chuyện. Thứ tự cũng vậy: SỐ BÀI AC trước, rồi tổng điểm (§2.7).
  *
@@ -23,8 +27,6 @@ interface TeamStandingRow {
 }
 
 interface TeamStandings {
-  /** Phạm vi tính điểm — phải HIỆN RA, xem chú thích ở đầu file. */
-  scope: { kind: 'khoa' | 'clb'; label: string }
   rows: TeamStandingRow[]
 }
 
@@ -33,7 +35,7 @@ const TH = 'px-2.5 py-2 font-mono text-[11px] font-normal tracking-[0.14em] whit
 export function TeamStandings() {
   const { data, isLoading } = useQuery({
     queryKey: ['team', 'standings'],
-    queryFn: () => api.get<TeamStandings>('/api/member/teams/standings'),
+    queryFn: () => api.get<TeamStandingRow[]>('/api/member/teams/standings'),
     refetchInterval: 30_000,
   })
 
@@ -45,18 +47,11 @@ export function TeamStandings() {
     )
   }
 
-  if (!data || data.rows.length === 0) return <EmptyState title="Chưa có team nào để xếp hạng" />
+  if (!data || data.length === 0) return <EmptyState title="Chưa có team nào để xếp hạng" />
 
   return (
-    <>
-      {/* Phạm vi phải hiện: cùng một bảng tên "BXH các team" mà lúc tính trong khoá,
-          lúc tính toàn CLB thì hai con số không so được với nhau — và không có gì
-          khác trên màn hình nói ra điều đó. */}
-      <p className="border-b border-line px-2.5 py-1.5 font-mono text-[11px] text-ink-5">
-        tính trong {data.scope.kind === 'khoa' ? `khoá ${data.scope.label}` : data.scope.label}
-      </p>
-      <table className="w-full border-collapse">
-        <caption className="sr-only">Xếp hạng các team, tính trong {data.scope.label}</caption>
+    <table className="w-full border-collapse">
+      <caption className="sr-only">Xếp hạng các team trong câu lạc bộ</caption>
       <thead>
         <tr className="border-b border-line">
           <th scope="col" className={`w-9 text-left ${TH}`}>
@@ -74,7 +69,7 @@ export function TeamStandings() {
         </tr>
       </thead>
       <tbody>
-        {data.rows.map((row) => (
+        {data.map((row) => (
           <tr
             key={row.id}
             className={`border-b border-line ${row.isMine ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]' : ''}`}
@@ -98,7 +93,6 @@ export function TeamStandings() {
           </tr>
         ))}
       </tbody>
-      </table>
-    </>
+    </table>
   )
 }

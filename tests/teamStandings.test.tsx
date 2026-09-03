@@ -42,39 +42,32 @@ const dong = async (khop: RegExp) => {
 
 describe('BXH các team', () => {
   it('hiện hạng, tên, số bài AC và điểm', async () => {
-    ve({ scope: { kind: 'khoa', label: 'C cơ bản' }, rows: [hang()] })
+    ve([hang()])
     const r = await dong(/Nhóm Alpha/)
     expect(within(r).getByText('12')).toBeInTheDocument()
     expect(within(r).getByText('1470')).toBeInTheDocument()
   })
 
-  it('nói rõ đang tính trong phạm vi nào', async () => {
-    ve({ scope: { kind: 'khoa', label: 'C cơ bản' }, rows: [hang()] })
-    expect(await screen.findByText(/^tính trong khoá C cơ bản$/)).toBeInTheDocument()
-  })
-
-  it('phạm vi toàn CLB cũng phải nói ra, không im lặng đổi cách tính', async () => {
-    ve({ scope: { kind: 'clb', label: 'toàn câu lạc bộ' }, rows: [hang()] })
-    expect(await screen.findByText(/^tính trong toàn câu lạc bộ$/)).toBeInTheDocument()
+  it('MỘT phạm vi duy nhất — không có nhãn "tính trong…" để phải đọc trước mỗi lần nhìn', async () => {
+    ve([hang()])
+    await dong(/Nhóm Alpha/)
+    expect(screen.queryByText(/tính trong/)).not.toBeInTheDocument()
   })
 
   it('hiện số người mỗi team — xếp theo TỔNG nên đông hơn thì lợi hơn', async () => {
-    ve({ scope: { kind: 'clb', label: 'toàn câu lạc bộ' }, rows: [hang({ memberCount: 6 })] })
+    ve([hang({ memberCount: 6 })])
     expect(within(await dong(/Nhóm Alpha/)).getByText('6 người')).toBeInTheDocument()
   })
 
   it('team của mình được đánh dấu', async () => {
-    ve({
-      scope: { kind: 'clb', label: 'toàn câu lạc bộ' },
-      rows: [hang(), hang({ rank: 2, id: 't2', name: 'Nhóm Beta', isMine: true })],
-    })
+    ve([hang(), hang({ rank: 2, id: 't2', name: 'Nhóm Beta', isMine: true })])
     const r = await dong(/Nhóm Beta/)
     expect(r.className).toContain('surface-sel')
     expect((await dong(/Nhóm Alpha/)).className).not.toContain('surface-sel')
   })
 
   it('chưa có team nào thì nói rõ, không dựng bảng rỗng', async () => {
-    ve({ scope: { kind: 'clb', label: 'toàn câu lạc bộ' }, rows: [] })
+    ve([])
     await waitFor(() => expect(screen.getByText('Chưa có team nào để xếp hạng')).toBeInTheDocument())
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
