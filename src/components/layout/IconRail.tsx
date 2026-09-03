@@ -24,6 +24,14 @@ export interface RailItem {
   /** Nhận ReactNode để nơi dùng tự chọn icon (lucide-react) — rail không ràng buộc bộ icon. */
   icon: ReactNode
   badge?: number
+  /**
+   * Đẩy mục này xuống ĐÁY thanh, tách khỏi nhóm trên.
+   *
+   * Dành cho thứ không cùng họ với các mục điều hướng nội dung — "Trợ giúp" nói về
+   * chính giao diện, không phải về bài đang làm. Xếp lẫn vào giữa thì nó trông như
+   * một panel nội dung nữa.
+   */
+  atBottom?: boolean
 }
 
 export interface IconRailProps {
@@ -81,8 +89,12 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
       // 48px cố định (w-12) — FR-E1 tính phần còn lại cho hai khung dựa trên con số này.
       className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface-2 py-2"
     >
-      <ul className="flex flex-col items-center gap-1">
-        {items.map((item) => {
+      {[false, true].map((bottom) => {
+        const group = items.filter((i) => Boolean(i.atBottom) === bottom)
+        if (group.length === 0) return null
+        return (
+      <ul key={String(bottom)} className={`flex flex-col items-center gap-1 ${bottom ? 'mt-auto' : ''}`}>
+        {group.map((item) => {
           const isActive = activeKey === item.key
           const showTip = visibleTipKey === item.key
           const tipId = `${tipIdBase}-${item.key}`
@@ -137,7 +149,7 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
                   role="tooltip"
                   id={tipId}
                   data-testid="rail-tooltip"
-                  className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 border border-line bg-surface-sel px-2 py-1 font-mono text-[11px] whitespace-nowrap text-ink-1"
+                  className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 border border-line bg-surface-sel px-2 py-1 font-mono text-[13px] whitespace-nowrap text-ink-1"
                 >
                   {item.label}
                 </span>
@@ -146,6 +158,8 @@ export function IconRail({ items, activeKey, onSelect }: IconRailProps) {
           )
         })}
       </ul>
+        )
+      })}
     </nav>
   )
 }

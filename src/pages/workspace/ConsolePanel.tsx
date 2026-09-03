@@ -71,7 +71,7 @@ export function ConsolePanel({
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => onTab(t.id)}
-            className={`border-b-2 px-3.5 py-2.5 font-mono text-[11px] transition-colors duration-[120ms] ease-linear ${
+            className={`border-b-2 px-3.5 py-2.5 font-mono text-[13px] transition-colors duration-[120ms] ease-linear ${
               tab === t.id ? 'border-moss text-ink-1' : 'border-transparent text-ink-5 hover:text-ink-2'
             }`}
           >
@@ -82,7 +82,7 @@ export function ConsolePanel({
         {/* Mép phải: đang xem lần nộp nào. Bản vẽ đặt nó ở đây thay vì trong thân panel
             để dòng đầu tiên của kết quả không bị đẩy xuống. */}
         {dangXem ? (
-          <span className="num ml-auto px-3.5 font-mono text-[11px] text-ink-6">
+          <span className="num ml-auto px-3.5 font-mono text-[13px] text-ink-6">
             {tab === 'chay-thu' ? 'lượt chạy thử' : 'lần nộp'} · {hhmmss(dangXem.receivedAt)}
           </span>
         ) : null}

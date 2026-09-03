@@ -1,5 +1,5 @@
 /**
- * Dòng tiêu đề 38px của khung nội dung (màn 04).
+ * Dòng tiêu đề của khung nội dung (màn 04).
  *
  * Đây là "một lớp tab" mà bản v2 nhắm tới: nó KHÔNG phải bộ chuyển tab — việc chuyển
  * do thanh icon lo — mà chỉ nói đang xem gì, đang ở bài thứ mấy, và cho nhảy sang bài
@@ -38,13 +38,15 @@ export function ContentHeader({
   asHeading?: boolean
 }) {
   const Label = asHeading ? 'h1' : 'span'
+  // Chiều cao lấy từ `--panel-header-h`, dùng chung với dòng tiêu đề khung editor —
+  // xem src/index.css. Cắm cứng ở đây thì hai bên lệch nhau lúc bên kia đổi.
   return (
-    <div className="flex h-[38px] shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-5">
-      <Label className="font-mono text-[11px] font-semibold tracking-[0.14em] text-ink-1 uppercase">{label}</Label>
-      {position ? <span className="num font-mono text-[11px] text-ink-5">{position}</span> : null}
+    <div className="flex h-[var(--panel-header-h)] shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-5">
+      <Label className="font-mono text-[13px] font-semibold tracking-[0.12em] text-ink-1 uppercase">{label}</Label>
+      {position ? <span className="num font-mono text-[13px] text-ink-5">{position}</span> : null}
 
       {prev || next ? (
-        <nav aria-label="Bài kề" className="num ml-auto flex items-center gap-2 font-mono text-[11px]">
+        <nav aria-label="Bài kề" className="num ml-auto flex items-center gap-3 font-mono text-[13px]">
           {prev ? (
             <Link to={prev.href} title={prev.title} className="text-ink-5 hover:text-ink-2">
               ← bài trước

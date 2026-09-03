@@ -47,10 +47,10 @@ function navFor(role: string): NavItem[] {
 /** Vai trò hiện thành chip viền: mentor xanh rêu, admin nâu đất đỏ. Member không có chip. */
 function RoleChip({ role }: { role: string }) {
   if (role === 'admin') {
-    return <span className="border border-clay px-2.5 py-1 font-mono text-[11px] text-clay">ADMIN</span>
+    return <span className="border border-clay px-2.5 py-1 font-mono text-[12px] text-clay">ADMIN</span>
   }
   if (role === 'mentor') {
-    return <span className="border border-moss px-2.5 py-1 font-mono text-[11px] text-moss">MENTOR</span>
+    return <span className="border border-moss px-2.5 py-1 font-mono text-[12px] text-moss">MENTOR</span>
   }
   return null
 }
@@ -75,7 +75,7 @@ export function TopBar() {
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `px-3 py-1.5 font-mono text-[12px] whitespace-nowrap transition-colors duration-[120ms] ease-linear ${
+              `px-3 py-1.5 font-mono text-[14px] whitespace-nowrap transition-colors duration-[120ms] ease-linear ${
                 isActive ? 'bg-surface-code text-ink-1' : 'text-ink-5 hover:text-ink-2'
               }`
             }
@@ -87,7 +87,7 @@ export function TopBar() {
 
       <div className="ml-auto flex shrink-0 items-center gap-3">
         <RoleChip role={me.role} />
-        <span className="hidden font-mono text-[12px] text-ink-2 sm:inline">{me.displayName}</span>
+        <span className="hidden font-mono text-[13px] text-ink-2 sm:inline">{me.displayName}</span>
         <Avatar name={me.displayName} chars={1} />
         <button
           type="button"

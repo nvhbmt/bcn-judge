@@ -18,6 +18,7 @@ export interface RailDef {
   key: RailKey
   label: string
   icon: ReactNode
+  atBottom?: boolean
 }
 
 export const RAIL_ITEMS: RailDef[] = [
@@ -25,7 +26,9 @@ export const RAIL_ITEMS: RailDef[] = [
   { key: 'bai-nop', label: 'Bài nộp', icon: <History size={19} /> },
   { key: 'giao-trinh', label: 'Giáo trình', icon: <BookOpen size={19} /> },
   { key: 'bang-xep-hang', label: 'Bảng xếp hạng', icon: <Trophy size={19} /> },
-  { key: 'tro-giup', label: 'Trợ giúp', icon: <CircleHelp size={19} /> },
+  // Xuống đáy thanh: "Trợ giúp" nói về chính giao diện, không phải về bài đang làm —
+  // xếp lẫn giữa các mục nội dung thì nó trông như một panel nội dung nữa.
+  { key: 'tro-giup', label: 'Trợ giúp', icon: <CircleHelp size={19} />, atBottom: true },
 ]
 
 export const RAIL_LABEL: Record<RailKey, string> = {

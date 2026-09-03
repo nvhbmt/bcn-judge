@@ -37,7 +37,7 @@ export function StdinPane({
   return (
     <div className="flex h-full min-h-0 flex-col gap-2">
       <div className="flex shrink-0 items-center gap-3">
-        <label className="font-mono text-[11px] text-ink-5" htmlFor="custom-input">
+        <label className="font-mono text-[13px] text-ink-5" htmlFor="custom-input">
           Chương trình đọc đúng những gì bạn gõ ở đây.
         </label>
         <Button size="sm" className="ml-auto" onClick={onRun} disabled={busy !== null}>
@@ -84,7 +84,7 @@ function Output({ busy, result }: { busy: boolean; result: SubmissionView | null
         {/* Chạy tự nhập KHÔNG có đáp án để so, nên "AC" ở đây chẳng nói lên điều gì —
             chỉ hiện verdict khi nó thật sự mang tin: TLE, RE, MLE. */}
         {r.verdict && r.verdict !== 'AC' ? <VerdictBadge verdict={r.verdict} /> : null}
-        <span className="num ml-auto font-mono text-[11px] text-ink-6">
+        <span className="num ml-auto font-mono text-[13px] text-ink-6">
           {r.timeMs ?? '—'} ms{r.memoryKb ? ` · ${Math.round(r.memoryKb / 1024)} MB` : ''}
         </span>
       </div>
@@ -106,12 +106,12 @@ function Output({ busy, result }: { busy: boolean; result: SubmissionView | null
 }
 
 function Hint({ children }: { children: string }) {
-  return <p className="font-mono text-[11px] text-ink-6">{children}</p>
+  return <p className="font-mono text-[13px] text-ink-6">{children}</p>
 }
 
 function Label({ children, tone }: { children: string; tone?: 'wa' }) {
   return (
-    <span className={`font-mono text-[11px] ${tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-6'}`}>
+    <span className={`font-mono text-[13px] ${tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-6'}`}>
       {children}
     </span>
   )

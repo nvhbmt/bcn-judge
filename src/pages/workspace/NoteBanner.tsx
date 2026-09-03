@@ -39,7 +39,7 @@ export function NoteBanner() {
       {unread.map((n) => (
         <div key={n.id} className="flex items-start gap-3 border-l-2 border-earth bg-[var(--tint-earth)] px-4 py-2.5">
           <p className="min-w-0 flex-1 text-[13px] text-ink-2">
-            <span className="font-mono text-[11px] text-ink-5">
+            <span className="font-mono text-[13px] text-ink-5">
               {n.authorName} · {n.teamName}
             </span>
             <span className="mt-0.5 block">{n.body}</span>
@@ -48,7 +48,7 @@ export function NoteBanner() {
             type="button"
             onClick={() => markRead.mutate(n.id)}
             disabled={markRead.isPending}
-            className="shrink-0 font-mono text-[11px] text-ink-5 hover:text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+            className="shrink-0 font-mono text-[13px] text-ink-5 hover:text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
           >
             đã đọc
           </button>

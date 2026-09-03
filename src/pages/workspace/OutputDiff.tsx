@@ -47,7 +47,7 @@ export function OutputDiff({
     // với người dùng trình đọc màn hình cũng như với test tự động.
     <div role="group" aria-label={`So output testcase mẫu #${position}`} className="border border-line bg-surface-2">
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-2.5 py-1.5">
-        <span className="font-mono text-[11px] text-[var(--color-wa)]">
+        <span className="font-mono text-[12px] text-[var(--color-wa)]">
           {d.firstDiff !== null
             ? `khác từ dòng ${d.firstDiff}`
             : d.trailingNewlineOnly
@@ -61,15 +61,15 @@ export function OutputDiff({
 
       {input !== null ? (
         <div className="border-b border-line px-2.5 py-1.5">
-          <p className="font-mono text-[11px] text-ink-6">input</p>
-          <pre className="mt-0.5 overflow-x-auto font-mono text-[12px] whitespace-pre text-ink-3">{input}</pre>
+          <p className="font-mono text-[12px] text-ink-6">input</p>
+          <pre className="mt-0.5 overflow-x-auto font-mono text-[13px] whitespace-pre text-ink-3">{input}</pre>
         </div>
       ) : null}
 
       <div className="overflow-x-auto">
         <div className="min-w-[22rem]">
           <div
-            className="grid gap-x-2 border-b border-line px-2.5 py-1 font-mono text-[11px] text-ink-6"
+            className="grid gap-x-2 border-b border-line px-2.5 py-1 font-mono text-[12px] text-ink-6"
             style={{ gridTemplateColumns: GRID }}
           >
             <span />
@@ -84,7 +84,7 @@ export function OutputDiff({
       </div>
 
       {d.hiddenLines > 0 ? (
-        <p className="num border-t border-line px-2.5 py-1 font-mono text-[11px] text-ink-6">
+        <p className="num border-t border-line px-2.5 py-1 font-mono text-[12px] text-ink-6">
           … còn {d.hiddenLines} dòng nữa không hiện
         </p>
       ) : null}
@@ -93,17 +93,17 @@ export function OutputDiff({
 }
 
 function Note({ children }: { children: string }) {
-  return <span className="bg-[var(--tint-earth)] px-1.5 py-0.5 font-mono text-[11px] text-earth">{children}</span>
+  return <span className="bg-[var(--tint-earth)] px-1.5 py-0.5 font-mono text-[12px] text-earth">{children}</span>
 }
 
 function Line({ line }: { line: DiffLine }) {
   const same = line.gotSpan === null && line.wantSpan === null && line.got === line.want
   return (
     <div
-      className={`grid gap-x-2 px-2.5 py-px font-mono text-[12px] ${same ? 'text-ink-5' : 'text-ink-2'}`}
+      className={`grid gap-x-2 px-2.5 py-px font-mono text-[13px] ${same ? 'text-ink-5' : 'text-ink-2'}`}
       style={{ gridTemplateColumns: GRID }}
     >
-      <span className="num text-right text-[11px] text-ink-6">{line.n}</span>
+      <span className="num text-right text-[12px] text-ink-6">{line.n}</span>
       <Cell text={line.got} span={line.gotSpan} tint="var(--diff-got)" />
       <Cell text={line.want} span={line.wantSpan} tint="var(--diff-want)" />
     </div>
@@ -112,7 +112,7 @@ function Line({ line }: { line: DiffLine }) {
 
 function Cell({ text, span, tint }: { text: string | null; span: [number, number] | null; tint: string }) {
   if (text === null) {
-    return <span className="text-[11px] text-ink-6">(thiếu dòng)</span>
+    return <span className="text-[12px] text-ink-6">(thiếu dòng)</span>
   }
 
   if (span === null) {

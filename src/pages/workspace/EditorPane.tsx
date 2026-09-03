@@ -56,7 +56,11 @@ export function EditorPane({
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
+      {/* `min-h` chứ không `h`: chiều cao khớp dòng tiêu đề khung nội dung
+          (`--panel-header-h`), nhưng khung này có `flex-wrap` nên trên bề ngang rất
+          hẹp nó phải được PHÉP cao thêm. Ghim cứng thì nút "Nộp bài" bị cắt mất —
+          lệch vài pixel còn đỡ hơn mất nút. */}
+      <div className="flex min-h-[var(--panel-header-h)] shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
         <select
           aria-label="Ngôn ngữ"
           value={languageId}
@@ -73,7 +77,7 @@ export function EditorPane({
         {submission ? <VerdictBadge verdict={submission.verdict} pending={submission.status !== 'done'} /> : null}
         {/* Bản vẽ ghi "nháp đã lưu 14:41" — có GIỜ chứ không chỉ "đã lưu". Đó đúng là
             thứ người gõ cần biết trước khi đóng tab. */}
-        <span className="font-mono text-[11px] text-ink-6" aria-live="polite">
+        <span className="font-mono text-[13px] text-ink-6" aria-live="polite">
           {draftStatus === 'saving'
             ? 'đang lưu nháp…'
             : draftStatus === 'error'

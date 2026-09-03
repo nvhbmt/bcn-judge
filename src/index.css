@@ -9,6 +9,13 @@
    thiết kế của Tailwind: theme → base → components → utilities. */
 @import '../design-system/styles.css' layer(base);
 
+/* Chiều cao dòng tiêu đề của HAI khung màn làm bài — khung nội dung và khung editor.
+   Một biến cho cả hai vì chúng nằm cạnh nhau ở cùng độ cao: để mỗi bên tự tính thì
+   chúng lệch nhau (từng lệch 38 với 47) và cả màn hình trông như bị so le. */
+:root {
+  --panel-header-h: 47px;
+}
+
 @theme {
   /* Ánh xạ token cũ → token mới, GIỮ NGUYÊN API cũ: components/ui/index.tsx và mọi
      chỗ đang gọi var(--color-primary/ac/wa/tle) không phải sửa một dòng nào. */

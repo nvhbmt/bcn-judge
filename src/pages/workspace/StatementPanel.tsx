@@ -23,35 +23,27 @@ export function StatementPanel({
   return (
     <article className="space-y-5 px-5 py-5">
       <header>
-        {/* Độ khó và tag đứng TRÊN tiêu đề theo bản vẽ: chúng là thứ người học liếc để
-            quyết định có làm bài này bây giờ không, nên phải gặp trước cái tên. */}
+        <Heading className="font-display text-[24px] text-ink-1">{problem.title}</Heading>
+
+        {/* Độ khó và tag đứng DƯỚI tiêu đề: tên bài là thứ mắt tìm trước, hai thứ này
+            chỉ để liếc sau khi đã biết đang đọc bài nào. Độ khó tô theo màu ngữ nghĩa
+            của hệ (moss/earth/clay) thay vì viền xám — xám thì nó chìm lẫn vào tag. */}
         {problem.difficulty || problem.tags.length > 0 ? (
-          <p className="mb-2.5 flex flex-wrap items-center gap-2.5">
+          <p className="mt-2.5 flex flex-wrap items-center gap-2.5">
             {problem.difficulty ? (
-              <span className="border border-line-strong px-2 py-1 font-mono text-[10px] tracking-[0.1em] text-ink-4 uppercase">
+              <span
+                className={`border px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.1em] uppercase ${
+                  DIFFICULTY_CLASS[problem.difficulty] ?? 'border-line-strong text-ink-4'
+                }`}
+              >
                 {DIFFICULTY_LABEL[problem.difficulty] ?? problem.difficulty}
               </span>
             ) : null}
             {problem.tags.length > 0 ? (
-              <span className="font-mono text-[11px] text-ink-6">{problem.tags.join(' · ')}</span>
+              <span className="font-mono text-[13px] text-ink-6">{problem.tags.join(' · ')}</span>
             ) : null}
           </p>
         ) : null}
-
-        <Heading className="font-display text-[24px] text-ink-1">{problem.title}</Heading>
-
-        {/* Dải số liệu có NHÃN thay cho một dòng số trần: bản vẽ tách thời gian · bộ
-            nhớ · test ẩn thành ba ô, vì "1000 ms · 256 MB · 3" đọc trần thì phải đoán
-            số nào là gì. Mọi con số dùng mono + tabular-nums. */}
-        <div className="mt-3.5">
-          <StatStrip
-            items={[
-              { label: 'Thời gian', value: `${problem.timeLimitMs} ms` },
-              { label: 'Bộ nhớ', value: `${problem.memoryLimitMb} MB` },
-              { label: 'Test ẩn', value: problem.hiddenTestcaseCount },
-            ]}
-          />
-        </div>
       </header>
 
       {/* Bài dạng function: người học phải biết đừng viết main, nếu không sẽ CE vì
@@ -86,18 +78,42 @@ export function StatementPanel({
           {/* Luật chấm nói thẳng ra. Người mới học mất hàng giờ đi tìm một lỗi không
               tồn tại vì tưởng thừa một dòng trống là sai. */}
           {problem.compareMode !== 'exact' ? (
-            <p className="mt-3 font-mono text-[11px] text-ink-6">
+            <p className="mt-3 font-mono text-[13px] text-ink-6">
               Thừa dấu cách cuối dòng hay một dòng trống ở cuối thì không bị tính sai.
             </p>
           ) : (
-            <p className="mt-3 font-mono text-[11px] text-earth">
+            <p className="mt-3 font-mono text-[13px] text-earth">
               Bài này so khớp CHÍNH XÁC từng ký tự — thừa một dấu cách cũng bị tính sai.
             </p>
           )}
         </section>
       ) : null}
+
+      {/* Dải số liệu xuống CUỐI: thời gian, bộ nhớ, số test ẩn là thứ tra lúc đã đọc
+          xong đề và đang cân nhắc thuật toán — đặt trên đầu thì nó chen giữa tên bài
+          và nội dung, mà lúc đó chưa ai cần tới. Có NHÃN cho từng ô vì "1000 ms ·
+          256 MB · 3" đọc trần thì phải đoán số nào là gì. */}
+      <section>
+        <SectionRule label="Giới hạn" />
+        <div className="mt-2">
+          <StatStrip
+            items={[
+              { label: 'Thời gian', value: `${problem.timeLimitMs} ms` },
+              { label: 'Bộ nhớ', value: `${problem.memoryLimitMb} MB` },
+              { label: 'Test ẩn', value: problem.hiddenTestcaseCount },
+            ]}
+          />
+        </div>
+      </section>
     </article>
   )
+}
+
+/** Màu theo ngữ nghĩa của hệ: dễ = moss, trung bình = earth, khó = clay. */
+const DIFFICULTY_CLASS: Record<string, string> = {
+  easy: 'border-moss bg-[var(--color-primary-soft)] text-moss',
+  medium: 'border-earth bg-[var(--tint-earth)] text-earth',
+  hard: 'border-clay bg-[var(--tint-clay)] text-clay',
 }
 
 /** Mỗi mục của đề dùng chung motif đường kẻ — xem SectionRule. */
