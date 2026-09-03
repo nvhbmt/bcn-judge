@@ -28,8 +28,6 @@ import { sanitizeHtml } from './sanitize';
 // nhập từ `lib/core` rồi tự đăng ký giữ phần này ở mức vài chục KB.
 const HIGHLIGHT_LANGUAGES = { c, cpp, java, javascript, python } as const;
 
-export const HIGHLIGHTED_LANGUAGES = Object.keys(HIGHLIGHT_LANGUAGES);
-
 for (const [name, definition] of Object.entries(HIGHLIGHT_LANGUAGES)) {
   // `registerLanguage` kéo theo cả bí danh do chính module ngôn ngữ khai báo, nên `c++`, `py`,
   // `js` chạy được mà không phải liệt kê thêm.
@@ -191,6 +189,11 @@ function extractMath(text: string, spans: MathSpan[], marker: (index: number) =>
     return marker(index);
   };
 
+  // THỨ TỰ ĐỌC LÀ MỘT PHẦN CỦA HỢP ĐỒNG: `$$` phải được xét trước `$`. Bộ quét đọc từ
+  // trái sang, gặp `$` trước sẽ nuốt mất nửa đầu của một khối `$$…$$`.
+  //
+  // Nhận cả `\(…\)` / `\[…\]` vì đề toán tin thường dán từ LaTeX hoặc Overleaf, nơi
+  // `$…$` đã bị coi là lối viết cũ.
   while (i < text.length) {
     const ch = text.charAt(i);
 

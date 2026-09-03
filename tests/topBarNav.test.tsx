@@ -11,12 +11,11 @@
  */
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { TopBar } from '@/components/layout/TopBar'
 import { useAuth } from '@/stores/auth'
 import type { Me, Role } from '@/types/api'
 
-vi.mock('@/assets/logo-bcn.png', () => ({ default: 'logo.png' }))
 
 function renderAs(role: Role) {
   const me: Me = {

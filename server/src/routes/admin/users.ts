@@ -1,5 +1,5 @@
 /** FR-A2/A3/A4: admin cấp tài khoản (đơn lẻ + CSV), đặt lại mật khẩu, khoá/mở. */
-import { and, asc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
+import { and, asc, eq, ilike, isNull, or } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { generatePassword, hashPassword } from '../../auth/hash'

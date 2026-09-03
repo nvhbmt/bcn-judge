@@ -285,6 +285,15 @@ export const contestProblems = pgTable(
   ],
 )
 
+/* MÌN CHO NGƯỜI DỌN CODE: năm bảng dưới đây — contest_participants, contest_events,
+   submission_results, submission_score_audit, rejudge_queue — KHÔNG có chỗ nào import
+   biến TypeScript của chúng, nên mọi máy dò code chết đều báo là thừa. Chúng không thừa:
+   mã đọc/ghi chúng bằng SQL thô (`sql\`INSERT INTO submission_results …\``), tổng cộng
+   hơn 50 chỗ, vì đây là các truy vấn nóng của máy chấm.
+
+   Xoá định nghĩa ở đây KHÔNG làm hỏng biên dịch — nó làm `npm run db:generate` sinh ra
+   một migration DROP TABLE, và mất dữ liệu ở lần deploy kế tiếp. Đây là file NGUỒN CHUẨN
+   của lược đồ, không phải danh sách bảng mà TypeScript đang dùng. */
 export const contestParticipants = pgTable(
   'contest_participants',
   {
@@ -467,10 +476,7 @@ export const teamMembers = pgTable(
 )
 
 export type User = typeof users.$inferSelect
-export type Course = typeof courses.$inferSelect
-export type Problem = typeof problems.$inferSelect
 export type Testcase = typeof testcases.$inferSelect
-export type Submission = typeof submissions.$inferSelect
 export type Contest = typeof contests.$inferSelect
 export type Team = typeof teams.$inferSelect
 export type LanguageRow = typeof languages.$inferSelect

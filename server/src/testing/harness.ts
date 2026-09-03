@@ -184,7 +184,3 @@ export async function call(path: string, opts: CallOptions = {}): Promise<{ stat
   }
   return { status: res.status, body }
 }
-
-export async function closeDb(): Promise<void> {
-  await pool.end()
-}

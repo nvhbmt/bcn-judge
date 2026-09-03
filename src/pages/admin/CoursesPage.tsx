@@ -1,5 +1,4 @@
 /** FR-B1/B2/B3 — trang khoá học: tạo/sửa khoá, gán mentor, ghi danh member. */
-import { useQuery } from '@tanstack/react-query'
 import { Pencil, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { EmptyState, Spinner, buttonClass } from '@/components/ui'

@@ -23,29 +23,6 @@ export interface KatexRenderer {
   renderToString(tex: string, options?: KatexOptions): string;
 }
 
-export interface MathDelimiter {
-  readonly left: string;
-  readonly right: string;
-  /** `true` = công thức đứng riêng một khối (căn giữa, cỡ chữ lớn). */
-  readonly display: boolean;
-}
-
-/**
- * Cặp dấu phân cách được coi là công thức.
- *
- * THỨ TỰ LÀ MỘT PHẦN CỦA HỢP ĐỒNG: `$$` phải đứng trước `$`, vì bộ quét đọc từ trái sang và
- * gặp `$` trước sẽ nuốt mất nửa đầu của một khối `$$…$$`.
- *
- * Có cả `\(…\)` / `\[…\]` vì đề bài toán tin thường được dán từ LaTeX hoặc từ Overleaf, nơi
- * `$…$` đã bị coi là lối viết cũ.
- */
-export const MATH_DELIMITERS: readonly MathDelimiter[] = [
-  { left: '$$', right: '$$', display: true },
-  { left: '\\[', right: '\\]', display: true },
-  { left: '\\(', right: '\\)', display: false },
-  { left: '$', right: '$', display: false },
-];
-
 /**
  * Tuỳ chọn dùng chung cho mọi lần gọi KaTeX.
  *
@@ -118,11 +95,4 @@ export function loadKatex(): Promise<KatexRenderer | null> {
       });
   }
   return pending;
-}
-
-/** Chỉ để test: quên hết những gì đã nạp. */
-export function _resetKatexCache(): void {
-  cached = null;
-  pending = null;
-  cssStarted = false;
 }

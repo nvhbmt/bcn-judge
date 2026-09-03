@@ -8,10 +8,6 @@
  */
 import { ApiFailure } from '@/lib/api'
 
-export function failureCode(err: unknown): string {
-  return err instanceof ApiFailure ? err.error.code : 'unknown'
-}
-
 /** Câu chỉ dẫn bước tiếp theo cho từng mã xung đột; không có thì trả về null. */
 const NEXT_STEP: Record<string, string> = {
   // FR-J1 — hai bất biến do DB giữ.

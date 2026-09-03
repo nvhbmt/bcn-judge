@@ -1,5 +1,5 @@
 /** FR-B5: member chỉ thấy khoá ĐANG MỞ mà mình đã ghi danh. */
-import { and, asc, eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { db, q } from '../../db/pool'
 import { courseEnrollments, courses } from '../../db/schema'

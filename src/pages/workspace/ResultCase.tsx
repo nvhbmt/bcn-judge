@@ -11,6 +11,7 @@
  */
 import { VerdictBadge } from '@/components/ui'
 import type { ResultView, SampleIO } from '@/types/api'
+import { formatDuration, formatMemory } from './format'
 import { OutputDiff } from './OutputDiff'
 
 export function ResultCase({
@@ -37,7 +38,7 @@ export function ResultCase({
         <VerdictBadge tone="soft" verdict={result.verdict} />
         {result.detail ? <span className="font-mono text-[12px] text-ink-6">{result.detail}</span> : null}
         <span className="num ml-auto font-mono text-[12px] text-ink-6">
-          {result.timeMs ?? '—'} ms · {formatMemory(result.memoryKb)}
+          {formatDuration(result.timeMs)} · {formatMemory(result.memoryKb)}
         </span>
       </div>
 
@@ -104,10 +105,4 @@ function Field({ label, text, tone }: { label: string; text: string; tone?: 'wa'
       </pre>
     </div>
   )
-}
-
-/** Dưới 1 MB thì giữ KB: "0 MB" không nói gì về một chương trình đang chạy. */
-function formatMemory(kb: number | null): string {
-  if (kb === null) return '— MB'
-  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`
 }

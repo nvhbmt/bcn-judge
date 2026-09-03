@@ -1,5 +1,4 @@
 /** Đọc bảng `settings` (FR-H2) với cache ngắn — mọi giới hạn đều cấu hình được. */
-import { eq } from 'drizzle-orm'
 import { db } from '../db/pool'
 import { settings } from '../db/schema'
 
@@ -60,9 +59,5 @@ export async function setSetting(key: string, value: unknown, actorId: string | 
     .insert(settings)
     .values({ key, value: value as never, updatedBy: actorId })
     .onConflictDoUpdate({ target: settings.key, set: { value: value as never, updatedBy: actorId } })
-  cache = null
-}
-
-export function invalidateSettingsCache(): void {
   cache = null
 }

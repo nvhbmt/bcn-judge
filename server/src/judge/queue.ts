@@ -375,23 +375,6 @@ export interface RejudgeJob extends ClaimedSubmission {
   shadowAttempt: number
 }
 
-/** Xếp hàng chấm lại. Không đụng `submissions` — bài vẫn ở `done` suốt quá trình. */
-export async function enqueueRejudge(
-  submissionIds: string[],
-  actorId: string,
-  reason: string,
-): Promise<number> {
-  if (submissionIds.length === 0) return 0
-  const rows = await q<{ submission_id: string }>(sql`
-    INSERT INTO rejudge_queue (submission_id, actor, reason)
-    SELECT id, ${actorId}, ${reason} FROM submissions
-    WHERE id = ANY (${submissionIds}) AND kind = 'submit' AND status = 'done'
-    ON CONFLICT (submission_id) DO NOTHING
-    RETURNING submission_id
-  `)
-  return rows.length
-}
-
 /** Mọi bài nộp của một bài tập — dùng khi mentor sửa testcase (FR-D9). */
 export async function enqueueRejudgeForProblem(problemId: string, actorId: string, reason: string): Promise<number> {
   const rows = await q<{ submission_id: string }>(sql`

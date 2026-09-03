@@ -11,7 +11,6 @@ import {
   foldKeymap,
   indentOnInput,
   indentUnit,
-  syntaxHighlighting,
 } from '@codemirror/language'
 import {
   defaultKeymap,

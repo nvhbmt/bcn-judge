@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { LanguageOption, SubmissionView } from '@/types/api'
+import { formatDuration, formatMemory } from './format'
 
 /**
  * Tab "Bài nộp" (FR-E3/FR-G1): danh sách lượt nộp với verdict, ngôn ngữ, thời gian,
@@ -75,7 +76,7 @@ export function SubmissionsPanel({
                 </span>
               </td>
               <td className="num px-2 py-2 text-right font-mono text-[13px] whitespace-nowrap text-ink-3">
-                {s.timeMsMax === null ? '—' : `${s.timeMsMax} ms`}
+                {formatDuration(s.timeMsMax)}
               </td>
               <td className="num px-2 py-2 text-right font-mono text-[13px] whitespace-nowrap text-ink-3">
                 {formatMemory(s.memoryKbMax)}
@@ -99,12 +100,6 @@ export function SubmissionsPanel({
       </table>
     </div>
   )
-}
-
-/** KB → MB một chữ số thập phân. Dưới 1 MB thì giữ KB, vì "0.0 MB" không nói gì. */
-function formatMemory(kb: number | null): string {
-  if (kb === null) return '—'
-  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`
 }
 
 function formatTime(iso: string): string {

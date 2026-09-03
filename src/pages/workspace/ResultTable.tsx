@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { VerdictBadge } from '@/components/ui'
 import type { ResultView, SampleIO, SubmissionView } from '@/types/api'
 import { VERDICT_LABEL } from '@/types/api'
+import { formatDuration, formatMemory } from './format'
 import { ResultCase } from './ResultCase'
 
 export function ResultTable({
@@ -132,7 +133,7 @@ function Summary({ submission, results }: { submission: SubmissionView; results:
         {passed}/{results.length} test đạt
       </span>
       <span className="num ml-auto font-mono text-[12px] text-ink-6">
-        cao nhất: {time === null ? '—' : `${time} ms`} · {mem === null ? '—' : formatMemory(mem)}
+        cao nhất: {formatDuration(time)} · {formatMemory(mem)}
       </span>
     </div>
   )
@@ -179,8 +180,4 @@ function Chip({
 function peak(values: (number | null)[]): number | null {
   const nums = values.filter((v): v is number => v !== null)
   return nums.length === 0 ? null : Math.max(...nums)
-}
-
-function formatMemory(kb: number): string {
-  return kb < 1024 ? `${kb} KB` : `${(kb / 1024).toFixed(1)} MB`
 }

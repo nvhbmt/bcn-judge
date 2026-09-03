@@ -17,7 +17,6 @@
 import { ApiFailure } from '@/lib/api'
 
 export const SOFT_PUBLISH_CODE = 'publish_validation_failed'
-export const HARD_PUBLISH_CODES = ['no_problems', 'no_testcases', 'missing_expected'] as const
 
 export interface PublishGate {
   code: string

@@ -12,6 +12,7 @@
  */
 import { Button, VerdictBadge } from '@/components/ui'
 import type { SubmissionView } from '@/types/api'
+import { formatDuration, formatMemory } from './format'
 
 export function StdinPane({
   value,
@@ -99,7 +100,7 @@ function Output({ busy, result }: { busy: boolean; result: SubmissionView | null
             chỉ hiện verdict khi nó thật sự mang tin: TLE, RE, MLE. */}
         {r.verdict && r.verdict !== 'AC' ? <VerdictBadge verdict={r.verdict} /> : null}
         <span className="num ml-auto font-mono text-[13px] text-ink-6">
-          {r.timeMs ?? '—'} ms{r.memoryKb ? ` · ${Math.round(r.memoryKb / 1024)} MB` : ''}
+          {formatDuration(r.timeMs)}{r.memoryKb ? ` · ${formatMemory(r.memoryKb)}` : ''}
         </span>
       </div>
 

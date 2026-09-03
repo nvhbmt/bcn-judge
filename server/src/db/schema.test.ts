@@ -18,7 +18,7 @@ describe.skipIf(!INTEGRATION)('bất biến schema', () => {
   it('mỗi member thuộc tối đa MỘT team (FR-J1, unique ở DB)', async () => {
     const leader = await makeUser('member')
     const other = await makeUser('member')
-    const t1 = await createTeam('Alpha', leader.id)
+    await createTeam('Alpha', leader.id)
     const t2 = await createTeam('Beta', other.id)
 
     await expect(

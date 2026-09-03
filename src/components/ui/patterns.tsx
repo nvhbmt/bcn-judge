@@ -135,20 +135,6 @@ export function StatStrip({ items }: { items: { label: string; value: ReactNode;
   )
 }
 
-/**
- * Chip phím tắt (`⌘K tìm bài`, `⇧⌘↵ nộp`).
- *
- * Ký tự ⌘ ⇧ ↵ là phần của font mono chứ không phải icon — readme liệt kê đúng bốn
- * nhóm unicode được phép dùng, đây là một trong số đó.
- */
-export function KeyHint({ children }: { children: ReactNode }) {
-  return (
-    <span className="border border-line-strong px-2.5 py-1 font-mono text-[11px] whitespace-nowrap text-ink-5">
-      {children}
-    </span>
-  )
-}
-
 /** Lấy chữ cái đầu của `count` từ cuối — "Trần Quốc Bảo" → "QB", đúng cách gọi tên người Việt. */
 export function initials(name: string, count = 2): string {
   const parts = name.trim().split(/\s+/).filter(Boolean)

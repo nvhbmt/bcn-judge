@@ -292,7 +292,6 @@ async function runJob(job: ClaimedSubmission, slot: number): Promise<void> {
       },
     )
 
-    const testcaseIds = new Map(ctx.testcases.map((t, i) => [t.position, i]))
     const ok = await finish(job.id, WORKER_ID, job.attempt, {
       verdict: outcome.verdict,
       passedWeight: outcome.passedWeight,
@@ -451,10 +450,6 @@ async function slotLoop(slot: number): Promise<void> {
     }
     await runJob(job, slot)
   }
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms))
 }
 
 /**

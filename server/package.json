@@ -24,7 +24,6 @@
     "drizzle-orm": "^0.45.2",
     "hono": "^4.13.5",
     "pg": "^8.23.0",
-    "tar-stream": "^3.2.1",
     "yauzl": "^3.4.0",
     "zod": "^4.5.4"
   },
@@ -32,7 +31,6 @@
     "@types/dockerode": "^4.0.1",
     "@types/node": "^26.4.0",
     "@types/pg": "^8.23.1",
-    "@types/tar-stream": "^3.1.4",
     "@types/yauzl": "^3.4.0",
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.23.13",
