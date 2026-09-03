@@ -21,7 +21,13 @@ export function StatementPanel({
 }) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2'
   return (
-    <article className="space-y-5 px-5 py-5">
+    /* 16px (--text-lg của hệ) chứ không phải 14px mặc định của app: đây là đoạn văn
+       người ta đọc CHĂM CHÚ trong nhiều phút giữa lúc thi, khác hẳn nhãn và số liệu
+       ở phần còn lại của giao diện. Khung rộng ~616px nên 16px ra khoảng 75 ký tự
+       mỗi dòng — đúng khoảng dễ đọc, không phải nới bừa.
+       Đặt ở <article> để MỌI khối markdown trong panel (đề, dữ liệu vào/ra, ghi chú)
+       cùng lớn lên; tiêu đề và nhãn đã khai cỡ riêng nên không đổi. */
+    <article className="space-y-5 px-5 py-5 text-[16px]">
       <header>
         <Heading className="font-display text-[24px] text-ink-1">{problem.title}</Heading>
 
@@ -50,7 +56,7 @@ export function StatementPanel({
           trùng điểm vào với harness — và thông báo của trình biên dịch lúc đó rất
           khó hiểu với người mới. */}
       {problem.kind === 'function' ? (
-        <p className="border-l-2 border-earth bg-[var(--tint-earth)] px-3 py-2.5 text-[13px] text-ink-3">
+        <p className="border-l-2 border-earth bg-[var(--tint-earth)] px-3 py-2.5 text-[14px] text-ink-3">
           Bài dạng <strong>hàm</strong>: chỉ viết đúng hàm theo mẫu có sẵn trong trình soạn thảo.{' '}
           <strong>Đừng viết hàm main</strong> — phần đọc dữ liệu và in kết quả đã có sẵn.
         </p>
@@ -134,7 +140,7 @@ function IoBox({ label, text }: { label: string; text: string }) {
       <div className="border-b border-line bg-surface-1 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-ink-6 uppercase">
         {label}
       </div>
-      <pre className="overflow-x-auto px-2 py-2 font-mono text-[12px] whitespace-pre-wrap text-ink-2">{text}</pre>
+      <pre className="overflow-x-auto px-2 py-2 font-mono text-[13px] whitespace-pre-wrap text-ink-2">{text}</pre>
     </div>
   )
 }
