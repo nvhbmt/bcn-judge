@@ -137,7 +137,7 @@ function Section({ title, body }: { title: string; body: string }) {
 function IoBox({ label, text }: { label: string; text: string }) {
   return (
     <div className="overflow-hidden border border-line bg-surface-2">
-      <div className="border-b border-line bg-surface-1 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-ink-6 uppercase">
+      <div className="border-b border-line bg-surface-1 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-[var(--label)] uppercase">
         {label}
       </div>
       <pre className="overflow-x-auto px-2 py-2 font-mono text-[13px] whitespace-pre-wrap text-ink-2">{text}</pre>

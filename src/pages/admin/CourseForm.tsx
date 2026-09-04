@@ -67,7 +67,7 @@ export function CourseForm({ course, onDone }: { course: AdminCourse | null; onD
 
   return (
     <form onSubmit={submit} className="mb-5 border border-line bg-surface-2 p-4">
-      <h2 className="mb-3 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{course ? `Sửa khoá ${course.code}` : 'Tạo khoá học'}</h2>
+      <h2 className="mb-3 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{course ? `Sửa khoá ${course.code}` : 'Tạo khoá học'}</h2>
       <FailureBanner notice={notice} />
 
       <div className="grid gap-3 sm:grid-cols-2">

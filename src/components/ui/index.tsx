@@ -155,7 +155,7 @@ export function SectionRule({
   const Heading = `h${level}` as 'h2' | 'h3' | 'h4'
   return (
     <div className="flex items-end gap-0">
-      <Heading className="pr-3 font-mono text-[11px] font-normal tracking-[0.14em] text-ink-6 uppercase">
+      <Heading className="pr-3 font-mono text-[11px] font-normal tracking-[0.14em] text-[var(--label)] uppercase">
         {label}
       </Heading>
       <div aria-hidden className="h-px flex-1 bg-line" />

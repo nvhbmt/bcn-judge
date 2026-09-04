@@ -89,7 +89,7 @@ export function LoginPage() {
 
       <div className="flex flex-col justify-center bg-surface-1 px-12 py-14">
         <form onSubmit={onSubmit} className="w-full">
-          <p className="mb-2.5 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">
+          <p className="mb-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
             Đăng nhập
           </p>
           <h1 className="mb-2 font-display text-[26px] text-ink-1">

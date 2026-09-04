@@ -15,7 +15,7 @@
  *   - tint-earth là chỗ chật nhất: earth là màu sáng nhất trong ba nên nền earth đậm
  *     thêm một nấc là chữ earth trên nó rơi xuống dưới ngưỡng.
  */
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
@@ -23,10 +23,19 @@ import { describe, expect, it } from 'vitest'
 // import.meta.url là URL http của Vite, readFileSync không nhận.
 const CSS = readFileSync(resolve(process.cwd(), 'design-system/tokens/colors.css'), 'utf8')
 
-/** Khối `[data-theme='light']` — bản sáng ghi đè, nên phải đọc đúng khối đó. */
-const LIGHT = CSS.slice(CSS.indexOf("[data-theme='light']"))
+/**
+ * Ranh giới hai bảng màu, cắt theo SELECTOR thật (`[data-theme='light'] {`) chứ không
+ * theo chuỗi trần: bản cũ dùng `indexOf("[data-theme='light']")`, nên một CHÚ THÍCH
+ * trong khối tối có nhắc tên selector cũng cắt nhầm — DARK bị cụt ở đó và LIGHT bắt
+ * đầu từ giữa khối tối, khiến ba phép đo của bản sáng lặng lẽ đọc giá trị bản tối.
+ * Đã xảy ra thật khi thêm --label. Có ` {` phía sau thì chỉ khai báo thật mới khớp.
+ */
+const RANH = /\[data-theme='light'\]\s*\{/.exec(CSS)
+if (!RANH) throw new Error('Không thấy khối [data-theme=light] trong colors.css')
+/** Khối bản sáng — nơi ghi đè. */
+const LIGHT = CSS.slice(RANH.index)
 /** Phần trước khối đó là `:root`, tức bản TỐI (mặc định của hệ). */
-const DARK = CSS.slice(0, CSS.indexOf("[data-theme='light']"))
+const DARK = CSS.slice(0, RANH.index)
 
 function tokenIn(block: string, name: string): string {
   const m = new RegExp(`--${name}:\\s*([^;]+);`).exec(block)
@@ -165,5 +174,45 @@ describe('dải tiêu đề khung bên — phải nhìn ra là một dải, ở 
   ])('bản %s: chữ tiêu đề trên dải ≥ 4.5:1', (_ten, block) => {
     // Chữ tiêu đề là ink-3, cỡ 11px — tức chữ nhỏ, nên ngưỡng 4.5 chứ không phải 3.
     expect(contrast(tokenIn(block, 'ink-3'), tokenIn(block, 'panel-head'))).toBeGreaterThanOrEqual(4.5)
+  })
+})
+
+describe('nhãn mục ALL-CAPS — cùng vai trò, hai theme hai bậc mực', () => {
+  // Đo ra hai theme bằng nhau đúng 4.8:1 mà chỉ bản sáng bị kêu "chưa nổi". Vẫn là
+  // chuyện HƯỚNG đã nói ở đầu file: nền tối thì chữ nhạt SÁNG hơn nền nên nổi lên,
+  // nền kem thì chữ nhạt TỐI hơn nền — cùng hướng với chữ thường — nên nhãn chìm
+  // xuống dưới chính khối chữ nó đứng đầu. Con số không bắt được lỗi này, nên phần
+  // canh ở đây là THỨ BẬC giữa các token chứ không phải một ngưỡng tương phản.
+
+  it('bản sáng: nhãn phải đậm hơn hẳn bậc mực nhạt, không dừng ở ink-6', () => {
+    expect(contrast(token('label'), BG())).toBeGreaterThan(contrast(tokenIn(LIGHT, 'ink-6'), BG()))
+    expect(contrast(token('label'), BG())).toBeGreaterThanOrEqual(7)
+  })
+
+  it('bản sáng: nhãn vẫn nhạt hơn chữ chính — nó dẫn khối chữ, không tranh chỗ', () => {
+    expect(contrast(token('label'), BG())).toBeLessThan(contrast(tokenIn(LIGHT, 'ink-2'), BG()))
+  })
+
+  it('bản tối giữ nguyên ink-6 — chỗ đó không ai kêu, đừng sửa kèm', () => {
+    expect(tokenIn(DARK, 'label')).toBe(tokenIn(DARK, 'ink-6'))
+  })
+
+  it('không còn chỗ nào viết nhãn ALL-CAPS bằng ink-6', () => {
+    // Vai trò này nằm rải ở 24 chỗ trong 20 file. Không có luật canh thì cái nhãn thứ
+    // 25 lại được chép từ hàng xóm cũ, và bản sáng lặng lẽ hỏng lại đúng một chỗ.
+    const sot: string[] = []
+    const quet = (thuMuc: string) => {
+      for (const ten of readdirSync(thuMuc)) {
+        const duong = resolve(thuMuc, ten)
+        if (statSync(duong).isDirectory()) quet(duong)
+        else if (ten.endsWith('.tsx')) {
+          readFileSync(duong, 'utf8').split('\n').forEach((dong, i) => {
+            if (dong.includes('uppercase') && dong.includes('text-ink-6')) sot.push(`${ten}:${i + 1}`)
+          })
+        }
+      }
+    }
+    quet(resolve(process.cwd(), 'src'))
+    expect(sot).toEqual([])
   })
 })

@@ -17,7 +17,7 @@ import { api } from '@/lib/api'
 import type { ContestStandingRow } from './standings'
 
 const TH =
-  'px-2.5 py-2 font-mono text-[11px] font-normal tracking-[0.14em] whitespace-nowrap text-ink-6 uppercase'
+  'px-2.5 py-2 font-mono text-[11px] font-normal tracking-[0.14em] whitespace-nowrap text-[var(--label)] uppercase'
 
 export function ContestStandings({
   contestId,

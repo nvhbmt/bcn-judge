@@ -54,6 +54,11 @@
   --ink-6: #948a78;  /* nhãn mục ALL-CAPS 11px, gợi ý Field · 4.8:1 */
   --ink-7: #6f6759;  /* 3.4:1 — CHỈ trang trí. Không đặt chữ ở bậc này. */
 
+  /* Nhãn mục ALL-CAPS 11px — "ĐỀ BÀI", "ĐIỂM CỦA BẠN", đầu cột bảng.
+     Một vai trò riêng chứ không phải "ink-6 dùng cho nhãn": hai theme cần hai bậc
+     mực KHÁC nhau cho cùng vai trò này — lý do nằm ở khối bản sáng bên dưới. */
+  --label: var(--ink-6);
+
   /* hai màu điểm: xanh rêu (xong / đang mở) và nâu đất (cần chú ý) */
   /* Ba VAI TRÒ của xanh rêu. Ở nền tối cả ba bằng nhau, nên trước giờ một token là
      đủ; ở nền kem thì không: chữ phải đậm hơn mới đủ tương phản, còn khối đặc phải
@@ -152,6 +157,15 @@
   --ink-5: #5f5747;  /* 5.4:1 */
   --ink-6: #6b6355;  /* 4.8:1 — nhãn mục ALL-CAPS, gợi ý Field */
   --ink-7: #98907d;  /* 2.8:1 — CHỈ trang trí (đường phân cách, chấm). Không đặt chữ ở đây. */
+
+  /* Nhãn mục ở bản sáng phải ĐẬM HƠN hai bậc so với bản tối, dù đo ra hai bên bằng
+     nhau đúng 4.8:1. Không phải chuyện tương phản mà là HƯỚNG — cùng lỗi đã ghi ở
+     đầu tests/lightAccents.test.ts: nền tối thì chữ nhạt SÁNG hơn nền nên mắt đọc
+     ra là chữ được làm nổi; nền kem thì chữ nhạt TỐI hơn nền, cùng hướng với chữ
+     thường, nên đọc ra là mực yếu — nhãn chìm xuống dưới cả khối chữ nó đứng đầu,
+     tức ngược thứ tự. ink-3 kéo nó lên sát chữ nội dung (vẫn nhạt hơn ink-2 một
+     bậc, nên không tranh chỗ) và đủ để mắt bắt được cấu trúc trang. */
+  --label: var(--ink-3);
 
   /* Ba bậc, đo từ bản vẽ màn sáng (mỗi bậc dùng ~57 lần nên không phải sai sót lẻ):
        0.42  chữ · viền · vạch chọn dòng — đậm hơn để đủ tương phản trên nền kem

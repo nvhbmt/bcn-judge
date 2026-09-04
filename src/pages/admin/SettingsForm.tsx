@@ -45,7 +45,7 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
 
       {groupSettings(settings).map((group) => (
         <section key={group.title} className="mb-5 border border-line bg-surface-2 p-4">
-          <h2 className="mb-3 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{group.title}</h2>
+          <h2 className="mb-3 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{group.title}</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {group.keys.map((key) => {
               const meta = metaFor(key)

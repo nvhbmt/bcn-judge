@@ -45,7 +45,7 @@ export function Card({ title, actions, children }: { title: string; actions?: Re
   return (
     <section className="mb-5 border border-line bg-surface-2 p-4">
       <div className="mb-3 flex items-center gap-2">
-        <h2 className="font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{title}</h2>
+        <h2 className="font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{title}</h2>
         {actions ? <div className="ml-auto flex items-center gap-2">{actions}</div> : null}
       </div>
       {children}

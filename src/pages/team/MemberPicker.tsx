@@ -30,7 +30,7 @@ export function MemberPicker({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0 border-b border-line">
-        <p className="px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">Thành viên</p>
+        <p className="px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">Thành viên</p>
         <nav aria-label="Chuyển thành viên" className="flex flex-col gap-px bg-line">
           {members.map((m) => {
             const dang = m.id === currentUserId
@@ -56,7 +56,7 @@ export function MemberPicker({
         </nav>
       </div>
 
-      <p className="shrink-0 px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">
+      <p className="shrink-0 px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
         Bài nộp {submissions ? `· ${submissions.length}` : ''}
       </p>
 

@@ -121,7 +121,7 @@ export function StatStrip({ items }: { items: { label: string; value: ReactNode;
     <div className="grid gap-px border border-line bg-line" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
       {items.map((it) => (
         <div key={it.label} className="bg-surface-2 px-4 py-3">
-          <div className="font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">{it.label}</div>
+          <div className="font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{it.label}</div>
           <div
             className={`num mt-1.5 font-mono text-[22px] font-semibold ${
               it.tone === 'moss' ? 'text-moss' : it.tone === 'earth' ? 'text-earth' : it.tone === 'clay' ? 'text-clay' : 'text-ink-1'
@@ -246,6 +246,6 @@ export function SideColumn({ children, className = '' }: { children: ReactNode; 
 /** Nhãn mục mono ALL-CAPS dùng trong cột phải (nơi không cần cả motif đường kẻ). */
 export function SideLabel({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-3.5 font-mono text-[11px] font-normal tracking-[0.14em] text-ink-6 uppercase">{children}</h2>
+    <h2 className="mb-3.5 font-mono text-[11px] font-normal tracking-[0.14em] text-[var(--label)] uppercase">{children}</h2>
   )
 }

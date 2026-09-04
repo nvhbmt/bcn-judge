@@ -26,7 +26,7 @@ export function DiscordLogin() {
     <>
       <div className="my-7 flex items-center gap-3">
         <span className="h-px flex-1 bg-line" />
-        <span className="font-mono text-[11px] tracking-[0.1em] text-ink-6 uppercase">hoặc</span>
+        <span className="font-mono text-[11px] tracking-[0.1em] text-[var(--label)] uppercase">hoặc</span>
         <span className="h-px flex-1 bg-line" />
       </div>
 

@@ -129,7 +129,7 @@ function FailedCase({
           />
         ) : got ? (
           <div>
-            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-ink-6 uppercase">
+            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-[var(--label)] uppercase">
               Lời giải mẫu in ra
             </p>
             <pre className="max-h-32 overflow-auto border border-line bg-surface-1 p-2 font-mono text-xs whitespace-pre-wrap">
@@ -142,7 +142,7 @@ function FailedCase({
 
         {result.stderr ? (
           <div>
-            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-ink-6 uppercase">stderr</p>
+            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-[var(--label)] uppercase">stderr</p>
             <pre className="max-h-24 overflow-auto border border-line bg-surface-1 p-2 font-mono text-xs whitespace-pre-wrap text-clay">
               {result.stderr}
             </pre>

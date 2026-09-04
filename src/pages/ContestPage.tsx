@@ -78,7 +78,7 @@ export function ContestPage() {
 
         {remaining ? (
           <div className="mt-6" aria-live="polite">
-            <p className="font-mono text-[11px] tracking-[0.14em] text-ink-6 uppercase">
+            <p className="font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
               {data.phase === 'sap-dien-ra' ? 'Bắt đầu sau' : 'Còn lại'}
             </p>
             <p className={`num mt-1.5 font-mono text-[34px] leading-none font-semibold tracking-[-0.02em] ${running ? 'text-earth' : 'text-ink-2'}`}>

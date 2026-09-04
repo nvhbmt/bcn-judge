@@ -48,7 +48,7 @@ export function SubmissionsPanel({
     <div className="overflow-x-auto">
       <table className="w-full min-w-[34rem] border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.1em] text-ink-6 uppercase">
+          <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.1em] text-[var(--label)] uppercase">
             <th scope="col" className="px-4 py-2 font-medium">Kết quả</th>
             <th scope="col" className="px-2 py-2 font-medium">Ngôn ngữ</th>
             <th scope="col" className="px-2 py-2 text-right font-medium">Thời gian</th>
