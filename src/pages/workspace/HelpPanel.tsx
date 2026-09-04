@@ -1,3 +1,4 @@
+import { VerdictBadge } from '@/components/ui'
 import { VERDICT_LABEL, type Verdict } from '@/types/api'
 
 /** FR-E11: trang trợ giúp tiếng Việt ngay trong workspace. */
@@ -19,16 +20,36 @@ export function HelpPanel({ role }: { role: 'admin' | 'mentor' | 'member' }) {
 
       <section>
         <h2 className="mb-1 font-display text-[16px] text-ink-1">Ý nghĩa các verdict</h2>
-        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-          {(Object.keys(VERDICT_LABEL) as Verdict[]).map((v) => (
-            <div key={v} className="contents">
-              <dt className="font-mono text-[13px] font-semibold whitespace-nowrap">
-                {VERDICT_LABEL[v]} <span className="font-normal text-ink-6">{v}</span>
-              </dt>
-              <dd className="text-ink-3">{VERDICT_EXPLAIN[v]}</dd>
-            </div>
-          ))}
-        </dl>
+        {/* Tag ở đây dùng ĐÚNG công thức màu của chip testcase (`tone="soft"`: chữ và
+            viền --verdict-x, nền --verdict-x-soft), không phải một bảng màu riêng cho
+            trang trợ giúp. Bảng chú giải mà tô khác chỗ thật thì nó chú giải cho chính
+            nó chứ không cho cái người ta vừa nhìn thấy — người đọc phải bắc cầu bằng
+            chữ, mà màu mới là thứ họ nhớ. Đổi màu verdict ở token là cả hai đổi theo. */}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[24rem] border-collapse text-[13px]">
+            <thead>
+              <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.1em] text-[var(--label)] uppercase">
+                <th scope="col" className="py-1.5 pr-3 font-medium">Verdict</th>
+                <th scope="col" className="py-1.5 pr-3 font-medium">Mã</th>
+                <th scope="col" className="py-1.5 font-medium">Ý nghĩa</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line align-top">
+              {(Object.keys(VERDICT_LABEL) as Verdict[]).map((v) => (
+                <tr key={v}>
+                  <td className="py-1.5 pr-3 whitespace-nowrap">
+                    <VerdictBadge verdict={v} tone="soft" />
+                  </td>
+                  {/* Mã gốc có CỘT RIÊNG chứ không nấp trong tooltip như mọi nơi khác:
+                      đây đúng là chỗ người ta tra "TLE là gì", mà tooltip thì phải biết
+                      trước là có cái để rê chuột vào mới thấy. */}
+                  <td className="num py-1.5 pr-3 font-mono text-[12px] text-ink-5">{v}</td>
+                  <td className="py-1.5 text-ink-3">{VERDICT_EXPLAIN[v]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section>

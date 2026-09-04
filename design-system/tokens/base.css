@@ -22,6 +22,30 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3 { font-family: var(--font-display); font-weight: var(--weight-medium); letter-spacing: var(--track-display); }
+
+/* Nhấn mạnh trong câu: <b>, <strong>.
+   Mặc định của trình duyệt là `font-weight: bold` (700), mà bộ IBM Plex Sans trang
+   này nạp chỉ tới 600 — xin 700 thì trình duyệt lấy 600 rồi có thể tự "bôi đậm"
+   thêm cho đủ, tức làm dày nét bằng cách nhoè ra. Xin thẳng 600 thì luôn là mặt
+   chữ thật đã tải. */
+b, strong { font-weight: var(--weight-semibold); }
+
+/* Ở nền TỐI, riêng nét đậm là không đủ.
+   Chữ sáng trên nền tối bị "nở" — nét chữ thường trông đã dày sẵn — nên khoảng cách
+   400 → 600 mà mắt thấy hẹp hơn hẳn so với chữ tối trên nền kem, và cụm được nhấn
+   chìm vào câu. Đây là mặt kia của cùng một chuyện đã ghi ở --label: hai theme cần
+   hai liều khác nhau cho cùng một vai trò.
+
+   Nâng ĐỘ SÁNG của chính màu đang thừa kế, không gán một màu mực cố định: có hai
+   chỗ <strong> nằm trong câu cảnh báo màu đất (OneTimeSecret, ImportReportTable),
+   gán --ink-1 vào đó là xoá luôn màu mang nghĩa. `oklch(from currentColor ...)` giữ
+   nguyên c và h nên chữ đất vẫn là đất, chỉ sáng hơn.
+
+   Trình duyệt không hiểu cú pháp màu tương đối thì bỏ nguyên dòng này và chữ đậm
+   quay về đúng hiện trạng cũ — mất phần nhấn, không vỡ gì. */
+:root:not([data-theme='light']) :is(b, strong) {
+  color: oklch(from currentColor calc(l + 0.14) c h);
+}
 a { color: var(--moss); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 code, pre, .num { font-family: var(--font-mono); }
