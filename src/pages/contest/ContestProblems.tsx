@@ -7,6 +7,10 @@
  *
  * Số đó lấy từ dòng của chính mình trong bảng xếp hạng, cùng một nguồn với dải "Điểm
  * của bạn", để hai chỗ không bao giờ nói hai con số khác nhau.
+ *
+ * Cột cuối tô ĐỎ khi chưa nộp, XANH khi đã nộp: giữa contest, câu hỏi đầu tiên là
+ * "còn bài nào mình chưa đụng tới", và một cột xám đều thì phải đọc từng chữ mới
+ * trả lời được.
  */
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
@@ -63,7 +67,17 @@ export function ContestProblems({
               /{p.maxScore}
             </span>
 
-            <span className="num w-20 shrink-0 text-right font-mono text-[11px] text-ink-6">
+            {/* Cột này trả lời ĐÚNG MỘT câu: đã đụng bài này chưa. Đỏ = chưa, xanh
+                = rồi — trong contest đó là thứ người ta quét mắt tìm trước tiên.
+                Nó KHÔNG nói bài đã đúng hay chưa; điểm ở cột bên trái nói việc đó
+                (moss khi AC, earth khi có nộp mà chưa trọn điểm). Hai cột trả lời
+                hai câu khác nhau, nên "3 lần" xanh cạnh "0/100" earth là đọc được:
+                đã làm, chưa ăn điểm. */}
+            <span
+              className={`num w-20 shrink-0 text-right font-mono text-[11px] ${
+                mine ? 'text-moss' : 'text-[var(--color-wa)]'
+              }`}
+            >
               {mine ? `${mine.attempts} lần` : 'chưa nộp'}
             </span>
           </Row>
