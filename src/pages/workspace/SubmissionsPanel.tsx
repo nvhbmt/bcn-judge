@@ -3,6 +3,7 @@ import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { LanguageOption, SubmissionView } from '@/types/api'
 import { formatDuration, formatMemory } from './format'
+import { cn } from '@/lib/cn'
 
 /**
  * Tab "Bài nộp" (FR-E3/FR-G1): danh sách lượt nộp với verdict, ngôn ngữ, thời gian,
@@ -46,9 +47,9 @@ export function SubmissionsPanel({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[34rem] border-collapse text-sm">
+      <table className="w-full min-w-136 border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.1em] text-[var(--label)] uppercase">
+          <tr className="border-b border-line text-left font-mono text-[11px] tracking-widest text-(--label) uppercase">
             <th scope="col" className="px-4 py-2 font-medium">Kết quả</th>
             <th scope="col" className="px-2 py-2 font-medium">Ngôn ngữ</th>
             <th scope="col" className="px-2 py-2 text-right font-medium">Thời gian</th>
@@ -61,7 +62,7 @@ export function SubmissionsPanel({
           {data.map((s) => (
             <tr
               key={s.id}
-              className={`relative ${s.id === selectedId ? 'bg-[var(--color-primary-soft)]' : 'hover:bg-surface-sel'}`}
+              className={cn('relative', s.id === selectedId ? 'bg-primary-soft' : 'hover:bg-surface-sel')}
             >
               {/* CẢ HÀNG là vùng bấm, không chỉ ô đầu: `after:absolute after:inset-0`
                   kéo vùng nhấn của nút trải kín hàng (hàng đã `relative`). Vẫn là MỘT
@@ -97,7 +98,7 @@ export function SubmissionsPanel({
                   onClick={async () =>
                     onLoadIntoEditor(await api.get<SubmissionView>(`/api/member/submissions/${s.id}`))
                   }
-                  className="text-[13px] whitespace-nowrap text-[var(--color-primary)] hover:underline"
+                  className="text-[13px] whitespace-nowrap text-primary hover:underline"
                 >
                   Nạp lại code
                 </button>

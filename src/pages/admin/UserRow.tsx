@@ -14,11 +14,12 @@ import { describeFailure, type FailureNotice } from './conflicts'
 import type { OneTimeSecretData } from './OneTimeSecret'
 import type { AdminUser, UserWithSecret } from './types'
 import { FailureBanner, Select } from './ui'
+import { cn } from '@/lib/cn'
 
 const ACTION_BTN =
   'inline-flex items-center gap-1  border border-line-strong px-2 py-1 text-xs hover:bg-surface-sel ' +
   'disabled:cursor-not-allowed disabled:border-line disabled:text-ink-5 disabled:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 ' +
-  'focus-visible:outline-[var(--color-primary)]'
+  'focus-visible:outline-primary'
 
 export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: OneTimeSecretData) => void }) {
   const client = useQueryClient()
@@ -48,7 +49,7 @@ export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: One
 
   return (
     <>
-      <tr className={`border-t border-line ${user.disabled ? 'opacity-60' : ''}`}>
+      <tr className={cn('border-t border-line', user.disabled && 'opacity-60')}>
         <td className="px-2 py-2">
           <span className="block">{user.displayName}</span>
           <span className="block font-mono text-xs break-all text-ink-5">{user.email}</span>
@@ -68,7 +69,7 @@ export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: One
         </td>
         <td className="px-2 py-2 text-xs">
           {user.disabled ? (
-            <span className="bg-[var(--tint-clay)] px-1.5 py-0.5 font-medium text-clay">
+            <span className="bg-(--tint-clay) px-1.5 py-0.5 font-medium text-clay">
               Đã khoá
             </span>
           ) : (

@@ -16,7 +16,7 @@ export function EnrollResult({ report, invalid }: { report: EnrollReport; invali
 
   return (
     <div className="mt-3" role="status">
-      <p className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-ac)]">
+      <p className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-ac">
         <CheckCircle2 size={15} /> Đã ghi danh {report.enrolled} member
       </p>
 

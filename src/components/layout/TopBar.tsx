@@ -61,7 +61,7 @@ export function TopBar() {
       {/* Chữ ký thứ hai của hệ: khối 14×7px moss ngay sau chữ BCN, chân chữ thẳng hàng. */}
       <span className="flex shrink-0 items-end gap-2">
         <span className="font-mono text-[13px] font-bold tracking-[0.06em] text-ink-1">BCN</span>
-        <span aria-hidden className="mb-[3px] h-[7px] w-[14px] bg-moss-fill" />
+        <span aria-hidden className="mb-0.75 h-1.75 w-3.5 bg-moss-fill" />
       </span>
 
       <nav aria-label="Điều hướng chính" className="flex min-w-0 items-center gap-0.5 overflow-x-auto">
@@ -71,7 +71,7 @@ export function TopBar() {
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `px-3 py-1.5 font-mono text-[15px] whitespace-nowrap transition-colors duration-[120ms] ease-linear ${
+              `px-3 py-1.5 font-mono text-[15px] whitespace-nowrap transition-colors duration-120 ease-linear ${
                 isActive ? 'bg-surface-code text-ink-1' : 'text-ink-5 hover:text-ink-2'
               }`
             }

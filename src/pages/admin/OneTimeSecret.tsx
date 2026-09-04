@@ -34,10 +34,10 @@ export function OneTimeSecret({ data, onDismiss }: { data: OneTimeSecretData; on
       ref={ref}
       role="alert"
       tabIndex={-1}
-      className="mb-4 border-2 border-[var(--color-tle)] bg-[var(--tint-earth)] p-4"
+      className="mb-4 border-2 border-tle bg-(--tint-earth) p-4"
     >
       <div className="mb-2 flex items-center gap-2">
-        <KeyRound size={16} className="text-[var(--color-tle)]" />
+        <KeyRound size={16} className="text-tle" />
         <h2 className="text-sm font-semibold text-earth">
           {data.kind === 'created' ? 'Tài khoản đã tạo — mật khẩu ban đầu' : 'Mật khẩu mới đã đặt lại'}
         </h2>

@@ -26,6 +26,7 @@ import { Spinner } from '@/components/ui'
 import { Avatar } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import type { TeamProgressRow, TeamView } from './types'
+import { cn } from '@/lib/cn'
 
 const ngay = (iso: string) =>
   new Date(iso).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
@@ -67,7 +68,10 @@ export function TeamMembers({ team }: { team: TeamView }) {
                   {cua.length > 0 ? `${ac}/${tong} bài` : <span className="text-earth">chưa ghi danh</span>}
                 </span>
                 <span
-                  className={`num w-16 shrink-0 text-right font-mono text-[13px] ${nopCuoi ? 'text-ink-6' : 'text-earth'}`}
+                  className={cn(
+                    'num w-16 shrink-0 text-right font-mono text-[13px]',
+                    nopCuoi ? 'text-ink-6' : 'text-earth',
+                  )}
                 >
                   {nopCuoi ? ngay(nopCuoi) : cua.length > 0 ? 'chưa nộp' : ''}
                 </span>
@@ -82,7 +86,7 @@ export function TeamMembers({ team }: { team: TeamView }) {
             {team.isLeader ? (
               <Link
                 to={`/team/thanh-vien/${m.id}`}
-                className="flex w-full items-center gap-3 px-4 py-2.5 no-underline transition-colors duration-[120ms] ease-linear hover:bg-surface-sel focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-moss"
+                className="flex w-full items-center gap-3 px-4 py-2.5 no-underline transition-colors duration-120 ease-linear hover:bg-surface-sel focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-moss"
               >
                 {than}
               </Link>

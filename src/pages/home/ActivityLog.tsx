@@ -14,6 +14,7 @@ import { SidePanel } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import { VERDICT_TONE, type Verdict } from '@/types/api'
 import { hhmm, workspaceLink, type RecentRow } from './recent'
+import { cn } from '@/lib/cn'
 
 const TONE_CLASS: Record<string, string> = {
   ac: 'text-moss',
@@ -43,7 +44,7 @@ export function ActivityLog() {
           const body = (
             <>
               <span className="num shrink-0 font-mono text-[13px] text-ink-5">{hhmm(row.receivedAt)}</span>
-              <span className={`num w-[34px] shrink-0 font-mono text-[13px] ${verdictClass(row.verdict)}`}>
+              <span className={cn('num w-8.5 shrink-0 font-mono text-[13px]', verdictClass(row.verdict))}>
                 {row.status === 'done' ? (row.verdict ?? '—') : '…'}
               </span>
               <span className="min-w-0 flex-1 truncate text-[13px] text-ink-4">{row.problemTitle}</span>
@@ -54,7 +55,7 @@ export function ActivityLog() {
               {href ? (
                 <Link
                   to={href}
-                  className="flex items-baseline gap-2.5 transition-colors duration-[120ms] ease-linear hover:text-ink-1"
+                  className="flex items-baseline gap-2.5 transition-colors duration-120 ease-linear hover:text-ink-1"
                 >
                   {body}
                 </Link>

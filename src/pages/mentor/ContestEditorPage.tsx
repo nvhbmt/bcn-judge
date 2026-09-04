@@ -22,6 +22,7 @@ import { isoToLocalInput } from './mentorTime'
 import { readApiMessage } from './publishGate'
 import { useContestDetail, useContestMutations, useContestRow, useMentorCourses } from './useContests'
 import { useMentorProblems } from './useCourseContent'
+import { cn } from '@/lib/cn'
 
 export function ContestEditorPage() {
   const { contestId = '' } = useParams()
@@ -64,10 +65,10 @@ export function ContestEditorPage() {
           <ArrowLeft size={15} /> Danh sách contest
         </Link>
         <h1 className="truncate font-display text-[16px] text-ink-1">{row.title}</h1>
-        <span className={`px-2 py-0.5 text-xs ${PHASE_CLASS[phase]}`}>{PHASE_LABEL[phase]}</span>
+        <span className={cn('px-2 py-0.5 text-xs', PHASE_CLASS[phase])}>{PHASE_LABEL[phase]}</span>
         <Link
           to={`/mentor/contest/${contestId}/thong-ke`}
-          className="ml-auto inline-flex items-center gap-1 text-sm text-[var(--color-primary)] hover:underline"
+          className="ml-auto inline-flex items-center gap-1 text-sm text-primary hover:underline"
         >
           <BarChart3 size={15} /> Thống kê
         </Link>

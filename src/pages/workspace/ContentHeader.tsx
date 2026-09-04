@@ -41,7 +41,7 @@ export function ContentHeader({
   // Chiều cao lấy từ `--panel-header-h`, dùng chung với dòng tiêu đề khung editor —
   // xem src/index.css. Cắm cứng ở đây thì hai bên lệch nhau lúc bên kia đổi.
   return (
-    <div className="flex h-[var(--panel-header-h)] shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-5">
+    <div className="flex h-(--panel-header-h) shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-5">
       <Label className="shrink-0 font-mono text-[13px] font-semibold tracking-[0.12em] whitespace-nowrap text-ink-1 uppercase">
         {label}
       </Label>

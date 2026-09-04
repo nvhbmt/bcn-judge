@@ -8,6 +8,7 @@ import { ItemEditor } from './ItemEditor'
 import type { SyllabusItem } from './mentorTypes'
 import { readApiMessage, readPublishGate, type PublishGate } from './publishGate'
 import { useItemMutations } from './useCourseContent'
+import { cn } from '@/lib/cn'
 
 export function ItemRow({
   courseId,
@@ -48,11 +49,10 @@ export function ItemRow({
         <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
 
         <span
-          className={` px-1.5 py-0.5 text-xs ${
-            published
-              ? 'bg-surface-sel text-moss'
-              : 'bg-surface-sel text-ink-3'
-          }`}
+          className={cn(
+            'px-1.5 py-0.5 text-xs',
+            published ? 'bg-surface-sel text-moss' : 'bg-surface-sel text-ink-3',
+          )}
         >
           {published ? 'Xuất bản' : 'Nháp'}
         </span>

@@ -23,6 +23,7 @@ import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
 import { Avatar } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import type { LanguageOption, Verdict } from '@/types/api'
+import { cn } from '@/lib/cn'
 
 interface HocVien {
   id: string
@@ -99,7 +100,7 @@ export function CourseSubmissionsPage() {
           minPx={280}
           left={
             <div className="flex h-full min-h-0 flex-col">
-              <p className="shrink-0 border-b border-line px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
+              <p className="shrink-0 border-b border-line px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">
                 Học viên {hocVien ? `· ${hocVien.length}` : ''}
               </p>
               {!hocVien || hocVien.length === 0 ? (
@@ -119,11 +120,10 @@ export function CourseSubmissionsPage() {
                                 setLuot(null)
                               }}
                               aria-current={dang ? 'true' : undefined}
-                              className={`flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] transition-colors duration-[120ms] ease-linear ${
-                                dang
-                                  ? 'bg-[var(--color-primary-soft)] font-semibold text-ink-1 shadow-[inset_2px_0_0_var(--moss)]'
-                                  : 'bg-surface-2 text-ink-3 hover:bg-surface-sel hover:text-ink-1'
-                              }`}
+                              className={cn(
+                                'flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] transition-colors duration-120 ease-linear',
+                                dang ? 'bg-primary-soft font-semibold text-ink-1 shadow-[inset_2px_0_0_var(--moss)]' : 'bg-surface-2 text-ink-3 hover:bg-surface-sel hover:text-ink-1',
+                              )}
                             >
                               <Avatar name={h.displayName} size={22} chars={1} />
                               <span className="min-w-0 truncate">{h.displayName}</span>
@@ -134,7 +134,7 @@ export function CourseSubmissionsPage() {
                     </ul>
                   </div>
 
-                  <p className="shrink-0 border-y border-line px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
+                  <p className="shrink-0 border-y border-line px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">
                     Bài nộp {baiNop ? `· ${baiNop.length}` : ''}
                   </p>
                   <div className="min-h-0 flex-1 overflow-y-auto">
@@ -152,11 +152,10 @@ export function CourseSubmissionsPage() {
                               type="button"
                               onClick={() => setLuot(s.id)}
                               aria-current={s.id === hien?.id ? 'true' : undefined}
-                              className={`flex w-full flex-col gap-1 px-3.5 py-2 text-left transition-colors duration-[120ms] ease-linear ${
-                                s.id === hien?.id
-                                  ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]'
-                                  : 'bg-surface-2 hover:bg-surface-sel'
-                              }`}
+                              className={cn(
+                                'flex w-full flex-col gap-1 px-3.5 py-2 text-left transition-colors duration-120 ease-linear',
+                                s.id === hien?.id ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]' : 'bg-surface-2 hover:bg-surface-sel',
+                              )}
                             >
                               <span className="truncate text-[13px] text-ink-2">
                                 {s.problemTitle ?? <span className="text-ink-6">(bài đã xoá)</span>}

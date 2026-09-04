@@ -15,6 +15,7 @@ import { Button } from '@/components/ui'
 import { api, ApiFailure } from '@/lib/api'
 import { DISCORD_REASON, discordOk } from '@/lib/discord'
 import { useAuth } from '@/stores/auth'
+import { cn } from '@/lib/cn'
 
 const ROLE_LABEL: Record<string, string> = { admin: 'Quản trị viên', mentor: 'Mentor', member: 'Học viên' }
 
@@ -42,9 +43,10 @@ export function AccountPage() {
       {reason && DISCORD_REASON[reason] ? (
         <p
           role="status"
-          className={`mb-6 border-l-2 px-3 py-2 text-[13px] text-ink-3 ${
-            discordOk(reason) ? 'border-moss bg-[var(--primary-soft)]' : 'border-clay bg-[var(--tint-clay)]'
-          }`}
+          className={cn(
+            'mb-6 border-l-2 px-3 py-2 text-[13px] text-ink-3',
+            discordOk(reason) ? 'border-moss bg-primary-soft' : 'border-clay bg-(--tint-clay)',
+          )}
         >
           {DISCORD_REASON[reason]}
         </p>
@@ -59,7 +61,7 @@ export function AccountPage() {
         <Field label="Vai trò" value={ROLE_LABEL[me.role] ?? me.role} />
       </dl>
 
-      <h2 className="mb-1 font-mono text-[12px] tracking-[0.1em] text-ink-5 uppercase">Discord</h2>
+      <h2 className="mb-1 font-mono text-[12px] tracking-widest text-ink-5 uppercase">Discord</h2>
       <p className="mb-3 text-[14px] leading-[1.6] text-ink-5">
         Gắn Discord để lần sau đăng nhập bằng một cú bấm, không phải gõ mật khẩu. Gắn hay bỏ gắn đều
         không đổi vai trò, khoá học hay team của bạn.
@@ -86,7 +88,7 @@ export function AccountPage() {
             {/* <a> chứ không <Link>: đây là điều hướng rời khỏi SPA sang discord.com. */}
             <a
               href="/auth/discord?intent=link"
-              className="ml-auto border border-line-strong px-3 py-1.5 font-mono text-[14px] text-ink-2 transition-colors duration-[120ms] ease-linear hover:border-moss hover:text-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+              className="ml-auto border border-line-strong px-3 py-1.5 font-mono text-[14px] text-ink-2 transition-colors duration-120 ease-linear hover:border-moss hover:text-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
             >
               Gắn Discord
             </a>
@@ -95,12 +97,12 @@ export function AccountPage() {
       </div>
 
       {unlink.error ? (
-        <p role="alert" className="mb-6 border-l-2 border-clay bg-[var(--tint-clay)] px-3 py-2 text-[13px] text-ink-3">
+        <p role="alert" className="mb-6 border-l-2 border-clay bg-(--tint-clay) px-3 py-2 text-[13px] text-ink-3">
           {unlink.error instanceof ApiFailure ? unlink.error.error.message : 'Không bỏ gắn được.'}
         </p>
       ) : null}
 
-      <h2 className="mb-1 font-mono text-[12px] tracking-[0.1em] text-ink-5 uppercase">Mật khẩu</h2>
+      <h2 className="mb-1 font-mono text-[12px] tracking-widest text-ink-5 uppercase">Mật khẩu</h2>
       <p className="mb-3 text-[14px] text-ink-5">Đổi mật khẩu sẽ đăng xuất mọi thiết bị khác.</p>
       <Link to="/doi-mat-khau" className="inline-block">
         <Button>Đổi mật khẩu</Button>
@@ -144,7 +146,7 @@ function TenHienThi({ current }: { current: string }) {
   return (
     <div className="border-b border-line px-4 py-2.5 last:border-b-0">
       <form onSubmit={onSubmit} className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <label htmlFor="ten-hien-thi" className="min-w-[8rem] font-mono text-[13px] text-ink-6">
+        <label htmlFor="ten-hien-thi" className="min-w-32 font-mono text-[13px] text-ink-6">
           Tên hiển thị
         </label>
         {/* Ô nhập trần, cùng kiểu với trang đổi mật khẩu. KHÔNG dùng `TextInput` vì
@@ -158,7 +160,7 @@ function TenHienThi({ current }: { current: string }) {
             setTen(e.target.value)
             setXong(false)
           }}
-          className="max-w-[18rem] flex-1 border border-line-strong bg-transparent px-3 py-1.5 text-sm text-ink-1"
+          className="max-w-72 flex-1 border border-line-strong bg-transparent px-3 py-1.5 text-sm text-ink-1"
         />
         <Button type="submit" size="sm" disabled={!doiThat || luu.isPending}>
           {luu.isPending ? 'Đang lưu…' : 'Lưu'}
@@ -170,7 +172,7 @@ function TenHienThi({ current }: { current: string }) {
         ) : null}
       </form>
       {luu.error ? (
-        <p role="alert" className="mt-1.5 text-[13px] text-[var(--color-wa)]">
+        <p role="alert" className="mt-1.5 text-[13px] text-wa">
           {luu.error instanceof ApiFailure ? luu.error.error.message : 'Không đổi được tên.'}
         </p>
       ) : null}
@@ -181,7 +183,7 @@ function TenHienThi({ current }: { current: string }) {
 function Field({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-wrap gap-x-4 border-b border-line px-4 py-2.5 last:border-b-0">
-      <dt className="min-w-[8rem] font-mono text-[13px] text-ink-6">{label}</dt>
+      <dt className="min-w-32 font-mono text-[13px] text-ink-6">{label}</dt>
       <dd className="font-mono text-[14px] text-ink-2">{value}</dd>
     </div>
   )

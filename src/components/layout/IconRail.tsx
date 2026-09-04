@@ -14,6 +14,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { ComponentPropsWithoutRef, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { cn } from '@/lib/cn'
 
 /** Nhãn tạm sau khi chạm sống bao lâu (ms) — "vài giây" của FR-E7. */
 const TOUCH_LABEL_MS = 2000
@@ -139,7 +140,7 @@ export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hư�
         const group = items.filter((i) => Boolean(i.atBottom) === bottom)
         if (group.length === 0) return null
         return (
-      <ul key={String(bottom)} className={`flex flex-col items-center gap-1 ${bottom ? 'mt-auto' : ''}`}>
+      <ul key={String(bottom)} className={cn('flex flex-col items-center gap-1', bottom && 'mt-auto')}>
         {group.map((item) => {
           const isActive = activeKey === item.key
           const showTip = visibleTipKey === item.key
@@ -165,11 +166,10 @@ export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hư�
                 // `--surface-sel`. Ở bản tối hai token trùng giá trị nên khác biệt này
                 // vô hình; ở bản sáng thì primary-soft mang sắc moss còn surface-sel là
                 // be trung tính — để nguyên surface-sel là mục đang mở mất hẳn màu.
-                className={`relative flex h-11 w-14 items-center justify-center transition-colors duration-[120ms] ease-linear focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss ${
-                  isActive
-                    ? 'bg-[var(--primary-soft)] text-moss shadow-[inset_2px_0_0_var(--moss)]'
-                    : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2'
-                }`}
+                className={cn(
+                  'relative flex h-11 w-14 items-center justify-center transition-colors duration-120 ease-linear focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss',
+                  isActive ? 'bg-primary-soft text-moss shadow-[inset_2px_0_0_var(--moss)]' : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2',
+                )}
                 onPointerDown={(e: ReactPointerEvent) => onPointerDown(e, item.key)}
                 onMouseEnter={() => showByPointer(item.key)}
                 onMouseLeave={() => setPointedKey((k) => (k === item.key ? null : k))}

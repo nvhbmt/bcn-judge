@@ -1,6 +1,7 @@
 import type { SampleIO, SubmissionView } from '@/types/api'
 import { ResultTable } from './ResultTable'
 import { StdinPane } from './StdinPane'
+import { cn } from '@/lib/cn'
 
 /**
  * Bảng điều khiển dưới editor (FR-E5).
@@ -74,9 +75,10 @@ export function ConsolePanel({
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => onTab(t.id)}
-            className={`border-b-2 px-3.5 py-2.5 font-mono text-[13px] transition-colors duration-[120ms] ease-linear ${
-              tab === t.id ? 'border-moss text-ink-1' : 'border-transparent text-ink-5 hover:text-ink-2'
-            }`}
+            className={cn(
+              'border-b-2 px-3.5 py-2.5 font-mono text-[13px] transition-colors duration-120 ease-linear',
+              tab === t.id ? 'border-moss text-ink-1' : 'border-transparent text-ink-5 hover:text-ink-2',
+            )}
           >
             {t.label}
           </button>

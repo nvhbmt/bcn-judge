@@ -74,7 +74,7 @@ export function ContestListPage() {
           <li key={c.id}>
             <Link
               to={`/contest/${c.id}`}
-              className="flex items-center gap-4 bg-surface-2 px-4 py-3 transition-colors duration-[120ms] ease-linear hover:bg-surface-sel"
+              className="flex items-center gap-4 bg-surface-2 px-4 py-3 transition-colors duration-120 ease-linear hover:bg-surface-sel"
             >
               <span
                 aria-hidden

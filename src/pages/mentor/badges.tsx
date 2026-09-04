@@ -5,6 +5,8 @@
  * việc phải làm tiếp hoàn toàn khác nhau (tải test lên / bấm kiểm) và cả hai đều
  * chưa xuất bản được. Gộp chung thì mentor nhìn chấm vàng mà không biết làm gì.
  */
+import { cn } from '@/lib/cn'
+
 export type ValidationState = 'no-testcase' | 'unchecked' | 'checked'
 
 export function validationState(opts: { testcases: number; validated: boolean }): ValidationState {
@@ -21,7 +23,7 @@ const STATE = {
   unchecked: {
     label: 'Chưa kiểm',
     title: 'Bộ test hiện tại chưa được lời giải mẫu xác nhận.',
-    className: 'bg-[var(--tint-earth)] text-earth',
+    className: 'bg-(--tint-earth) text-earth',
   },
   checked: {
     label: 'Đã kiểm',
@@ -33,7 +35,7 @@ const STATE = {
 export function ValidationBadge({ state }: { state: ValidationState }) {
   const s = STATE[state]
   return (
-    <span className={` px-1.5 py-0.5 text-xs font-semibold ${s.className}`} title={s.title}>
+    <span className={cn('px-1.5 py-0.5 text-xs font-semibold', s.className)} title={s.title}>
       {s.label}
     </span>
   )

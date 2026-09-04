@@ -16,6 +16,7 @@ import { Button, EmptyState, SectionRule, Spinner } from "@/components/ui";
 import { Row, RowGroup, StatStrip } from "@/components/ui/patterns";
 import { api } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { cn } from '@/lib/cn'
 
 interface JudgeStatus {
   queue: {
@@ -56,11 +57,10 @@ function Banner({
   return (
     <p
       role={alarm ? "alert" : undefined}
-      className={`mb-3 border-l-2 px-3 py-2 text-[13px] ${
-        alarm
-          ? "border-clay bg-[var(--tint-clay)] text-ink-2"
-          : "border-earth bg-[var(--tint-earth)] text-ink-3"
-      }`}
+      className={cn(
+        'mb-3 border-l-2 px-3 py-2 text-[13px]',
+        alarm ? "border-clay bg-(--tint-clay) text-ink-2" : "border-earth bg-(--tint-earth) text-ink-3",
+      )}
     >
       {children}
       {alarm ? null : (
@@ -160,7 +160,7 @@ export function AdminPage() {
               <Row key={w.id}>
                 <span
                   aria-hidden
-                  className={`size-2 shrink-0 rounded-full ${w.alive ? "bg-moss-fill" : "bg-clay"}`}
+                  className={cn('size-2 shrink-0 rounded-full', w.alive ? "bg-moss-fill" : "bg-clay")}
                 />
                 <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-ink-2">
                   {w.id}

@@ -17,6 +17,7 @@ import { VerdictBadge } from '@/components/ui'
 import { OutputDiff } from '@/pages/workspace/OutputDiff'
 import { Notice } from './fields'
 import type { CompareMode, MentorTestcaseView, ValidateResultView, ValidateRunView } from './types'
+import { cn } from '@/lib/cn'
 
 export function ValidateReport({
   result,
@@ -32,7 +33,7 @@ export function ValidateReport({
     return (
       <div className="space-y-2">
         <Notice tone="error">Lời giải mẫu không biên dịch được — chưa kiểm được testcase nào.</Notice>
-        <pre className="max-h-40 overflow-auto border border-line bg-[var(--surface-code)] p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
+        <pre className="max-h-40 overflow-auto border border-line bg-surface-code p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
           {result.compileOutput}
         </pre>
       </div>
@@ -71,9 +72,10 @@ export function ValidateReport({
         {results.map((r) => (
           <li
             key={r.position}
-            className={`flex items-center gap-1.5 border px-1.5 py-0.5 ${
-              r.verdict === 'AC' ? 'border-line bg-surface-1' : 'border-clay bg-surface-2'
-            }`}
+            className={cn(
+              'flex items-center gap-1.5 border px-1.5 py-0.5',
+              r.verdict === 'AC' ? 'border-line bg-surface-1' : 'border-clay bg-surface-2',
+            )}
           >
             <span className="font-mono text-[11px] text-ink-5">#{r.position}</span>
             <VerdictBadge tone="soft" verdict={r.verdict} />
@@ -129,7 +131,7 @@ function FailedCase({
           />
         ) : got ? (
           <div>
-            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-[var(--label)] uppercase">
+            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-(--label) uppercase">
               Lời giải mẫu in ra
             </p>
             <pre className="max-h-32 overflow-auto border border-line bg-surface-1 p-2 font-mono text-xs whitespace-pre-wrap">
@@ -142,7 +144,7 @@ function FailedCase({
 
         {result.stderr ? (
           <div>
-            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-[var(--label)] uppercase">stderr</p>
+            <p className="mb-1 font-mono text-[10px] tracking-[0.14em] text-(--label) uppercase">stderr</p>
             <pre className="max-h-24 overflow-auto border border-line bg-surface-1 p-2 font-mono text-xs whitespace-pre-wrap text-clay">
               {result.stderr}
             </pre>

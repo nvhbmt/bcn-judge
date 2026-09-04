@@ -15,7 +15,8 @@
  * component này: chúng chia khung theo chiều cao và tự quản vùng cuộn của mình.
  */
 import type { ReactNode } from 'react'
+import { cn } from '@/lib/cn'
 
 export function PageContainer({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-5xl px-7 py-8 ${className}`}>{children}</div>
+  return <div className={cn('mx-auto w-full max-w-5xl px-7 py-8', className)}>{children}</div>
 }

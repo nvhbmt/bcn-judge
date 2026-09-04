@@ -1,5 +1,7 @@
 /**
- * Bộ UI tối giản tự viết (không kéo thư viện).
+ * Bộ UI tối giản tự viết — không kéo thư viện component nào. (Hai phụ thuộc duy nhất
+ * dính tới lớp này là `clsx` + `tailwind-merge`, và chúng chỉ ghép/giải xung đột chuỗi
+ * class chứ không dựng nên thành phần nào — xem src/lib/cn.ts.)
  *
  * Ba luật của hệ thiết kế được ép ở đây, vì đây là chỗ mọi màn hình đi qua:
  *   - bo góc 0 (ngoại lệ duy nhất: chấm trạng thái)
@@ -10,6 +12,7 @@
 import { Eye, EyeOff } from 'lucide-react'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { VERDICT_LABEL, type Verdict } from '@/types/api'
+import { cn } from '@/lib/cn'
 
 type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'quiet'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -17,16 +20,16 @@ type ButtonSize = 'sm' | 'md' | 'lg'
 /** `--moss-solid` chỉ tồn tại ở bản sáng; bản tối rơi về `--moss`. */
 const VARIANT: Record<ButtonVariant, string> = {
   primary:
-    'bg-[var(--moss-solid,var(--moss))] text-on-accent font-semibold uppercase hover:opacity-90',
+    'bg-(--moss-solid,var(--moss)) text-on-accent font-semibold uppercase hover:opacity-90',
   ghost: 'border border-line-strong text-ink-3 hover:bg-surface-sel',
   danger: 'bg-clay text-on-accent font-semibold uppercase hover:opacity-90',
   quiet: 'text-ink-5 hover:text-ink-3',
 }
 
 const SIZE: Record<ButtonSize, string> = {
-  sm: 'px-[11px] py-[5px] text-[12px]',
-  md: 'px-[14px] py-1.5 text-[13px]',
-  lg: 'px-4 py-[9px] text-[14px]',
+  sm: 'px-2.75 py-1.25 text-[12px]',
+  md: 'px-3.5 py-1.5 text-[13px]',
+  lg: 'px-4 py-2.25 text-[14px]',
 }
 
 /**
@@ -36,12 +39,18 @@ const SIZE: Record<ButtonSize, string> = {
  * sai, và mất luôn bấm-giữa-chuột, mở tab mới, copy địa chỉ. Trước đây mỗi trang tự
  * chép lại chuỗi class nên chúng trôi lệch nhau từng chút một.
  */
+/**
+ * Phần chung của MỌI nút. Tách thành hằng số vì `buttonClass` và `<Button>` đều cần
+ * đúng chuỗi này — chép làm hai bản là mở lại đúng cái cửa mà chú thích trên vừa đóng.
+ */
+const BUTTON_BASE =
+  'inline-flex items-center justify-center gap-2 rounded-none font-mono tracking-[0.06em] ' +
+  'transition-[background-color,color] duration-120 ease-linear ' +
+  'disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5 disabled:opacity-100 ' +
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss'
+
 export function buttonClass(variant: ButtonVariant = 'ghost', size: ButtonSize = 'md', extra = ''): string {
-  return `inline-flex items-center justify-center gap-2 rounded-none font-mono tracking-[0.06em]
-    transition-[background-color,color] duration-[120ms] ease-linear
-    disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5 disabled:opacity-100
-    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss
-    ${VARIANT[variant]} ${SIZE[size]} ${extra}`
+  return cn(BUTTON_BASE, VARIANT[variant], SIZE[size], extra)
 }
 
 export function Button({
@@ -53,11 +62,7 @@ export function Button({
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center gap-2 rounded-none font-mono tracking-[0.06em]
-        transition-[background-color,color] duration-[120ms] ease-linear
-        disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5 disabled:opacity-100
-        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss
-        ${VARIANT[variant]} ${SIZE[size]} ${className}`}
+      className={buttonClass(variant, size, className)}
     />
   )
 }
@@ -158,14 +163,14 @@ export function SectionRule({
       {/* `rule-label` / `rule-line`: bản SÁNG tô nhãn moss, đậm hơn, và kẻ dày 2px.
           Luật nằm ở src/index.css vì hai theme vẽ khác nhau chứ không chỉ đổi giá
           trị token — xem chú thích ở đó. */}
-      <Heading className="rule-label pr-3 font-mono text-[12px] font-normal tracking-[0.14em] text-[var(--label)] uppercase">
+      <Heading className="rule-label pr-3 font-mono text-[12px] font-normal tracking-[0.14em] text-(--label) uppercase">
         {label}
       </Heading>
       <div aria-hidden className="rule-line h-px flex-1 bg-line" />
       {meta ? (
         <div className="num pl-3 font-mono text-[12px] text-ink-5">{meta}</div>
       ) : (
-        <div aria-hidden className="h-1.5 w-[18px] bg-line-strong" />
+        <div aria-hidden className="h-1.5 w-4.5 bg-line-strong" />
       )}
     </div>
   )
@@ -191,7 +196,7 @@ export function PasswordEye({ shown, onToggle }: { shown: boolean; onToggle: () 
       aria-label={nhan}
       aria-pressed={shown}
       title={nhan}
-      className="inline-flex shrink-0 items-center justify-center p-1 text-ink-6 transition-colors duration-[120ms] ease-linear hover:text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+      className="inline-flex shrink-0 items-center justify-center p-1 text-ink-6 transition-colors duration-120 ease-linear hover:text-ink-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
     >
       {shown ? <EyeOff size={15} aria-hidden /> : <Eye size={15} aria-hidden />}
     </button>

@@ -14,6 +14,7 @@
  */
 import { useEffect, useState } from 'react'
 import { BcnLogo } from '@/components/BcnLogo'
+import { cn } from '@/lib/cn'
 
 type Health = 'checking' | 'up' | 'down'
 
@@ -27,7 +28,7 @@ function Line({ state, children }: { state: 'ok' | 'wait' | 'fail'; children: st
   const mark = state === 'ok' ? '[ok]' : state === 'wait' ? '[..]' : '[!!]'
   const color = state === 'ok' ? 'text-ink-5' : state === 'wait' ? 'text-moss' : 'text-clay'
   return (
-    <p className={`font-mono text-[13px] leading-[2] ${state === 'wait' ? 'text-moss' : 'text-ink-5'}`}>
+    <p className={cn('font-mono text-[13px] leading-loose', state === 'wait' ? 'text-moss' : 'text-ink-5')}>
       <span className={color}>{mark}</span>
       {'  '}
       {children}
@@ -53,19 +54,19 @@ export function SystemLog() {
 
   return (
     <div className="flex h-full flex-col justify-between overflow-hidden border-line px-14 py-12 md:border-r">
-      <p className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
-        <span aria-hidden className="size-[7px] rounded-full bg-moss-fill" />
+      <p className="flex items-center gap-2.5 font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">
+        <span aria-hidden className="size-1.75 rounded-full bg-moss-fill" />
         judge.bancongnghe.dev
       </p>
 
-      <div className="flex min-h-0 max-w-[620px] flex-col gap-9">
+      <div className="flex min-h-0 max-w-155 flex-col gap-9">
         <BcnLogo className="w-full text-ink-1" />
 
         <div className="flex flex-col gap-3.5">
           {/* Motif nhận diện, bản dài: đường kẻ chạy hết chiều ngang, khối đặc ở cuối. */}
           <div aria-hidden className="flex items-end">
             <div className="h-px flex-1 bg-line-strong" />
-            <div className="h-[9px] w-[26px] bg-moss-fill" />
+            <div className="h-2.25 w-6.5 bg-moss-fill" />
           </div>
 
           <div>

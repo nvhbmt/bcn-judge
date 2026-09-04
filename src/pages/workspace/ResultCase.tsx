@@ -13,6 +13,7 @@ import { VerdictBadge } from '@/components/ui'
 import type { ResultView, SampleIO } from '@/types/api'
 import { formatDuration, formatMemory } from './format'
 import { OutputDiff } from './OutputDiff'
+import { cn } from '@/lib/cn'
 
 export function ResultCase({
   result,
@@ -95,11 +96,12 @@ function Plain({
 function Field({ label, text, tone }: { label: string; text: string; tone?: 'wa' }) {
   return (
     <div className="border-t border-line px-2.5 py-1.5 first:border-t-0">
-      <p className={`font-mono text-[13px] ${tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-6'}`}>{label}</p>
+      <p className={cn('font-mono text-[13px]', tone === 'wa' ? 'text-wa' : 'text-ink-6')}>{label}</p>
       <pre
-        className={`mt-0.5 max-h-40 overflow-auto font-mono text-[13px] whitespace-pre ${
-          tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-3'
-        }`}
+        className={cn(
+          'mt-0.5 max-h-40 overflow-auto font-mono text-[13px] whitespace-pre',
+          tone === 'wa' ? 'text-wa' : 'text-ink-3',
+        )}
       >
         {text}
       </pre>

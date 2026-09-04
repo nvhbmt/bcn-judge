@@ -17,6 +17,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react'
 import { SplitPane } from './SplitPane'
+import { cn } from '@/lib/cn'
 
 export const NARROW_QUERY = '(max-width: 899px)'
 
@@ -119,11 +120,10 @@ export function Workspace({ rail, content, editor, contentLabel, storageKey, col
       // Roving tabindex: Tab đưa vào đúng tab đang chọn, mũi tên đi giữa hai tab (NFR-6).
       tabIndex={tab === k ? 0 : -1}
       data-testid={`workspace-tab-${k}`}
-      className={`flex-1 border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary ${
-        tab === k
-          ? 'border-primary text-primary'
-          : 'border-transparent text-ink-5 hover:text-ink-2'
-      }`}
+      className={cn(
+        'flex-1 border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary',
+        tab === k ? 'border-primary text-primary' : 'border-transparent text-ink-5 hover:text-ink-2',
+      )}
       onClick={() => setTab(k)}
     >
       {children}

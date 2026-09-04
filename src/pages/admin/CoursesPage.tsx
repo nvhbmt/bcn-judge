@@ -5,11 +5,12 @@ import { EmptyState, Spinner, buttonClass } from '@/components/ui'
 import { AdminShell } from './AdminShell'
 import { useAdminCourses } from './useAdminLists'
 import type { CourseStatus } from './types'
+import { cn } from '@/lib/cn'
 
 const STATUS: Record<CourseStatus, { label: string; className: string }> = {
   draft: { label: 'Nháp', className: 'bg-surface-sel text-ink-2' },
   open: { label: 'Đang mở', className: 'bg-surface-sel text-moss' },
-  archived: { label: 'Lưu trữ', className: 'bg-[var(--tint-earth)] text-earth' },
+  archived: { label: 'Lưu trữ', className: 'bg-(--tint-earth) text-earth' },
 }
 
 
@@ -39,11 +40,11 @@ export function AdminCoursesPage() {
               <span className="block truncate font-mono text-xs text-ink-5">{course.code}</span>
             </span>
 
-            <span className={` px-1.5 py-0.5 text-xs font-medium ${STATUS[course.status].className}`}>
+            <span className={cn('px-1.5 py-0.5 text-xs font-medium', STATUS[course.status].className)}>
               {STATUS[course.status].label}
             </span>
             {course.selfEnroll ? (
-              <span className="bg-[var(--color-primary-soft)] px-1.5 py-0.5 text-xs text-[var(--color-primary)]">
+              <span className="bg-primary-soft px-1.5 py-0.5 text-xs text-primary">
                 Tự ghi danh
               </span>
             ) : null}

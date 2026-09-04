@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { EmptyState, Spinner, buttonClass } from '@/components/ui'
 import { AdminShell } from './AdminShell'
 import { useAdminTeams } from './useAdminLists'
+import { cn } from '@/lib/cn'
 
 export function AdminTeamsPage() {
   const { data, isLoading } = useAdminTeams()
@@ -30,7 +31,7 @@ export function AdminTeamsPage() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-medium">{team.name}</span>
                 <span className="flex items-center gap-1 text-xs text-ink-5">
-                  <Crown size={12} className="text-[var(--color-tle)]" />
+                  <Crown size={12} className="text-tle" />
                   {team.leaderName}
                 </span>
               </span>
@@ -49,11 +50,12 @@ export function AdminTeamsPage() {
                 {team.members.map((m) => (
                   <li
                     key={m.id}
-                    className={`inline-flex items-center gap-1 border px-2 py-0.5 text-xs ${
-                      m.isLeader ? 'border-brass text-ink-2' : 'border-line text-ink-4'
-                    }`}
+                    className={cn(
+                      'inline-flex items-center gap-1 border px-2 py-0.5 text-xs',
+                      m.isLeader ? 'border-brass text-ink-2' : 'border-line text-ink-4',
+                    )}
                   >
-                    {m.isLeader ? <Crown size={10} className="text-[var(--color-tle)]" /> : null}
+                    {m.isLeader ? <Crown size={10} className="text-tle" /> : null}
                     {m.displayName}
                   </li>
                 ))}

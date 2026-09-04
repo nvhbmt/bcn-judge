@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom'
 import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
 import { Avatar } from '@/components/ui/patterns'
 import type { TeamSubmissionRow, TeamView } from './types'
+import { cn } from '@/lib/cn'
 
 const gio = (iso: string) =>
   new Date(iso).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })
@@ -30,7 +31,7 @@ export function MemberPicker({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0 border-b border-line">
-        <p className="px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">Thành viên</p>
+        <p className="px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">Thành viên</p>
         <nav aria-label="Chuyển thành viên" className="flex flex-col gap-px bg-line">
           {members.map((m) => {
             const dang = m.id === currentUserId
@@ -39,11 +40,10 @@ export function MemberPicker({
                 key={m.id}
                 to={`/team/thanh-vien/${m.id}`}
                 aria-current={dang ? 'page' : undefined}
-                className={`flex items-center gap-2.5 px-3.5 py-2 text-[13px] no-underline transition-colors duration-[120ms] ease-linear ${
-                  dang
-                    ? 'bg-[var(--color-primary-soft)] font-semibold text-ink-1 shadow-[inset_2px_0_0_var(--moss)]'
-                    : 'bg-surface-2 text-ink-3 hover:bg-surface-sel hover:text-ink-1'
-                }`}
+                className={cn(
+                  'flex items-center gap-2.5 px-3.5 py-2 text-[13px] no-underline transition-colors duration-120 ease-linear',
+                  dang ? 'bg-primary-soft font-semibold text-ink-1 shadow-[inset_2px_0_0_var(--moss)]' : 'bg-surface-2 text-ink-3 hover:bg-surface-sel hover:text-ink-1',
+                )}
               >
                 <Avatar name={m.displayName} size={22} chars={1} />
                 <span className="min-w-0 truncate">{m.displayName}</span>
@@ -56,7 +56,7 @@ export function MemberPicker({
         </nav>
       </div>
 
-      <p className="shrink-0 px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
+      <p className="shrink-0 px-3.5 py-2.5 font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">
         Bài nộp {submissions ? `· ${submissions.length}` : ''}
       </p>
 
@@ -77,9 +77,10 @@ export function MemberPicker({
                     type="button"
                     onClick={() => onPickSubmission(s.id)}
                     aria-current={dang ? 'true' : undefined}
-                    className={`flex w-full items-start gap-2.5 px-3.5 py-2 text-left transition-colors duration-[120ms] ease-linear ${
-                      dang ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]' : 'bg-surface-2 hover:bg-surface-sel'
-                    }`}
+                    className={cn(
+                      'flex w-full items-start gap-2.5 px-3.5 py-2 text-left transition-colors duration-120 ease-linear',
+                      dang ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]' : 'bg-surface-2 hover:bg-surface-sel',
+                    )}
                   >
                     {/* Tên bài là dòng CHÍNH: danh sách chỉ có verdict và giờ thì
                         leader không biết đang xem bài nào, mà đó là câu hỏi đầu tiên. */}

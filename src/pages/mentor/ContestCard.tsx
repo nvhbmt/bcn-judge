@@ -6,6 +6,7 @@ import { Button } from '@/components/ui'
 import { PHASE_CLASS, PHASE_LABEL, contestPhase } from './contestPhase'
 import { formatDateTime } from './mentorTime'
 import type { MentorContestRow } from './mentorTypes'
+import { cn } from '@/lib/cn'
 
 export function ContestCard({
   row,
@@ -23,13 +24,12 @@ export function ContestCard({
     <li className="border border-line bg-surface-2 p-3">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="min-w-0 flex-1 truncate font-display text-[16px] text-ink-1">{row.title}</h2>
-        <span className={`px-2 py-0.5 text-xs ${PHASE_CLASS[phase]}`}>{PHASE_LABEL[phase]}</span>
+        <span className={cn('px-2 py-0.5 text-xs', PHASE_CLASS[phase])}>{PHASE_LABEL[phase]}</span>
         <span
-          className={` px-1.5 py-0.5 text-xs ${
-            row.status === 'published'
-              ? 'bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
-              : 'bg-surface-sel text-ink-3'
-          }`}
+          className={cn(
+            'px-1.5 py-0.5 text-xs',
+            row.status === 'published' ? 'bg-primary-soft text-primary' : 'bg-surface-sel text-ink-3',
+          )}
         >
           {row.status === 'published' ? 'Đã xuất bản' : 'Nháp'}
         </span>

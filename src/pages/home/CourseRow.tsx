@@ -44,14 +44,14 @@ export function CourseRow({ course }: { course: CourseSummary }) {
   return (
     <Link
       to={`/khoa-hoc/${course.id}`}
-      className="grid grid-cols-[82px_1fr] items-center gap-4 bg-surface-2 px-[18px] py-4 transition-colors duration-[120ms] ease-linear hover:bg-surface-sel sm:grid-cols-[82px_1fr_180px_92px]"
+      className="grid grid-cols-[82px_1fr] items-center gap-4 bg-surface-2 px-4.5 py-4 transition-colors duration-120 ease-linear hover:bg-surface-sel sm:grid-cols-[82px_1fr_180px_92px]"
     >
       <span className="num font-mono text-[14px] text-moss">{course.code}</span>
 
       <span className="min-w-0">
         <span className="block truncate text-[17px] font-semibold text-ink-1">{course.name}</span>
         {data ? (
-          <span className="num mt-[3px] block truncate font-mono text-[12px] text-ink-5">
+          <span className="num mt-0.75 block truncate font-mono text-[12px] text-ink-5">
             {sections} chương · {total} bài
             {course.mentorName ? ` · mentor ${course.mentorName}` : ''}
           </span>

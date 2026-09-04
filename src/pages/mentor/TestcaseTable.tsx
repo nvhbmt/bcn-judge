@@ -13,6 +13,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { Notice, Select, TextArea, TextInput } from './fields'
 import { emptyDraft, sampleCount, utf8Bytes, type TestcaseDraft } from './testcases'
+import { cn } from '@/lib/cn'
 
 export function TestcaseTable({
   drafts,
@@ -54,9 +55,10 @@ export function TestcaseTable({
                trang thêm 160px. Hậu quả: mở tab Testcase là mọc ra một thanh cuộn
                TRANG chồng lên thanh cuộn của khung, đúng thứ bố cục `h-full` này
                không được phép có. */
-            className={`relative border p-2 ${
-              draft.truncated ? 'border-[var(--color-wa)] bg-[var(--tint-clay)]/50' : 'border-line'
-            }`}
+            className={cn(
+              'relative border p-2',
+              draft.truncated ? 'border-wa bg-(--tint-clay)/50' : 'border-line',
+            )}
           >
             <div className="mb-1.5 flex flex-wrap items-center gap-2 text-xs">
               <span className="font-mono font-semibold">#{index + 1}</span>
@@ -104,7 +106,7 @@ export function TestcaseTable({
             </div>
 
             {draft.truncated ? (
-              <p className="mb-1.5 text-xs text-[var(--color-wa)]">
+              <p className="mb-1.5 text-xs text-wa">
                 Máy chủ chỉ gửi về 2 KB đầu của testcase này nên không sửa tay được. Muốn đổi thì tải lại cả bộ
                 test bằng zip.
               </p>

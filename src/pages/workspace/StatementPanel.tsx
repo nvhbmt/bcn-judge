@@ -4,6 +4,7 @@ import { SectionRule } from '@/components/ui'
 import { StatStrip } from '@/components/ui/patterns'
 import { DIFFICULTY_LABEL } from '@/pages/mentor/types'
 import type { ProblemView } from '@/types/api'
+import { cn } from '@/lib/cn'
 
 /** Tab "Đề bài" (FR-D1): đề, mô tả input/output, ràng buộc, ví dụ, giới hạn. */
 export function StatementPanel({
@@ -50,9 +51,10 @@ export function StatementPanel({
                     '--chip-solid': DIFFICULTY_TINT[problem.difficulty]?.solid,
                   } as CSSProperties
                 }
-                className={`border px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.1em] uppercase ${
-                  DIFFICULTY_TINT[problem.difficulty] ? 'chip-do-kho' : 'border-line-strong text-ink-4'
-                }`}
+                className={cn(
+                  'border px-2 py-1 font-mono text-[10px] font-semibold tracking-widest uppercase',
+                  DIFFICULTY_TINT[problem.difficulty] ? 'chip-do-kho' : 'border-line-strong text-ink-4',
+                )}
               >
                 {DIFFICULTY_LABEL[problem.difficulty] ?? problem.difficulty}
               </span>
@@ -68,7 +70,7 @@ export function StatementPanel({
           trùng điểm vào với harness — và thông báo của trình biên dịch lúc đó rất
           khó hiểu với người mới. */}
       {problem.kind === 'function' ? (
-        <p className="border-l-2 border-earth bg-[var(--tint-earth)] px-3 py-2.5 text-[14px] text-ink-3">
+        <p className="border-l-2 border-earth bg-(--tint-earth) px-3 py-2.5 text-[14px] text-ink-3">
           Bài dạng <strong>hàm</strong>: chỉ viết đúng hàm theo mẫu có sẵn trong trình soạn thảo.{' '}
           <strong>Đừng viết hàm main</strong> — phần đọc dữ liệu và in kết quả đã có sẵn.
         </p>
@@ -160,7 +162,7 @@ function Section({ title, body }: { title: string; body: string }) {
 function IoBox({ label, text }: { label: string; text: string }) {
   return (
     <div className="overflow-hidden border border-line bg-surface-2">
-      <div className="border-b border-line bg-surface-1 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-[var(--label)] uppercase">
+      <div className="border-b border-line bg-surface-1 px-2 py-1 font-mono text-[10px] tracking-[0.14em] text-(--label) uppercase">
         {label}
       </div>
       <pre className="overflow-x-auto px-2 py-2 font-mono text-[13px] whitespace-pre-wrap text-ink-2">{text}</pre>

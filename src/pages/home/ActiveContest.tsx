@@ -15,6 +15,7 @@ import { SidePanel } from '@/components/ui/patterns'
 import { useCountdown } from '@/hooks/useCountdown'
 import { api } from '@/lib/api'
 import { hhmm } from './recent'
+import { cn } from '@/lib/cn'
 
 type Phase = 'sap-dien-ra' | 'dang-dien-ra' | 'da-ket-thuc'
 
@@ -67,7 +68,10 @@ export function ActiveContest() {
         <p className="text-[20px] font-semibold text-ink-1">{contest.title}</p>
       </Link>
 
-      <p className={`num mt-3 font-mono text-[42px] leading-none font-semibold tracking-[-0.02em] ${running ? 'text-earth' : 'text-ink-2'}`}>
+      <p className={cn(
+        'num mt-3 font-mono text-[42px] leading-none font-semibold tracking-[-0.02em]',
+        running ? 'text-earth' : 'text-ink-2',
+      )}>
         {left ?? '—'}
       </p>
 

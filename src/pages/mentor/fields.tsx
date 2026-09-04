@@ -8,6 +8,7 @@
  * `aria-describedby` nối gợi ý vào ô là lý do `Field` phải tự sinh id gợi ý.
  */
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
+import { cn } from '@/lib/cn'
 
 const CONTROL =
   'w-full border border-line-strong bg-surface-2 px-2 py-1.5 text-sm text-ink-2 ' +
@@ -40,11 +41,11 @@ export function Field({
 }
 
 export function TextInput({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`${CONTROL} ${className}`} />
+  return <input {...props} className={cn(CONTROL, className)} />
 }
 
 export function TextArea({ className = '', ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${CONTROL} font-mono ${className}`} />
+  return <textarea {...props} className={cn(CONTROL, 'font-mono', className)} />
 }
 
 /**
@@ -54,7 +55,7 @@ export function TextArea({ className = '', ...props }: TextareaHTMLAttributes<HT
  * dài ("Mọi vai trò") chạy sát vào nó và trông như bị cắt.
  */
 export function Select({ className = '', ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${CONTROL} pr-8 ${className}`} />
+  return <select {...props} className={cn(CONTROL, 'pr-8', className)} />
 }
 
 /** Băng lỗi/cảnh báo. `alert` cho lỗi (đọc ngay), `status` cho tin lành (đọc lịch sự). */
@@ -66,13 +67,13 @@ export function Notice({
   children: ReactNode
 }) {
   const style = {
-    error: 'bg-[var(--tint-clay)] text-[var(--color-wa)]',
-    warn: 'bg-[var(--tint-earth)] text-earth',
+    error: 'bg-(--tint-clay) text-wa',
+    warn: 'bg-(--tint-earth) text-earth',
     ok: 'bg-surface-sel text-moss',
     info: 'bg-surface-1 text-ink-3',
   }[tone]
   return (
-    <p role={tone === 'error' ? 'alert' : 'status'} className={` px-3 py-2 text-sm ${style}`}>
+    <p role={tone === 'error' ? 'alert' : 'status'} className={cn('px-3 py-2 text-sm', style)}>
       {children}
     </p>
   )
@@ -81,7 +82,7 @@ export function Notice({
 export function Section({ title, hint, children }: { title: string; hint?: ReactNode; children: ReactNode }) {
   return (
     <section className="mb-5 border border-line bg-surface-2 p-3">
-      <h2 className="mb-1 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{title}</h2>
+      <h2 className="mb-1 font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">{title}</h2>
       {hint ? <p className="mb-3 text-xs text-ink-5">{hint}</p> : <div className="mb-2" />}
       {children}
     </section>

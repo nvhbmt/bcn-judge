@@ -9,6 +9,7 @@
 import { useCallback, useRef, useState } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { DIVIDER_PX, clampByPx, useSplitRatio } from './SplitPane'
+import { cn } from '@/lib/cn'
 
 const KEY_STEP = 0.02
 
@@ -127,9 +128,10 @@ export function HSplit({
         tabIndex={collapsed ? -1 : 0}
         data-testid="hsplit-divider"
         data-dragging={dragging ? 'true' : undefined}
-        className={`split-handle-h relative bg-line transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary ${
-          dragging ? 'bg-primary/60' : ''
-        }`}
+        className={cn(
+          'split-handle-h relative bg-line transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary',
+          dragging && 'bg-primary/60',
+        )}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}

@@ -20,6 +20,7 @@ import { ContestStandings } from './contest/ContestStandings'
 import { useContestDetail } from './contest/useContestDetail'
 import { MyScore } from './contest/MyScore'
 import { hhmm } from './home/recent'
+import { cn } from '@/lib/cn'
 
 const PHASE_LABEL = {
   'sap-dien-ra': 'Sắp diễn ra',
@@ -67,7 +68,7 @@ export function ContestPage() {
         </Link>
 
         <p className="mb-2 flex items-center gap-2 font-mono text-[12px] tracking-[0.14em] text-ink-4 uppercase">
-          <span aria-hidden className={`size-[7px] rounded-full ${PHASE_DOT[data.phase]}`} />
+          <span aria-hidden className={cn('size-1.75 rounded-full', PHASE_DOT[data.phase])} />
           {PHASE_LABEL[data.phase]}
         </p>
         <h1 className="font-display text-[30px] text-ink-1">{data.title}</h1>
@@ -85,13 +86,17 @@ export function ContestPage() {
                 chuyện với con số bên cạnh, tách màu là tách nghĩa. */}
             <div className="flex flex-wrap items-baseline gap-4">
               <p
-                className={`shrink-0 font-mono text-[12px] font-semibold tracking-[0.14em] uppercase ${
-                  running ? 'text-earth' : 'text-[var(--label)]'
-                }`}
+                className={cn(
+                  'shrink-0 font-mono text-[12px] font-semibold tracking-[0.14em] uppercase',
+                  running ? 'text-earth' : 'text-(--label)',
+                )}
               >
                 {data.phase === 'sap-dien-ra' ? 'Bắt đầu sau' : 'Còn lại'}
               </p>
-              <p className={`num font-mono text-[52px] leading-none font-semibold tracking-[-0.03em] ${running ? 'text-earth' : 'text-ink-2'}`}>
+              <p className={cn(
+                'num font-mono text-[52px] leading-none font-semibold tracking-[-0.03em]',
+                running ? 'text-earth' : 'text-ink-2',
+              )}>
                 {remaining}
               </p>
             </div>
@@ -102,7 +107,7 @@ export function ContestPage() {
         ) : null}
 
         {data.phase === 'da-ket-thuc' ? (
-          <p className="mt-6 border-l-2 border-earth bg-[var(--tint-earth)] px-3 py-2 text-[13px] text-ink-3">
+          <p className="mt-6 border-l-2 border-earth bg-(--tint-earth) px-3 py-2 text-[13px] text-ink-3">
             Chế độ luyện tập — bài nộp vẫn được chấm nhưng không tính vào bảng xếp hạng.
           </p>
         ) : null}

@@ -61,7 +61,7 @@ export function EditorPane({
           để nó co giãn thì nội dung đẩy thanh editor cao hơn thanh bên trái vài
           pixel và cả màn hình trông như so le — đúng thứ biến chung này sinh ra để
           tránh. Nút trong thanh dùng cỡ `md` (đệm dọc 6px) nên 47px vẫn đủ chỗ. */}
-      <div className="flex h-[var(--panel-header-h)] shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
+      <div className="flex h-(--panel-header-h) shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
         <select
           aria-label="Ngôn ngữ"
           value={languageId}
@@ -91,7 +91,7 @@ export function EditorPane({
         <div className="ml-auto flex items-center gap-2">
           {/* FR-I6: chế độ luyện tập phải nói rõ, không để member tưởng còn tính điểm. */}
           {practiceMode ? (
-            <span className="bg-[var(--tint-earth)] px-2 py-0.5 text-xs text-earth">
+            <span className="bg-(--tint-earth) px-2 py-0.5 text-xs text-earth">
               Luyện tập — không tính BXH
             </span>
           ) : null}
@@ -107,7 +107,7 @@ export function EditorPane({
       </div>
 
       {error ? (
-        <p role="alert" className="shrink-0 bg-[var(--tint-clay)] px-3 py-1.5 text-xs text-[var(--color-wa)]">
+        <p role="alert" className="shrink-0 bg-(--tint-clay) px-3 py-1.5 text-xs text-wa">
           {error}
         </p>
       ) : null}

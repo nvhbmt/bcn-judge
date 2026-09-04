@@ -114,7 +114,7 @@ export function UserPicker({
                 onClick={() => onPick(user)}
                 className="shrink-0 border border-line-strong px-2 py-1 text-xs hover:bg-surface-sel
  disabled:cursor-not-allowed disabled:border-line disabled:text-ink-5 disabled:opacity-100 focus-visible:outline-2
- focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]"
+ focus-visible:outline-offset-1 focus-visible:outline-primary"
               >
                 {blocked.has(user.id) ? 'Đã có' : actionLabel}
               </button>

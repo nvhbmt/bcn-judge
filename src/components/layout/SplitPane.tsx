@@ -11,6 +11,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import { cn } from '@/lib/cn'
 
 /** Bề rộng vạch chia (px) — trừ ra khỏi phần chia được để phép kẹp tối thiểu là chính xác. */
 export const DIVIDER_PX = 8
@@ -191,9 +192,10 @@ export function SplitPane({
         tabIndex={collapsed ? -1 : 0}
         data-testid="split-divider"
         data-dragging={dragging ? 'true' : undefined}
-        className={`split-handle relative bg-line outline-offset-0 transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary ${
-          dragging ? 'bg-primary/60' : ''
-        }`}
+        className={cn(
+          'split-handle relative bg-line outline-offset-0 transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary',
+          dragging && 'bg-primary/60',
+        )}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}

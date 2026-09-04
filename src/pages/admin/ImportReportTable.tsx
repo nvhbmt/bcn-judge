@@ -9,6 +9,7 @@
 import { CheckCircle2, XCircle } from 'lucide-react'
 import type { ImportReport, ImportRow } from './types'
 import { CopyButton } from './ui'
+import { cn } from '@/lib/cn'
 
 const STATUS_LABEL: Record<string, string> = {
   created: 'Đã tạo',
@@ -28,10 +29,10 @@ export function ImportReportTable({ report }: { report: ImportReport }) {
   return (
     <div className="mt-4">
       <div className="mb-2 flex flex-wrap items-center gap-3 text-sm">
-        <span className="inline-flex items-center gap-1.5 text-[var(--color-ac)]">
+        <span className="inline-flex items-center gap-1.5 text-ac">
           <CheckCircle2 size={15} /> {report.created} tài khoản đã tạo
         </span>
-        <span className={`inline-flex items-center gap-1.5 ${report.failed > 0 ? 'text-[var(--color-wa)]' : 'text-ink-5'}`}>
+        <span className={cn('inline-flex items-center gap-1.5', report.failed > 0 ? 'text-wa' : 'text-ink-5')}>
           <XCircle size={15} /> {report.failed} dòng lỗi
         </span>
         <span className="ml-auto flex gap-2">
@@ -41,7 +42,7 @@ export function ImportReportTable({ report }: { report: ImportReport }) {
       </div>
 
       {createdRows.length > 0 ? (
-        <p className="mb-2 bg-[var(--tint-earth)] px-3 py-2 text-sm text-earth">
+        <p className="mb-2 bg-(--tint-earth) px-3 py-2 text-sm text-earth">
           <strong>Chép mật khẩu trước khi rời trang.</strong> Hệ thống không lưu bản rõ; muốn có lại phải đặt lại mật
           khẩu từng tài khoản.
         </p>
@@ -77,11 +78,10 @@ function ReportRow({ row }: { row: ImportRow }) {
       <td className="px-2 py-1.5 font-mono text-xs break-all">{row.email || '—'}</td>
       <td className="px-2 py-1.5">
         <span
-          className={` px-1.5 py-0.5 text-xs font-medium ${
-            created
-              ? 'bg-surface-sel text-moss'
-              : 'bg-[var(--tint-clay)] text-clay'
-          }`}
+          className={cn(
+            'px-1.5 py-0.5 text-xs font-medium',
+            created ? 'bg-surface-sel text-moss' : 'bg-(--tint-clay) text-clay',
+          )}
         >
           {STATUS_LABEL[row.status] ?? row.status}
         </span>

@@ -43,9 +43,9 @@ export function AdminNav() {
               end={to === "/quan-tri"}
               className={({ isActive }) =>
                 `-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 py-2 text-sm transition
-                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] ${
+                 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                    isActive
-                     ? "border-[var(--color-primary)] font-medium text-[var(--color-primary)]"
+                     ? "border-primary font-medium text-primary"
                      : "border-transparent text-ink-5 hover:text-ink-2"
                  }`
               }

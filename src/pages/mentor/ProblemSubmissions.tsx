@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { EmptyState, Spinner, VerdictBadge } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { Verdict } from '@/types/api'
+import { cn } from '@/lib/cn'
 
 interface Row {
   id: string
@@ -62,11 +63,10 @@ export function ProblemSubmissions({
                 type="button"
                 onClick={() => onSelect(r.id)}
                 aria-current={r.id === selectedId ? 'true' : undefined}
-                className={`flex w-full items-center gap-3 px-3.5 py-2 text-left text-[13px] transition-colors duration-[120ms] ease-linear ${
-                  r.id === selectedId
-                    ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]'
-                    : 'bg-surface-2 hover:bg-surface-sel'
-                }`}
+                className={cn(
+                  'flex w-full items-center gap-3 px-3.5 py-2 text-left text-[13px] transition-colors duration-120 ease-linear',
+                  r.id === selectedId ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]' : 'bg-surface-2 hover:bg-surface-sel',
+                )}
               >
                 <span className="min-w-0 flex-1 truncate text-ink-2">{r.displayName}</span>
                 <VerdictBadge tone="soft" verdict={r.verdict} />

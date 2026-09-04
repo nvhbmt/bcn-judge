@@ -3,6 +3,7 @@ import { BookText, Check, CircleDot, Circle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
+import { cn } from '@/lib/cn'
 
 export interface SyllabusItem {
   id: string
@@ -44,11 +45,10 @@ export function SyllabusPanel({ courseId, currentItemId }: { courseId: string; c
                 <Link
                   to={`/khoa-hoc/${courseId}/bai/${item.id}`}
                   aria-current={item.id === currentItemId ? 'page' : undefined}
-                  className={`flex items-center gap-2  px-2 py-1.5 text-sm ${
-                    item.id === currentItemId
-                      ? 'bg-[var(--color-primary-soft)] font-medium'
-                      : 'hover:bg-surface-sel'
-                  }`}
+                  className={cn(
+                    'flex items-center gap-2 px-2 py-1.5 text-sm',
+                    item.id === currentItemId ? 'bg-primary-soft font-medium' : 'hover:bg-surface-sel',
+                  )}
                 >
                   <StatusIcon item={item} />
                   <span className="truncate">{item.title}</span>
@@ -67,8 +67,8 @@ export function SyllabusPanel({ courseId, currentItemId }: { courseId: string; c
 
 function StatusIcon({ item }: { item: SyllabusItem }) {
   if (item.kind === 'lesson') return <BookText size={15} className="shrink-0 text-ink-6" aria-label="Bài đọc" />
-  if (item.status === 'da-ac') return <Check size={15} className="shrink-0 text-[var(--color-ac)]" aria-label="Đã AC" />
+  if (item.status === 'da-ac') return <Check size={15} className="shrink-0 text-ac" aria-label="Đã AC" />
   if (item.status === 'da-thu')
-    return <CircleDot size={15} className="shrink-0 text-[var(--color-tle)]" aria-label="Đã thử" />
+    return <CircleDot size={15} className="shrink-0 text-tle" aria-label="Đã thử" />
   return <Circle size={15} className="shrink-0 text-ink-6" aria-label="Chưa làm" />
 }

@@ -27,6 +27,7 @@ import { ProblemForm } from './ProblemForm'
 import { StatementPreview } from './StatementPreview'
 import { TestcasePanel } from './TestcasePanel'
 import type { MentorProblemDetail, ProblemDetailMeta } from './types'
+import { cn } from '@/lib/cn'
 
 export function ProblemEditorPage() {
   const { problemId } = useParams()
@@ -195,11 +196,10 @@ function EditorTab({
       aria-selected={active === id}
       aria-controls={`panel-${id}`}
       onClick={() => onTab(id)}
-      className={`px-3 py-1.5 text-sm font-medium ${
-        active === id
-          ? 'bg-surface-1 shadow-[inset_0_-2px_0_var(--color-primary)]'
-          : 'text-ink-5'
-      }`}
+      className={cn(
+        'px-3 py-1.5 text-sm font-medium',
+        active === id ? 'bg-surface-1 shadow-[inset_0_-2px_0_var(--color-primary)]' : 'text-ink-5',
+      )}
     >
       {children}
     </button>

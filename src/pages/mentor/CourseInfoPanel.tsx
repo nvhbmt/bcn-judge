@@ -59,7 +59,7 @@ export function CourseInfoPanel({
 
       <p className="mb-4 text-xs text-ink-5">
         Mã, tên, trạng thái và quyền tự ghi danh do admin đặt ở{' '}
-        <Link to="/quan-tri/khoa-hoc" className="text-[var(--color-primary)] hover:underline">
+        <Link to="/quan-tri/khoa-hoc" className="text-primary hover:underline">
           Quản trị · Khoá học
         </Link>
         . Ở đây bạn sửa mô tả và soạn giáo trình.

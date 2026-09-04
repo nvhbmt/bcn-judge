@@ -26,13 +26,13 @@ export function DiscordLogin() {
     <>
       <div className="my-7 flex items-center gap-3">
         <span className="h-px flex-1 bg-line" />
-        <span className="font-mono text-[11px] tracking-[0.1em] text-[var(--label)] uppercase">hoặc</span>
+        <span className="font-mono text-[11px] tracking-widest text-(--label) uppercase">hoặc</span>
         <span className="h-px flex-1 bg-line" />
       </div>
 
       <a
         href="/auth/discord"
-        className="flex w-full items-center justify-center gap-2.5 border border-line-strong px-4 py-3.5 font-mono text-[15px] text-ink-2 transition-colors duration-[120ms] ease-linear hover:border-moss hover:text-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+        className="flex w-full items-center justify-center gap-2.5 border border-line-strong px-4 py-3.5 font-mono text-[15px] text-ink-2 transition-colors duration-120 ease-linear hover:border-moss hover:text-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
       >
         <DiscordMark />
         Đăng nhập bằng Discord

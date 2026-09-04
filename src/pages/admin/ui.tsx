@@ -7,10 +7,11 @@ import { Check, Copy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import type { FailureNotice } from './conflicts'
+import { cn } from '@/lib/cn'
 
 const CONTROL =
   'w-full border border-line-strong bg-surface-2 px-2.5 py-1.5 text-sm ' +
-  'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)] ' +
+  'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary ' +
   'disabled:cursor-not-allowed disabled:bg-surface-1 disabled:text-ink-5 disabled:opacity-100'
 
 export function Field({ label, hint, children }: { label: string; hint?: ReactNode; children: ReactNode }) {
@@ -24,11 +25,11 @@ export function Field({ label, hint, children }: { label: string; hint?: ReactNo
 }
 
 export function TextInput({ className = '', ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={`${CONTROL} ${className}`} />
+  return <input {...props} className={cn(CONTROL, className)} />
 }
 
 export function TextArea({ className = '', ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${CONTROL} font-mono ${className}`} />
+  return <textarea {...props} className={cn(CONTROL, 'font-mono', className)} />
 }
 
 /**
@@ -38,14 +39,14 @@ export function TextArea({ className = '', ...props }: TextareaHTMLAttributes<HT
  * dài ("Mọi vai trò") chạy sát vào nó và trông như bị cắt.
  */
 export function Select({ className = '', ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${CONTROL} pr-8 ${className}`} />
+  return <select {...props} className={cn(CONTROL, 'pr-8', className)} />
 }
 
 export function Card({ title, actions, children }: { title: string; actions?: ReactNode; children: ReactNode }) {
   return (
     <section className="mb-5 border border-line bg-surface-2 p-4">
       <div className="mb-3 flex items-center gap-2">
-        <h2 className="font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{title}</h2>
+        <h2 className="font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">{title}</h2>
         {actions ? <div className="ml-auto flex items-center gap-2">{actions}</div> : null}
       </div>
       {children}
@@ -57,8 +58,8 @@ export function Card({ title, actions, children }: { title: string; actions?: Re
 export function FailureBanner({ notice }: { notice: FailureNotice | null }) {
   if (!notice) return null
   return (
-    <p role="alert" className="mb-3 bg-[var(--tint-clay)] px-3 py-2 text-sm">
-      <span className="font-medium text-[var(--color-wa)]">{notice.message}</span>
+    <p role="alert" className="mb-3 bg-(--tint-clay) px-3 py-2 text-sm">
+      <span className="font-medium text-wa">{notice.message}</span>
       {notice.nextStep ? (
         <span className="mt-1 block text-ink-3">{notice.nextStep}</span>
       ) : null}
@@ -105,9 +106,9 @@ export function CopyButton({ value, label = 'Chép' }: { value: string; label?: 
       onClick={() => void copy()}
       className="inline-flex items-center gap-1 border border-line-strong px-2 py-1 text-xs
  hover:bg-surface-sel focus-visible:outline-2 focus-visible:outline-offset-1
- focus-visible:outline-[var(--color-primary)]"
+ focus-visible:outline-primary"
     >
-      {done ? <Check size={13} className="text-[var(--color-ac)]" /> : <Copy size={13} />}
+      {done ? <Check size={13} className="text-ac" /> : <Copy size={13} />}
       {done ? 'Đã chép' : label}
     </button>
   )

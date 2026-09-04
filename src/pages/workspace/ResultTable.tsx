@@ -19,6 +19,7 @@ import type { ResultView, SampleIO, SubmissionView } from '@/types/api'
 import { VERDICT_LABEL } from '@/types/api'
 import { formatDuration, formatMemory } from './format'
 import { ResultCase } from './ResultCase'
+import { cn } from '@/lib/cn'
 
 export function ResultTable({
   submission,
@@ -36,8 +37,8 @@ export function ResultTable({
   if (submission.compileOutput) {
     return (
       <div>
-        <p className="mb-1 text-xs font-medium text-[var(--color-wa)]">Lỗi biên dịch</p>
-        <pre className="max-h-60 overflow-auto border border-line bg-[var(--surface-code)] p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
+        <p className="mb-1 text-xs font-medium text-wa">Lỗi biên dịch</p>
+        <pre className="max-h-60 overflow-auto border border-line bg-surface-code p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
           {submission.compileOutput}
         </pre>
       </div>
@@ -167,9 +168,11 @@ function Chip({
       }}
       // Nét đứt cho test ẩn: khác biệt này có thật (bấm vào không có gì để so) nên nói
       // trước ở chip, đỡ hơn để người ta bấm vào rồi mới biết.
-      className={`num border px-2 py-0.5 font-mono text-[13px] transition-colors duration-[120ms] ease-linear ${
-        result.isSample ? '' : 'border-dashed'
-      } ${selected ? 'font-semibold' : 'hover:bg-surface-sel'}`}
+      className={cn(
+        'num border px-2 py-0.5 font-mono text-[13px] transition-colors duration-120 ease-linear',
+        result.isSample ? '' : 'border-dashed',
+        selected ? 'font-semibold' : 'hover:bg-surface-sel',
+      )}
     >
       {/* Không chỉ dựa vào màu: dấu ✓/✗ đọc được cả khi không phân biệt được màu. */}
       {ok ? '✓' : '✗'} {result.position}

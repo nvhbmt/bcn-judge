@@ -15,6 +15,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
+import { cn } from '@/lib/cn'
 
 interface TeamStandingRow {
   rank: number
@@ -59,14 +60,20 @@ export function TeamStandings() {
         {data.map((row) => (
           <tr
             key={row.id}
-            className={`border-b border-line ${row.isMine ? 'bg-[var(--primary-soft)] shadow-[inset_2px_0_0_var(--moss)]' : ''}`}
+            className={cn(
+              'border-b border-line',
+              row.isMine && 'bg-primary-soft shadow-[inset_2px_0_0_var(--moss)]',
+            )}
           >
-            <td className={`num px-2.5 py-2 font-mono text-[13px] ${row.isMine ? 'text-moss' : 'text-ink-5'}`}>
+            <td className={cn('num px-2.5 py-2 font-mono text-[13px]', row.isMine ? 'text-moss' : 'text-ink-5')}>
               {row.rank}
             </td>
             <td
               title={row.name}
-              className={`max-w-0 truncate px-2.5 py-2 text-[13px] ${row.isMine ? 'font-semibold text-ink-1' : 'text-ink-2'}`}
+              className={cn(
+                'max-w-0 truncate px-2.5 py-2 text-[13px]',
+                row.isMine ? 'font-semibold text-ink-1' : 'text-ink-2',
+              )}
             >
               {row.name}
               {/* Tổng điểm chứ không phải trung bình, nên số người phải hiện: team
@@ -74,7 +81,10 @@ export function TeamStandings() {
               <span className="num ml-1.5 font-mono text-[11px] text-ink-6">{row.memberCount} người</span>
             </td>
             <td className="num px-2.5 py-2 text-right font-mono text-[13px] text-ink-3">{row.acCount}</td>
-            <td className={`num px-2.5 py-2 text-right font-mono text-[13px] ${row.isMine ? 'text-ink-1' : 'text-ink-4'}`}>
+            <td className={cn(
+              'num px-2.5 py-2 text-right font-mono text-[13px]',
+              row.isMine ? 'text-ink-1' : 'text-ink-4',
+            )}>
               {row.totalPoints}
             </td>
           </tr>

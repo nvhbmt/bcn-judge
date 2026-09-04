@@ -69,7 +69,7 @@ export function ResumeCard() {
   return (
     <section className="mb-8 flex items-center gap-5 border border-line-strong bg-surface-2 p-5">
       <div className="min-w-0 flex-1">
-        <h2 className="font-mono text-[12px] font-normal tracking-[0.1em] text-moss uppercase">Làm tiếp dở dang</h2>
+        <h2 className="font-mono text-[12px] font-normal tracking-widest text-moss uppercase">Làm tiếp dở dang</h2>
         <p className="mt-2 truncate text-[20px] font-semibold text-ink-1">{row.problemTitle}</p>
         <p className="num mt-1.5 truncate font-mono text-[14px] text-ink-4">
           {meta.length > 0 ? `${meta.join(' · ')} · ` : ''}
@@ -88,7 +88,7 @@ export function ResumeCard() {
       </div>
       <Link
         to={href}
-        className="flex shrink-0 items-center gap-2.5 bg-[var(--moss-solid,var(--moss))] px-5 py-3 font-mono text-[14px] font-semibold text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+        className="flex shrink-0 items-center gap-2.5 bg-(--moss-solid,var(--moss)) px-5 py-3 font-mono text-[14px] font-semibold text-on-accent uppercase transition-opacity duration-120 ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
       >
         Làm tiếp <span aria-hidden>→</span>
       </Link>

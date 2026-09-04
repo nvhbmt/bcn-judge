@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { Avatar } from '@/components/ui/patterns'
 import { currentTheme, toggleTheme, type Theme } from '@/lib/theme'
 import { useAuth } from '@/stores/auth'
+import { cn } from '@/lib/cn'
 
 export function UserMenu() {
   const { me, logout } = useAuth()
@@ -83,15 +84,16 @@ export function UserMenu() {
             setOpen(true)
           }
         }}
-        className={`flex items-center gap-2 border px-1.5 py-1 transition-colors duration-[120ms] ease-linear ${
-          open ? 'border-line bg-surface-code' : 'border-transparent hover:border-line hover:bg-surface-code'
-        }`}
+        className={cn(
+          'flex items-center gap-2 border px-1.5 py-1 transition-colors duration-120 ease-linear',
+          open ? 'border-line bg-surface-code' : 'border-transparent hover:border-line hover:bg-surface-code',
+        )}
       >
         <Avatar name={me.displayName} chars={1} src={me.avatarUrl} />
-        <span className="hidden max-w-[10rem] truncate font-mono text-[13px] text-ink-2 sm:inline">
+        <span className="hidden max-w-40 truncate font-mono text-[13px] text-ink-2 sm:inline">
           {me.displayName}
         </span>
-        <ChevronDown size={13} className={`text-ink-5 ${open ? 'rotate-180' : ''}`} aria-hidden />
+        <ChevronDown size={13} className={cn('text-ink-5', open && 'rotate-180')} aria-hidden />
       </button>
 
       {open ? (
@@ -168,7 +170,7 @@ function MenuItem({
       type="button"
       role="menuitem"
       onClick={onClick}
-      className="flex w-full items-center gap-2.5 px-3 py-2 text-left font-mono text-[13px] text-ink-3 transition-colors duration-[120ms] ease-linear hover:bg-surface-sel hover:text-ink-1 focus-visible:bg-surface-sel focus-visible:text-ink-1"
+      className="flex w-full items-center gap-2.5 px-3 py-2 text-left font-mono text-[13px] text-ink-3 transition-colors duration-120 ease-linear hover:bg-surface-sel hover:text-ink-1 focus-visible:bg-surface-sel focus-visible:text-ink-1"
     >
       <span aria-hidden className="text-ink-5">
         {icon}

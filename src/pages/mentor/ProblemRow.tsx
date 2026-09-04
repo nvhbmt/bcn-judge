@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom'
 import { Row } from '@/components/ui/patterns'
 import { ValidationBadge, validationState } from './badges'
 import { DIFFICULTY_LABEL, isValidated, type MentorProblemRow } from './types'
+import { cn } from '@/lib/cn'
 
 /** Lưới cột lấy đúng từ bản vẽ; `RowHead` ở trang cha dùng lại hằng số này. */
 export const PROBLEM_COLS = '1fr 140px 108px 96px 116px 96px'
@@ -39,7 +40,7 @@ export function ProblemRow({ row, courseCode }: { row: MentorProblemRow; courseC
         >
           {row.title}
         </Link>
-        <span className={`mt-0.5 block truncate font-mono text-[12px] ${canhBao ? 'text-earth' : 'text-ink-6'}`}>
+        <span className={cn('mt-0.5 block truncate font-mono text-[12px]', canhBao ? 'text-earth' : 'text-ink-6')}>
           {canhBao ?? (tags.length > 0 ? tags.join(' · ') : '—')}
         </span>
       </span>

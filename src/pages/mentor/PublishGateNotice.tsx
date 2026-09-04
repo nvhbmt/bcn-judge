@@ -2,6 +2,7 @@
 import { AlertTriangle, ShieldAlert } from 'lucide-react'
 import { Button } from '@/components/ui'
 import type { PublishGate } from './publishGate'
+import { cn } from '@/lib/cn'
 
 /**
  * Nút "Vẫn xuất bản" chỉ mọc khi `gate.canConfirm` — tức đúng mã mềm
@@ -24,11 +25,10 @@ export function PublishGateNotice({
   return (
     <div
       role="alert"
-      className={`mt-2  px-3 py-2 text-sm ${
-        soft
-          ? 'bg-[var(--tint-earth)] text-earth'
-          : 'bg-[var(--tint-clay)] text-[var(--color-wa)]'
-      }`}
+      className={cn(
+        'mt-2 px-3 py-2 text-sm',
+        soft ? 'bg-(--tint-earth) text-earth' : 'bg-(--tint-clay) text-wa',
+      )}
     >
       <p className="flex items-start gap-2">
         {soft ? <AlertTriangle size={15} className="mt-0.5 shrink-0" /> : <ShieldAlert size={15} className="mt-0.5 shrink-0" />}

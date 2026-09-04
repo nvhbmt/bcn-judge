@@ -13,6 +13,7 @@
  * là đủ mà không phải nới lỏng cái cổng đó.
  */
 import { diffOutput, showWhitespace, type DiffLine } from './diff'
+import { cn } from '@/lib/cn'
 
 const GRID = '2.25rem 1fr 1fr'
 
@@ -47,7 +48,7 @@ export function OutputDiff({
     // với người dùng trình đọc màn hình cũng như với test tự động.
     <div role="group" aria-label={`So output testcase mẫu #${position}`} className="border border-line bg-surface-2">
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-2.5 py-1.5">
-        <span className="font-mono text-[12px] text-[var(--color-wa)]">
+        <span className="font-mono text-[12px] text-wa">
           {d.firstDiff !== null
             ? `khác từ dòng ${d.firstDiff}`
             : d.trailingNewlineOnly
@@ -67,7 +68,7 @@ export function OutputDiff({
       ) : null}
 
       <div className="overflow-x-auto">
-        <div className="min-w-[22rem]">
+        <div className="min-w-88">
           <div
             className="grid gap-x-2 border-b border-line px-2.5 py-1 font-mono text-[12px] text-ink-6"
             style={{ gridTemplateColumns: GRID }}
@@ -93,14 +94,14 @@ export function OutputDiff({
 }
 
 function Note({ children }: { children: string }) {
-  return <span className="bg-[var(--tint-earth)] px-1.5 py-0.5 font-mono text-[12px] text-earth">{children}</span>
+  return <span className="bg-(--tint-earth) px-1.5 py-0.5 font-mono text-[12px] text-earth">{children}</span>
 }
 
 function Line({ line }: { line: DiffLine }) {
   const same = line.gotSpan === null && line.wantSpan === null && line.got === line.want
   return (
     <div
-      className={`grid gap-x-2 px-2.5 py-px font-mono text-[13px] ${same ? 'text-ink-5' : 'text-ink-2'}`}
+      className={cn('grid gap-x-2 px-2.5 py-px font-mono text-[13px]', same ? 'text-ink-5' : 'text-ink-2')}
       style={{ gridTemplateColumns: GRID }}
     >
       <span className="num text-right text-[12px] text-ink-6">{line.n}</span>
@@ -128,7 +129,7 @@ function Cell({ text, span, tint }: { text: string | null; span: [number, number
     return (
       <span className="break-all whitespace-pre-wrap">
         {text.slice(0, a)}
-        <span className="inline-block h-[1.1em] w-0 translate-y-[0.2em] border-l-2 border-[var(--color-wa)]" />
+        <span className="inline-block h-[1.1em] w-0 translate-y-[0.2em] border-l-2 border-wa" />
         <span className="sr-only"> (thiếu ký tự ở đây) </span>
         {text.slice(b)}
       </span>

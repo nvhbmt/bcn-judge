@@ -22,6 +22,7 @@ import { useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui'
 import { api, ApiFailure } from '@/lib/api'
 import { Notice, TextInput } from './fields'
+import { cn } from '@/lib/cn'
 
 export interface ZipImportResult {
   count: number
@@ -113,9 +114,10 @@ export function TestcaseZipForm({
           id={fileId}
           type="file"
           accept=".zip,application/zip"
-          className={`w-full text-sm file:mr-3 file:border-0 file:bg-surface-sel file:px-3 file:py-1.5 file:text-sm ${
-            file ? 'sr-only' : 'mb-3'
-          }`}
+          className={cn(
+            'w-full text-sm file:mr-3 file:border-0 file:bg-surface-sel file:px-3 file:py-1.5 file:text-sm',
+            file ? 'sr-only' : 'mb-3',
+          )}
           onChange={(e) => {
             setFile(e.target.files?.[0] ?? null)
             setError(null)

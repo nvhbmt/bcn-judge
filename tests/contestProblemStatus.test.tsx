@@ -57,7 +57,9 @@ describe('trạng thái nộp của từng bài', () => {
   it('chưa nộp thì ĐỎ', async () => {
     ve()
     await waitFor(() => expect(screen.getByText('chưa nộp')).toBeInTheDocument())
-    expect(mau(screen.getByText('chưa nộp'))).toContain('--color-wa')
+    // `text-wa` chứ không phải `--color-wa`: @theme đã khai --color-wa nên có class
+    // mang tên, và class tên là thứ đọc ra được ở chỗ gọi. Cùng một màu.
+    expect(mau(screen.getByText('chưa nộp'))).toContain('text-wa')
   })
 
   it('đã nộp thì XANH', async () => {

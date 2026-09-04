@@ -36,7 +36,7 @@ function PromptInput({
   return (
     <div className="mb-7">
       <label
-        className="mb-2 block font-mono text-[11px] tracking-[0.1em] text-ink-5 uppercase"
+        className="mb-2 block font-mono text-[11px] tracking-widest text-ink-5 uppercase"
         htmlFor={id}
       >
         {label}
@@ -89,7 +89,7 @@ export function LoginPage() {
 
       <div className="flex flex-col justify-center bg-surface-1 px-12 py-14">
         <form onSubmit={onSubmit} className="w-full">
-          <p className="mb-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
+          <p className="mb-2.5 font-mono text-[11px] tracking-[0.14em] text-(--label) uppercase">
             Đăng nhập
           </p>
           <h1 className="mb-2 font-display text-[28px] text-ink-1">
@@ -126,7 +126,7 @@ export function LoginPage() {
           {discordLoi ? (
             <p
               role="alert"
-              className="mb-5 border-l-2 border-clay bg-[var(--tint-clay)] px-3 py-2 text-[13px] text-ink-3"
+              className="mb-5 border-l-2 border-clay bg-(--tint-clay) px-3 py-2 text-[13px] text-ink-3"
             >
               {discordLoi}
             </p>
@@ -135,7 +135,7 @@ export function LoginPage() {
           {error ? (
             <p
               role="alert"
-              className="mb-5 border-l-2 border-clay bg-[var(--tint-clay)] px-3 py-2 text-[13px] text-ink-3"
+              className="mb-5 border-l-2 border-clay bg-(--tint-clay) px-3 py-2 text-[13px] text-ink-3"
             >
               {error}
             </p>
@@ -146,7 +146,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={busy}
-            className="flex w-full items-center justify-center gap-2.5 bg-[var(--moss-solid,var(--moss))] px-4 py-4 font-mono text-[15px] font-semibold tracking-[0.04em] text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5"
+            className="flex w-full items-center justify-center gap-2.5 bg-(--moss-solid,var(--moss)) px-4 py-4 font-mono text-[15px] font-semibold tracking-[0.04em] text-on-accent uppercase transition-opacity duration-120 ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5"
           >
             {busy ? "Đang đăng nhập…" : "Đăng nhập"}
             {busy ? null : (

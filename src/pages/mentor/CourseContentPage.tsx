@@ -92,13 +92,13 @@ export function CourseContentPage() {
         <span className="font-mono text-xs text-ink-6">{course.code}</span>
         <Link
           to={`/mentor/khoa-hoc/${courseId}/bai-nop`}
-          className="ml-auto text-sm text-[var(--color-primary)] hover:underline"
+          className="ml-auto text-sm text-primary hover:underline"
         >
           Bài nộp của học viên
         </Link>
         <Link
           to={`/khoa-hoc/${courseId}`}
-          className="text-sm text-[var(--color-primary)] hover:underline"
+          className="text-sm text-primary hover:underline"
         >
           Xem như member
         </Link>

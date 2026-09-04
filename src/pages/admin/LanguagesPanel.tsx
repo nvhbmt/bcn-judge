@@ -15,6 +15,7 @@ import { toLanguagePayload } from './languagePayload'
 import { LANGUAGES_KEY, useAdminLanguages } from './useAdminLists'
 import type { Language } from './types'
 import { FailureBanner } from './ui'
+import { cn } from '@/lib/cn'
 
 export function LanguagesPanel() {
   const client = useQueryClient()
@@ -54,12 +55,10 @@ export function LanguagesPanel() {
                   checked={lang.enabled}
                   disabled={toggle.isPending}
                   onChange={() => toggle.mutate(lang)}
-                  className="size-5 accent-[var(--color-primary)]"
+                  className="size-5 accent-primary"
                 />
                 <span
-                  className={`text-xs font-semibold ${
-                    lang.enabled ? 'text-[var(--color-ac)]' : 'text-ink-6'
-                  }`}
+                  className={cn('text-xs font-semibold', lang.enabled ? 'text-ac' : 'text-ink-6')}
                 >
                   {lang.enabled ? 'Đang bật' : 'Đang tắt'}
                 </span>

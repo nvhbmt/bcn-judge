@@ -37,7 +37,7 @@ function RowButton({
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="grid size-7 shrink-0 place-items-center text-ink-5 transition-colors duration-[120ms] ease-linear
+      className="grid size-7 shrink-0 place-items-center text-ink-5 transition-colors duration-120 ease-linear
                  hover:bg-surface-sel hover:text-ink-2 disabled:cursor-not-allowed disabled:text-line-strong
                  disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-1
                  focus-visible:outline-moss"
@@ -111,7 +111,7 @@ export function ContestProblemRow({
           to={`/mentor/bai-tap/${draft.problemId}`}
           title="Sửa nội dung bài (đề, testcase)"
           aria-label={`Sửa nội dung bài ${draft.title}`}
-          className="grid size-7 shrink-0 place-items-center text-ink-5 transition-colors duration-[120ms]
+          className="grid size-7 shrink-0 place-items-center text-ink-5 transition-colors duration-120
                      ease-linear hover:bg-surface-sel hover:text-ink-2 focus-visible:outline-2
                      focus-visible:outline-offset-1 focus-visible:outline-moss"
         >

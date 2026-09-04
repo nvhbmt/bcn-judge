@@ -16,6 +16,7 @@ import { describeFailure, type FailureNotice } from './conflicts'
 import type { AdminTeam } from './types'
 import { FailureBanner, SuccessNote } from './ui'
 import { UserPicker } from './UserPicker'
+import { cn } from '@/lib/cn'
 
 type Op = 'add' | 'remove' | 'leader'
 
@@ -80,7 +81,7 @@ export function TeamDetail({ team }: { team: AdminTeam }) {
       <SuccessNote>{done}</SuccessNote>
 
       <p className="mb-3 text-sm text-ink-5">
-        <Crown size={13} className="mr-1 inline text-[var(--color-tle)]" />
+        <Crown size={13} className="mr-1 inline text-tle" />
         Leader hiện tại: <strong className="font-medium text-ink-2">{team.leaderName}</strong> ·{' '}
         {team.memberCount} thành viên.
       </p>
@@ -98,12 +99,10 @@ export function TeamDetail({ team }: { team: AdminTeam }) {
               setDone(null)
               setNotice(null)
             }}
-            className={`inline-flex items-center gap-1  px-2.5 py-1 text-xs font-medium transition
-              focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)] ${
-                op === kind
-                  ? 'bg-[var(--color-primary)] text-on-accent'
-                  : 'border border-line-strong hover:bg-surface-sel'
-              }`}
+            className={cn(
+              'inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium transition focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary',
+              op === kind ? 'bg-primary text-on-accent' : 'border border-line-strong hover:bg-surface-sel',
+            )}
           >
             {kind === 'add' ? <UserPlus size={13} /> : kind === 'remove' ? <UserMinus size={13} /> : <Crown size={13} />}
             {OP_LABEL[kind].title}
@@ -122,7 +121,7 @@ export function TeamDetail({ team }: { team: AdminTeam }) {
       <div className="mt-4 border-t border-line pt-3">
         {confirmDelete ? (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-[var(--color-wa)]">
+            <span className="text-sm text-wa">
               Xoá team “{team.name}”? Bài nộp và tiến độ của thành viên giữ nguyên.
             </span>
             <Button variant="danger" onClick={() => removeTeam.mutate()} disabled={removeTeam.isPending}>

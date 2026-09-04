@@ -156,7 +156,7 @@ function Step({ n, title, hint, children }: { n: number; title: string; hint?: s
   return (
     <section className="mb-6">
       <h3 className="mb-1 flex items-center gap-2 text-sm font-semibold">
-        <span className="grid size-5 place-items-center bg-[var(--color-primary)] text-xs text-on-accent">
+        <span className="grid size-5 place-items-center bg-primary text-xs text-on-accent">
           {n}
         </span>
         {title}

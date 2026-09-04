@@ -13,6 +13,7 @@
 import { Button, VerdictBadge } from '@/components/ui'
 import type { SubmissionView } from '@/types/api'
 import { formatDuration, formatMemory } from './format'
+import { cn } from '@/lib/cn'
 
 export function StdinPane({
   value,
@@ -111,7 +112,7 @@ function Output({ busy, result }: { busy: boolean; result: SubmissionView | null
       {r.stderr ? (
         <div className="border-t border-line pt-1.5">
           <Label tone="wa">stderr</Label>
-          <pre className="mt-1 font-mono text-[13px] break-all whitespace-pre-wrap text-[var(--color-wa)]">
+          <pre className="mt-1 font-mono text-[13px] break-all whitespace-pre-wrap text-wa">
             {r.stderr}
           </pre>
         </div>
@@ -126,7 +127,7 @@ function Hint({ children }: { children: string }) {
 
 function Label({ children, tone }: { children: string; tone?: 'wa' }) {
   return (
-    <span className={`font-mono text-[13px] ${tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-6'}`}>
+    <span className={cn('font-mono text-[13px]', tone === 'wa' ? 'text-wa' : 'text-ink-6')}>
       {children}
     </span>
   )

@@ -31,9 +31,9 @@ export function HelpPanel({ role }: { role: "admin" | "mentor" | "member" }) {
             nó chứ không cho cái người ta vừa nhìn thấy — người đọc phải bắc cầu bằng
             chữ, mà màu mới là thứ họ nhớ. Đổi màu verdict ở token là cả hai đổi theo. */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[24rem] border-collapse text-[13px]">
+          <table className="w-full min-w-96 border-collapse text-[13px]">
             <thead>
-              <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.1em] text-[var(--label)] uppercase">
+              <tr className="border-b border-line text-left font-mono text-[11px] tracking-widest text-(--label) uppercase">
                 <th scope="col" className="py-1.5 pr-3 font-medium">
                   Verdict
                 </th>

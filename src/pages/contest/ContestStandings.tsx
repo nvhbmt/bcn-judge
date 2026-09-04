@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query'
 import { EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { ContestStandingRow } from './standings'
+import { cn } from '@/lib/cn'
 
 export function ContestStandings({
   contestId,
@@ -51,9 +52,12 @@ export function ContestStandings({
         {data.map((row) => (
           <tr
             key={row.userId}
-            className={`border-b border-line ${row.isMe ? 'bg-[var(--primary-soft)] shadow-[inset_2px_0_0_var(--moss)]' : ''}`}
+            className={cn(
+              'border-b border-line',
+              row.isMe && 'bg-primary-soft shadow-[inset_2px_0_0_var(--moss)]',
+            )}
           >
-            <td className={`num px-2.5 py-2 font-mono text-[13px] ${row.isMe ? 'text-moss' : 'text-ink-5'}`}>
+            <td className={cn('num px-2.5 py-2 font-mono text-[13px]', row.isMe ? 'text-moss' : 'text-ink-5')}>
               {row.rank}
             </td>
             {/* `max-w-0` + `truncate` là cách cắt chữ trong ô bảng: không có nó thì
@@ -61,7 +65,10 @@ export function ContestStandings({
                 cho tên vẫn dài quá chỗ. */}
             <td
               title={row.isMe ? undefined : row.displayName}
-              className={`max-w-0 truncate px-2.5 py-2 text-[13px] ${row.isMe ? 'font-semibold text-ink-1' : 'text-ink-2'}`}
+              className={cn(
+                'max-w-0 truncate px-2.5 py-2 text-[13px]',
+                row.isMe ? 'font-semibold text-ink-1' : 'text-ink-2',
+              )}
             >
               {row.isMe ? 'Bạn' : row.displayName}
             </td>
@@ -71,7 +78,7 @@ export function ContestStandings({
               <span className={row.acCount > 0 ? 'text-ink-2' : 'text-ink-5'}>{row.acCount}</span>
               <span className="text-ink-6">/{problems.length}</span>
             </td>
-            <td className={`num px-2.5 py-2 text-right font-mono text-[13px] ${row.isMe ? 'text-ink-1' : 'text-ink-4'}`}>
+            <td className={cn('num px-2.5 py-2 text-right font-mono text-[13px]', row.isMe ? 'text-ink-1' : 'text-ink-4')}>
               {Math.round(row.totalPoints)}
             </td>
           </tr>

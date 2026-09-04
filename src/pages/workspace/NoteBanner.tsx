@@ -37,7 +37,7 @@ export function NoteBanner() {
   return (
     <div className="border-b border-line">
       {unread.map((n) => (
-        <div key={n.id} className="flex items-start gap-3 border-l-2 border-earth bg-[var(--tint-earth)] px-4 py-2.5">
+        <div key={n.id} className="flex items-start gap-3 border-l-2 border-earth bg-(--tint-earth) px-4 py-2.5">
           <p className="min-w-0 flex-1 text-[13px] text-ink-2">
             <span className="font-mono text-[13px] text-ink-5">
               {n.authorName} · {n.teamName}

@@ -106,7 +106,7 @@ export function CourseEnrollments({
         type="button"
         onClick={() => setMoDan((v) => !v)}
         aria-expanded={moDan}
-        className="mt-3 font-mono text-[12px] text-[var(--color-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+        className="mt-3 font-mono text-[12px] text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
       >
         {moDan ? 'Ẩn ô dán danh sách email' : 'Hoặc dán cả danh sách email…'}
       </button>
@@ -158,7 +158,7 @@ export function CourseEnrollments({
               disabled={unenroll.isPending}
               className="ml-auto inline-flex shrink-0 items-center gap-1 border border-line-strong px-2 py-1
  text-xs hover:bg-surface-sel disabled:cursor-not-allowed disabled:border-line disabled:text-ink-5 disabled:opacity-100 focus-visible:outline-2
- focus-visible:outline-offset-1 focus-visible:outline-[var(--color-primary)]"
+ focus-visible:outline-offset-1 focus-visible:outline-primary"
             >
               <UserMinus size={13} /> Gỡ
             </button>

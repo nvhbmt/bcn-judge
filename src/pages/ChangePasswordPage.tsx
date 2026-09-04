@@ -80,12 +80,12 @@ export function ChangePasswordPage() {
       ))}
 
       {mismatch ? (
-        <p role="alert" className="text-sm text-[var(--color-wa)]">
+        <p role="alert" className="text-sm text-wa">
           Hai mật khẩu mới chưa khớp.
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="text-sm text-[var(--color-wa)]">
+        <p role="alert" className="text-sm text-wa">
           {error}
         </p>
       ) : null}

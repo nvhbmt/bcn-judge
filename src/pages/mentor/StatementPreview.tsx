@@ -50,7 +50,7 @@ export function StatementPreview({
 
   return (
     <div className="h-full overflow-auto bg-surface-1">
-      <p className="px-5 pt-4 text-xs font-semibold tracking-wide text-[var(--label)] uppercase">Xem trước</p>
+      <p className="px-5 pt-4 text-xs font-semibold tracking-wide text-(--label) uppercase">Xem trước</p>
       <StatementPanel problem={problem} headingLevel={2} />
     </div>
   )
