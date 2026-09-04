@@ -26,16 +26,21 @@ export function RowGroup({ children, className = '' }: { children: ReactNode; cl
 export type RowAccent = 'moss' | 'earth' | 'clay' | null
 
 const ACCENT_BORDER: Record<Exclude<RowAccent, null>, string> = {
-  moss: 'border-l-2 border-l-moss',
-  earth: 'border-l-2 border-l-earth',
-  clay: 'border-l-2 border-l-clay',
+  moss: 'border-l-[3px] border-l-moss',
+  earth: 'border-l-[3px] border-l-earth',
+  clay: 'border-l-[3px] border-l-clay',
 }
 
 /**
  * Một dòng trong `RowGroup`.
  *
- * `accent` làm dòng nổi lên bằng nền đậm hơn một bậc + vạch TRONG 2px bên trái.
+ * `accent` làm dòng nổi lên bằng nền mang màu + vạch TRONG 3px bên trái.
  * Readme nói rõ đây là "một vạch, không phải bóng" — cả hệ không có bóng đổ.
+ *
+ * Nền là `--primary-soft`, KHÔNG phải `--surface-sel`. Ở bản tối hai token bằng nhau
+ * (#2e2921) nên nhìn không ra khác biệt; ở bản sáng thì surface-sel là be trung tính
+ * chroma 0 còn primary-soft mang sắc moss thật — dùng nhầm là dòng đang chọn mất màu,
+ * đúng lỗi mà chú thích `--primary-soft` trong colors.css ghi lại.
  */
 export function Row({
   children,
@@ -59,7 +64,7 @@ export function Row({
     <div
       style={cols ? { gridTemplateColumns: cols } : undefined}
       className={`${cols ? 'grid gap-3.5' : 'flex gap-3.5'} items-center px-4 py-3 ${
-        accent ? `bg-surface-sel ${ACCENT_BORDER[accent]}` : 'bg-surface-2'
+        accent ? `bg-[var(--primary-soft)] ${ACCENT_BORDER[accent]}` : 'bg-surface-2'
       } ${interactive ? 'transition-colors duration-[120ms] ease-linear hover:bg-surface-sel' : ''} ${className}`}
     >
       {children}
@@ -76,7 +81,7 @@ export function RowHead({ cols, children }: { cols: string; children: ReactNode 
   return (
     <div
       style={{ gridTemplateColumns: cols }}
-      className="grid gap-3.5 border-b border-line px-4 pb-2 font-mono text-[10px] tracking-[0.06em] text-ink-5 uppercase"
+      className="grid gap-3.5 border-b border-line px-4 pb-2 font-mono text-[11px] tracking-[0.06em] text-ink-5 uppercase"
     >
       {children}
     </div>
@@ -123,7 +128,7 @@ export function StatStrip({ items }: { items: { label: string; value: ReactNode;
         <div key={it.label} className="bg-surface-2 px-4 py-3">
           <div className="font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{it.label}</div>
           <div
-            className={`num mt-1.5 font-mono text-[22px] font-semibold ${
+            className={`num mt-1.5 font-mono text-[26px] font-semibold ${
               it.tone === 'moss' ? 'text-moss' : it.tone === 'earth' ? 'text-earth' : it.tone === 'clay' ? 'text-clay' : 'text-ink-1'
             }`}
           >
@@ -198,9 +203,13 @@ export function Divider() {
  * mạch, không thấy đâu là ranh giới.
  *
  * Cách chữa là tăng DIỆN TÍCH màu, không phải tăng độ đậm: `--panel-head` sơn cả
- * dải tiêu đề (1.50:1 so với nền ở bản sáng, 1.32:1 ở bản tối), cộng khối moss đặc
- * 3px đầu dải. Khối đó là chữ ký của hệ (giống dấu sau chữ BCN) và nó ĐẶC nên đọc
- * được ở cả hai theme, không phụ thuộc dải đậm tới đâu.
+ * dải tiêu đề (1.83:1 so với thân khung ở bản sáng, 1.81:1 ở bản tối), cộng khối
+ * moss đặc 4×16px đầu dải. Khối đó là chữ ký của hệ (giống dấu sau chữ BCN) và nó
+ * ĐẶC nên đọc được ở cả hai theme, không phụ thuộc dải đậm tới đâu.
+ *
+ * Dải đậm tới mức chỉ còn `--ink-3` đặt lên được: ink-4 đo ra 3.84:1 và ink-5 chỉ
+ * 3.41:1 ở bản tối, tức dưới ngưỡng cho chữ mono 11px. Vì vậy chữ `meta` mép phải
+ * cũng là ink-3, không phải ink-5 như mọi chú thích khác trong app.
  *
  * KHÔNG cho mỗi vùng một hue riêng: moss/clay/earth đã có nghĩa cố định là verdict
  * (AC/WA/TLE) và brass là leader — tô vùng "Log" màu clay thì nó đọc ra "lỗi".
@@ -228,9 +237,9 @@ export function SidePanel({
   return (
     <section className="border border-line bg-surface-2">
       <header className="flex items-center gap-2.5 border-b border-line bg-[var(--panel-head)] px-3.5 py-2.5">
-        <span aria-hidden className={`h-3.5 w-[3px] shrink-0 ${tone === 'earth' ? 'bg-earth' : 'bg-moss-fill'}`} />
+        <span aria-hidden className={`h-4 w-1 shrink-0 ${tone === 'earth' ? 'bg-earth' : 'bg-moss-fill'}`} />
         <h2 className="font-mono text-[11px] font-normal tracking-[0.14em] text-ink-3 uppercase">{label}</h2>
-        {meta ? <span className="ml-auto font-mono text-[11px] whitespace-nowrap text-ink-5">{meta}</span> : null}
+        {meta ? <span className="ml-auto font-mono text-[11px] whitespace-nowrap text-ink-3">{meta}</span> : null}
       </header>
       <div className={flush ? '' : 'px-3.5 py-3.5'}>{children}</div>
     </section>

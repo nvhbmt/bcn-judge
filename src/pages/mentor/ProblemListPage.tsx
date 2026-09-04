@@ -60,8 +60,8 @@ export function ProblemListPage() {
     <PageContainer>
       <header className="mb-6 flex items-start justify-between gap-5">
         <div className="min-w-0">
-          <h1 className="font-display text-[28px] text-ink-1">Bài tập</h1>
-          <p className="mt-1.5 text-[14px] text-ink-4">
+          <h1 className="font-display text-[30px] text-ink-1">Bài tập</h1>
+          <p className="mt-1.5 text-[15px] text-ink-4">
             Soạn đề, tải test lên, kiểm bằng lời giải mẫu, xong mới cho member thấy.
           </p>
         </div>
@@ -73,7 +73,7 @@ export function ProblemListPage() {
               onChange={(e) => setTim(e.target.value)}
               placeholder="tìm bài"
               aria-label="Tìm bài tập theo tiêu đề hoặc tag"
-              className="w-32 bg-transparent font-mono text-[12px] text-ink-2 outline-none placeholder:text-ink-6"
+              className="w-32 bg-transparent font-mono text-[13px] text-ink-2 outline-none placeholder:text-ink-6"
             />
           </label>
           {!creating ? (

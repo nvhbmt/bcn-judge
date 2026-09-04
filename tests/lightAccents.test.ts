@@ -10,7 +10,9 @@
  * ràng buộc mới: chữ nằm TRÊN mảng màu đó phải còn đọc được.
  *
  * Ba con số dưới đây là chỗ dễ trôi nhất khi ai đó chỉnh màu cho "đẹp hơn":
- *   - băng cảnh báo nổi ≥ 1.4:1 so với nền (trước khi sửa chỉ 1.16 — gần như tàng hình);
+ *   - băng cảnh báo nổi ≥ 1.4:1 so với MẶT PHẲNG NỘI DUNG (trước khi sửa chỉ 1.16 —
+ *     gần như tàng hình). Đo với `--surface-2` chứ không phải `--surface-0`: xem
+ *     chú thích ở `NOI_DUNG` bên dưới, hai cái đó nay là hai giá trị khác nhau;
  *   - chữ trên mọi nền đặc và nền wash ≥ 4.5:1 (chữ huy hiệu là 11px, tức chữ nhỏ);
  *   - tint-earth là chỗ chật nhất: earth là màu sáng nhất trong ba nên nền earth đậm
  *     thêm một nấc là chữ earth trên nó rơi xuống dưới ngưỡng.
@@ -46,7 +48,7 @@ function tokenIn(block: string, name: string): string {
     throw new Error(`Không thấy token --${name}`)
   }
   let v = m[1]!.trim()
-  // `--panel-head: var(--primary-soft)` ở bản sáng — phải lần theo mới đo được.
+  // `--label: var(--ink-3)`, `--verdict-ac: var(--moss)` — phải lần theo mới đo được.
   for (let i = 0; i < 5 && v.startsWith('var('); i++) {
     v = tokenIn(block, v.slice(6, -1).trim())
   }
@@ -97,15 +99,52 @@ function contrast(a: string, b: string): number {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
 }
 
+/**
+ * Wash bản TỐI là màu PHỦ — `oklch(0.30 0.05 68 / 0.26)`. Đo nó như màu đục cho ra
+ * một màu tối hơn hẳn màu mắt thấy, tức phép đo nói dối theo hướng dễ dãi. Phải hợp
+ * lên mặt phẳng nằm dưới rồi mới đo. Bản sáng bỏ alpha nên hàm này trả về chính nó.
+ */
+function hopLen(mau: string, nen: string): RGB {
+  const a = /\/\s*([\d.]+)\s*\)/.exec(mau)
+  if (!a) return parse(mau)
+  const [f, b] = [parse(mau), parse(nen)]
+  const al = Number(a[1])
+  return f.map((v, i) => al * v + (1 - al) * b[i]!) as RGB
+}
+
+function contrastRGB(a: RGB, b: RGB): number {
+  const [x, y] = [luminance(a), luminance(b)]
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)
+}
+
+/** Nền TRANG — nơi chữ chạy thẳng trên đó, không có mặt phẳng nào đỡ bên dưới. */
 const BG = () => token('surface-0')
+
+/**
+ * Mặt phẳng NỘI DUNG — dòng bảng, thân `SidePanel`, khung editor. Mọi wash mang màu
+ * đều được vẽ ở đây chứ không vẽ thẳng lên nền trang, nên đây mới là cái nó phải nổi
+ * lên khỏi.
+ *
+ * Trước phương án "Khối màu" hai token này BẰNG nhau (#fcfaf5) nên đo bên nào cũng ra
+ * một số, và cả file này gọi chung là "nền trang". Nay nền trang tụt xuống #eae7dc còn
+ * mặt phẳng nội dung lên #fdfcf8 (chênh 1.21:1, cố ý — xem tokens/base.css), nên đo
+ * nhầm bên làm ba wash tụt xuống 1.22–1.26 dù bản thân chúng không đổi một giá trị nào.
+ */
+const NOI_DUNG = () => token('surface-2')
 
 describe('bản sáng — nền mang màu phải nổi lên', () => {
   it.each([
     ['primary-soft', 1.4],
     ['tint-earth', 1.4],
     ['tint-clay', 1.4],
-  ])('%s nổi ≥ %s:1 so với nền trang', (name, min) => {
-    expect(contrast(token(name), BG())).toBeGreaterThanOrEqual(min)
+  ])('%s nổi ≥ %s:1 so với mặt phẳng nội dung', (name, min) => {
+    expect(contrast(token(name), NOI_DUNG())).toBeGreaterThanOrEqual(min)
+  })
+
+  it('mặt phẳng nội dung phải SÁNG hơn nền trang — khối nổi lên, không chìm xuống', () => {
+    // Ràng buộc mà phép đo ngay trên dựa vào. Nếu ai đó kéo surface-2 xuống dưới
+    // surface-0 thì ba con số kia vẫn qua, mà cả bản sáng thì lộn ngược tầng.
+    expect(luminance(parse(NOI_DUNG()))).toBeGreaterThan(luminance(parse(BG())))
   })
 
   it('primary-soft phải CÓ SẮC, không phải be trung tính', () => {
@@ -156,9 +195,10 @@ describe('bảng màu verdict', () => {
 
 describe('dải tiêu đề khung bên — phải nhìn ra là một dải, ở cả hai theme', () => {
   // Vì sao `--panel-head` không dùng lại `--primary-soft`: ở bản TỐI, primary-soft là
-  // #221f19, đo ra 1.09:1 so với surface-2 — mắt không thấy có dải nào. Mọi mặt phẳng
-  // bản tối nằm trong 1.02–1.09 của nhau (chủ ý của hệ: bản tối tách nhau bằng đường
-  // kẻ), nên một dải NHÌN RA ĐƯỢC buộc phải có giá trị riêng cho bản tối.
+  // #2e2921, đo ra 1.14:1 so với surface-2 — mắt không thấy có dải nào. Mọi mặt phẳng
+  // bản tối nằm trong 1.02–1.14 của nhau (chủ ý của hệ: bản tối tách nhau bằng đường
+  // kẻ), nên một dải NHÌN RA ĐƯỢC buộc phải có giá trị riêng. Bản SÁNG nay cũng có giá
+  // trị riêng chứ không trỏ vào primary-soft nữa: cùng một liều, 1.81 và 1.83:1.
   it.each([
     ['sáng', LIGHT],
     ['tối', DARK],
@@ -209,6 +249,63 @@ describe('nhãn mục ALL-CAPS — cùng vai trò, hai theme hai bậc mực', (
           readFileSync(duong, 'utf8').split('\n').forEach((dong, i) => {
             if (dong.includes('uppercase') && dong.includes('text-ink-6')) sot.push(`${ten}:${i + 1}`)
           })
+        }
+      }
+    }
+    quet(resolve(process.cwd(), 'src'))
+    expect(sot).toEqual([])
+  })
+})
+
+describe('nền xấu nhất là mặt phẳng ĐANG CHỌN, không phải nền trang', () => {
+  // Luật 1 của design-system/readme.md §"Đo ở đâu". Nền trang là mặt phẳng DỄ nhất
+  // trong cả hai theme; đo ở đó rồi kết luận "đạt" là tự lừa mình. Chỗ mực phải chịu
+  // là mặt phẳng đang chọn (bản tối sáng nhất, bản sáng tối nhất) và hai wash.
+  const DANG_CHON = { tối: 'surface-sel', sáng: 'primary-soft' } as const
+
+  it.each([
+    ['tối', DARK],
+    ['sáng', LIGHT],
+  ] as const)('bản %s: ink-1…ink-6 đều ≥ 4.5:1 trên mặt phẳng đang chọn', (ten, block) => {
+    const nen = tokenIn(block, DANG_CHON[ten])
+    for (const bac of ['ink-1', 'ink-2', 'ink-3', 'ink-4', 'ink-5', 'ink-6']) {
+      expect(contrast(tokenIn(block, bac), nen)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it.each([
+    ['tối', DARK],
+    ['sáng', LIGHT],
+  ] as const)('bản %s: chữ clay đọc được trên CHÍNH wash clay — cặp của huy hiệu WA', (_ten, block) => {
+    const wash = hopLen(tokenIn(block, 'tint-clay'), tokenIn(block, 'surface-2'))
+    expect(contrastRGB(parse(tokenIn(block, 'clay')), wash)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it.each([
+    ['tối', DARK],
+    ['sáng', LIGHT],
+  ] as const)('bản %s: chữ earth đọc được trên chính wash earth', (_ten, block) => {
+    const wash = hopLen(tokenIn(block, 'tint-earth'), tokenIn(block, 'surface-2'))
+    expect(contrastRGB(parse(tokenIn(block, 'earth')), wash)).toBeGreaterThanOrEqual(4.5)
+  })
+})
+
+describe('--ink-7 là bậc trang trí — không đặt chữ lên, kể cả chữ đã tắt', () => {
+  // Luật 3 của readme. Bậc này đo ra 2.4:1 (tối) và 2.6:1 (sáng) nên nó KHÔNG phải
+  // "mực nhạt hơn một bậc" mà là màu của đường kẻ và dấu chấm. Chỗ đã cắn thật: mục
+  // "← bài trước" lúc không có bài kề từng nằm ở đây — chữ đã tắt vẫn phải đọc được.
+  it('không file .tsx nào dùng text-ink-7 cho phần tử không aria-hidden', () => {
+    const sot: string[] = []
+    const quet = (thuMuc: string) => {
+      for (const ten of readdirSync(thuMuc)) {
+        const duong = resolve(thuMuc, ten)
+        if (statSync(duong).isDirectory()) quet(duong)
+        else if (ten.endsWith('.tsx')) {
+          readFileSync(duong, 'utf8')
+            .split('\n')
+            .forEach((dong, i) => {
+              if (dong.includes('text-ink-7') && !dong.includes('aria-hidden')) sot.push(`${ten}:${i + 1}`)
+            })
         }
       }
     }

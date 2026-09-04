@@ -30,8 +30,6 @@ interface TeamStandings {
   rows: TeamStandingRow[]
 }
 
-const TH = 'px-2.5 py-2 font-mono text-[11px] font-normal tracking-[0.14em] whitespace-nowrap text-[var(--label)] uppercase'
-
 export function TeamStandings() {
   const { data, isLoading } = useQuery({
     queryKey: ['team', 'standings'],
@@ -52,29 +50,18 @@ export function TeamStandings() {
   return (
     <table className="w-full border-collapse">
       <caption className="sr-only">Xếp hạng các team trong ban</caption>
-      <thead>
-        <tr className="border-b border-line">
-          <th scope="col" className={`w-9 text-left ${TH}`}>
-            #
-          </th>
-          <th scope="col" className={`text-left ${TH}`}>
-            Team
-          </th>
-          <th scope="col" className={`w-16 text-right ${TH}`}>
-            Bài AC
-          </th>
-          <th scope="col" className={`w-16 text-right ${TH}`}>
-            Điểm
-          </th>
-        </tr>
-      </thead>
+      {/* KHÔNG có <thead>: bản vẽ bỏ hàng tiêu đề cột để bảng trong cột phải chỉ còn
+          dữ liệu. `<caption>` ở lại (sr-only) nên trình đọc màn hình vẫn biết đây là
+          bảng gì — bỏ cả caption mới là mất thông tin thật.
+          Đánh đổi đã biết: cột "Bài AC" nay là con số trần. Cần nhãn thì gộp vào
+          chính dòng ("13 bài · 1440 đ"), đừng dựng lại hàng tiêu đề. */}
       <tbody>
         {data.map((row) => (
           <tr
             key={row.id}
-            className={`border-b border-line ${row.isMine ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]' : ''}`}
+            className={`border-b border-line ${row.isMine ? 'bg-[var(--primary-soft)] shadow-[inset_2px_0_0_var(--moss)]' : ''}`}
           >
-            <td className={`num px-2.5 py-2 font-mono text-[12px] ${row.isMine ? 'text-moss' : 'text-ink-5'}`}>
+            <td className={`num px-2.5 py-2 font-mono text-[13px] ${row.isMine ? 'text-moss' : 'text-ink-5'}`}>
               {row.rank}
             </td>
             <td
@@ -86,8 +73,8 @@ export function TeamStandings() {
                   đông hơn thì tổng cao hơn, giấu đi là để bảng nói dối một nửa. */}
               <span className="num ml-1.5 font-mono text-[11px] text-ink-6">{row.memberCount} người</span>
             </td>
-            <td className="num px-2.5 py-2 text-right font-mono text-[12px] text-ink-3">{row.acCount}</td>
-            <td className={`num px-2.5 py-2 text-right font-mono text-[12px] ${row.isMine ? 'text-ink-1' : 'text-ink-4'}`}>
+            <td className="num px-2.5 py-2 text-right font-mono text-[13px] text-ink-3">{row.acCount}</td>
+            <td className={`num px-2.5 py-2 text-right font-mono text-[13px] ${row.isMine ? 'text-ink-1' : 'text-ink-4'}`}>
               {row.totalPoints}
             </td>
           </tr>

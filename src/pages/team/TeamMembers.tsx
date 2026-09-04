@@ -54,7 +54,7 @@ export function TeamMembers({ team }: { team: TeamView }) {
         const than = (
           <>
             <Avatar name={m.displayName} size={26} />
-            <span className="min-w-0 flex-1 truncate text-left text-[14px] text-ink-2">{m.displayName}</span>
+            <span className="min-w-0 flex-1 truncate text-left text-[15px] text-ink-2">{m.displayName}</span>
             {m.isLeader ? (
               <span className="shrink-0 font-mono text-[10px] tracking-[0.06em] text-brass uppercase">leader</span>
             ) : null}
@@ -63,11 +63,11 @@ export function TeamMembers({ team }: { team: TeamView }) {
               <>
                 {/* Chưa ghi danh khoá nào là TIN, không phải ô trống: đó đúng là
                     người leader cần đi hỏi trước tiên. */}
-                <span className="num w-24 shrink-0 text-right font-mono text-[12px] text-ink-4">
+                <span className="num w-24 shrink-0 text-right font-mono text-[13px] text-ink-4">
                   {cua.length > 0 ? `${ac}/${tong} bài` : <span className="text-earth">chưa ghi danh</span>}
                 </span>
                 <span
-                  className={`num w-16 shrink-0 text-right font-mono text-[12px] ${nopCuoi ? 'text-ink-6' : 'text-earth'}`}
+                  className={`num w-16 shrink-0 text-right font-mono text-[13px] ${nopCuoi ? 'text-ink-6' : 'text-earth'}`}
                 >
                   {nopCuoi ? ngay(nopCuoi) : cua.length > 0 ? 'chưa nộp' : ''}
                 </span>

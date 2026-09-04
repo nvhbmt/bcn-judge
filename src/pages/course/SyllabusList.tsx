@@ -35,23 +35,23 @@ function ItemRow({ item, courseId }: { item: SyllabusItem; courseId: string }) {
 
   return (
     <Row accent={dangDo ? 'earth' : null} interactive={!dangDo} className="gap-3.5 px-4 py-3">
-      <span className={`num w-9 shrink-0 font-mono text-[11px] ${m.className}`}>{m.text}</span>
+      <span className={`num w-9 shrink-0 font-mono text-[12px] ${m.className}`}>{m.text}</span>
 
       <Link
         to={`/khoa-hoc/${courseId}/bai/${item.id}`}
-        className={`min-w-0 flex-1 truncate text-[14px] hover:underline ${
+        className={`min-w-0 flex-1 truncate text-[16px] hover:underline ${
           dangDo ? 'font-semibold text-ink-1' : 'text-ink-3'
         }`}
       >
         {item.title}
       </Link>
 
-      <span className="num shrink-0 font-mono text-[11px] text-ink-5">{meta(item)}</span>
+      <span className="num shrink-0 font-mono text-[12px] text-ink-5">{meta(item)}</span>
 
       {dangDo ? (
         <Link
           to={`/khoa-hoc/${courseId}/bai/${item.id}`}
-          className="shrink-0 bg-[var(--moss-solid,var(--moss))] px-3 py-1.5 font-mono text-[11px] font-semibold text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+          className="shrink-0 bg-[var(--moss-solid,var(--moss))] px-3 py-1.5 font-mono text-[12px] font-semibold text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
         >
           Làm tiếp
         </Link>

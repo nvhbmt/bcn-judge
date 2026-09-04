@@ -191,7 +191,7 @@ export function SplitPane({
         tabIndex={collapsed ? -1 : 0}
         data-testid="split-divider"
         data-dragging={dragging ? 'true' : undefined}
-        className={`split-handle relative bg-surface-sel outline-offset-0 transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary ${
+        className={`split-handle relative bg-line outline-offset-0 transition-colors hover:bg-primary/50 focus-visible:bg-primary/60 focus-visible:outline-2 focus-visible:outline-primary ${
           dragging ? 'bg-primary/60' : ''
         }`}
         onPointerDown={onPointerDown}

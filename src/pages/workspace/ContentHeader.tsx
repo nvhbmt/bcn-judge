@@ -66,8 +66,12 @@ export function ContentHeader({
               ← bài trước
             </Link>
           ) : (
-            <span className="text-ink-7">← bài trước</span>
+            // `--ink-7` là bậc TRANG TRÍ (2.4:1), không đặt chữ lên. Mục đã tắt vẫn
+            // là chữ mang thông tin — "không có bài trước" — nên nó xuống ink-6, đúng
+            // luật đã ghi ở readme: "đã tắt" không có nghĩa là "không đọc được".
+            <span className="text-ink-6">← bài trước</span>
           )}
+          {/* Dấu chấm giữa hai mục thì đúng là trang trí, và nó aria-hidden. */}
           <span aria-hidden className="text-ink-7">
             ·
           </span>
@@ -76,7 +80,7 @@ export function ContentHeader({
               bài sau →
             </Link>
           ) : (
-            <span className="text-ink-7">bài sau →</span>
+            <span className="text-ink-6">bài sau →</span>
           )}
         </nav>
       ) : null}

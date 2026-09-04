@@ -47,13 +47,13 @@ export function CoursesPage() {
   return (
     <div className="grid h-full lg:grid-cols-[minmax(0,1fr)_400px]">
       <main className="min-w-0 overflow-y-auto px-7 py-8">
-        <p className="num font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">{today()}</p>
-        <h1 className="mt-1.5 mb-1 font-display text-[28px] text-ink-1">
+        <p className="num font-mono text-[12px] tracking-[0.14em] text-[var(--label)] uppercase">{today()}</p>
+        <h1 className="mt-1.5 mb-1 font-display text-[32px] text-ink-1">
           Chào {me ? shortName(me.displayName) : 'bạn'}
         </h1>
         {/* Câu chào phải đúng với vai: mentor KHÔNG ghi danh vào khoá mình dạy, nên
             "Bạn đang theo 0 khoá" là câu vô nghĩa với họ. */}
-        <p className="mb-7 text-[14px] text-ink-4">
+        <p className="mb-7 text-[16px] text-ink-4">
           {!data
             ? 'Đang tải khoá học của bạn…'
             : me?.role !== 'member'

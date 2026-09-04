@@ -32,7 +32,7 @@ export function DiscordLogin() {
 
       <a
         href="/auth/discord"
-        className="flex w-full items-center justify-center gap-2.5 border border-line-strong px-4 py-3.5 font-mono text-[14px] text-ink-2 transition-colors duration-[120ms] ease-linear hover:border-moss hover:text-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+        className="flex w-full items-center justify-center gap-2.5 border border-line-strong px-4 py-3.5 font-mono text-[15px] text-ink-2 transition-colors duration-[120ms] ease-linear hover:border-moss hover:text-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
       >
         <DiscordMark />
         Đăng nhập bằng Discord

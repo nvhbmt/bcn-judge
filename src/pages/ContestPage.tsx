@@ -66,26 +66,37 @@ export function ContestPage() {
           <ArrowLeft size={13} /> ~/contest
         </Link>
 
-        <p className="mb-2 flex items-center gap-2 font-mono text-[11px] tracking-[0.14em] text-ink-4 uppercase">
+        <p className="mb-2 flex items-center gap-2 font-mono text-[12px] tracking-[0.14em] text-ink-4 uppercase">
           <span aria-hidden className={`size-[7px] rounded-full ${PHASE_DOT[data.phase]}`} />
           {PHASE_LABEL[data.phase]}
         </p>
-        <h1 className="font-display text-[26px] text-ink-1">{data.title}</h1>
-        <p className="num mt-2 font-mono text-[12px] text-ink-5">
+        <h1 className="font-display text-[30px] text-ink-1">{data.title}</h1>
+        <p className="num mt-2 font-mono text-[14px] text-ink-5">
           {ngay(data.startAt)} · {hhmm(data.startAt)} → {hhmm(data.endAt)} · {data.problemCount} bài ·{' '}
           {diemToiDa} điểm tối đa
         </p>
 
         {remaining ? (
           <div className="mt-6" aria-live="polite">
-            <p className="font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
-              {data.phase === 'sap-dien-ra' ? 'Bắt đầu sau' : 'Còn lại'}
-            </p>
-            <p className={`num mt-1.5 font-mono text-[34px] leading-none font-semibold tracking-[-0.02em] ${running ? 'text-earth' : 'text-ink-2'}`}>
-              {remaining}
-            </p>
+            {/* Nhãn và số CÙNG HÀNG, canh theo baseline: nhãn xếp trên số 52px thì hai
+                dòng cách nhau xa quá, đọc ra thành hai mẩu rời chứ không phải một số
+                có tên. `flex-wrap` để màn hẹp vẫn xuống dòng thay vì tràn.
+                Nhãn mang màu earth chứ không phải màu nhãn chung: nó nói cùng một
+                chuyện với con số bên cạnh, tách màu là tách nghĩa. */}
+            <div className="flex flex-wrap items-baseline gap-4">
+              <p
+                className={`shrink-0 font-mono text-[12px] font-semibold tracking-[0.14em] uppercase ${
+                  running ? 'text-earth' : 'text-[var(--label)]'
+                }`}
+              >
+                {data.phase === 'sap-dien-ra' ? 'Bắt đầu sau' : 'Còn lại'}
+              </p>
+              <p className={`num font-mono text-[52px] leading-none font-semibold tracking-[-0.03em] ${running ? 'text-earth' : 'text-ink-2'}`}>
+                {remaining}
+              </p>
+            </div>
             {running && freezeAt ? (
-              <p className="num mt-2 font-mono text-[11px] text-ink-5">BXH đóng băng lúc {hhmm(freezeAt.toISOString())}</p>
+              <p className="num mt-2 font-mono text-[12px] text-ink-5">BXH đóng băng lúc {hhmm(freezeAt.toISOString())}</p>
             ) : null}
           </div>
         ) : null}
@@ -101,7 +112,7 @@ export function ContestPage() {
             660px làm gần nửa cột bỏ trống. Đánh đổi có thật: trên màn rất rộng, dòng
             dài hơn khoảng 45–90 ký tự mà sách vở khuyên cho văn xuôi. */}
         {data.descriptionMd ? (
-          <div className="mt-6 text-[14px] leading-[1.7] text-ink-4">
+          <div className="mt-6 text-[16px] leading-[1.7] text-ink-4">
             <Markdown source={data.descriptionMd} />
           </div>
         ) : null}
@@ -130,7 +141,7 @@ export function ContestPage() {
       <SideColumn className="min-w-0 overflow-y-auto">
         {/* Cùng khung với cột bên trang chủ — hai cột bên trông như nhau thì người
             dùng không phải học lại bố cục ở mỗi màn. */}
-        <SidePanel label="Bảng xếp hạng" meta="cập nhật mỗi 5s" flush>
+        <SidePanel label="Bảng xếp hạng" flush>
           <ContestStandings contestId={contestId!} problems={data.problems} />
         </SidePanel>
       </SideColumn>

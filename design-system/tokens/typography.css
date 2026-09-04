@@ -5,20 +5,20 @@
 :root {
   --text-mono-xs: 10px;
   --text-mono-sm: 11px;
-  --text-mono-md: 12px;
+  --text-mono-md: 13px;
   --text-mono-lg: 13px;
 
-  --text-xs: 12px;
+  --text-xs: 13px;
   --text-sm: 13px;
-  --text-base: 14px;
-  --text-md: 15px;
-  --text-lg: 16px;
-  --text-xl: 18px;
+  --text-base: 15px;
+  --text-md: 16px;
+  --text-lg: 17px;
+  --text-xl: 20px;
 
-  --display-sm: 22px;
-  --display-md: 24px;
-  --display-lg: 26px;
-  --display-xl: 31px;
+  --display-sm: 24px;
+  --display-md: 26px;
+  --display-lg: 28px;
+  --display-xl: 33px;
 
   --leading-tight: 1.2;
   --leading-snug: 1.55;

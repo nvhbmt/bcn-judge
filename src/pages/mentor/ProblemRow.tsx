@@ -35,11 +35,11 @@ export function ProblemRow({ row, courseCode }: { row: MentorProblemRow; courseC
       <span className="min-w-0">
         <Link
           to={`/mentor/bai-tap/${row.id}`}
-          className="block truncate text-[15px] font-semibold text-ink-1 hover:underline"
+          className="block truncate text-[16px] font-semibold text-ink-1 hover:underline"
         >
           {row.title}
         </Link>
-        <span className={`mt-0.5 block truncate font-mono text-[11px] ${canhBao ? 'text-earth' : 'text-ink-6'}`}>
+        <span className={`mt-0.5 block truncate font-mono text-[12px] ${canhBao ? 'text-earth' : 'text-ink-6'}`}>
           {canhBao ?? (tags.length > 0 ? tags.join(' · ') : '—')}
         </span>
       </span>
@@ -48,17 +48,17 @@ export function ProblemRow({ row, courseCode }: { row: MentorProblemRow; courseC
         <ValidationBadge state={state} />
       </span>
 
-      <span className="num truncate font-mono text-[11px] text-ink-5">
+      <span className="num truncate font-mono text-[12px] text-ink-5">
         {row.difficulty ? (DIFFICULTY_LABEL[row.difficulty] ?? row.difficulty) : '—'}
       </span>
 
-      <span className="num truncate font-mono text-[11px] text-ink-5">{courseCode}</span>
+      <span className="num truncate font-mono text-[12px] text-ink-5">{courseCode}</span>
 
-      <span className="num font-mono text-[11px] text-ink-5">
+      <span className="num font-mono text-[12px] text-ink-5">
         {row.testcases} · bộ #{row.testcaseRev}
       </span>
 
-      <span className="num text-right font-mono text-[11px] text-ink-6">
+      <span className="num text-right font-mono text-[12px] text-ink-6">
         {new Date(row.updatedAt).toLocaleString('vi-VN', {
           hour: '2-digit',
           minute: '2-digit',

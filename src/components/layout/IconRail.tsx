@@ -160,9 +160,14 @@ export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hư�
                 // `shadow-[inset_…]` ở đây không phải bóng đổ — hệ thiết kế không có
                 // bóng — mà là cách CSS duy nhất vẽ một vạch nằm BÊN TRONG mép trái mà
                 // không đẩy nội dung sang phải như `border-l` sẽ làm.
+                //
+                // Nền mục ĐANG mở là `--primary-soft`, nền lúc rê chuột mới là
+                // `--surface-sel`. Ở bản tối hai token trùng giá trị nên khác biệt này
+                // vô hình; ở bản sáng thì primary-soft mang sắc moss còn surface-sel là
+                // be trung tính — để nguyên surface-sel là mục đang mở mất hẳn màu.
                 className={`relative flex h-11 w-14 items-center justify-center transition-colors duration-[120ms] ease-linear focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss ${
                   isActive
-                    ? 'bg-surface-sel text-moss shadow-[inset_2px_0_0_var(--moss)]'
+                    ? 'bg-[var(--primary-soft)] text-moss shadow-[inset_2px_0_0_var(--moss)]'
                     : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2'
                 }`}
                 onPointerDown={(e: ReactPointerEvent) => onPointerDown(e, item.key)}

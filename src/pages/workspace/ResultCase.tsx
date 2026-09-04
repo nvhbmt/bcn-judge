@@ -31,13 +31,13 @@ export function ResultCase({
   return (
     <div className="border border-line bg-surface-2">
       <div className="flex flex-wrap items-center gap-2 border-b border-line px-2.5 py-1.5">
-        <span className="num font-mono text-[12px] text-ink-4">
+        <span className="num font-mono text-[13px] text-ink-4">
           test #{result.position}
         </span>
-        <span className="font-mono text-[12px] text-ink-6">{result.isSample ? 'mẫu' : 'ẩn'}</span>
+        <span className="font-mono text-[13px] text-ink-6">{result.isSample ? 'mẫu' : 'ẩn'}</span>
         <VerdictBadge tone="soft" verdict={result.verdict} />
-        {result.detail ? <span className="font-mono text-[12px] text-ink-6">{result.detail}</span> : null}
-        <span className="num ml-auto font-mono text-[12px] text-ink-6">
+        {result.detail ? <span className="font-mono text-[13px] text-ink-6">{result.detail}</span> : null}
+        <span className="num ml-auto font-mono text-[13px] text-ink-6">
           {formatDuration(result.timeMs)} · {formatMemory(result.memoryKb)}
         </span>
       </div>
@@ -75,7 +75,7 @@ function Plain({
 }) {
   if (!result.isSample) {
     return (
-      <p className="px-2.5 py-2 font-mono text-[12px] text-ink-6">
+      <p className="px-2.5 py-2 font-mono text-[13px] text-ink-6">
         Test ẩn — đề không công bố input lẫn đáp án của test này. Chỉ có verdict, thời gian và bộ nhớ ở trên.
       </p>
     )
@@ -95,7 +95,7 @@ function Plain({
 function Field({ label, text, tone }: { label: string; text: string; tone?: 'wa' }) {
   return (
     <div className="border-t border-line px-2.5 py-1.5 first:border-t-0">
-      <p className={`font-mono text-[12px] ${tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-6'}`}>{label}</p>
+      <p className={`font-mono text-[13px] ${tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-6'}`}>{label}</p>
       <pre
         className={`mt-0.5 max-h-40 overflow-auto font-mono text-[13px] whitespace-pre ${
           tone === 'wa' ? 'text-[var(--color-wa)]' : 'text-ink-3'

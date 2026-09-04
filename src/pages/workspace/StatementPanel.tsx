@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Markdown } from '@/components/markdown/Markdown'
 import { SectionRule } from '@/components/ui'
 import { StatStrip } from '@/components/ui/patterns'
@@ -27,9 +28,13 @@ export function StatementPanel({
        mỗi dòng — đúng khoảng dễ đọc, không phải nới bừa.
        Đặt ở <article> để MỌI khối markdown trong panel (đề, dữ liệu vào/ra, ghi chú)
        cùng lớn lên; tiêu đề và nhãn đã khai cỡ riêng nên không đổi. */
-    <article className="space-y-5 px-5 py-5 text-[16px]">
+    // `bg-surface-1` — cùng mặt phẳng với ConsolePanel, không phải nền trang. Nhờ vậy
+    // hộp ví dụ và dải StatStrip (--surface-2) NỔI LÊN trên vùng đọc thay vì chìm
+    // ngang với nó. Phải là `min-h-full` chứ không chỉ nền trên chữ: khung cuộn ở
+    // WorkspacePage cao hơn nội dung khi đề ngắn, để trống thì lộ nền trang bên dưới.
+    <article className="min-h-full space-y-5 bg-surface-1 px-5 py-5 text-[17px]">
       <header>
-        <Heading className="font-display text-[24px] text-ink-1">{problem.title}</Heading>
+        <Heading className="font-display text-[26px] text-ink-1">{problem.title}</Heading>
 
         {/* Độ khó và tag đứng DƯỚI tiêu đề: tên bài là thứ mắt tìm trước, hai thứ này
             chỉ để liếc sau khi đã biết đang đọc bài nào. Độ khó tô theo màu ngữ nghĩa
@@ -38,8 +43,15 @@ export function StatementPanel({
           <p className="mt-2.5 flex flex-wrap items-center gap-2.5">
             {problem.difficulty ? (
               <span
+                style={
+                  {
+                    '--chip': DIFFICULTY_TINT[problem.difficulty]?.chip,
+                    '--chip-soft': DIFFICULTY_TINT[problem.difficulty]?.soft,
+                    '--chip-solid': DIFFICULTY_TINT[problem.difficulty]?.solid,
+                  } as CSSProperties
+                }
                 className={`border px-2 py-1 font-mono text-[10px] font-semibold tracking-[0.1em] uppercase ${
-                  DIFFICULTY_CLASS[problem.difficulty] ?? 'border-line-strong text-ink-4'
+                  DIFFICULTY_TINT[problem.difficulty] ? 'chip-do-kho' : 'border-line-strong text-ink-4'
                 }`}
               >
                 {DIFFICULTY_LABEL[problem.difficulty] ?? problem.difficulty}
@@ -115,11 +127,22 @@ export function StatementPanel({
   )
 }
 
-/** Màu theo ngữ nghĩa của hệ: dễ = moss, trung bình = earth, khó = clay. */
-const DIFFICULTY_CLASS: Record<string, string> = {
-  easy: 'border-moss bg-[var(--color-primary-soft)] text-moss',
-  medium: 'border-earth bg-[var(--tint-earth)] text-earth',
-  hard: 'border-clay bg-[var(--tint-clay)] text-clay',
+/**
+ * Màu theo ngữ nghĩa của hệ: dễ = moss, trung bình = earth, khó = clay.
+ *
+ * Chỉ truyền MÀU, không truyền cách vẽ: hai theme vẽ chip này khác nhau (bản tối là
+ * wash + viền + chữ mang màu, bản sáng là khối đặc chữ --on-accent) và luật đó nằm ở
+ * `.chip-do-kho` trong src/index.css. Xem chú thích ở đó.
+ *
+ * Ba biến chứ không hai: `solid` (nền đặc bản sáng) TÁCH khỏi `chip` (màu chữ và viền
+ * bản tối) vì mức trung bình đổi hue giữa hai theme — bản tối là earth, bản sáng là
+ * brass. Ở bậc L 0.51 của bản sáng, brass là màu vàng đồng còn đọc ra được trên nền
+ * kem, trong khi earth 0.46 nằm sát ink nên khối đặc màu đó đọc ra là một mảng nâu.
+ */
+const DIFFICULTY_TINT: Record<string, { chip: string; soft: string; solid: string }> = {
+  easy: { chip: 'var(--moss)', soft: 'var(--primary-soft)', solid: 'var(--moss-solid, var(--moss))' },
+  medium: { chip: 'var(--earth)', soft: 'var(--tint-earth)', solid: 'var(--brass)' },
+  hard: { chip: 'var(--clay)', soft: 'var(--tint-clay)', solid: 'var(--clay)' },
 }
 
 /** Mỗi mục của đề dùng chung motif đường kẻ — xem SectionRule. */

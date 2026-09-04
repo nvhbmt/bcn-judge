@@ -132,7 +132,7 @@ function Summary({ submission, results }: { submission: SubmissionView; results:
       <span className="num font-mono text-[13px] text-ink-3">
         {passed}/{results.length} test đạt
       </span>
-      <span className="num ml-auto font-mono text-[12px] text-ink-6">
+      <span className="num ml-auto font-mono text-[13px] text-ink-6">
         cao nhất: {formatDuration(time)} · {formatMemory(mem)}
       </span>
     </div>
@@ -167,7 +167,7 @@ function Chip({
       }}
       // Nét đứt cho test ẩn: khác biệt này có thật (bấm vào không có gì để so) nên nói
       // trước ở chip, đỡ hơn để người ta bấm vào rồi mới biết.
-      className={`num border px-2 py-0.5 font-mono text-[12px] transition-colors duration-[120ms] ease-linear ${
+      className={`num border px-2 py-0.5 font-mono text-[13px] transition-colors duration-[120ms] ease-linear ${
         result.isSample ? '' : 'border-dashed'
       } ${selected ? 'font-semibold' : 'hover:bg-surface-sel'}`}
     >

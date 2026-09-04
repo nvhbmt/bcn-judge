@@ -42,11 +42,11 @@ export function ActivityLog() {
           const href = workspaceLink(row)
           const body = (
             <>
-              <span className="num shrink-0 font-mono text-[12px] text-ink-5">{hhmm(row.receivedAt)}</span>
-              <span className={`num w-[34px] shrink-0 font-mono text-[12px] ${verdictClass(row.verdict)}`}>
+              <span className="num shrink-0 font-mono text-[13px] text-ink-5">{hhmm(row.receivedAt)}</span>
+              <span className={`num w-[34px] shrink-0 font-mono text-[13px] ${verdictClass(row.verdict)}`}>
                 {row.status === 'done' ? (row.verdict ?? '—') : '…'}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[12px] text-ink-4">{row.problemTitle}</span>
+              <span className="min-w-0 flex-1 truncate text-[13px] text-ink-4">{row.problemTitle}</span>
             </>
           )
           return (

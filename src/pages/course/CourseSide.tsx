@@ -25,7 +25,7 @@ export function CourseSide({ course, sections }: { course: CourseDetail; section
             <span className="num font-mono text-[44px] leading-none font-semibold tracking-[-0.03em] text-ink-1">
               {percent}
             </span>
-            <span className="num font-mono text-[18px] text-ink-5">%</span>
+            <span className="num font-mono text-[20px] text-ink-5">%</span>
           </p>
           <div className="mt-3 mb-2.5">
             <Segments percent={percent} height={8} />

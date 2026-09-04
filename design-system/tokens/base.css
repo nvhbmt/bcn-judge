@@ -8,11 +8,14 @@ body {
      mấy ảnh màn hình 1440×900, không phải nền của app. Nền màn hình là `--surface-0`,
      và mọi khung màn trong bản vẽ đều mở đầu bằng đúng giá trị đó.
 
-     Sơn `--canvas` lên body làm cả app tối hơn một bậc so với thiết kế, và ở theme
-     SÁNG thì lệch thấy rõ: nền trang thành xám ấm (#efece5) trong khi dòng bảng là
-     #fcfaf5, nên bảng "nổi" lên như thẻ — ngược hẳn ý thiết kế, vốn để nền trang và
-     dòng bảng BẰNG nhau rồi tách nhau bằng đường kẻ 1px. Ở theme tối thì hai giá trị
-     gần nhau nên gần như không ai thấy, và lỗi sống sót.
+     Sơn `--canvas` lên body làm cả app tối hơn một bậc so với thiết kế: ở bản sáng
+     nền trang tụt từ #eae7dc xuống #e2ded1, ở bản tối từ #0d0c0a xuống #0a0908.
+     Ở theme tối hai giá trị gần nhau nên gần như không ai thấy, và lỗi sống sót.
+
+     Lưu ý bản sáng nay CỐ Ý cho nền trang (#eae7dc) tối hơn mặt phẳng nội dung
+     (#fdfcf8) một bậc — chênh 1.21:1, nên dòng bảng và khung SidePanel thật sự nổi
+     lên khỏi nền trang. Trước đây hai giá trị bằng nhau và chỉ tách bằng đường kẻ
+     1px; phương án "Khối màu" đổi điều đó, nên đừng "sửa lại cho bằng nhau".
 
      `--canvas` giữ lại cho chỗ nào thật sự cần vùng ngoài khung. */
   background: var(--surface-0);
@@ -97,7 +100,7 @@ option {
    nói được nó đứng ở đâu.
 
    Hai ảnh cho hai theme vì màu nằm TRONG data URI, không đọc được biến CSS: bản tối
-   dùng --ink-5 #a3998a, bản sáng #5f5747. Đổi token thì phải sửa cả ở đây — đánh đổi
+   dùng --ink-5 #a89e8a, bản sáng #5b5342. Đổi token thì phải sửa cả ở đây — đánh đổi
    để giữ <select> là một thẻ trần, không phải bọc thêm div (ba chỗ gọi đang truyền
    class kích thước cho chính ô, kể cả `py-1`).
 
@@ -105,14 +108,14 @@ option {
    mentor đã có. */
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a3998a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a89e8a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 12px 12px;
 }
 
 [data-theme='light'] select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f5747' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235b5342' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 /* <select> nhiều dòng vẫn là danh sách, không có mũi tên nào để vẽ. */

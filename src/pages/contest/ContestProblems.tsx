@@ -47,20 +47,20 @@ export function ContestProblems({
         const done = mine?.verdict === 'AC'
         return (
           <Row key={p.id} accent={done ? 'moss' : null} interactive={!done} className="gap-3.5">
-            <span className={`num w-6 shrink-0 font-mono text-[12px] ${done ? 'text-moss' : 'text-ink-5'}`}>
+            <span className={`num w-6 shrink-0 font-mono text-[14px] ${done ? 'text-moss' : 'text-ink-5'}`}>
               {p.label ?? String.fromCharCode(65 + i)}
             </span>
 
             <Link
               to={`/contest/${contestId}/bai/${p.id}`}
-              className={`min-w-0 flex-1 truncate text-[14px] hover:underline ${
+              className={`min-w-0 flex-1 truncate text-[16px] hover:underline ${
                 done ? 'font-semibold text-ink-1' : 'text-ink-3'
               }`}
             >
               {p.title}
             </Link>
 
-            <span className="num shrink-0 font-mono text-[12px] text-ink-4">
+            <span className="num shrink-0 font-mono text-[14px] text-ink-4">
               <span className={done ? 'text-moss' : mine ? 'text-earth' : 'text-ink-6'}>
                 {mine ? Math.round(mine.points) : 0}
               </span>
@@ -74,7 +74,7 @@ export function ContestProblems({
                 hai câu khác nhau, nên "3 lần" xanh cạnh "0/100" earth là đọc được:
                 đã làm, chưa ăn điểm. */}
             <span
-              className={`num w-20 shrink-0 text-right font-mono text-[11px] ${
+              className={`num w-20 shrink-0 text-right font-mono text-[12px] ${
                 mine ? 'text-moss' : 'text-[var(--color-wa)]'
               }`}
             >

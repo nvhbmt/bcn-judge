@@ -53,8 +53,8 @@ export function CourseDetailPage() {
             >
               <ArrowLeft size={13} /> ~/khoá-học
             </Link>
-            <p className="num font-mono text-[12px] text-moss">{course.code}</p>
-            <h1 className="mt-2 font-display text-[30px] text-ink-1">{course.name}</h1>
+            <p className="num font-mono text-[14px] text-moss">{course.code}</p>
+            <h1 className="mt-2 font-display text-[32px] text-ink-1">{course.name}</h1>
           </div>
 
           {me && me.role !== 'member' ? (
@@ -68,7 +68,7 @@ export function CourseDetailPage() {
         </div>
 
         {course.descriptionMd ? (
-          <div className="mb-7 max-w-[660px] text-[15px] leading-[1.7] text-ink-4">
+          <div className="mb-7 max-w-[660px] text-[17px] leading-[1.7] text-ink-4">
             <Markdown source={course.descriptionMd} />
           </div>
         ) : null}

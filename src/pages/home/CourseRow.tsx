@@ -46,12 +46,12 @@ export function CourseRow({ course }: { course: CourseSummary }) {
       to={`/khoa-hoc/${course.id}`}
       className="grid grid-cols-[82px_1fr] items-center gap-4 bg-surface-2 px-[18px] py-4 transition-colors duration-[120ms] ease-linear hover:bg-surface-sel sm:grid-cols-[82px_1fr_180px_92px]"
     >
-      <span className="num font-mono text-[12px] text-moss">{course.code}</span>
+      <span className="num font-mono text-[14px] text-moss">{course.code}</span>
 
       <span className="min-w-0">
-        <span className="block truncate text-[15px] font-semibold text-ink-1">{course.name}</span>
+        <span className="block truncate text-[17px] font-semibold text-ink-1">{course.name}</span>
         {data ? (
-          <span className="num mt-[3px] block truncate font-mono text-[11px] text-ink-5">
+          <span className="num mt-[3px] block truncate font-mono text-[12px] text-ink-5">
             {sections} chương · {total} bài
             {course.mentorName ? ` · mentor ${course.mentorName}` : ''}
           </span>
@@ -62,15 +62,15 @@ export function CourseRow({ course }: { course: CourseSummary }) {
         <>
           <span className="hidden sm:block">
             <Segments percent={percent} />
-            <span className="num mt-1.5 block font-mono text-[11px] text-ink-5">
+            <span className="num mt-1.5 block font-mono text-[12px] text-ink-5">
               {ac}/{total} AC
             </span>
           </span>
-          <span className="num hidden text-right font-mono text-[12px] text-ink-4 sm:block">{percent}%</span>
+          <span className="num hidden text-right font-mono text-[14px] text-ink-4 sm:block">{percent}%</span>
         </>
       ) : (
         <>
-          <span className="num hidden font-mono text-[11px] text-ink-6 sm:block">chưa có bài</span>
+          <span className="num hidden font-mono text-[12px] text-ink-6 sm:block">chưa có bài</span>
           <span aria-hidden className="hidden sm:block" />
         </>
       )}

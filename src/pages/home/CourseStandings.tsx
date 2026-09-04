@@ -42,13 +42,13 @@ export function CourseStandings({ courseId, courseCode }: { courseId: string; co
       <RowGroup className="border-0">
         {rows.map((row) => (
           <Row key={row.userId} accent={row.isMe ? 'moss' : null} className="gap-3 px-2.5 py-2">
-            <span className={`num w-4 shrink-0 font-mono text-[12px] ${row.isMe ? 'text-moss' : 'text-ink-5'}`}>
+            <span className={`num w-4 shrink-0 font-mono text-[13px] ${row.isMe ? 'text-moss' : 'text-ink-5'}`}>
               {row.rank}
             </span>
-            <span className={`min-w-0 flex-1 truncate text-[12px] ${row.isMe ? 'font-semibold text-ink-1' : 'text-ink-2'}`}>
+            <span className={`min-w-0 flex-1 truncate text-[13px] ${row.isMe ? 'font-semibold text-ink-1' : 'text-ink-2'}`}>
               {row.isMe ? 'Bạn' : row.displayName}
             </span>
-            <span className={`num font-mono text-[12px] ${row.isMe ? 'text-ink-1' : 'text-ink-4'}`}>
+            <span className={`num font-mono text-[13px] ${row.isMe ? 'text-ink-1' : 'text-ink-4'}`}>
               {row.totalPoints}
             </span>
           </Row>

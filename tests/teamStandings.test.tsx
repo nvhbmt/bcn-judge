@@ -33,12 +33,14 @@ function ve(data: unknown) {
   render(<TeamStandings />, { wrapper })
 }
 
-const dong = async (khop: RegExp) => {
-  await waitFor(() => expect(screen.getAllByRole('row').length).toBeGreaterThan(1))
-  const r = screen.getAllByRole('row').find((x) => khop.test(x.textContent ?? ''))
-  if (!r) throw new Error(`không có hàng nào khớp ${khop}`)
-  return r
-}
+// Bảng KHÔNG còn <thead> (bản vẽ bỏ hàng tiêu đề cột), nên hàng đầu tiên đã là dữ
+// liệu — không được canh theo "nhiều hơn 1 hàng" như hồi còn hàng tiêu đề nữa.
+const dong = async (khop: RegExp) =>
+  await waitFor(() => {
+    const r = screen.getAllByRole('row').find((x) => khop.test(x.textContent ?? ''))
+    if (!r) throw new Error(`không có hàng nào khớp ${khop}`)
+    return r
+  })
 
 describe('BXH các team', () => {
   it('hiện hạng, tên, số bài AC và điểm', async () => {
@@ -62,8 +64,11 @@ describe('BXH các team', () => {
   it('team của mình được đánh dấu', async () => {
     ve([hang(), hang({ rank: 2, id: 't2', name: 'Nhóm Beta', isMine: true })])
     const r = await dong(/Nhóm Beta/)
-    expect(r.className).toContain('surface-sel')
-    expect((await dong(/Nhóm Alpha/)).className).not.toContain('surface-sel')
+    // `--primary-soft` chứ KHÔNG phải `--surface-sel`: bản tối hai token trùng giá
+    // trị nên đổi nhầm không lộ ra, còn bản sáng thì surface-sel là be trung tính
+    // chroma 0 — dòng của mình mất hẳn màu. Xem chú thích --primary-soft ở colors.css.
+    expect(r.className).toContain('primary-soft')
+    expect((await dong(/Nhóm Alpha/)).className).not.toContain('primary-soft')
   })
 
   it('chưa có team nào thì nói rõ, không dựng bảng rỗng', async () => {

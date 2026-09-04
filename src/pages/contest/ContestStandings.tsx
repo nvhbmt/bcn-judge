@@ -16,9 +16,6 @@ import { EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { ContestStandingRow } from './standings'
 
-const TH =
-  'px-2.5 py-2 font-mono text-[11px] font-normal tracking-[0.14em] whitespace-nowrap text-[var(--label)] uppercase'
-
 export function ContestStandings({
   contestId,
   problems,
@@ -45,29 +42,18 @@ export function ContestStandings({
   return (
     <table className="w-full border-collapse">
       <caption className="sr-only">Bảng xếp hạng contest</caption>
-      <thead>
-        <tr className="border-b border-line">
-          <th scope="col" className={`w-9 text-left ${TH}`}>
-            #
-          </th>
-          <th scope="col" className={`text-left ${TH}`}>
-            Thành viên
-          </th>
-          <th scope="col" className={`w-[4.75rem] text-right ${TH}`}>
-            Đã giải
-          </th>
-          <th scope="col" className={`w-14 text-right ${TH}`}>
-            Điểm
-          </th>
-        </tr>
-      </thead>
+      {/* KHÔNG có <thead>: bản vẽ bỏ hàng tiêu đề cột để bảng trong cột phải chỉ còn
+          dữ liệu. `<caption>` ở lại (sr-only) nên trình đọc màn hình vẫn biết đây là
+          bảng gì — bỏ cả caption mới là mất thông tin thật.
+          Đánh đổi đã biết: cột "Đã giải" nay đọc trần là `1/4`, không nhãn. Cần nhãn
+          thì gộp vào chính dòng ("1/4 bài · 188 đ"), đừng dựng lại hàng tiêu đề. */}
       <tbody>
         {data.map((row) => (
           <tr
             key={row.userId}
-            className={`border-b border-line ${row.isMe ? 'bg-surface-sel shadow-[inset_2px_0_0_var(--moss)]' : ''}`}
+            className={`border-b border-line ${row.isMe ? 'bg-[var(--primary-soft)] shadow-[inset_2px_0_0_var(--moss)]' : ''}`}
           >
-            <td className={`num px-2.5 py-2 font-mono text-[12px] ${row.isMe ? 'text-moss' : 'text-ink-5'}`}>
+            <td className={`num px-2.5 py-2 font-mono text-[13px] ${row.isMe ? 'text-moss' : 'text-ink-5'}`}>
               {row.rank}
             </td>
             {/* `max-w-0` + `truncate` là cách cắt chữ trong ô bảng: không có nó thì
@@ -79,13 +65,13 @@ export function ContestStandings({
             >
               {row.isMe ? 'Bạn' : row.displayName}
             </td>
-            <td className="num px-2.5 py-2 text-right font-mono text-[12px] whitespace-nowrap">
+            <td className="num px-2.5 py-2 text-right font-mono text-[13px] whitespace-nowrap">
               {/* Mẫu số mờ hơn tử số: số bài giải được mới là thứ so giữa các hàng,
                   còn tổng số bài thì cả bảng giống nhau. */}
               <span className={row.acCount > 0 ? 'text-ink-2' : 'text-ink-5'}>{row.acCount}</span>
               <span className="text-ink-6">/{problems.length}</span>
             </td>
-            <td className={`num px-2.5 py-2 text-right font-mono text-[12px] ${row.isMe ? 'text-ink-1' : 'text-ink-4'}`}>
+            <td className={`num px-2.5 py-2 text-right font-mono text-[13px] ${row.isMe ? 'text-ink-1' : 'text-ink-4'}`}>
               {Math.round(row.totalPoints)}
             </td>
           </tr>

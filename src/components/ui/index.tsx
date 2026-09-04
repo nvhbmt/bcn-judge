@@ -24,9 +24,9 @@ const VARIANT: Record<ButtonVariant, string> = {
 }
 
 const SIZE: Record<ButtonSize, string> = {
-  sm: 'px-[11px] py-[5px] text-[11px]',
-  md: 'px-[14px] py-[7px] text-[12px]',
-  lg: 'px-4 py-[9px] text-[13px]',
+  sm: 'px-[11px] py-[5px] text-[12px]',
+  md: 'px-[14px] py-1.5 text-[13px]',
+  lg: 'px-4 py-[9px] text-[14px]',
 }
 
 /**
@@ -155,12 +155,15 @@ export function SectionRule({
   const Heading = `h${level}` as 'h2' | 'h3' | 'h4'
   return (
     <div className="flex items-end gap-0">
-      <Heading className="pr-3 font-mono text-[11px] font-normal tracking-[0.14em] text-[var(--label)] uppercase">
+      {/* `rule-label` / `rule-line`: bản SÁNG tô nhãn moss, đậm hơn, và kẻ dày 2px.
+          Luật nằm ở src/index.css vì hai theme vẽ khác nhau chứ không chỉ đổi giá
+          trị token — xem chú thích ở đó. */}
+      <Heading className="rule-label pr-3 font-mono text-[12px] font-normal tracking-[0.14em] text-[var(--label)] uppercase">
         {label}
       </Heading>
-      <div aria-hidden className="h-px flex-1 bg-line" />
+      <div aria-hidden className="rule-line h-px flex-1 bg-line" />
       {meta ? (
-        <div className="num pl-3 font-mono text-[11px] text-ink-5">{meta}</div>
+        <div className="num pl-3 font-mono text-[12px] text-ink-5">{meta}</div>
       ) : (
         <div aria-hidden className="h-1.5 w-[18px] bg-line-strong" />
       )}

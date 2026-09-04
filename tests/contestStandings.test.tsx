@@ -45,20 +45,31 @@ function ve(rows: ContestStandingRow[], problems = BAI) {
   render(<ContestStandings contestId="c1" problems={problems} />, { wrapper })
 }
 
-const dong = async (khop: RegExp) => {
-  await waitFor(() => expect(screen.getAllByRole('row').length).toBeGreaterThan(1))
-  const r = screen.getAllByRole('row').find((x) => khop.test(x.textContent ?? ''))
-  if (!r) throw new Error(`không có hàng nào khớp ${khop}`)
-  return r
-}
+// Bảng KHÔNG còn <thead> (bản vẽ bỏ hàng tiêu đề cột), nên hàng đầu tiên đã là dữ
+// liệu — không được canh theo "nhiều hơn 1 hàng" như hồi còn hàng tiêu đề nữa.
+const dong = async (khop: RegExp) =>
+  await waitFor(() => {
+    const r = screen.getAllByRole('row').find((x) => khop.test(x.textContent ?? ''))
+    if (!r) throw new Error(`không có hàng nào khớp ${khop}`)
+    return r
+  })
 
 describe('bảng xếp hạng contest', () => {
   it('mười bài vẫn CHỈ bốn cột — thêm bài không được bóp cột tên', async () => {
     ve([hang({})])
+    const r = await dong(/Phạm Minh Phong/)
+
+    // Đếm Ô của chính hàng dữ liệu chứ không đếm tiêu đề cột: bảng nay không có
+    // <thead>, mà điều cần canh vẫn nguyên — thêm bài không được đẻ thêm cột.
+    expect(within(r).getAllByRole('cell')).toHaveLength(4)
+  })
+
+  it('bỏ hàng tiêu đề nhưng GIỮ caption — trình đọc màn hình còn biết đây là bảng gì', async () => {
+    ve([hang({})])
     await dong(/Phạm Minh Phong/)
 
-    const dau = screen.getAllByRole('columnheader').map((h) => h.textContent?.trim())
-    expect(dau).toEqual(['#', 'Thành viên', 'Đã giải', 'Điểm'])
+    expect(screen.queryAllByRole('columnheader')).toHaveLength(0)
+    expect(screen.getByRole('table', { name: /xếp hạng contest/i })).toBeInTheDocument()
   })
 
   it('hiện số bài đã giải trên tổng số, và điểm', async () => {

@@ -84,3 +84,44 @@
   cursor: row-resize;
   touch-action: none;
 }
+
+/* SectionRule ở bản SÁNG: nhãn tô moss và đậm hơn, đường kẻ dày 2px thay vì 1px.
+   Vì sao chỉ bản sáng: trên nền kem, nhãn mực nhạt TỐI hơn nền — cùng hướng với chữ
+   thường — nên đầu mục chìm xuống dưới chính khối chữ nó dẫn (cùng lỗi đã ghi ở
+   --label trong tokens/colors.css). Chữa bằng màu và độ dày, tức bằng DIỆN TÍCH,
+   không phải bằng cỡ chữ. Bản tối giữ nguyên: ở đó moss sáng hơn nền nên nhãn moss
+   sẽ tranh chỗ với verdict AC vốn cũng là moss. */
+[data-theme='light'] .rule-label {
+  color: var(--moss);
+  font-weight: var(--weight-semibold);
+}
+
+[data-theme='light'] .rule-line {
+  height: 2px;
+}
+
+/* Chip độ khó của bài (StatementPanel). Cùng lý do như trên — hai theme vẽ khác nhau
+   chứ không chỉ đổi giá trị token, nên là một luật CSS chứ không đẻ ra chín token màu:
+     - nền tối: wash mờ + viền + chữ mang màu — màu sáng hơn nền nên tự nổi lên;
+     - nền sáng: khối ĐẶC, chữ --on-accent. Trên nền kem thì wash đọc ra là mực nhạt,
+       đúng cái lỗi "hoà tan" đã ghi ở design-system/readme.md; cách chữa của hệ là
+       tăng diện tích màu, và đây là bản vẽ màn 03 làm đúng vậy.
+
+   Viền GIỮ NGUYÊN ở bản sáng, chỉ tô cùng màu nền nên coi như không có: bản vẽ bỏ
+   viền rồi bù 1px vào padding, làm vậy thì phải nuôi hai bộ padding cho cùng một ô.
+   Cách này cho ra đúng kích thước hộp mà chỗ gọi chỉ cần truyền màu.
+
+   Màu do chỗ gọi truyền vào, BA biến: --chip (chữ + viền bản tối), --chip-soft (wash
+   bản tối) và --chip-solid (nền đặc bản sáng). Tách --chip-solid ra vì mức trung bình
+   đổi hue giữa hai theme — xem DIFFICULTY_TINT trong StatementPanel.tsx. */
+.chip-do-kho {
+  background: var(--chip-soft);
+  color: var(--chip);
+  border-color: var(--chip);
+}
+
+[data-theme='light'] .chip-do-kho {
+  background: var(--chip-solid);
+  color: var(--on-accent);
+  border-color: var(--chip-solid);
+}

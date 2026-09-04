@@ -45,7 +45,7 @@ function PromptInput({
           sáng thuộc về cả dòng (dấu nhắc + ô + nút hiện), và với ô văn bản thì hiện
           vòng sáng cả khi bấm chuột là đúng — khác nút bấm. */}
       <div className="flex items-center gap-2.5 border-b border-line-strong pb-2.5 focus-within:border-moss">
-        <span aria-hidden className="font-mono text-[15px] text-moss">
+        <span aria-hidden className="font-mono text-[16px] text-moss">
           &gt;
         </span>
         <input
@@ -55,7 +55,7 @@ function PromptInput({
           onChange={(e) => onChange(e.target.value)}
           autoComplete={autoComplete}
           required
-          className="w-full bg-transparent font-mono text-[15px] text-ink-1 outline-none"
+          className="w-full bg-transparent font-mono text-[16px] text-ink-1 outline-none"
         />
         {trailing}
       </div>
@@ -92,10 +92,10 @@ export function LoginPage() {
           <p className="mb-2.5 font-mono text-[11px] tracking-[0.14em] text-[var(--label)] uppercase">
             Đăng nhập
           </p>
-          <h1 className="mb-2 font-display text-[26px] text-ink-1">
+          <h1 className="mb-2 font-display text-[28px] text-ink-1">
             Xin chào, coder.
           </h1>
-          <p className="mb-9 text-[14px] leading-[1.6] text-ink-4">
+          <p className="mb-9 text-[15px] leading-[1.6] text-ink-4">
             Chưa có tài khoản? Liên hệ ngay các mentor để được cấp tài khoản.
           </p>
 
@@ -146,7 +146,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={busy}
-            className="flex w-full items-center justify-center gap-2.5 bg-[var(--moss-solid,var(--moss))] px-4 py-4 font-mono text-[14px] font-semibold tracking-[0.04em] text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5"
+            className="flex w-full items-center justify-center gap-2.5 bg-[var(--moss-solid,var(--moss))] px-4 py-4 font-mono text-[15px] font-semibold tracking-[0.04em] text-on-accent uppercase transition-opacity duration-[120ms] ease-linear hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-5"
           >
             {busy ? "Đang đăng nhập…" : "Đăng nhập"}
             {busy ? null : (

@@ -41,7 +41,7 @@ export function TeamPage() {
   if (isError) {
     return (
       <Shell>
-        <h1 className="font-display text-[28px] text-ink-1">Team</h1>
+        <h1 className="font-display text-[30px] text-ink-1">Team</h1>
         <EmptyState title="Không đọc được thông tin team" hint="Tải lại trang, hoặc báo mentor nếu vẫn lỗi." />
       </Shell>
     )
@@ -52,7 +52,7 @@ export function TeamPage() {
       <Shell>
         {/* Vẫn phải có h1: màn hình không tiêu đề thì người dùng trình đọc màn
             hình không biết mình đang ở đâu, và tab trình duyệt cũng vô danh. */}
-        <h1 className="font-display text-[28px] text-ink-1">Team</h1>
+        <h1 className="font-display text-[30px] text-ink-1">Team</h1>
         <EmptyState title="Bạn chưa thuộc team nào" hint="Quản lý viên sẽ xếp bạn vào team." />
       </Shell>
     )
@@ -63,14 +63,14 @@ export function TeamPage() {
     <Shell>
       <header className="mb-7">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-[28px] text-ink-1">{team.name}</h1>
+          <h1 className="font-display text-[30px] text-ink-1">{team.name}</h1>
           {team.isLeader ? (
-            <span className="border border-brass px-2.5 py-1 font-mono text-[11px] tracking-[0.06em] text-brass uppercase">
+            <span className="border border-brass px-2.5 py-1 font-mono text-[12px] tracking-[0.06em] text-brass uppercase">
               Bạn là leader
             </span>
           ) : null}
         </div>
-        <p className="num mt-2 font-mono text-[12px] text-ink-5">
+        <p className="num mt-2 font-mono text-[13px] text-ink-5">
           {team.members.length} thành viên
           {team.createdAt ? ` · lập ${new Date(team.createdAt).toLocaleDateString('vi-VN')}` : ''}
         </p>

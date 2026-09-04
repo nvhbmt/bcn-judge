@@ -25,12 +25,30 @@ Ba luật, ép ở `src/components/ui/index.tsx` vì đó là chỗ mọi màn h
 Trung tính **ấm** (không phải `slate`) + hai màu điểm: xanh rêu `--moss` (xong / đang
 mở) và nâu đất `--earth` / `--clay` (cần chú ý). Giá trị thật ở `tokens/colors.css`.
 
-Ngưỡng cứng, đo trên nền xấu nhất mỗi theme (tối: `--surface-sel`, sáng: `--surface-0`):
-
 | Bậc | Vai trò | Ngưỡng |
 |---|---|---|
 | `--ink-1` … `--ink-6` | chữ mang thông tin | **≥ 4.5:1** |
 | `--ink-7` | CHỈ trang trí — đường phân cách, chấm | không đặt chữ |
+
+### Đo ở đâu — ba luật cứng
+
+**1 · Nền xấu nhất là mặt phẳng ĐANG CHỌN, không phải `--surface-0`.**
+Bốn mặt phẳng phải đo lại sau MỌI lần đụng vào thang nền: `--surface-sel` (tối) /
+`--primary-soft` (sáng), cộng hai wash `--tint-earth` và `--tint-clay`. Nền trang là
+mặt phẳng dễ nhất, đo ở đó rồi kết luận "đạt" là tự lừa mình. Riêng `--clay` còn phải
+đọc được **trên chính `--tint-clay`** — huy hiệu WA cấp `soft` đặt đúng cặp đó.
+`tests/lightAccents.test.ts` canh cả bốn, đọc thẳng từ file token; wash bản tối có
+alpha nên phải hợp lên `--surface-2` rồi mới đo.
+
+**2 · `--panel-head` chỉ nhận `--ink-3`.**
+Dải đã sơn đậm (1.81:1 so với `--surface-2` ở bản tối, 1.83:1 ở bản sáng) nên `--ink-4`
+tụt xuống 3.84:1 và `--ink-5` xuống 3.41:1 — dưới ngưỡng cho chữ mono 11px. Áp cho cả
+chữ `meta` ở mép phải dải, chỗ duy nhất trong app mà chú thích không dùng `--ink-5`.
+
+**3 · `--ink-7` là bậc trang trí, không đặt chữ — kể cả chữ đã tắt.**
+Số dòng của editor, mục "bài trước / bài sau" khi không có bài kề, nhãn của điều khiển
+đã tắt: tất cả là chữ MANG THÔNG TIN, bậc thấp nhất chúng được phép xuống là `--ink-6`.
+Cùng một chuyện với luật ngay dưới đây.
 
 Hệ quả thực tế đã gặp: `disabled:opacity-40/50/60` kéo tương phản xuống 2,33–3,99:1 nên
 **không dùng opacity để làm mờ điều khiển đã tắt** — đổi màu chữ sang `--ink-5` và làm

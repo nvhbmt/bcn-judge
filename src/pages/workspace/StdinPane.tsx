@@ -66,7 +66,7 @@ export function StdinPane({
               : 'Gõ dữ liệu vào ở đây, đúng định dạng đề mô tả.'
           }
           spellCheck={false}
-          className="min-h-0 resize-none bg-surface-editor px-2.5 py-2 font-mono text-[12px] text-ink-2 placeholder:text-ink-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-moss"
+          className="min-h-0 resize-none bg-surface-editor px-2.5 py-2 font-mono text-[13px] text-ink-2 placeholder:text-ink-6 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-moss"
         />
         <div className="min-h-0 overflow-auto bg-surface-editor px-2.5 py-2">
           <Output busy={busy === 'run' || pending} result={result} />
@@ -84,7 +84,7 @@ function Output({ busy, result }: { busy: boolean; result: SubmissionView | null
     return (
       <div>
         <Label tone="wa">lỗi biên dịch</Label>
-        <pre className="mt-1 font-mono text-[12px] whitespace-pre-wrap text-ink-2">{result.compileOutput}</pre>
+        <pre className="mt-1 font-mono text-[13px] whitespace-pre-wrap text-ink-2">{result.compileOutput}</pre>
       </div>
     )
   }
@@ -104,14 +104,14 @@ function Output({ busy, result }: { busy: boolean; result: SubmissionView | null
         </span>
       </div>
 
-      <pre className="font-mono text-[12px] break-all whitespace-pre-wrap text-ink-2">
+      <pre className="font-mono text-[13px] break-all whitespace-pre-wrap text-ink-2">
         {r.stdout ? r.stdout : <span className="text-ink-6">(rỗng)</span>}
       </pre>
 
       {r.stderr ? (
         <div className="border-t border-line pt-1.5">
           <Label tone="wa">stderr</Label>
-          <pre className="mt-1 font-mono text-[12px] break-all whitespace-pre-wrap text-[var(--color-wa)]">
+          <pre className="mt-1 font-mono text-[13px] break-all whitespace-pre-wrap text-[var(--color-wa)]">
             {r.stderr}
           </pre>
         </div>

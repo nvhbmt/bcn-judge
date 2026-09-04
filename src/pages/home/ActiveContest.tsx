@@ -64,10 +64,10 @@ export function ActiveContest() {
   return (
     <SidePanel label={running ? 'Đang diễn ra' : 'Sắp diễn ra'} tone={running ? 'earth' : 'moss'}>
       <Link to={`/contest/${contest.id}`} className="block hover:underline">
-        <p className="text-[16px] font-semibold text-ink-1">{contest.title}</p>
+        <p className="text-[20px] font-semibold text-ink-1">{contest.title}</p>
       </Link>
 
-      <p className={`num mt-3 font-mono text-[34px] leading-none font-semibold tracking-[-0.02em] ${running ? 'text-earth' : 'text-ink-2'}`}>
+      <p className={`num mt-3 font-mono text-[42px] leading-none font-semibold tracking-[-0.02em] ${running ? 'text-earth' : 'text-ink-2'}`}>
         {left ?? '—'}
       </p>
 

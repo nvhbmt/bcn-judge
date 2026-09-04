@@ -57,15 +57,16 @@ export function EditorPane({
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* `min-h` chứ không `h`: chiều cao khớp dòng tiêu đề khung nội dung
-          (`--panel-header-h`), nhưng khung này có `flex-wrap` nên trên bề ngang rất
-          hẹp nó phải được PHÉP cao thêm. Ghim cứng thì nút "Nộp bài" bị cắt mất —
-          lệch vài pixel còn đỡ hơn mất nút. */}
-      <div className="flex min-h-[var(--panel-header-h)] shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
+          (`--panel-header-h`), và nay là chiều cao CỐ ĐỊNH chứ không phải `min-h`:
+          để nó co giãn thì nội dung đẩy thanh editor cao hơn thanh bên trái vài
+          pixel và cả màn hình trông như so le — đúng thứ biến chung này sinh ra để
+          tránh. Nút trong thanh dùng cỡ `md` (đệm dọc 6px) nên 47px vẫn đủ chỗ. */}
+      <div className="flex h-[var(--panel-header-h)] shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
         <select
           aria-label="Ngôn ngữ"
           value={languageId}
           onChange={(e) => onLanguage(e.target.value)}
-          className="border border-line-strong py-1 pr-7 pl-2 font-mono text-xs"
+          className="border border-line-strong py-1 pr-7 pl-2 font-mono text-[13px]"
         >
           {languages.map((l) => (
             <option key={l.id} value={l.id}>

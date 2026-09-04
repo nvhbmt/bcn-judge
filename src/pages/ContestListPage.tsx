@@ -59,8 +59,8 @@ export function ContestListPage() {
 
   return (
     <PageContainer>
-      <h1 className="mb-1 font-display text-[26px] text-ink-1">Contest</h1>
-      <p className="mb-6 text-[13px] text-ink-5">
+      <h1 className="mb-1 font-display text-[28px] text-ink-1">Contest</h1>
+      <p className="mb-6 text-[14px] text-ink-5">
         Bài nộp trong khung thời gian mới tính vào bảng xếp hạng.
       </p>
 
@@ -82,13 +82,13 @@ export function ContestListPage() {
                 style={{ background: PHASE_COLOR[c.phase] }}
               />
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-display text-[16px] text-ink-1">{c.title}</span>
-                <span className="num mt-0.5 block font-mono text-[11px] text-ink-5">
+                <span className="block truncate font-display text-[17px] text-ink-1">{c.title}</span>
+                <span className="num mt-0.5 block font-mono text-[12px] text-ink-5">
                   {when(c.startAt)} → {when(c.endAt)} · {c.problemCount} bài
                 </span>
               </span>
               <span
-                className="shrink-0 font-mono text-[11px] tracking-[0.06em]"
+                className="shrink-0 font-mono text-[12px] tracking-[0.06em]"
                 style={{ color: PHASE_COLOR[c.phase] }}
               >
                 {PHASE_LABEL[c.phase]}
@@ -100,7 +100,7 @@ export function ContestListPage() {
 
       <div className="mt-8">
         <SectionRule label="Cách tính điểm" />
-        <p className="mt-3 text-[13px] leading-[1.65] text-ink-4">
+        <p className="mt-3 text-[14px] leading-[1.65] text-ink-4">
           Điểm mỗi bài bằng tỉ lệ testcase đúng nhân điểm tối đa của bài. Bảng xếp hạng lấy lần nộp
           tốt nhất trong khung thời gian, không phải lần nộp cuối.
         </p>
