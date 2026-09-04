@@ -18,7 +18,7 @@ import type { ContestBody } from './useContests'
 export interface ContestFormValues {
   title: string
   descriptionMd: string
-  /** null = toàn câu lạc bộ (chỉ admin đặt được, server trả 403 cho mentor). */
+  /** null = toàn ban (chỉ admin đặt được, server trả 403 cho mentor). */
   courseId: string | null
   startAt: string
   endAt: string

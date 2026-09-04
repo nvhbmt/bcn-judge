@@ -88,7 +88,7 @@ export function NewProblemForm({ onCancel }: { onCancel: () => void }) {
           aria-describedby="new-scope-hint"
           onChange={(e) => setScopeCourseId(e.target.value)}
         >
-          <option value="">Ngân hàng chung của câu lạc bộ</option>
+          <option value="">Ngân hàng chung của ban</option>
           {(courses ?? []).map((c) => (
             <option key={c.id} value={c.id}>
               {c.code} — {c.name}

@@ -37,7 +37,7 @@ export function ContestCard({
 
       <p className="mt-1 text-sm text-ink-5">
         {formatDateTime(row.startAt)} → {formatDateTime(row.endAt)} · {row.problemCount} bài ·{' '}
-        {row.courseId ? 'theo khoá' : 'toàn câu lạc bộ'}
+        {row.courseId ? 'theo khoá' : 'toàn ban'}
         {row.freezeMinutes > 0 ? ` · đóng băng ${row.freezeMinutes} phút cuối` : ''}
       </p>
 

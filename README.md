@@ -1,6 +1,6 @@
 # BCN Judge
 
-Hệ thống chấm bài tập lập trình nội bộ của câu lạc bộ: quản lý viên đăng bài theo khoá học,
+Hệ thống chấm bài tập lập trình nội bộ của ban: quản lý viên đăng bài theo khoá học,
 thành viên code trên trình duyệt, chấm tự động bằng testcase, contest theo tuần có bảng xếp hạng.
 
 - Yêu cầu: [`docs/requirements.md`](docs/requirements.md) (v0.7)
@@ -344,7 +344,7 @@ P0 phải chạy trước mọi thứ khác.
 7. **`run.sh` nuốt sạch stderr của trình biên dịch** vì thứ tự chuyển hướng ngược:
    `2>/dev/null >&2` đặt fd2 vào `/dev/null` **trước**, rồi `>&2` nhân bản fd2 đó vào
    fd1 — cả hai cùng trỏ `/dev/null`. Hệ quả: **mọi bài CE trong toàn hệ thống chỉ
-   hiện "Biên dịch thất bại."**, không nói sai ở đâu. Với câu lạc bộ dạy C cho người
+   hiện "Biên dịch thất bại."**, không nói sai ở đâu. Với ban dạy C cho người
    mới, đây là hỏng ở đúng chỗ đau nhất. Test cũ không bắt được vì chỉ kiểm
    `compileOutput.length > 0`, mà chính chuỗi dự phòng cũng thoả điều kiện đó.
 

@@ -46,7 +46,7 @@ export function ContestForm({
     // Chặn sớm cái server sẽ trả 403, để mentor thấy lý do bằng tiếng người thay vì
     // "Không có quyền thực hiện." sau một vòng mạng.
     if (values.courseId === null && !canPickClub) {
-      return setError('Chọn một khoá học — chỉ admin tạo được contest toàn câu lạc bộ.')
+      return setError('Chọn một khoá học — chỉ admin tạo được contest toàn ban.')
     }
     setError(null)
     onSubmit(
@@ -74,7 +74,7 @@ export function ContestForm({
           mode === 'edit'
             ? 'Không đổi được sau khi tạo: câu UPDATE của server không ghi cột phạm vi.'
             : canPickClub
-              ? 'Toàn câu lạc bộ = mọi member đều thấy.'
+              ? 'Toàn ban = mọi member đều thấy.'
               : 'Mentor chỉ tạo được contest cho khoá mình phụ trách.'
         }
       >
@@ -85,7 +85,7 @@ export function ContestForm({
           aria-describedby={`${ids.course}-hint`}
           onChange={(e) => set('courseId', e.currentTarget.value === '' ? null : e.currentTarget.value)}
         >
-          <option value="">{canPickClub ? 'Toàn câu lạc bộ' : '— Chọn khoá —'}</option>
+          <option value="">{canPickClub ? 'Toàn ban' : '— Chọn khoá —'}</option>
           {courses.map((c) => (
             <option key={c.id} value={c.id}>
               {c.code} — {c.name}

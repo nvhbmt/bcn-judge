@@ -10,7 +10,7 @@
 
 ## 1. Tóm tắt
 
-BCN Judge là hệ thống chấm bài tập lập trình nội bộ của câu lạc bộ. Quản lý viên (admin, mentor) tổ chức bài tập theo **khoá học**; thành viên làm bài trên một màn hình gồm **thanh icon điều hướng bên trái**, **khung nội dung ở giữa** và **khung soạn code bên phải** với vạch chia kéo được, chạy thử rồi nộp bài để hệ thống **chấm tự động bằng testcase**. Mỗi tuần câu lạc bộ mở một **contest** — một chuỗi bài tập trong khung thời gian nhất định, có bảng xếp hạng. Thành viên được tổ chức thành các **team**, mỗi team có một **leader** theo dõi tiến độ và bài nộp của team mình.
+BCN Judge là hệ thống chấm bài tập lập trình nội bộ của ban. Quản lý viên (admin, mentor) tổ chức bài tập theo **khoá học**; thành viên làm bài trên một màn hình gồm **thanh icon điều hướng bên trái**, **khung nội dung ở giữa** và **khung soạn code bên phải** với vạch chia kéo được, chạy thử rồi nộp bài để hệ thống **chấm tự động bằng testcase**. Mỗi tuần ban mở một **contest** — một chuỗi bài tập trong khung thời gian nhất định, có bảng xếp hạng. Thành viên được tổ chức thành các **team**, mỗi team có một **leader** theo dõi tiến độ và bài nộp của team mình.
 
 Ba việc hệ thống phải làm tốt:
 
@@ -42,9 +42,9 @@ Mỗi tài khoản có đúng một vai trò hệ thống. Mentor chỉ có quy�
 
 | Vai trò | Là ai | Việc chính |
 |---|---|---|
-| **Admin** | BCN / người vận hành | Cấp tài khoản, gán vai trò, tạo khoá, gán mentor, tạo contest toàn câu lạc bộ, cấu hình ngôn ngữ chấm và giới hạn, theo dõi hàng đợi chấm |
+| **Admin** | BCN / người vận hành | Cấp tài khoản, gán vai trò, tạo khoá, gán mentor, tạo contest toàn ban, cấu hình ngôn ngữ chấm và giới hạn, theo dõi hàng đợi chấm |
 | **Mentor** | Người hướng dẫn một hoặc nhiều khoá | Soạn chương, bài đọc, bài tập, testcase; tạo contest trong khoá mình; ghi danh member; xem bài nộp và tiến độ |
-| **Member** | Thành viên câu lạc bộ | Vào khoá đã ghi danh, đọc nội dung, code, chạy thử, nộp bài, thi contest, xem lịch sử và bảng xếp hạng. Nếu là **leader**: thêm quyền xem tiến độ và bài nộp của thành viên team mình |
+| **Member** | Thành viên ban | Vào khoá đã ghi danh, đọc nội dung, code, chạy thử, nộp bài, thi contest, xem lịch sử và bảng xếp hạng. Nếu là **leader**: thêm quyền xem tiến độ và bài nộp của thành viên team mình |
 
 ### Ma trận quyền
 
@@ -76,13 +76,13 @@ Mỗi tài khoản có đúng một vai trò hệ thống. Mentor chỉ có quy�
 - **Bài đọc (Lesson)** — nội dung lý thuyết (Markdown, code block, ảnh, công thức).
 - **Bài tập (Problem)** — đề bài, mô tả input/output, ràng buộc, ví dụ, giới hạn thời gian và bộ nhớ, ngôn ngữ cho phép, code khởi tạo, lời giải tham khảo, danh sách testcase. Một bài có thể xuất hiện trong nhiều khoá và nhiều contest.
 - **Testcase** — một cặp *input / expected output*, thuộc loại **mẫu** (member thấy được) hoặc **ẩn**, có trọng số điểm và thứ tự.
-- **Contest** — một chuỗi bài tập có thứ tự, có thời điểm bắt đầu và kết thúc (mặc định một tuần), thuộc một khoá học hoặc toàn câu lạc bộ; có bảng xếp hạng.
+- **Contest** — một chuỗi bài tập có thứ tự, có thời điểm bắt đầu và kết thúc (mặc định một tuần), thuộc một khoá học hoặc toàn ban; có bảng xếp hạng.
 - **Bảng xếp hạng (Standings)** — thứ hạng member trong một contest (tính từ các bài nộp trong khung thời gian contest) hoặc trong một khoá học (số bài AC, tổng điểm tích luỹ).
 - **Lượt chạy thử (Run)** — biên dịch và chạy code với testcase mẫu hoặc input tự nhập. Không tính là nộp bài, không lưu vào lịch sử.
 - **Bài nộp (Submission)** — source code của member cho một bài tập, được chấm trên **toàn bộ** testcase; lưu lâu dài kèm kết quả từng testcase (thời hạn tối thiểu theo NFR-7); có thể gắn với một contest.
 - **Verdict** — kết quả chấm: `AC` đúng, `WA` sai đáp án, `TLE` quá thời gian, `MLE` quá bộ nhớ, `RE` lỗi runtime, `CE` lỗi biên dịch, `IE` lỗi hệ thống (không phải lỗi của member), cùng hai trạng thái tạm `PENDING` / `RUNNING`.
 - **Ghi danh (Enrollment)** — quan hệ member ↔ khoá học.
-- **Team (Nhóm)** — nhóm thành viên cấp câu lạc bộ; mỗi member thuộc **tối đa một team**. Mỗi team có đúng một **Leader** — một member trong team, do admin gán, có thêm quyền xem tiến độ và bài nộp của team mình.
+- **Team (Nhóm)** — nhóm thành viên cấp ban; mỗi member thuộc **tối đa một team**. Mỗi team có đúng một **Leader** — một member trong team, do admin gán, có thêm quyền xem tiến độ và bài nộp của team mình.
 - **Tiến độ** — với mỗi cặp (member, bài tập): *Chưa làm / Đã thử / Đã AC*, suy ra từ bài nộp tốt nhất.
 
 ## 5. Yêu cầu chức năng
@@ -192,7 +192,7 @@ Mức ưu tiên: **M** = bắt buộc trong v1 · **S** = nên có trong v1 nế
 
 | ID | Ưu tiên | Yêu cầu |
 |---|:-:|---|
-| FR-I1 | M | Contest là một **chuỗi bài tập có thứ tự** với thời điểm bắt đầu và kết thúc (mặc định 7 ngày), thuộc một khoá học **hoặc** toàn câu lạc bộ (mọi member). Trạng thái suy ra từ thời gian: *Sắp diễn ra / Đang diễn ra / Đã kết thúc*. |
+| FR-I1 | M | Contest là một **chuỗi bài tập có thứ tự** với thời điểm bắt đầu và kết thúc (mặc định 7 ngày), thuộc một khoá học **hoặc** toàn ban (mọi member). Trạng thái suy ra từ thời gian: *Sắp diễn ra / Đang diễn ra / Đã kết thúc*. |
 | FR-I2 | M | Mentor (trong khoá) hoặc admin (toàn CLB) tạo contest: tên, mô tả, khung thời gian, chọn bài từ khoá hoặc ngân hàng bài (hoặc soạn bài mới), đặt thứ tự và điểm tối đa mỗi bài. Contest ở trạng thái Nháp cho tới khi xuất bản. |
 | FR-I3 | M | Trước giờ bắt đầu, member thấy contest trong danh sách (tên, khung thời gian, số bài, đếm ngược) và vào được màn hình contest: khung đầu hiển thị Mô tả contest kèm đếm ngược, Giáo trình hiển thị số bài ở trạng thái khoá, khung editor trống — nhưng **không thấy đề**; server không bao giờ trả đề trước thời điểm bắt đầu. Đề hiển thị trong vòng ≤ 5 giây sau thời điểm bắt đầu mà không cần reload. |
 | FR-I4 | M | Trong contest, member làm bài bằng đúng màn hình split view; bài nộp gắn với contest. Chỉ bài nộp **trong khung thời gian** mới tính vào bảng xếp hạng. |
@@ -338,7 +338,7 @@ Kết luận khả thi: khoảng **một phần ba** v1 (tài khoản, khoá, gh
 
 | # | Câu hỏi | Giả định hiện tại |
 |---|---|---|
-| Q12 ★ | Contest thuộc **khoá học** hay **toàn câu lạc bộ**, hay cần cả hai? | Cả hai (FR-I1) |
+| Q12 ★ | Contest thuộc **khoá học** hay **toàn ban**, hay cần cả hai? | Cả hai (FR-I1) |
 | Q13 ★ | Cách xếp hạng: **tổng điểm + thời điểm đạt** (giả định), hay kiểu ICPC (số bài AC + penalty mỗi lần sai)? | Tổng điểm, hoà xét thời điểm (FR-I5) |
 | Q14 ★ | Contest kéo dài **cả tuần** (làm lúc nào cũng được) hay có **giờ thi tập trung** 2–3 tiếng? Ảnh hưởng tải cao điểm và tính năng đóng băng bảng xếp hạng. | Cả tuần |
 | Q15 | "Chuỗi bài tập" có nghĩa **mở tuần tự** (AC bài trước mới mở bài sau) không? | Không bắt buộc; là tuỳ chọn per contest (FR-I8) |
@@ -349,7 +349,7 @@ Kết luận khả thi: khoảng **một phần ba** v1 (tài khoản, khoá, gh
 | Q9 | Bài tập có dùng chung giữa nhiều khoá / contest (ngân hàng bài) không? | S — cần cho contest nên gần như M |
 | Q11 | Có cần hỗ trợ bài "tương tác" (đọc stdin từng dòng) hay chỉ batch stdin → stdout? | Chỉ batch |
 | Q16 | Dự kiến tăng trưởng member 1–2 năm tới? Số mentor, admin thực tế? | Dự phòng tới 300 member; vài mentor, 1–3 admin |
-| Q17 ★ | Team thuộc **toàn câu lạc bộ** hay theo **từng khoá học**? Một member có thể thuộc nhiều team không? Leader do admin gán hay mentor cũng gán được? | Toàn CLB; mỗi member ≤ 1 team; admin gán (FR-J1) |
+| Q17 ★ | Team thuộc **toàn ban** hay theo **từng khoá học**? Một member có thể thuộc nhiều team không? Leader do admin gán hay mentor cũng gán được? | Toàn CLB; mỗi member ≤ 1 team; admin gán (FR-J1) |
 
 ## 11. Bước tiếp theo
 

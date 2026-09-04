@@ -51,7 +51,7 @@ export function TeamStandings() {
 
   return (
     <table className="w-full border-collapse">
-      <caption className="sr-only">Xếp hạng các team trong câu lạc bộ</caption>
+      <caption className="sr-only">Xếp hạng các team trong ban</caption>
       <thead>
         <tr className="border-b border-line">
           <th scope="col" className={`w-9 text-left ${TH}`}>

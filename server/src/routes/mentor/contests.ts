@@ -56,7 +56,7 @@ mentorContestRoutes.post('/', async (c) => {
   const d = body.data
 
   if (d.courseId == null && me.role !== 'admin') {
-    return errors.forbidden(c, 'Chỉ admin tạo được contest toàn câu lạc bộ.')
+    return errors.forbidden(c, 'Chỉ admin tạo được contest toàn ban.')
   }
   if (d.courseId && !(await isCourseStaff(me, d.courseId))) {
     return errors.notFound(c, 'Không tìm thấy khoá học.')
