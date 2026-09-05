@@ -23,16 +23,14 @@ import { api, ApiFailure } from '@/lib/api'
 import { ValidationBadge, validationState } from '@/pages/mentor/badges'
 import { Notice } from '@/pages/mentor/fields'
 import { toFormValues, toPatchPayload, validateForm, type ProblemFormValues } from '@/pages/mentor/form'
-import { ProblemForm } from './ProblemForm'
+import { EditorTabs, type EditorTabId } from './EditorTabs'
 import { StatementPreview } from './StatementPreview'
-import { TestcasePanel } from './TestcasePanel'
 import type { MentorProblemDetail, ProblemDetailMeta } from '@/pages/mentor/types'
-import { cn } from '@/lib/cn'
 
 export function ProblemEditorPage() {
   const { problemId } = useParams()
   const client = useQueryClient()
-  const [tab, setTab] = useState<'de-bai' | 'testcase'>('de-bai')
+  const [tab, setTab] = useState<EditorTabId>('de-bai')
   const [initial, setInitial] = useState<ProblemFormValues | null>(null)
   const [values, setValues] = useState<ProblemFormValues | null>(null)
   const [saving, setSaving] = useState(false)
@@ -127,47 +125,17 @@ export function ProblemEditorPage() {
           defaultRatio={0.55}
           minPx={360}
           left={
-            <div className="flex h-full min-h-0 flex-col">
-              <div
-                role="tablist"
-                className="flex shrink-0 gap-1 border-b border-line px-2 pt-1"
-              >
-                <EditorTab id="de-bai" active={tab} onTab={setTab}>
-                  Đề bài
-                </EditorTab>
-                <EditorTab id="testcase" active={tab} onTab={setTab}>
-                  {`Testcase (${detail.testcases.length})`}
-                </EditorTab>
-
-              </div>
-              {/* Cả hai thẻ luôn mount, chỉ ẩn bằng CSS — cùng kỷ luật với SplitPane
-                  lúc thu gọn khung ("nội dung khung phải sống qua thu gọn/mở lại").
-                  Đổi thẻ mà unmount thì bảng testcase đang gõ dở và lịch sử undo của
-                  ô lời giải biến mất, im lặng, đúng lúc mentor đang soạn dở. */}
-              <div className="min-h-0 flex-1 overflow-auto">
-                <div id="panel-de-bai" role="tabpanel" aria-labelledby="tab-de-bai" hidden={tab !== 'de-bai'} inert={tab !== 'de-bai'}>
-                  <ProblemForm values={values} onChange={(p) => setValues({ ...values, ...p })} />
-                </div>
-                <div
-                  id="panel-testcase"
-                  role="tabpanel"
-                  aria-labelledby="tab-testcase"
-                  hidden={tab !== 'testcase'}
-                  inert={tab !== 'testcase'}
-                >
-                  <TestcasePanel
-                    problemId={detail.id}
-                    testcaseRev={detail.testcaseRev}
-                    testcases={detail.testcases}
-                    compareMode={values.compareMode}
-                    hasSolution={initial.solutionSource.trim().length > 0 && initial.solutionLanguageId !== ''}
-                    dirty={dirty}
-                    validated={validated}
-                    onReloaded={reload}
-                  />
-                </div>
-              </div>
-            </div>
+            <EditorTabs
+              tab={tab}
+              onTab={setTab}
+              values={values}
+              onChange={(p) => setValues({ ...values, ...p })}
+              detail={detail}
+              hasSolution={initial.solutionSource.trim().length > 0 && initial.solutionLanguageId !== ''}
+              dirty={dirty}
+              validated={validated}
+              onReloaded={reload}
+            />
           }
           right={
             <StatementPreview values={values} testcases={detail.testcases} />
@@ -178,30 +146,3 @@ export function ProblemEditorPage() {
   )
 }
 
-function EditorTab({
-  id,
-  active,
-  onTab,
-  children,
-}: {
-  id: 'de-bai' | 'testcase'
-  active: string
-  onTab: (t: 'de-bai' | 'testcase') => void
-  children: string
-}) {
-  return (
-    <button
-      id={`tab-${id}`}
-      role="tab"
-      aria-selected={active === id}
-      aria-controls={`panel-${id}`}
-      onClick={() => onTab(id)}
-      className={cn(
-        'px-3 py-1.5 text-sm font-medium',
-        active === id ? 'bg-surface-1 shadow-[inset_0_-2px_0_var(--color-primary)]' : 'text-ink-5',
-      )}
-    >
-      {children}
-    </button>
-  )
-}

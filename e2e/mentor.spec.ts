@@ -51,7 +51,9 @@ test('soạn bài mới → nạp testcase → kiểm bằng lời giải mẫu 
   // Bài mới CHƯA có testcase nên phải ở trạng thái chưa kiểm.
   await expect(page.getByText(/Chưa có testcase|Chưa kiểm/).first()).toBeVisible()
 
-  // Lời giải mẫu là đầu vào của bước kiểm (FR-D6).
+  // Lời giải mẫu là đầu vào của bước kiểm (FR-D6). Từ khi trình soạn chia tab
+  // theo nhịp sửa, ô lời giải nằm trong tab riêng — phải mở tab đó trước.
+  await page.getByRole('tab', { name: 'Lời giải' }).click()
   await page.getByLabel('Ngôn ngữ của lời giải').selectOption('c11')
   const solutionEditor = page.locator('.cm-content').last()
   await solutionEditor.click()

@@ -131,7 +131,9 @@ test.describe('Full luồng: admin mở khoá → mentor soạn bài → member 
     await expect(page.getByText(/2 testcase|#2/).first()).toBeVisible({ timeout: 20_000 })
 
     // ── lời giải mẫu rồi kiểm ────────────────────────────────────────────────
-    await page.getByRole('tab', { name: /Đề bài/ }).click()
+    // Ô lời giải nằm trong tab riêng từ khi trình soạn chia tab theo nhịp sửa —
+    // cùng bản vá với mentor.spec.ts, chuỗi này serial nên sót là sập cả dây.
+    await page.getByRole('tab', { name: 'Lời giải' }).click()
     await page.getByLabel('Ngôn ngữ của lời giải').selectOption('c11')
     await typeInto(page, 0, SOLUTION)
     await page.getByRole('button', { name: 'Lưu', exact: true }).click()
