@@ -1,8 +1,8 @@
 import { and, eq, ilike, isNull, or } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { db } from '../../db/pool'
-import { users } from '../../db/schema'
-import { ok } from '../../lib/apiResponse'
+import { db } from '@/db/pool'
+import { users } from '@/db/schema'
+import { ok } from '@/lib/apiResponse'
 
 export const mentorMemberRoutes = new Hono()
 

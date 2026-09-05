@@ -1,8 +1,8 @@
 /** Seed: ngôn ngữ (FR-F7), settings mặc định (FR-H2), một tài khoản admin. */
 import { sql } from 'drizzle-orm'
-import { hashPassword } from '../auth/hash'
-import { config } from '../config'
-import { DEFAULTS } from '../lib/settings'
+import { hashPassword } from '@/auth/hash'
+import { config } from '@/config'
+import { DEFAULTS } from '@/lib/settings'
 import { db, pool } from './pool'
 import { languages, settings, users } from './schema'
 

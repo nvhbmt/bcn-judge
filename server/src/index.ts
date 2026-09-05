@@ -2,8 +2,8 @@
 import { serve } from '@hono/node-server'
 import { createApp } from './app'
 import { config } from './config'
-import { closePool } from './db/pool'
-import { startBus, stopBus } from './realtime/bus'
+import { closePool } from '@/db/pool'
+import { startBus, stopBus } from '@/realtime/bus'
 
 // Bus lười và không bao giờ ném: mất LISTEN thì SSE tự hạ xuống polling (§4.3).
 await startBus()

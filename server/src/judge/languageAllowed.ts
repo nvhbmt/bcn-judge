@@ -11,7 +11,7 @@
  * vào người duy nhất có quyền sửa.
  */
 import { sql } from 'drizzle-orm'
-import { q } from '../db/pool'
+import { q } from '@/db/pool'
 
 export async function languageAllowed(problemId: string, languageId: string): Promise<boolean> {
   const [row] = await q<{ allowed: boolean }>(sql`

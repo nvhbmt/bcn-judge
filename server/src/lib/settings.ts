@@ -1,6 +1,6 @@
 /** Đọc bảng `settings` (FR-H2) với cache ngắn — mọi giới hạn đều cấu hình được. */
-import { db } from '../db/pool'
-import { settings } from '../db/schema'
+import { db } from '@/db/pool'
+import { settings } from '@/db/schema'
 
 export interface JudgeSettings {
   default_time_limit_ms: number

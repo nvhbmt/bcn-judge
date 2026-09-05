@@ -8,6 +8,11 @@ ENV NODE_ENV=production
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
+# tsconfig.json PHẢI vào image: tsx giải `@/…` bằng `paths` trong đó, tìm từ cwd
+# (/app). Thiếu file này thì container chết ngay ở import đầu tiên — "Cannot find
+# module '@/config'" — mà `npm test` và `tsc` ở máy dev vẫn xanh vì chúng đọc được
+# tsconfig từ cây nguồn.
+COPY tsconfig.json ./
 COPY src ./src
 COPY drizzle ./drizzle
 

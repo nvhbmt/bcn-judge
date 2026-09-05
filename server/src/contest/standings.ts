@@ -9,7 +9,7 @@
  * bài gửi 19:59:58 chấm xong 20:00:10 vẫn tính.
  */
 import { sql } from 'drizzle-orm'
-import { q } from '../db/pool'
+import { q } from '@/db/pool'
 
 export interface StandingRow {
   rank: number

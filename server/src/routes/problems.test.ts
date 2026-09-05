@@ -12,7 +12,7 @@
  */
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { db } from '../db/pool'
+import { db } from '@/db/pool'
 import {
   INTEGRATION,
   addTestcases,
@@ -22,7 +22,7 @@ import {
   resetDb,
   setupDb,
   type TestUser,
-} from '../testing/harness'
+} from '@/testing/harness'
 
 describe.skipIf(!INTEGRATION)('mentor · chi tiết bài tập (FR-D)', () => {
   let mentor: TestUser

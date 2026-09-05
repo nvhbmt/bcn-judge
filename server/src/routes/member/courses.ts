@@ -2,14 +2,14 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { isCourseStaff } from '../../auth/middleware'
-import type { AuthUser } from '../../auth/session'
-import { db, q } from '../../db/pool'
-import { courseEnrollments, courses } from '../../db/schema'
-import { errors, ok } from '../../lib/apiResponse'
-import { audit } from '../../lib/audit'
-import { parseBody } from '../../lib/http'
-import { getSettings } from '../../lib/settings'
+import { isCourseStaff } from '@/auth/middleware'
+import type { AuthUser } from '@/auth/session'
+import { db, q } from '@/db/pool'
+import { courseEnrollments, courses } from '@/db/schema'
+import { errors, ok } from '@/lib/apiResponse'
+import { audit } from '@/lib/audit'
+import { parseBody } from '@/lib/http'
+import { getSettings } from '@/lib/settings'
 
 export const memberCourseRoutes = new Hono()
 

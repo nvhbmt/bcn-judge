@@ -13,7 +13,7 @@
  */
 import { sql } from 'drizzle-orm'
 import { createHash } from 'node:crypto'
-import { pool, q } from '../db/pool'
+import { pool, q } from '@/db/pool'
 
 const arg = (name: string, fallback: string): string => {
   const i = process.argv.indexOf(`--${name}`)

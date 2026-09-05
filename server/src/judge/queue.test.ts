@@ -5,7 +5,7 @@
  */
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { q } from '../db/pool'
+import { q } from '@/db/pool'
 import {
   INTEGRATION,
   addTestcases,
@@ -19,7 +19,7 @@ import {
   setupDb,
   assignMentor,
   type TestUser,
-} from '../testing/harness'
+} from '@/testing/harness'
 import {
   claimNext,
   claimRejudge,
@@ -327,7 +327,7 @@ describe.skipIf(!INTEGRATION)('hàng đợi chấm bài', () => {
       expect(posted.status).toBe(201)
       const id = posted.body.data.id
 
-      const { processOneJob } = await import('../worker')
+      const { processOneJob } = await import('@/worker')
       const job = await processOneJob(0)
       expect(job?.id).toBe(id)
 
@@ -345,7 +345,7 @@ describe.skipIf(!INTEGRATION)('hàng đợi chấm bài', () => {
         as: member,
         body: { itemId, languageId: 'c11', source: wrong },
       })
-      const { processOneJob } = await import('../worker')
+      const { processOneJob } = await import('@/worker')
       await processOneJob(0)
 
       const detail = await call(`/api/member/submissions/${posted.body.data.id}`, { as: member })
@@ -360,7 +360,7 @@ describe.skipIf(!INTEGRATION)('hàng đợi chấm bài', () => {
       const res = await call(`/api/mentor/problems/${problemId}/validate`, { as: mentor, body: {} })
       expect(res.status).toBe(201)
 
-      const { processOneJob } = await import('../worker')
+      const { processOneJob } = await import('@/worker')
       await processOneJob(0)
 
       const [row] = await q<{ validated_testcase_rev: number | null; testcase_rev: number }>(sql`

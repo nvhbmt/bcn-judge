@@ -6,8 +6,8 @@
  * dựng từng trường một, và các trường cấm được khai kiểu `never` để rò rỉ trở
  * thành lỗi biên dịch chứ không phải lỗi runtime ai đó phải phát hiện.
  */
-import type { Verdict } from '../judge/types'
-import { iso } from '../lib/time'
+import type { Verdict } from '@/judge/types'
+import { iso } from '@/lib/time'
 
 /** Dòng thô từ DB — chỉ tầng serialize được chạm vào. */
 export interface RawResultRow {

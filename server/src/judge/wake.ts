@@ -34,7 +34,7 @@ export function wakeAll(): void {
  */
 export async function signalJobReady(): Promise<void> {
   try {
-    const { publish } = await import('../realtime/bus')
+    const { publish } = await import('@/realtime/bus')
     await publish(JOB_CHANNEL, { kind: 'job.ready' })
   } catch {
     /* im lặng — poll sẽ nhặt */
@@ -44,7 +44,7 @@ export async function signalJobReady(): Promise<void> {
 /** Nối bus và lắng nghe chuông. Không ném: nối hụt thì worker chạy như cũ. */
 export async function startJobWake(): Promise<() => void> {
   try {
-    const { startBus, subscribe } = await import('../realtime/bus')
+    const { startBus, subscribe } = await import('@/realtime/bus')
     await startBus()
     return subscribe(JOB_CHANNEL, () => wakeAll())
   } catch {

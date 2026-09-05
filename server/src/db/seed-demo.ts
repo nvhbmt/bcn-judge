@@ -11,8 +11,8 @@
  */
 import { createHash } from 'node:crypto'
 import { sql } from 'drizzle-orm'
-import { hashPassword } from '../auth/hash'
-import { config } from '../config'
+import { hashPassword } from '@/auth/hash'
+import { config } from '@/config'
 import { pool, q, qt, tx } from './pool'
 import { seed as seedBase } from './seed'
 

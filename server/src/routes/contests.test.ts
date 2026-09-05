@@ -1,8 +1,8 @@
 /** FR-I: contest tuần — embargo, cửa sổ tính điểm, xếp hạng, đóng băng, luyện tập. */
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { computeStandings, cutoffFor } from '../contest/standings'
-import { q } from '../db/pool'
+import { computeStandings, cutoffFor } from '@/contest/standings'
+import { q } from '@/db/pool'
 import {
   INTEGRATION,
   addTestcases,
@@ -15,7 +15,7 @@ import {
   resetDb,
   setupDb,
   type TestUser,
-} from '../testing/harness'
+} from '@/testing/harness'
 
 describe.skipIf(!INTEGRATION)('contest (FR-I)', () => {
   let admin: TestUser

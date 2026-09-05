@@ -17,7 +17,7 @@
  * đoán mò ở đây có giá là giết nhầm việc đang chạy.
  */
 import { sql } from 'drizzle-orm'
-import { q } from '../db/pool'
+import { q } from '@/db/pool'
 import { docker } from './sandbox'
 
 export interface ReapResult {

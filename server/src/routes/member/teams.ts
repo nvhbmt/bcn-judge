@@ -9,12 +9,12 @@
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { isCourseStaff, teamRole } from '../../auth/middleware'
-import { q } from '../../db/pool'
-import { created, errors, ok } from '../../lib/apiResponse'
-import { parseBody } from '../../lib/http'
-import { iso } from '../../lib/time'
-import { toLeaderSubmission, type RawSubmissionRow } from '../../serialize/submission'
+import { isCourseStaff, teamRole } from '@/auth/middleware'
+import { q } from '@/db/pool'
+import { created, errors, ok } from '@/lib/apiResponse'
+import { parseBody } from '@/lib/http'
+import { iso } from '@/lib/time'
+import { toLeaderSubmission, type RawSubmissionRow } from '@/serialize/submission'
 import { bestSubmissions } from './syllabus'
 
 export const memberTeamRoutes = new Hono()

@@ -10,7 +10,7 @@
  * gì tới việc họ có ở CLB hay không. `guilds.members.read` phải nêu đích danh một
  * guild, và chỉ trả về tư cách thành viên ở đúng guild đó.
  */
-import { config } from '../config'
+import { config } from '@/config'
 
 const AUTHORIZE = 'https://discord.com/api/oauth2/authorize'
 const TOKEN = 'https://discord.com/api/oauth2/token'

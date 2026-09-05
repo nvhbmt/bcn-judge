@@ -12,7 +12,12 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    // `@/…` = `server/src/…`, GIỐNG hệt SPA ở cây gốc — hai cây nguồn, một quy ước.
+    // Không có `baseUrl`: đường dẫn ở đây tính theo chính file tsconfig này, nên
+    // thêm baseUrl chỉ mở thêm một cách viết import thứ hai (bare "lib/settings")
+    // mà tsx không giải được lúc chạy.
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src/**/*.ts"]
 }

@@ -7,10 +7,10 @@
  */
 import { createMiddleware } from 'hono/factory'
 import { and, eq } from 'drizzle-orm'
-import { errors } from '../lib/apiResponse'
-import { readSessionCookie } from '../lib/http'
-import { db } from '../db/pool'
-import { courseMentors, teamMembers, teams } from '../db/schema'
+import { errors } from '@/lib/apiResponse'
+import { readSessionCookie } from '@/lib/http'
+import { db } from '@/db/pool'
+import { courseMentors, teamMembers, teams } from '@/db/schema'
 import { resolveSession, type AuthUser } from './session'
 
 declare module 'hono' {

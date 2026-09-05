@@ -27,7 +27,7 @@ vi.mock('./sandbox', () => ({
   },
 }))
 
-vi.mock('../db/pool', () => ({
+vi.mock('@/db/pool', () => ({
   q: async () => aliveWorkers.map((id) => ({ id })),
 }))
 

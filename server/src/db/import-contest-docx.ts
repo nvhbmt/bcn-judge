@@ -24,7 +24,7 @@ import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { sql } from 'drizzle-orm'
 import { fromBuffer } from 'yauzl'
-import { enqueue } from '../judge/queue'
+import { enqueue } from '@/judge/queue'
 import { pool, q, qt, tx } from './pool'
 
 // ── Đọc .docx ───────────────────────────────────────────────────────────────

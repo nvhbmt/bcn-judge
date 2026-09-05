@@ -434,6 +434,13 @@ scripts/                 build image · run-local · smoke · ràng buộc ngu�
 docs/                    requirements.md · design.md · deploy.md
 ```
 
+Đường dẫn import: `@/` là gốc `src/` của **cả hai** cây nguồn — `@/lib/settings` trong `server/src`,
+`@/components/ui` trong SPA. Chỉ file CÙNG thư mục mới viết `./`; không còn `../../`. Alias khai ở
+`tsconfig.json` của mỗi cây (dùng cho `tsc`, và cho `tsx` lúc chạy server) và phải khai LẶP ở
+`vite.config.ts` / `server/vitest.config.ts` vì Vite không đọc `paths` của tsconfig. Kéo theo:
+`server/Dockerfile` bắt buộc COPY `tsconfig.json` vào image — thiếu nó thì container chết ngay ở
+import đầu tiên trong khi máy dev vẫn xanh.
+
 ## Lệnh hay dùng
 
 ```bash

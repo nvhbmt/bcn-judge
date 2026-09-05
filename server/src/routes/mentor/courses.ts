@@ -2,13 +2,13 @@
 import { and, asc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { z } from 'zod'
-import { isCourseStaff } from '../../auth/middleware'
-import { db } from '../../db/pool'
-import { courseEnrollments, courseMentors, courses, users } from '../../db/schema'
-import { errors, ok } from '../../lib/apiResponse'
-import { audit } from '../../lib/audit'
-import { parseBody } from '../../lib/http'
-import { enrollByEmails, enrollSchema } from '../admin/courses'
+import { isCourseStaff } from '@/auth/middleware'
+import { db } from '@/db/pool'
+import { courseEnrollments, courseMentors, courses, users } from '@/db/schema'
+import { errors, ok } from '@/lib/apiResponse'
+import { audit } from '@/lib/audit'
+import { parseBody } from '@/lib/http'
+import { enrollByEmails, enrollSchema } from '@/routes/admin/courses'
 
 export const mentorCourseRoutes = new Hono()
 

@@ -6,10 +6,10 @@
  */
 import { createHash, randomBytes } from 'node:crypto'
 import { and, eq, gt, isNull, sql } from 'drizzle-orm'
-import { config } from '../config'
+import { config } from '@/config'
 import { avatarUrl } from './discordApi'
-import { db } from '../db/pool'
-import { userSessions, users } from '../db/schema'
+import { db } from '@/db/pool'
+import { userSessions, users } from '@/db/schema'
 
 export interface AuthUser {
   id: string

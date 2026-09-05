@@ -21,9 +21,9 @@ vi.hoisted(() => {
   process.env.DISCORD_REDIRECT_URI = 'http://localhost:8099/auth/discord/callback'
 })
 
-import { db, q } from '../db/pool'
-import { users } from '../db/schema'
-import { INTEGRATION, app, makeUser, resetDb, setupDb, type TestUser } from '../testing/harness'
+import { db, q } from '@/db/pool'
+import { users } from '@/db/schema'
+import { INTEGRATION, app, makeUser, resetDb, setupDb, type TestUser } from '@/testing/harness'
 
 /** Giả lập hai lượt gọi Discord: đổi code lấy token, rồi hỏi /users/@me. */
 function gaLapDiscord(me: Record<string, unknown> | null, tokenOk = true) {

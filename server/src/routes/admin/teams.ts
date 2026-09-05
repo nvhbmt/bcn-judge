@@ -8,11 +8,11 @@
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { q, qt, tx } from '../../db/pool'
-import { created, errors, ok } from '../../lib/apiResponse'
-import { audit } from '../../lib/audit'
-import { describeDbError } from '../../lib/dbError'
-import { parseBody } from '../../lib/http'
+import { q, qt, tx } from '@/db/pool'
+import { created, errors, ok } from '@/lib/apiResponse'
+import { audit } from '@/lib/audit'
+import { describeDbError } from '@/lib/dbError'
+import { parseBody } from '@/lib/http'
 
 export const adminTeamRoutes = new Hono()
 

@@ -8,7 +8,7 @@
  */
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { q } from '../db/pool'
+import { q } from '@/db/pool'
 import {
   INTEGRATION,
   addTestcases,
@@ -21,7 +21,7 @@ import {
   resetDb,
   setupDb,
   type TestUser,
-} from '../testing/harness'
+} from '@/testing/harness'
 import { toMemberProblem } from './problem'
 import { toMemberResult } from './submission'
 

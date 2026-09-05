@@ -1,7 +1,7 @@
 /** Tiện ích HTTP nhỏ (mẫu imath: parseBody, clientIp, cookies, rateLimit). */
 import type { Context } from 'hono'
 import { z } from 'zod'
-import { config } from '../config'
+import { config } from '@/config'
 import { errors } from './apiResponse'
 
 export async function parseBody<S extends z.ZodTypeAny>(

@@ -1,6 +1,6 @@
 /** FR-H4: nhật ký hành động quản trị. Gọi từ mọi mutation của mentor/admin. */
-import { db } from '../db/pool'
-import { auditLog } from '../db/schema'
+import { db } from '@/db/pool'
+import { auditLog } from '@/db/schema'
 
 export async function audit(
   actorId: string | null,

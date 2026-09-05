@@ -2,12 +2,12 @@
 import { sql } from 'drizzle-orm'
 import { Hono, type Context } from 'hono'
 import { z } from 'zod'
-import { isCourseStaff } from '../../auth/middleware'
-import { q, tx } from '../../db/pool'
-import { created, errors, ok } from '../../lib/apiResponse'
-import { audit } from '../../lib/audit'
-import { parseBody } from '../../lib/http'
-import { computeStandings } from '../../contest/standings'
+import { isCourseStaff } from '@/auth/middleware'
+import { q, tx } from '@/db/pool'
+import { created, errors, ok } from '@/lib/apiResponse'
+import { audit } from '@/lib/audit'
+import { parseBody } from '@/lib/http'
+import { computeStandings } from '@/contest/standings'
 
 export const mentorContestRoutes = new Hono()
 

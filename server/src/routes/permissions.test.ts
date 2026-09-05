@@ -13,7 +13,7 @@ import {
   resetDb,
   setupDb,
   type TestUser,
-} from '../testing/harness'
+} from '@/testing/harness'
 
 describe.skipIf(!INTEGRATION)('ma trận quyền — API', () => {
   let admin: TestUser
@@ -268,7 +268,7 @@ describe.skipIf(!INTEGRATION)('luồng đăng nhập (FR-A1/A3)', () => {
 
 /** Đăng nhập trả cả header Set-Cookie (harness `call` không lộ header). */
 async function app_login(emailOrUsername: string, password: string) {
-  const { app } = await import('../testing/harness')
+  const { app } = await import('@/testing/harness')
   const res = await app.request('/auth/login', {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-api-response-version': '2' },

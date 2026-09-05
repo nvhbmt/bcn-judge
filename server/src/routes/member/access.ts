@@ -7,8 +7,8 @@
  * composite FK ở §2.6 là lưới thứ hai dưới nó.
  */
 import { sql } from 'drizzle-orm'
-import { q } from '../../db/pool'
-import type { AuthUser } from '../../auth/session'
+import { q } from '@/db/pool'
+import type { AuthUser } from '@/auth/session'
 
 export interface ProblemAccess {
   problemId: string

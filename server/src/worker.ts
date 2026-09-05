@@ -8,8 +8,8 @@
 import { sql } from 'drizzle-orm'
 import { hostname } from 'node:os'
 import { config } from './config'
-import { closePool, db, q } from './db/pool'
-import type { LanguageConfig } from './judge/languages'
+import { closePool, db, q } from '@/db/pool'
+import type { LanguageConfig } from '@/judge/languages'
 import {
   claimNext,
   claimRejudge,
@@ -23,13 +23,13 @@ import {
   requeue,
   type ClaimedSubmission,
   type RejudgeJob,
-} from './judge/queue'
-import { judgeSubmission } from './judge/runner'
-import { DEFAULT_LIMITS, type JudgeLimits, type SourceFile, type TestcaseInput } from './judge/types'
-import { drainPool, poolStats, sweepPool } from './judge/pool'
-import { reapOrphanSandboxes } from './judge/reap'
-import { startJobWake, wakeAll, waitForJob } from './judge/wake'
-import { getSettings } from './lib/settings'
+} from '@/judge/queue'
+import { judgeSubmission } from '@/judge/runner'
+import { DEFAULT_LIMITS, type JudgeLimits, type SourceFile, type TestcaseInput } from '@/judge/types'
+import { drainPool, poolStats, sweepPool } from '@/judge/pool'
+import { reapOrphanSandboxes } from '@/judge/reap'
+import { startJobWake, wakeAll, waitForJob } from '@/judge/wake'
+import { getSettings } from '@/lib/settings'
 
 export const WORKER_ID = `${hostname()}-${process.pid}`
 const HEARTBEAT_MS = 15_000
@@ -40,7 +40,7 @@ let stopping = false
 /** Sự kiện realtime: bus có thể chưa chạy — SSE tự hạ xuống polling (§4.3). */
 async function emit(channel: string, payload: object): Promise<void> {
   try {
-    const { publish } = await import('./realtime/bus')
+    const { publish } = await import('@/realtime/bus')
     await publish(channel, payload)
   } catch {
     /* không chặn việc chấm */

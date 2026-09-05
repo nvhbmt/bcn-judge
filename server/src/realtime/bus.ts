@@ -28,8 +28,8 @@
  */
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
-import { config } from '../config'
-import { pool } from '../db/pool'
+import { config } from '@/config'
+import { pool } from '@/db/pool'
 
 /** Kênh Postgres duy nhất; kênh logic nằm trong envelope. */
 const PG_CHANNEL = 'bcn_events'

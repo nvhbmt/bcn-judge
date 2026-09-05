@@ -1,10 +1,10 @@
 /** FR-I1/I3/I4/I5/I6: member xem contest, đề mở đúng giờ, bảng xếp hạng. */
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { computeStandings, cutoffFor } from '../../contest/standings'
-import { q } from '../../db/pool'
-import { errors, ok } from '../../lib/apiResponse'
-import { sseStream } from '../../realtime/sse'
+import { computeStandings, cutoffFor } from '@/contest/standings'
+import { q } from '@/db/pool'
+import { errors, ok } from '@/lib/apiResponse'
+import { sseStream } from '@/realtime/sse'
 
 export const memberContestRoutes = new Hono()
 

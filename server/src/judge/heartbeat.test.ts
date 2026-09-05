@@ -14,9 +14,9 @@
  */
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { q } from '../db/pool'
-import { INTEGRATION, resetDb, setupDb } from '../testing/harness'
-import { touchWorker } from '../worker'
+import { q } from '@/db/pool'
+import { INTEGRATION, resetDb, setupDb } from '@/testing/harness'
+import { touchWorker } from '@/worker'
 
 const ID = 'test-worker-heartbeat'
 

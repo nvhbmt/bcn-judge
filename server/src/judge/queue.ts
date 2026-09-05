@@ -4,8 +4,8 @@
  * + advisory lock + LISTEN/NOTIFY.
  */
 import { sql } from 'drizzle-orm'
-import { db, pool, q, qt } from '../db/pool'
-import { getSettings } from '../lib/settings'
+import { db, pool, q, qt } from '@/db/pool'
+import { getSettings } from '@/lib/settings'
 import { signalJobReady } from './wake'
 
 export type SubmissionKind = 'submit' | 'run'

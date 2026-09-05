@@ -4,8 +4,8 @@
  * nơi" chính là thứ duy nhất ADR-7 đặt cược.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
-import { pool } from '../db/pool'
-import { INTEGRATION } from '../testing/harness'
+import { pool } from '@/db/pool'
+import { INTEGRATION } from '@/testing/harness'
 import {
   MAX_PAYLOAD_BYTES,
   busStatus,

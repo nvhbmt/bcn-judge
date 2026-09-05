@@ -1,7 +1,7 @@
 /** Pool Postgres + helper transaction (mẫu imath-test/server/src/db/pool.ts). */
 import { drizzle } from 'drizzle-orm/node-postgres'
 import pg from 'pg'
-import { config } from '../config'
+import { config } from '@/config'
 import * as schema from './schema'
 
 export const pool = new pg.Pool({

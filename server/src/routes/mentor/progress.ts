@@ -1,11 +1,11 @@
 /** FR-G3/G4: mentor duyệt bài nộp và xem ma trận tiến độ khoá (+ xuất CSV). */
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { isCourseStaff } from '../../auth/middleware'
-import { q } from '../../db/pool'
-import { errors, ok } from '../../lib/apiResponse'
-import { toMentorSubmission, type RawSubmissionRow } from '../../serialize/submission'
-import { bestSubmissions } from '../member/syllabus'
+import { isCourseStaff } from '@/auth/middleware'
+import { q } from '@/db/pool'
+import { errors, ok } from '@/lib/apiResponse'
+import { toMentorSubmission, type RawSubmissionRow } from '@/serialize/submission'
+import { bestSubmissions } from '@/routes/member/syllabus'
 
 export const mentorProgressRoutes = new Hono()
 

@@ -2,12 +2,12 @@
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { db, q, qt, tx } from '../../db/pool'
-import { courseEnrollments, courseMentors, courses, users } from '../../db/schema'
-import { created, errors, ok } from '../../lib/apiResponse'
-import { audit } from '../../lib/audit'
-import { describeDbError, isConstraintViolation } from '../../lib/dbError'
-import { parseBody } from '../../lib/http'
+import { db, q, qt, tx } from '@/db/pool'
+import { courseEnrollments, courseMentors, courses, users } from '@/db/schema'
+import { created, errors, ok } from '@/lib/apiResponse'
+import { audit } from '@/lib/audit'
+import { describeDbError, isConstraintViolation } from '@/lib/dbError'
+import { parseBody } from '@/lib/http'
 
 export const adminCourseRoutes = new Hono()
 

@@ -14,7 +14,7 @@
  */
 import { randomBytes, createHash } from 'node:crypto'
 import { sql } from 'drizzle-orm'
-import { pool, q } from '../db/pool'
+import { pool, q } from '@/db/pool'
 
 const arg = (n: string, d: string): string => {
   const i = process.argv.indexOf(`--${n}`)

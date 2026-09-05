@@ -53,10 +53,10 @@ describe('waitForJob', () => {
 
 describe('signalJobReady', () => {
   it('bus hỏng thì NUỐT lỗi — lượt nộp vừa ghi xong không được phép đổ vì cái chuông', async () => {
-    vi.doMock('../realtime/bus', () => ({
+    vi.doMock('@/realtime/bus', () => ({
       publish: () => Promise.reject(new Error('mất kết nối LISTEN')),
     }))
     await expect(signalJobReady()).resolves.toBeUndefined()
-    vi.doUnmock('../realtime/bus')
+    vi.doUnmock('@/realtime/bus')
   })
 })

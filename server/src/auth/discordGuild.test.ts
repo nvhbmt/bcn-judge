@@ -19,9 +19,9 @@ vi.hoisted(() => {
   process.env.DISCORD_ROLE_ID = '999888'
 })
 
-import { db, q } from '../db/pool'
-import { users } from '../db/schema'
-import { INTEGRATION, app, makeUser, resetDb, setupDb, type TestUser } from '../testing/harness'
+import { db, q } from '@/db/pool'
+import { users } from '@/db/schema'
+import { INTEGRATION, app, makeUser, resetDb, setupDb, type TestUser } from '@/testing/harness'
 
 type GuildTraLoi = { roles: string[] } | 404 | 'loi'
 

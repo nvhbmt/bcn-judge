@@ -2,14 +2,14 @@
 import { and, asc, eq, ilike, isNull, or } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { generatePassword, hashPassword } from '../../auth/hash'
-import { revokeAllSessionsOf } from '../../auth/session'
-import { db, tx } from '../../db/pool'
-import { courseEnrollments, courses, users } from '../../db/schema'
-import { created, errors, ok } from '../../lib/apiResponse'
-import { parseBody } from '../../lib/http'
-import { audit } from '../../lib/audit'
-import { isConstraintViolation } from '../../lib/dbError'
+import { generatePassword, hashPassword } from '@/auth/hash'
+import { revokeAllSessionsOf } from '@/auth/session'
+import { db, tx } from '@/db/pool'
+import { courseEnrollments, courses, users } from '@/db/schema'
+import { created, errors, ok } from '@/lib/apiResponse'
+import { parseBody } from '@/lib/http'
+import { audit } from '@/lib/audit'
+import { isConstraintViolation } from '@/lib/dbError'
 
 export const adminUserRoutes = new Hono()
 

@@ -1,7 +1,7 @@
 /** FR-J: team & leader — quyền, bất biến, và chặn kênh chép bài trong contest. */
 import { sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { q } from '../db/pool'
+import { q } from '@/db/pool'
 import {
   INTEGRATION,
   addTestcases,
@@ -14,7 +14,7 @@ import {
   resetDb,
   setupDb,
   type TestUser,
-} from '../testing/harness'
+} from '@/testing/harness'
 
 describe.skipIf(!INTEGRATION)('team & leader (FR-J)', () => {
   let admin: TestUser

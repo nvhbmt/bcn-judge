@@ -6,9 +6,9 @@
  */
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
-import { q } from '../../db/pool'
-import { errors, ok } from '../../lib/apiResponse'
-import { iso } from '../../lib/time'
+import { q } from '@/db/pool'
+import { errors, ok } from '@/lib/apiResponse'
+import { iso } from '@/lib/time'
 import { lessonForMember } from './access'
 import { canViewCourseAsMember } from './courses'
 

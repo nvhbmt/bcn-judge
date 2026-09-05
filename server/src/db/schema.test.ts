@@ -5,7 +5,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { applyGrants, checkWorkerCannotTouchUsers } from './grants'
 import { pool } from './pool'
-import { INTEGRATION, makeUser, resetDb, setupDb } from '../testing/harness'
+import { INTEGRATION, makeUser, resetDb, setupDb } from '@/testing/harness'
 
 describe.skipIf(!INTEGRATION)('bất biến schema', () => {
   beforeAll(async () => {

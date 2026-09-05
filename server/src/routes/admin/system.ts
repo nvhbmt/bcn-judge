@@ -2,12 +2,12 @@
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { q } from '../../db/pool'
-import { queueStats, retryIeSubmissions } from '../../judge/queue'
-import { errors, ok } from '../../lib/apiResponse'
-import { audit } from '../../lib/audit'
-import { parseBody } from '../../lib/http'
-import { getSettings, setSetting } from '../../lib/settings'
+import { q } from '@/db/pool'
+import { queueStats, retryIeSubmissions } from '@/judge/queue'
+import { errors, ok } from '@/lib/apiResponse'
+import { audit } from '@/lib/audit'
+import { parseBody } from '@/lib/http'
+import { getSettings, setSetting } from '@/lib/settings'
 
 export const adminSystemRoutes = new Hono()
 
