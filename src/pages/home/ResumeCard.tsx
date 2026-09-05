@@ -14,21 +14,12 @@ import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
 import { VERDICT_LABEL, type CourseSummary } from '@/types/api'
 import type { SyllabusSection } from '../workspace/SyllabusPanel'
-import { workspaceLink, type RecentRow } from './recent'
-
-function pickUnfinished(rows: RecentRow[]): { row: RecentRow; href: string } | null {
-  for (const row of rows) {
-    if (row.status !== 'done' || row.verdict === 'AC') continue
-    const href = workspaceLink(row)
-    if (href) return { row, href }
-  }
-  return null
-}
+import { pickUnfinished, type RecentRow } from './recent'
 
 export function ResumeCard() {
   const { data } = useQuery({
     queryKey: ['member', 'recent'],
-    queryFn: () => api.get<RecentRow[]>('/api/member/submissions/recent?limit=12'),
+    queryFn: () => api.get<RecentRow[]>('/api/member/submissions/recent?limit=20'),
   })
   const { data: courses } = useQuery({
     queryKey: ['member', 'courses'],

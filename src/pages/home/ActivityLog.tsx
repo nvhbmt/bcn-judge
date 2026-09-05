@@ -31,7 +31,7 @@ function verdictClass(verdict: Verdict | null): string {
 export function ActivityLog() {
   const { data } = useQuery({
     queryKey: ['member', 'recent'],
-    queryFn: () => api.get<RecentRow[]>('/api/member/submissions/recent?limit=12'),
+    queryFn: () => api.get<RecentRow[]>('/api/member/submissions/recent?limit=20'),
   })
 
   return (
