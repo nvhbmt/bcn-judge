@@ -81,7 +81,11 @@ const GROUPS: Group[] = [
     title: 'Testcase mentor tải lên',
     keys: ['max_testcase_file_bytes', 'max_testcases_total_bytes_per_problem', 'max_zip_bytes'],
   },
-  { title: 'Vận hành', keys: ['judge_paused'] },
+  // `announcement` là khoá cài đặt duy nhất mang CHỮ. Trước đây nó không có tên trong
+  // bảng này nên rơi vào nhóm "Khác" ở tận cuối trang — cùng chỗ với khoá server thêm
+  // mà FE chưa biết, tức là chỗ nói "không rõ cái này là gì". Nó thuộc về vận hành,
+  // đứng cạnh công tắc tạm dừng chấm.
+  { title: 'Vận hành', keys: ['announcement', 'judge_paused'] },
 ]
 
 export interface RenderedGroup {

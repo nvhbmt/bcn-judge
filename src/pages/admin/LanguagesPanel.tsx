@@ -34,9 +34,13 @@ export function LanguagesPanel() {
   })
 
   return (
-    <section className="mb-5">
-      <div className="mb-1"><SectionRule label="Ngôn ngữ chấm" /></div>
-      <p className="mb-3 text-sm text-ink-5">
+    <section className="min-w-0">
+      {/* Số ngôn ngữ ở mép phải đường kẻ: cột này là một danh sách, và đếm tay 5 dòng
+          thì được, 15 dòng thì không. */}
+      <div className="mb-2.5">
+        <SectionRule label="Ngôn ngữ chấm" meta={data ? `${data.length} ngôn ngữ` : undefined} />
+      </div>
+      <p className="mb-3.5 text-[13px] text-ink-5">
         Bật một ngôn ngữ là mentor thấy nó ngay trong danh sách ngôn ngữ cho phép của bài — không cần deploy lại. Image
         Docker phải có sẵn trên máy chấm trước khi bật.
       </p>
@@ -48,7 +52,7 @@ export function LanguagesPanel() {
       <ul className="space-y-2">
         {data?.map((lang) => (
           <li key={lang.id} className="border border-line bg-surface-2">
-            <div className="flex flex-wrap items-center gap-3 p-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
