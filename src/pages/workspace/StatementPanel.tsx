@@ -96,14 +96,19 @@ export function StatementPanel({
           </div>
 
           {/* Luật chấm nói thẳng ra. Người mới học mất hàng giờ đi tìm một lỗi không
-              tồn tại vì tưởng thừa một dòng trống là sai. */}
+              tồn tại vì tưởng thừa một dòng trống là sai — mà bản trước viết câu này
+              bằng mono ink-6, tức cùng bậc mực với chú thích "ẩn" cạnh testcase:
+              đúng người cần đọc nhất thì lướt qua. Nâng thành băng có vạch trái —
+              cùng ngữ pháp với ghi chú bài dạng hàm ngay đầu panel: câu trấn an
+              mang moss, câu cảnh báo mang earth. */}
           {problem.compareMode !== 'exact' ? (
-            <p className="mt-3 font-mono text-[13px] text-ink-6">
-              Thừa dấu cách cuối dòng hay một dòng trống ở cuối thì không bị tính sai.
+            <p className="mt-3 border-l-2 border-moss bg-primary-soft px-3 py-2.5 text-[14px] text-ink-3">
+              <strong>Yên tâm về khoảng trắng:</strong> thừa dấu cách cuối dòng hay một dòng trống ở
+              cuối thì không bị tính sai.
             </p>
           ) : (
-            <p className="mt-3 font-mono text-[13px] text-earth">
-              Bài này so khớp CHÍNH XÁC từng ký tự — thừa một dấu cách cũng bị tính sai.
+            <p className="mt-3 border-l-2 border-earth bg-(--tint-earth) px-3 py-2.5 text-[14px] text-ink-3">
+              Bài này so khớp <strong>chính xác từng ký tự</strong> — thừa một dấu cách cũng bị tính sai.
             </p>
           )}
         </section>
