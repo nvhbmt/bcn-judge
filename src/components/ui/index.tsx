@@ -160,10 +160,10 @@ export function SectionRule({
   const Heading = `h${level}` as 'h2' | 'h3' | 'h4'
   return (
     <div className="flex items-end gap-0">
-      {/* `rule-ink` / `rule-line`: bản SÁNG tô mực moss đậm hơn, kẻ dày 2px. Luật
-          nằm ở src/index.css vì hai theme vẽ khác nhau chứ không chỉ đổi giá trị
-          token — xem chú thích ở đó. Meta mang CÙNG mực với nhãn: hai đầu của một
-          cặp đóng khung, một đầu nổi một đầu lịm là con số đọc ra như bị bỏ quên. */}
+      {/* `rule-ink`: mực moss đậm ở CẢ HAI theme (quyết định của người dùng — xem
+          src/index.css); `rule-line`: kẻ 2px chỉ bản sáng. Meta mang CÙNG mực với
+          nhãn: hai đầu của một cặp đóng khung, một đầu nổi một đầu lịm là con số
+          đọc ra như bị bỏ quên. */}
       <Heading className="rule-ink pr-3 font-mono text-[12px] font-normal tracking-[0.14em] text-(--label) uppercase">
         {label}
       </Heading>

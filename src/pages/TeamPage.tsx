@@ -9,21 +9,25 @@
  * lưu" — SAI: ba endpoint đã nằm sẵn trong routes/member/teams.ts từ lâu, chỉ là
  * frontend chưa gọi cái nào, nên cả tính năng nằm đó không ai dùng được.
  */
-import { useQuery } from '@tanstack/react-query'
-import { PageContainer } from '@/components/layout/PageContainer'
-import { EmptyState, SectionRule, Spinner } from '@/components/ui'
-import { SideColumn, SidePanel } from '@/components/ui/patterns'
-import { api } from '@/lib/api'
-import { LeaderNote } from './team/LeaderNote'
-import { TeamMembers } from './team/TeamMembers'
-import { TeamStandings } from './team/TeamStandings'
-import type { TeamView } from './team/types'
+import { useQuery } from "@tanstack/react-query";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { EmptyState, SectionRule, Spinner } from "@/components/ui";
+import { SideColumn, SidePanel } from "@/components/ui/patterns";
+import { api } from "@/lib/api";
+import { LeaderNote } from "./team/LeaderNote";
+import { TeamMembers } from "./team/TeamMembers";
+import { TeamStandings } from "./team/TeamStandings";
+import type { TeamView } from "./team/types";
 
 export function TeamPage() {
-  const { data: team, isLoading, isError } = useQuery({
-    queryKey: ['team', 'mine'],
-    queryFn: () => api.get<TeamView | null>('/api/member/teams/mine'),
-  })
+  const {
+    data: team,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["team", "mine"],
+    queryFn: () => api.get<TeamView | null>("/api/member/teams/mine"),
+  });
 
   if (isLoading) {
     return (
@@ -32,7 +36,7 @@ export function TeamPage() {
           <Spinner />
         </div>
       </Shell>
-    )
+    );
   }
 
   // Lỗi gọi API KHÁC hẳn "không có team", dù cả hai đều cho `team` rỗng. Gộp chung thì
@@ -42,9 +46,12 @@ export function TeamPage() {
     return (
       <Shell>
         <h1 className="font-display text-[30px] text-ink-1">Team</h1>
-        <EmptyState title="Không đọc được thông tin team" hint="Tải lại trang, hoặc báo mentor nếu vẫn lỗi." />
+        <EmptyState
+          title="Không đọc được thông tin team"
+          hint="Tải lại trang, hoặc báo mentor nếu vẫn lỗi."
+        />
       </Shell>
-    )
+    );
   }
 
   if (!team) {
@@ -53,11 +60,13 @@ export function TeamPage() {
         {/* Vẫn phải có h1: màn hình không tiêu đề thì người dùng trình đọc màn
             hình không biết mình đang ở đâu, và tab trình duyệt cũng vô danh. */}
         <h1 className="font-display text-[30px] text-ink-1">Team</h1>
-        <EmptyState title="Bạn chưa thuộc team nào" hint="Quản lý viên sẽ xếp bạn vào team." />
+        <EmptyState
+          title="Bạn chưa thuộc team nào"
+          hint="Quản lý viên sẽ xếp bạn vào team."
+        />
       </Shell>
-    )
+    );
   }
-
 
   return (
     <Shell>
@@ -72,7 +81,9 @@ export function TeamPage() {
         </div>
         <p className="num mt-2 font-mono text-[13px] text-ink-5">
           {team.members.length} thành viên
-          {team.createdAt ? ` · lập ${new Date(team.createdAt).toLocaleDateString('vi-VN')}` : ''}
+          {team.createdAt
+            ? ` · lập ${new Date(team.createdAt).toLocaleDateString("vi-VN")}`
+            : ""}
         </p>
       </header>
 
@@ -88,11 +99,9 @@ export function TeamPage() {
 
       {team.isLeader ? (
         <LeaderNote teamId={team.id} members={team.members} />
-      ) : (
-        <p className="text-[13px] text-ink-5">Chỉ leader xem được tiến độ và bài nộp của cả team.</p>
-      )}
+      ) : null}
     </Shell>
-  )
+  );
 }
 
 /**
@@ -115,5 +124,5 @@ function Shell({ children }: { children: React.ReactNode }) {
         </SidePanel>
       </SideColumn>
     </div>
-  )
+  );
 }
