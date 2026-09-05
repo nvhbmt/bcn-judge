@@ -259,6 +259,17 @@ test('danh sách contest → chi tiết → bảng xếp hạng', async ({ page 
   expect(errors).toEqual([])
 })
 
+test('BXH các team hiện ĐỦ tên — cột tên không bị bóp khi bảng không còn hàng tiêu đề', async ({ page }) => {
+  // Hồi quy có thật: bỏ <thead> theo bản vẽ làm các class bề rộng sống trên <th>
+  // biến mất, cột tên (max-w-0 + truncate) co còn vài ký tự — "Chuột …" giữa một
+  // hàng trống trơn. jsdom không có layout nên chỉ đo được ở đây.
+  await page.goto('/team')
+  const oTen = page.locator('table td:nth-child(2)').first()
+  await expect(oTen).toBeVisible()
+  const bi_cat = await oTen.evaluate((el) => el.scrollWidth > el.clientWidth)
+  expect(bi_cat, 'tên team bị cắt dù bảng còn thừa chỗ').toBe(false)
+})
+
 test('leader: danh sách thành viên → trang riêng hai panel (FR-J)', async ({ page }) => {
   const { errors } = watchForErrors(page)
   await page.goto('/')

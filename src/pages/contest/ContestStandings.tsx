@@ -41,8 +41,16 @@ export function ContestStandings({
   if (!data || data.length === 0) return <EmptyState title="Chưa ai có kết quả" />
 
   return (
-    <table className="w-full border-collapse">
+    // table-fixed + colgroup: cùng lý do với TeamStandings — bỏ <thead> là mất
+    // các w-9/w-[4.75rem]/w-14 từng sống trên <th>, cột tên co tịt.
+    <table className="w-full table-fixed border-collapse">
       <caption className="sr-only">Bảng xếp hạng contest</caption>
+      <colgroup>
+        <col className="w-9" />
+        <col />
+        <col className="w-[4.75rem]" />
+        <col className="w-14" />
+      </colgroup>
       {/* KHÔNG có <thead>: bản vẽ bỏ hàng tiêu đề cột để bảng trong cột phải chỉ còn
           dữ liệu. `<caption>` ở lại (sr-only) nên trình đọc màn hình vẫn biết đây là
           bảng gì — bỏ cả caption mới là mất thông tin thật.

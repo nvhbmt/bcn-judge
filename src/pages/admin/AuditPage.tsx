@@ -53,15 +53,23 @@ export function AdminAuditPage() {
       ) : null}
 
       {data && data.length > 0 ? (
-        <table className="w-full border-collapse">
+        <table className="w-full table-fixed border-collapse">
           <caption className="sr-only">Nhật ký hành động quản trị</caption>
+          {/* Cùng lớp lỗi với hai BXH: bảng không <thead> thì <col> phải nói bề
+              rộng, nếu không cột `after` (max-w-0) bóp các cột kia theo nội dung. */}
+          <colgroup>
+            <col className="w-24" />
+            <col className="w-40" />
+            <col className="w-56" />
+            <col />
+          </colgroup>
           <tbody>
             {data.map((r) => (
               <tr key={r.id} className="border-t border-line align-top">
-                <td className="num w-24 px-2.5 py-2 font-mono text-[13px] whitespace-nowrap text-ink-5">
+                <td className="num px-2.5 py-2 font-mono text-[13px] whitespace-nowrap text-ink-5">
                   {gio(r.at)}
                 </td>
-                <td className="w-40 px-2.5 py-2 text-[13px] text-ink-2">{r.actorName ?? '—'}</td>
+                <td className="px-2.5 py-2 text-[13px] text-ink-2">{r.actorName ?? '—'}</td>
                 <td className="px-2.5 py-2 font-mono text-[13px] text-ink-3">
                   {r.action}
                   {r.entityType ? <span className="text-ink-6"> · {r.entityType}</span> : null}

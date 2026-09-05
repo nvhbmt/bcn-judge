@@ -49,8 +49,19 @@ export function TeamStandings() {
   if (!data || data.length === 0) return <EmptyState title="Chưa có team nào để xếp hạng" />
 
   return (
-    <table className="w-full border-collapse">
+    // `table-fixed` + colgroup là hệ quả BẮT BUỘC của việc bỏ <thead>: các class
+    // w-9/w-16 vốn sống trên <th>, gỡ hàng tiêu đề là cột tên (max-w-0 + truncate)
+    // mất mỏ neo bố cục và co còn vài ký tự — "Chuột …" giữa một hàng trống trơn.
+    // Ở layout fixed, <col> nói bề rộng và cột tên ăn toàn bộ phần còn lại, nên
+    // tên chỉ bị cắt khi THẬT SỰ dài (title vẫn giữ bản đầy đủ).
+    <table className="w-full table-fixed border-collapse">
       <caption className="sr-only">Xếp hạng các team trong ban</caption>
+      <colgroup>
+        <col className="w-9" />
+        <col />
+        <col className="w-16" />
+        <col className="w-16" />
+      </colgroup>
       {/* KHÔNG có <thead>: bản vẽ bỏ hàng tiêu đề cột để bảng trong cột phải chỉ còn
           dữ liệu. `<caption>` ở lại (sr-only) nên trình đọc màn hình vẫn biết đây là
           bảng gì — bỏ cả caption mới là mất thông tin thật.
