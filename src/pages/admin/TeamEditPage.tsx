@@ -9,6 +9,7 @@ import { EmptyState, Spinner } from '@/components/ui'
 import { AdminShell } from './AdminShell'
 import { TeamCreateForm } from './TeamCreateForm'
 import { TeamDetail } from './TeamDetail'
+import { TeamRenameForm } from './TeamRenameForm'
 import { useAdminTeam } from './useAdminLists'
 
 const BACK = { to: '/quan-tri/team', label: 'Danh sách team' }
@@ -47,6 +48,9 @@ export function AdminTeamEditPage() {
 
   return (
     <AdminShell back={BACK} title={found.name} description={`Leader: ${found.leaderName}`}>
+      {/* Đổi tên đứng TRƯỚC phần xếp người: đó là thao tác không cần chọn ai, còn phần
+          dưới thì lượt nào cũng phải tìm một tài khoản. */}
+      <TeamRenameForm team={found} />
       <TeamDetail team={found} />
     </AdminShell>
   )

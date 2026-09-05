@@ -3,6 +3,7 @@ import { Pencil, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { EmptyState, Spinner, buttonClass } from '@/components/ui'
 import { AdminShell } from './AdminShell'
+import { CloneCourseButton } from './CloneCourseButton'
 import { useAdminCourses } from './useAdminLists'
 import type { CourseStatus } from './types'
 import { cn } from '@/lib/cn'
@@ -60,6 +61,7 @@ export function AdminCoursesPage() {
             <Link to={`/mentor/khoa-hoc/${course.id}/thong-tin`} className={buttonClass('ghost', 'sm')}>
               <Pencil size={14} /> Sửa
             </Link>
+            <CloneCourseButton course={course} />
           </li>
         ))}
       </ul>

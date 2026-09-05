@@ -16,6 +16,7 @@ import { migrate } from '../db/migrate'
 import { seed } from '../db/seed'
 import { courseEnrollments, courseMentors, courses, users } from '../db/schema'
 import { resetRateLimits } from '../lib/http'
+import { resetSettingsCache } from '../lib/settings'
 
 export const INTEGRATION = process.env.INTEGRATION === '1'
 
@@ -37,6 +38,7 @@ export async function resetDb(): Promise<void> {
   const list = rows[0]?.list
   if (list) await pool.query(`TRUNCATE TABLE ${list} RESTART IDENTITY CASCADE`)
   resetRateLimits()
+  resetSettingsCache()
   await seed(() => {})
 }
 

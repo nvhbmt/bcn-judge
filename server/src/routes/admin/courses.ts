@@ -2,11 +2,11 @@
 import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { db, tx } from '../../db/pool'
+import { db, q, qt, tx } from '../../db/pool'
 import { courseEnrollments, courseMentors, courses, users } from '../../db/schema'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { audit } from '../../lib/audit'
-import { isConstraintViolation } from '../../lib/dbError'
+import { describeDbError, isConstraintViolation } from '../../lib/dbError'
 import { parseBody } from '../../lib/http'
 
 export const adminCourseRoutes = new Hono()
@@ -74,6 +74,105 @@ adminCourseRoutes.patch('/:id', async (c) => {
   if (!row) return errors.notFound(c, 'Không tìm thấy khoá học.')
   await audit(me.id, 'course.update', 'course', row.id, null, body.data)
   return ok(c, row)
+})
+
+/**
+ * POST /api/admin/courses/:id/clone — nhân bản khoá để mở lại mỗi kỳ (FR-B6).
+ *
+ * Sao chép chương, mục và BÀI TẬP kèm testcase; KHÔNG sao chép ghi danh, bài nộp hay
+ * mentor. Khoá mới luôn ở trạng thái `draft` và tắt tự ghi danh — bản sao chưa soạn
+ * xong mà member đã vào được là chuyện không ai muốn.
+ *
+ * Vì sao sao chép SÂU bài tập chứ không trỏ lại bài cũ (FR-D8 cho phép dùng chung):
+ * FR-B6 nói rõ "sao chép toàn bộ chương, mục, TESTCASE", và mục đích của nó là mở
+ * lại khoá cho kỳ sau — kỳ sau thường sửa đề và thêm test, mà sửa trên bài dùng
+ * chung là sửa luôn vào khoá kỳ trước đang còn lịch sử bài nộp. Cần dùng chung thật
+ * thì thêm bài vào khoá mới bằng ngân hàng bài, đó là đường của FR-D8.
+ *
+ * Cả việc chạy trong MỘT transaction: nhân bản nửa chừng để lại một khoá có chương
+ * mà không có bài, và không ai biết nó dở dang.
+ */
+adminCourseRoutes.post('/:id/clone', async (c) => {
+  const nguon = c.req.param('id')
+  const me = c.get('user')
+  const body = await parseBody(c, z.object({ code: z.string().min(1).max(40), name: z.string().min(1).max(200) }))
+  if (!body.ok) return body.response
+
+  const [goc] = await q<{ id: string }>(sql`SELECT id FROM courses WHERE id = ${nguon}`)
+  if (!goc) return errors.notFound(c, 'Không tìm thấy khoá học.')
+
+  try {
+    const id = await tx(async (t) => {
+      const [khoa] = await qt<{ id: string }>(t, sql`
+        INSERT INTO courses (code, name, description_md, status, self_enroll, created_by)
+        SELECT ${body.data.code}, ${body.data.name}, description_md, 'draft', false, ${me.id}
+        FROM courses WHERE id = ${nguon}
+        RETURNING id
+      `)
+      const moi = khoa!.id
+
+      // MỘT câu cho toàn bộ phần còn lại. Mấu chốt là sinh sẵn id mới ngay trong CTE
+      // (`gen_random_uuid()`), nhờ vậy có bảng ánh xạ cũ → mới để `items` trỏ đúng
+      // chương mới và bài mới. `INSERT … RETURNING` không trả kèm cột nguồn nên không
+      // dựng được ánh xạ, còn ghép theo (tiêu đề, vị trí) thì hai chương trùng tên là
+      // trỏ nhầm — im lặng và rất khó lần ra.
+      await t.execute(sql`
+        WITH sec AS (
+          SELECT s.id AS cu, gen_random_uuid()::text AS moi, s.title, s.position
+          FROM sections s WHERE s.course_id = ${nguon}
+        ),
+        bai AS (
+          SELECT DISTINCT p.id AS cu, gen_random_uuid()::text AS moi
+          FROM items i
+          JOIN sections s ON s.id = i.section_id AND s.course_id = ${nguon}
+          JOIN problems p ON p.id = i.problem_id
+          WHERE p.deleted_at IS NULL
+        ),
+        them_sec AS (
+          INSERT INTO sections (id, course_id, title, position)
+          SELECT moi, ${moi}, title, position FROM sec
+        ),
+        them_bai AS (
+          -- KHÔNG chép testcase_rev / validated_testcase_rev: bản sao có bộ testcase
+          -- MỚI, nên nó phải ở trạng thái chưa kiểm cho tới khi mentor bấm kiểm lại.
+          -- Chép cờ đã-kiểm sang là nói dối về một phép kiểm chưa từng chạy.
+          INSERT INTO problems (id, title, statement_md, input_desc_md, output_desc_md,
+                                constraints_md, examples, time_limit_ms, memory_limit_mb,
+                                difficulty, tags, allowed_language_ids, compare_mode, float_eps,
+                                starter_code, solution_language_id, solution_source,
+                                solution_visibility, scope_course_id, created_by, kind, harness)
+          SELECT b.moi, p.title, p.statement_md, p.input_desc_md, p.output_desc_md,
+                 p.constraints_md, p.examples, p.time_limit_ms, p.memory_limit_mb,
+                 p.difficulty, p.tags, p.allowed_language_ids, p.compare_mode, p.float_eps,
+                 p.starter_code, p.solution_language_id, p.solution_source,
+                 p.solution_visibility, ${moi}, ${me.id}, p.kind, p.harness
+          FROM bai b JOIN problems p ON p.id = b.cu
+        ),
+        them_tc AS (
+          INSERT INTO testcases (problem_id, position, kind, weight, input, expected,
+                                 input_bytes, expected_bytes, input_sha256)
+          SELECT b.moi, t.position, t.kind, t.weight, t.input, t.expected,
+                 t.input_bytes, t.expected_bytes, t.input_sha256
+          FROM bai b JOIN testcases t ON t.problem_id = b.cu
+        )
+        INSERT INTO items (section_id, kind, title, position, status, visible_from,
+                           lesson_body_md, problem_id)
+        SELECT sec.moi, i.kind, i.title, i.position, i.status, i.visible_from,
+               i.lesson_body_md, bai.moi
+        FROM items i
+        JOIN sec ON sec.cu = i.section_id
+        LEFT JOIN bai ON bai.cu = i.problem_id
+      `)
+      return moi
+    })
+    await audit(me.id, 'course.clone', 'course', id, null, { from: nguon })
+    return created(c, { id })
+  } catch (err) {
+    if (describeDbError(err).includes('courses_code_key')) {
+      return errors.conflict(c, 'code_taken', 'Mã khoá đã tồn tại.')
+    }
+    throw err
+  }
 })
 
 // ── Mentor của khoá (FR-B2) ────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import { q, tx } from '../../db/pool'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { audit } from '../../lib/audit'
 import { parseBody } from '../../lib/http'
+import { computeStandings } from '../../contest/standings'
 
 export const mentorContestRoutes = new Hono()
 
@@ -252,6 +253,59 @@ mentorContestRoutes.get('/:id/stats', async (c) => {
 
   return ok(c, { opened: summary?.opened ?? 0, submitted: summary?.submitted ?? 0, byProblem, notSubmitted })
 })
+
+/**
+ * GET /api/mentor/contests/:id/stats.csv — xuất bảng kết quả (vế "xuất CSV (S)" của FR-I7).
+ *
+ * Dùng lại `computeStandings` thay vì viết truy vấn thứ hai: file tải về mà lệch với
+ * bảng đang hiện trên màn hình thì mentor phải chọn tin cái nào, và đó là lỗi không ai
+ * phát hiện cho tới lúc chấm giải. Mốc cắt `infinity` — mentor luôn nhìn xuyên đóng
+ * băng (FR-I10), và một file kết quả đóng băng nửa chừng thì vô dụng.
+ *
+ * Người CHƯA NỘP cũng có dòng, điểm 0: danh sách chưa nộp là một nửa giá trị của
+ * thống kê này (FR-I7 nêu đích danh), lọc họ khỏi file là bắt mentor tự đối chiếu.
+ */
+mentorContestRoutes.get('/:id/stats.csv', async (c) => {
+  const contestId = c.req.param('id')
+  if (!(await canEdit(c, contestId))) return errors.notFound(c, 'Không tìm thấy contest.')
+
+  const [meta] = await q<{ title: string }>(sql`SELECT title FROM contests WHERE id = ${contestId}`)
+  const problems = await q<{ id: string; label: string | null; title: string }>(sql`
+    SELECT cp.id, cp.label, p.title
+    FROM contest_problems cp JOIN problems p ON p.id = cp.problem_id
+    WHERE cp.contest_id = ${contestId}
+    ORDER BY cp.position, cp.label
+  `)
+  const rows = await computeStandings(contestId, { cutoff: 'infinity', meId: '' })
+
+  const header = ['Hạng', 'Họ tên', 'Số bài AC', 'Tổng điểm', 'Đã nộp', ...problems.map((p) => p.label ?? p.title)]
+  const body = rows.map((r) => [
+    r.rank,
+    r.displayName,
+    r.acCount,
+    r.totalPoints,
+    Object.keys(r.problems).length > 0 ? 'x' : '',
+    ...problems.map((p) => r.problems[p.id]?.points ?? 0),
+  ])
+
+  // BOM UTF-8 ở đầu file: thiếu nó thì Excel trên Windows đọc CSV bằng bảng mã địa
+  // phương và mọi tên tiếng Việt ra ký tự rác — mentor mở file bằng Excel, không phải
+  // bằng trình soạn thảo.
+  const csv = '﻿' + [header, ...body].map((line) => line.map(oCsv).join(',')).join('\r\n') + '\r\n'
+  const ten = `contest-${(meta?.title ?? contestId).replace(/[^\p{L}\p{N}]+/gu, '-').slice(0, 60)}.csv`
+  return new Response(csv, {
+    headers: {
+      'content-type': 'text/csv; charset=utf-8',
+      'content-disposition': `attachment; filename*=UTF-8''${encodeURIComponent(ten)}`,
+    },
+  })
+})
+
+/** Bọc một ô CSV: dấu phẩy, nháy kép, xuống dòng đều phải nằm trong nháy kép. */
+function oCsv(v: string | number): string {
+  const s = String(v)
+  return /[",\r\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s
+}
 
 /** FR-I9: nhân bản contest tuần trước — dời +7 ngày, DANH SÁCH BÀI ĐỂ TRỐNG (US-10). */
 mentorContestRoutes.post('/:id/clone', async (c) => {

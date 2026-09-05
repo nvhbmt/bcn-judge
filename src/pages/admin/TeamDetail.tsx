@@ -1,11 +1,14 @@
 /**
  * Thao tác trên một team (FR-J1): thêm/gỡ thành viên, đổi leader, xoá team.
  *
- * ⚠ API hiện KHÔNG có `GET /api/admin/teams/:id/members` — route admin chỉ trả
- * `memberCount`, còn `/api/member/teams/mine` chỉ phục vụ team của chính người
- * gọi. Nên phần dưới không liệt kê được danh sách thành viên; mọi thao tác đi
- * qua ô tìm tài khoản. Gỡ nhầm người không thuộc team là lệnh rỗng, không hỏng
- * dữ liệu. Khi server bổ sung route liệt kê thì thay ô "gỡ" bằng danh sách thật.
+ * Danh sách thành viên lấy từ `team.members` — `GET /api/admin/teams` đã gộp sẵn tên
+ * từng người vào mỗi dòng team, nên không tốn thêm lượt gọi nào. (Chú thích cũ ở đây
+ * nói API không có phần đó và bắt admin gỡ người bằng cách gõ tên vào ô tìm; điều đó
+ * sai từ lúc route danh sách bắt đầu trả `members`, và nó khiến trang này để admin
+ * thao tác trong mù suốt.)
+ *
+ * Ô tìm tài khoản vẫn giữ cho việc THÊM: người sắp thêm thì theo định nghĩa chưa có
+ * trong danh sách để mà bấm.
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Crown, Trash2, UserMinus, UserPlus } from 'lucide-react'
@@ -85,6 +88,32 @@ export function TeamDetail({ team }: { team: AdminTeam }) {
         Leader hiện tại: <strong className="font-medium text-ink-2">{team.leaderName}</strong> ·{' '}
         {team.memberCount} thành viên.
       </p>
+
+      {/* Ai đang ở trong team. Leader lên đầu, và không có nút "gỡ" trên dòng của
+          leader: DB chặn gỡ leader đương nhiệm (composite FK), nên vẽ nút đó ra chỉ
+          để nhận lỗi. Đổi leader trước, rồi mới gỡ được người cũ. */}
+      <ul className="mb-3 flex flex-col gap-px border border-line bg-line">
+        {team.members.map((m) => (
+          <li key={m.id} className="flex items-center gap-2 bg-surface-2 px-2.5 py-1.5">
+            {m.isLeader ? <Crown size={13} className="shrink-0 text-tle" aria-label="Leader" /> : null}
+            <span className="min-w-0 flex-1 truncate text-sm text-ink-2">{m.displayName}</span>
+            {m.isLeader ? null : (
+              <>
+                <Button
+                  size="sm"
+                  disabled={run.isPending}
+                  onClick={() => run.mutate({ kind: 'leader', userId: m.id })}
+                >
+                  Đặt làm leader
+                </Button>
+                <Button size="sm" disabled={run.isPending} onClick={() => run.mutate({ kind: 'remove', userId: m.id })}>
+                  Gỡ
+                </Button>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
 
       {/* Nhóm nút bật/tắt, KHÔNG phải tab: không có tabpanel nào ở đây, nên
           `aria-pressed` mới là ngữ nghĩa đúng cho trình đọc màn hình. */}

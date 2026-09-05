@@ -10,6 +10,7 @@ import {
   Activity,
   ArrowLeft,
   GraduationCap,
+  ScrollText,
   Settings,
   Users,
   UsersRound,
@@ -29,6 +30,7 @@ const ITEMS: NavItem[] = [
   { to: "/quan-tri/tai-khoan", label: "Tài khoản", icon: Users },
   { to: "/quan-tri/khoa-hoc", label: "Khoá học", icon: GraduationCap },
   { to: "/quan-tri/team", label: "Team", icon: UsersRound },
+  { to: "/quan-tri/nhat-ky", label: "Nhật ký", icon: ScrollText },
   { to: "/quan-tri/cai-dat", label: "Cài đặt", icon: Settings },
 ];
 

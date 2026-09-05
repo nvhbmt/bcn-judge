@@ -127,4 +127,9 @@ export interface Language {
   position: number | null
 }
 
-export type SettingsMap = Record<string, number | boolean>
+/**
+ * Giá trị cài đặt: số, cờ, HOẶC chữ. Vế chữ có từ FR-H5 (`announcement`) — trước đó
+ * mọi khoá đều là số hoặc cờ, nên form chỉ có hai nhánh render và một chuỗi lọt vào
+ * ô `type="number"` là gõ không vào được mà không có gì báo.
+ */
+export type SettingsMap = Record<string, number | boolean | string>

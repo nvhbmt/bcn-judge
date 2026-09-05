@@ -75,6 +75,16 @@ export function SettingsForm({ settings }: { settings: SettingsMap }) {
                         />
                         {value ? 'Đang bật' : 'Đang tắt'}
                       </span>
+                    ) : typeof value === 'string' ? (
+                      // Khoá cài đặt mang CHỮ (hiện chỉ có `announcement` — FR-H5).
+                      // Nhánh mặc định là ô số, đưa chuỗi vào đó thì gõ gì cũng không
+                      // vào được và không có gì báo vì sao.
+                      <TextInput
+                        value={value}
+                        maxLength={500}
+                        placeholder="Để trống thì không hiện banner"
+                        onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+                      />
                     ) : (
                       <TextInput
                         type="number"

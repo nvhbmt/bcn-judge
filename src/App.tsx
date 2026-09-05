@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { Announcement } from '@/components/layout/Announcement'
 import { TopBar } from '@/components/layout/TopBar'
 import { Spinner } from '@/components/ui'
 import { AdminCoursesPage } from '@/pages/admin/CoursesPage'
@@ -7,6 +8,7 @@ import { AdminCourseCreatePage } from '@/pages/admin/CourseCreatePage'
 import { AdminLanguageEditPage } from '@/pages/admin/LanguageEditPage'
 import { AdminTeamCreatePage, AdminTeamEditPage } from '@/pages/admin/TeamEditPage'
 import { AdminJudgePage } from '@/pages/admin/JudgeStatusPage'
+import { AdminAuditPage } from '@/pages/admin/AuditPage'
 import { AdminSettingsPage } from '@/pages/admin/SettingsPage'
 import { AdminTeamsPage } from '@/pages/admin/TeamsPage'
 import { AdminUsersPage } from '@/pages/admin/UsersPage'
@@ -71,6 +73,9 @@ export function App() {
        nhập, không phụ thuộc vào việc trang nào nhớ vẽ nó. Xem TopBar.tsx. */
     <div className="flex h-full flex-col">
       <TopBar />
+      {/* Ngay dưới thanh trên và NGOÀI khung cuộn: thông báo bảo trì mà cuộn mất theo
+          nội dung thì người đang đọc giữa trang không bao giờ thấy nó. */}
+      <Announcement />
       <div className="min-h-0 flex-1 overflow-auto">
         <AppRoutes role={me.role} />
       </div>
@@ -113,6 +118,7 @@ function AppRoutes({ role }: { role: Me['role'] }) {
           <Route path="/quan-tri/team" element={<AdminTeamsPage />} />
           <Route path="/quan-tri/team/moi" element={<AdminTeamCreatePage />} />
           <Route path="/quan-tri/team/:teamId" element={<AdminTeamEditPage />} />
+          <Route path="/quan-tri/nhat-ky" element={<AdminAuditPage />} />
           <Route path="/quan-tri/cai-dat" element={<AdminSettingsPage />} />
           <Route path="/quan-tri/cai-dat/ngon-ngu/:languageId" element={<AdminLanguageEditPage />} />
         </>

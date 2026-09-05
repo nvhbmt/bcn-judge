@@ -2,10 +2,10 @@
  * FR-I7: thống kê contest — ai mở, ai nộp, ai chưa, phân bố verdict theo bài.
  * Route: /mentor/contest/:contestId/thong-ke
  */
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
-import { EmptyState, SectionRule, Spinner, VerdictBadge } from '@/components/ui'
+import { buttonClass, EmptyState, SectionRule, Spinner, VerdictBadge } from '@/components/ui'
 import { Notice } from './fields'
 import { groupByProblem, percent } from './contestStats'
 import { useContestStats } from './useContests'
@@ -33,7 +33,19 @@ export function ContestStatsPage() {
         <ArrowLeft size={15} /> Về contest
       </Link>
 
-      <h1 className="mb-4 font-display text-[26px] text-ink-1">Thống kê contest</h1>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <h1 className="font-display text-[26px] text-ink-1">Thống kê contest</h1>
+        {/* Thẻ <a> chứ không phải nút gọi fetch: phiên đăng nhập nằm ở cookie nên
+            trình duyệt tự gửi kèm, và tải file bằng điều hướng thật thì được thanh
+            tải xuống của trình duyệt lo — không phải tự dựng Blob rồi thu dọn URL. */}
+        <a
+          href={`/api/mentor/contests/${contestId}/stats.csv`}
+          download
+          className={buttonClass('ghost', 'sm', 'ml-auto no-underline')}
+        >
+          <Download size={13} /> Xuất CSV
+        </a>
+      </div>
 
       {isError || !data ? (
         <Notice tone="error">Không đọc được thống kê — kiểm tra bạn có quyền với contest này không.</Notice>

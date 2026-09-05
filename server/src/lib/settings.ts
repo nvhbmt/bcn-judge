@@ -18,6 +18,11 @@ export interface JudgeSettings {
   max_zip_bytes: number
   tle_skip_threshold: number
   judge_paused: boolean
+  /**
+   * FR-H5 — banner thông báo toàn hệ thống ("bảo trì 22:00"). Chuỗi rỗng = không có
+   * thông báo; đây là khoá cài đặt DUY NHẤT mang chữ, mọi khoá còn lại là số hoặc cờ.
+   */
+  announcement: string
 }
 
 /**
@@ -42,6 +47,7 @@ export const DEFAULTS: JudgeSettings = {
   max_zip_bytes: 67_108_864,
   tle_skip_threshold: 0,
   judge_paused: false,
+  announcement: '',
 }
 
 let cache: { at: number; value: JudgeSettings } | null = null
@@ -58,6 +64,17 @@ export async function getSettings(): Promise<JudgeSettings> {
   }
   cache = { at: Date.now(), value: merged }
   return merged
+}
+
+/**
+ * Vứt cache — chỉ dùng cho test.
+ *
+ * `resetDb()` TRUNCATE bảng `settings` rồi seed lại, nhưng cache sống ở biến module
+ * nên nó không biết gì về chuyện đó: test sau đọc trúng giá trị test trước vừa đặt,
+ * và hỏng theo THỨ TỰ CHẠY — loại lỗi chỉ hiện khi ai đó thêm một test ở giữa.
+ */
+export function resetSettingsCache(): void {
+  cache = null
 }
 
 export async function setSetting(key: string, value: unknown, actorId: string | null): Promise<void> {

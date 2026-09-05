@@ -196,6 +196,15 @@ lắt léo nhất: chấm lại có shadow attempt và audit (FR-D9), contest m�
 băng bảng xếp hạng (FR-I10), team/leader với hai bất biến ép ở tầng DB (FR-J), ghi chú của
 leader (FR-J6), bốn ngôn ngữ chấm.
 
+> Câu trên từng KHÔNG đúng, và sai suốt một thời gian vì không ai đối chiếu lại. Một lượt
+> rà nghiệp vụ mentor/admin tìm ra bảy chỗ hụt — một ở mức M (`FR-J1`: không có đường sửa
+> tên/mô tả team, chữa lỗi chính tả phải xoá rồi tạo lại, mất sạch thành viên) và sáu ở
+> mức S (`FR-B4` cờ tự ghi danh không endpoint nào đọc, `FR-B6` nhân bản khoá chưa có,
+> `FR-H4` API nhật ký có mà không màn nào gọi, `FR-H5` banner thông báo chưa có, `FR-I7`
+> chưa xuất CSV, `FR-J6` mentor/admin không đọc được ghi chú). Cả bảy nay đã vá và có test
+> canh. Bài học ghi lại ở đây: bảng trạng thái tự khai thì trôi, chỉ phép đối chiếu mới giữ
+> nó thật.
+
 Chưa làm, đều là mức **C**: đăng nhập Google (FR-A5), checker tự viết (FR-D5), phát hiện
 trùng code (FR-G7), lịch tự tạo contest hằng tuần (FR-I11).
 

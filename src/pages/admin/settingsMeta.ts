@@ -20,6 +20,10 @@ export interface SettingMeta {
 }
 
 export const SETTING_META: Record<string, SettingMeta> = {
+  announcement: {
+    label: 'Thông báo toàn hệ thống',
+    hint: 'Hiện thành băng ngay dưới thanh trên cho mọi người. Để trống thì không hiện gì.',
+  },
   default_time_limit_ms: {
     label: 'Giới hạn thời gian mặc định',
     unit: 'ms',

@@ -151,6 +151,38 @@ adminTeamRoutes.put('/:id/leader', async (c) => {
   return ok(c, { ok: true })
 })
 
+/**
+ * PATCH /api/admin/teams/:id — đổi tên và mô tả (FR-J1 "tạo / SỬA / xoá team").
+ *
+ * Thiếu đường này thì sửa một lỗi chính tả trong tên team chỉ còn cách xoá rồi tạo
+ * lại, mà xoá team là mất toàn bộ dòng `team_members` và cả leader — tức phải xếp
+ * lại người. `descriptionMd` đã nhận được lúc TẠO nhưng trước đây không sửa được,
+ * nên cột `teams.description_md` gần như chỉ ghi được đúng một lần.
+ *
+ * Không đụng tới `leader_id` ở đây: đổi leader có bất biến riêng (leader phải là
+ * thành viên của chính team đó, ép bằng composite FK) và đã có `PUT /:id/leader`.
+ */
+adminTeamRoutes.patch('/:id', async (c) => {
+  const body = await parseBody(c, teamSchema.omit({ leaderId: true }).partial())
+  if (!body.ok) return body.response
+  const d = body.data
+  if (d.name === undefined && d.descriptionMd === undefined) {
+    return errors.badRequest(c, 'Không có gì để sửa.')
+  }
+
+  const [row] = await q<{ id: string; name: string }>(sql`
+    UPDATE teams SET
+      name           = COALESCE(${d.name ?? null}, name),
+      description_md = ${d.descriptionMd === undefined ? sql`description_md` : (d.descriptionMd || null)},
+      updated_at     = now()
+    WHERE id = ${c.req.param('id')}
+    RETURNING id, name
+  `)
+  if (!row) return errors.notFound(c, 'Không tìm thấy team.')
+  await audit(c.get('user').id, 'team.update', 'team', row.id, null, d)
+  return ok(c, row)
+})
+
 adminTeamRoutes.delete('/:id', async (c) => {
   const [row] = await q<{ id: string }>(sql`DELETE FROM teams WHERE id = ${c.req.param('id')} RETURNING id`)
   if (!row) return errors.notFound(c, 'Không tìm thấy team.')

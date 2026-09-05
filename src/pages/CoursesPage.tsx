@@ -20,6 +20,7 @@ import { ActivityLog } from './home/ActivityLog'
 import { CourseRow } from './home/CourseRow'
 import { CourseStandings } from './home/CourseStandings'
 import { ResumeCard } from './home/ResumeCard'
+import { JoinByCode } from './home/JoinByCode'
 
 const WEEKDAY = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy']
 
@@ -83,6 +84,9 @@ export function CoursesPage() {
           />
         ) : null}
 
+        {/* Ô nhập mã đặt SAU danh sách: người đã có khoá thì thứ họ vào trang để xem
+            là danh sách, không phải ô nhập. Người chưa có khoá nào thì EmptyState ở
+            ngay trên đã dẫn mắt xuống đây. */}
         {data && data.length > 0 ? (
           <RowGroup className="mt-4">
             {data.map((course) => (
@@ -90,6 +94,8 @@ export function CoursesPage() {
             ))}
           </RowGroup>
         ) : null}
+
+        <JoinByCode role={me?.role ?? 'member'} />
       </main>
 
       {/* Không còn <Divider /> giữa các vùng: mỗi vùng nay là một khung có viền

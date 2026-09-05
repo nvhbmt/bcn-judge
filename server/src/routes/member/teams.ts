@@ -9,7 +9,7 @@
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
-import { teamRole } from '../../auth/middleware'
+import { isCourseStaff, teamRole } from '../../auth/middleware'
 import { q } from '../../db/pool'
 import { created, errors, ok } from '../../lib/apiResponse'
 import { parseBody } from '../../lib/http'
@@ -256,11 +256,33 @@ memberTeamRoutes.post('/notes/:noteId/read', async (c) => {
   return ok(c, { ok: true })
 })
 
-/** GET /api/member/teams/:id/notes — leader xem lại ghi chú mình đã để. */
+/**
+ * GET /api/member/teams/:id/notes — leader xem lại ghi chú mình đã để, và
+ * mentor/admin đọc được ghi chú của team trong phạm vi của mình.
+ *
+ * Vế thứ hai là chữ cuối của FR-J6: "mentor/admin xem được các ghi chú này". Trước
+ * đây điều kiện chỉ có `isLeader`, mà admin không phải thành viên team nào nên
+ * `teamRole` trả null — tức đường duy nhất để thấy lời nhắc trong ban lại đóng với
+ * chính người chịu trách nhiệm về nó.
+ *
+ * Mentor giới hạn theo KHOÁ của team, đúng ô "trong khoá" của ma trận quyền. Team
+ * không gắn khoá nào (`course_id` null) là team toàn ban, chỉ admin đọc được — mentor
+ * không có phạm vi nào để suy ra quyền ở đó.
+ */
 memberTeamRoutes.get('/:teamId/notes', async (c) => {
   const me = c.get('user')
-  const role = await teamRole(me.id, c.req.param('teamId'))
-  if (!role?.isLeader) return errors.forbidden(c, 'Chỉ leader xem được danh sách ghi chú của team.')
+  const teamId = c.req.param('teamId')
+  const role = await teamRole(me.id, teamId)
+  if (!role?.isLeader) {
+    const [team] = await q<{ courseId: string | null }>(
+      sql`SELECT course_id AS "courseId" FROM teams WHERE id = ${teamId}`,
+    )
+    if (!team) return errors.notFound(c, 'Không tìm thấy team.')
+    const staff = me.role === 'admin' || (team.courseId !== null && (await isCourseStaff(me, team.courseId)))
+    if (!staff) {
+      return errors.forbidden(c, 'Chỉ leader của team, mentor phụ trách khoá hoặc admin xem được ghi chú.')
+    }
+  }
   const rows = await q(sql`
     SELECT n.id, n.body, n.created_at AS "createdAt", n.read_at AS "readAt",
            u.display_name AS "targetName", n.target_user_id AS "targetUserId"

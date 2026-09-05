@@ -47,6 +47,44 @@ describe.skipIf(!INTEGRATION)('team & leader (FR-J)', () => {
     }
   })
 
+  it('FR-J1: đổi được TÊN và MÔ TẢ team mà không mất thành viên', async () => {
+    // Trước đây chỉ có tạo và xoá, nên sửa một lỗi chính tả trong tên là phải xoá team
+    // rồi tạo lại — mất sạch team_members và cả leader. Phép canh ở đây là số thành
+    // viên PHẢI y nguyên sau khi đổi tên.
+    const res = await call(`/api/admin/teams/${teamId}`, {
+      as: admin,
+      method: 'PATCH',
+      body: { name: 'Alpha đã đổi', descriptionMd: 'Mô tả mới' },
+    })
+    expect(res.status).toBe(200)
+
+    const [row] = await q<{ name: string; description_md: string; n: number }>(sql`
+      SELECT t.name, t.description_md,
+             (SELECT count(*)::int FROM team_members tm WHERE tm.team_id = t.id) AS n
+      FROM teams t WHERE t.id = ${teamId}
+    `)
+    expect(row!.name).toBe('Alpha đã đổi')
+    expect(row!.description_md).toBe('Mô tả mới')
+    expect(row!.n).toBeGreaterThan(0)
+  })
+
+  it('FR-J1: sửa từng phần — chỉ gửi tên thì mô tả cũ còn nguyên', async () => {
+    await call(`/api/admin/teams/${teamId}`, { as: admin, method: 'PATCH', body: { descriptionMd: 'Giữ lại' } })
+    await call(`/api/admin/teams/${teamId}`, { as: admin, method: 'PATCH', body: { name: 'Chỉ đổi tên' } })
+    const [row] = await q<{ name: string; description_md: string }>(
+      sql`SELECT name, description_md FROM teams WHERE id = ${teamId}`,
+    )
+    expect(row!.name).toBe('Chỉ đổi tên')
+    expect(row!.description_md).toBe('Giữ lại')
+  })
+
+  it('FR-J1: member và leader KHÔNG sửa được team', async () => {
+    for (const user of [leader, teammate]) {
+      const res = await call(`/api/admin/teams/${teamId}`, { as: user, method: 'PATCH', body: { name: 'X' } })
+      expect(res.status).toBe(403)
+    }
+  })
+
   it('một member chỉ thuộc MỘT team (thông điệp tiếng Việt, không phải lỗi SQL)', async () => {
     const second = await call('/api/admin/teams', { as: admin, body: { name: 'Beta', leaderId: outsider.id } })
     const res = await call(`/api/admin/teams/${second.body.data.id}/members`, { as: admin, body: { userId: teammate.id } })
@@ -126,6 +164,35 @@ describe.skipIf(!INTEGRATION)('team & leader (FR-J)', () => {
       body: { targetUserId: outsider.id, body: 'x' },
     })
     expect(outsiderTarget.status).toBe(404)
+  })
+
+  it('FR-J6: admin đọc được ghi chú của team, mentor ngoài khoá thì không', async () => {
+    // Vế cuối của FR-J6 — "mentor/admin xem được các ghi chú này". Trước đây điều
+    // kiện chỉ có isLeader, mà admin không thuộc team nào nên teamRole trả null:
+    // người chịu trách nhiệm về lời nhắc lại là người duy nhất không đọc được.
+    await call(`/api/member/teams/${teamId}/notes`, {
+      as: leader,
+      body: { targetUserId: teammate.id, body: 'Tuần này nhớ nộp bài 3.' },
+    })
+
+    const cuaAdmin = await call(`/api/member/teams/${teamId}/notes`, { as: admin })
+    expect(cuaAdmin.status).toBe(200)
+    expect(cuaAdmin.body.data).toHaveLength(1)
+    expect(cuaAdmin.body.data[0].body).toContain('bài 3')
+
+    // Team này không gắn khoá nào ⇒ team toàn ban ⇒ mentor không có phạm vi để suy
+    // ra quyền, phải bị chặn. Chỉ admin đọc được.
+    const mentor = await makeUser('mentor')
+    expect((await call(`/api/member/teams/${teamId}/notes`, { as: mentor })).status).toBe(403)
+  })
+
+  it('FR-J6: thành viên thường vẫn KHÔNG đọc được cả sổ ghi chú của team', async () => {
+    await call(`/api/member/teams/${teamId}/notes`, {
+      as: leader,
+      body: { targetUserId: teammate.id, body: 'riêng tư' },
+    })
+    expect((await call(`/api/member/teams/${teamId}/notes`, { as: teammate })).status).toBe(403)
+    expect((await call(`/api/member/teams/${teamId}/notes`, { as: outsider })).status).toBe(403)
   })
 
   it('FR-J6: không đọc trộm được ghi chú của người khác', async () => {
