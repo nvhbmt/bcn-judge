@@ -195,10 +195,19 @@ describe('testcase mẫu sai — bảng so output', () => {
     expect(screen.queryByText('đáp án đúng')).not.toBeInTheDocument()
   })
 
-  it('lỗi biên dịch thì báo lỗi, không dựng bảng so', () => {
+  it('lỗi biên dịch (verdict CE) thì báo lỗi, không dựng bảng so', () => {
     const s = run([])
-    panel({ tab: 'chay-thu', sampleRun: { ...s, compileOutput: 'error: expected ;' } })
+    panel({ tab: 'chay-thu', sampleRun: { ...s, verdict: 'CE', compileOutput: 'error: expected ;' } })
     expect(within(screen.getByText('Lỗi biên dịch').parentElement!).getByText(/expected ;/)).toBeInTheDocument()
     expect(screen.queryByText('đáp án đúng')).not.toBeInTheDocument()
+  })
+
+  it('CẢNH BÁO (verdict không phải CE) không bị gọi là lỗi — bài vẫn được chấm', () => {
+    // Thiếu header trong C ra cảnh báo implicit-declaration nhưng exit 0 → verdict
+    // vẫn là kết quả chấm thật; compileOutput chứa cảnh báo không được dán "Lỗi".
+    const s = run([{ verdict: 'AC', stdout: '10\n' }])
+    panel({ tab: 'chay-thu', sampleRun: { ...s, verdict: 'AC', compileOutput: 'warning: implicit declaration' } })
+    expect(screen.queryByText('Lỗi biên dịch')).not.toBeInTheDocument()
+    expect(screen.getByText(/Cảnh báo/)).toBeInTheDocument()
   })
 })

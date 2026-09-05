@@ -34,28 +34,54 @@ export function ResultTable({
 }) {
   if (!submission) return <p className="py-4 text-center text-xs text-ink-5">{emptyText}</p>
 
-  if (submission.compileOutput) {
+  // "Lỗi biên dịch" chỉ khi verdict THẬT là CE — KHÔNG phải "có chữ trong
+  // compileOutput". C biên dịch được nhưng thiếu header thì gcc in cảnh báo
+  // (implicit declaration) ra stderr, exit 0, chạy đúng → AC; chuỗi cảnh báo đó
+  // vẫn nằm ở compileOutput. Bản trước gào "Lỗi biên dịch" cho mọi compileOutput
+  // khác rỗng nên một bài AC (đúng) bị dán nhãn lỗi, mâu thuẫn với lịch sử — đúng
+  // ca người dùng báo. Nay verdict AC dẫn dắt, cảnh báo hiện dưới dạng cảnh báo.
+  if (submission.verdict === 'CE') {
     return (
       <div>
         <p className="mb-1 text-xs font-medium text-wa">Lỗi biên dịch</p>
         <pre className="max-h-60 overflow-auto border border-line bg-surface-code p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
-          {submission.compileOutput}
+          {submission.compileOutput || 'Biên dịch thất bại.'}
         </pre>
       </div>
     )
   }
 
+  // Cảnh báo biên dịch trên bài KHÔNG lỗi: giữ lại vì implicit-declaration là bug
+  // tiềm ẩn thật, nhưng nói rõ "vẫn được chấm" để không ai tưởng bài rớt.
+  // Tới đây verdict CHẮC CHẮN không phải CE (đã return ở trên), nên compileOutput
+  // còn lại chỉ có thể là CẢNH BÁO của một bài biên dịch được.
+  const warnings = submission.compileOutput || null
+  const warningNote = warnings ? (
+    <details className="mb-2 border-l-2 border-earth bg-(--tint-earth) px-3 py-2 text-earth">
+      <summary className="cursor-pointer text-xs font-medium">Cảnh báo từ trình biên dịch — bài vẫn được chấm</summary>
+      <pre className="mt-1 max-h-40 overflow-auto font-mono text-xs whitespace-pre-wrap text-ink-3">{warnings}</pre>
+    </details>
+  ) : null
+
   const results = submission.results ?? []
   if (results.length === 0) {
     return (
-      <p className="py-4 text-center text-xs text-ink-5">
-        {submission.status === 'done' ? 'Không có kết quả.' : 'Đang chấm…'}
-      </p>
+      <div>
+        {warningNote}
+        <p className="py-4 text-center text-xs text-ink-5">
+          {submission.status === 'done' ? 'Không có kết quả.' : 'Đang chấm…'}
+        </p>
+      </div>
     )
   }
 
-  // `key`: lượt chấm khác là câu hỏi khác, nên test đang chọn phải trở về mặc định.
-  return <Cases key={submission.id} submission={submission} results={results} samples={samples} compareMode={compareMode} />
+  return (
+    <div>
+      {warningNote}
+      {/* `key`: lượt chấm khác là câu hỏi khác, nên test đang chọn phải trở về mặc định. */}
+      <Cases key={submission.id} submission={submission} results={results} samples={samples} compareMode={compareMode} />
+    </div>
+  )
 }
 
 function Cases({

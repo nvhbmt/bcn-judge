@@ -15,7 +15,7 @@ const LANGUAGE_SEED = [
     sourceFilename: 'main.c',
     functionSourceFilename: 'solution.c',
     compileArgvFunction: null,
-    compileArgv: ['gcc', '-std=c11', '-O2', '-pipe', '-static', '-s', '-o', '/w/prog', 'main.c', '-lm'],
+    compileArgv: ['gcc', '-std=c11', '-Werror=implicit-function-declaration', '-Werror=implicit-int', '-O2', '-pipe', '-static', '-s', '-o', '/w/prog', 'main.c', '-lm'],
     runArgv: ['/w/prog'],
     timeFactor: '1',
     memoryExtraMb: 0,

@@ -138,6 +138,19 @@ describe.skipIf(!RUN_DOCKER)('P0 — sandbox trên Docker thật', () => {
     expect(out.score).toBe(40)
   })
 
+  // ---- Chính sách C nghiêm: thiếu khai báo (thiếu #include) là LỖI, không chấm.
+  it('C thiếu <stdio.h> → CE (implicit-declaration là lỗi), không chấm test nào', async () => {
+    const out = await judge('c11', 'implicit_decl.c', [tc(1, '5', '10')], { timeLimitMs: 2000 })
+    expect(out.verdict).toBe('CE')
+    expect(out.results).toHaveLength(0)
+    expect(out.compileOutput).toMatch(/implicit/i)
+  })
+
+  it('C đầy đủ #include vẫn AC — cờ -Werror chỉ nhắm implicit, không siết oan', async () => {
+    const out = await judge('c11', 'sum.c', [tc(1, '3 5\n', '8')])
+    expect(out.verdict).toBe('AC')
+  })
+
   // ---- Bảng verdict trên hành vi thật.
   it('lỗi cú pháp → CE kèm CHẨN ĐOÁN THẬT của compiler', async () => {
     const out = await judge('c11', 'syntax_error.c', [tc(1, '', 'x')])

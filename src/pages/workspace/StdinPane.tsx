@@ -81,20 +81,34 @@ function Output({ busy, result }: { busy: boolean; result: SubmissionView | null
   if (busy) return <Hint>đang chạy…</Hint>
   if (!result) return <Hint>output hiện ở đây sau khi bấm Chạy.</Hint>
 
-  if (result.compileOutput) {
+  // "lỗi biên dịch" chỉ khi verdict THẬT là CE — không phải mọi compileOutput khác
+  // rỗng: thiếu header thì gcc CẢNH BÁO (exit 0, chạy được), chuỗi cảnh báo vẫn nằm
+  // ở compileOutput. Xem chú thích dài hơn ở ResultTable.
+  if (result.verdict === 'CE') {
     return (
       <div>
         <Label tone="wa">lỗi biên dịch</Label>
-        <pre className="mt-1 font-mono text-[13px] whitespace-pre-wrap text-ink-2">{result.compileOutput}</pre>
+        <pre className="mt-1 font-mono text-[13px] whitespace-pre-wrap text-ink-2">
+          {result.compileOutput || 'Biên dịch thất bại.'}
+        </pre>
       </div>
     )
   }
 
+  // Tới đây verdict CHẮC CHẮN không phải CE (đã return ở trên), nên compileOutput
+  // còn lại chỉ có thể là CẢNH BÁO của một bài biên dịch được.
+  const warnings = result.compileOutput || null
   const r = result.results?.[0]
   if (!r) return <Hint>{result.status === 'done' ? 'không có output.' : 'đang chấm…'}</Hint>
 
   return (
     <div className="flex h-full flex-col gap-1.5">
+      {warnings ? (
+        <details className="border-l-2 border-earth bg-(--tint-earth) px-2 py-1 text-earth">
+          <summary className="cursor-pointer font-mono text-[13px]">cảnh báo biên dịch — vẫn chạy</summary>
+          <pre className="mt-1 font-mono text-[13px] whitespace-pre-wrap text-ink-3">{warnings}</pre>
+        </details>
+      ) : null}
       <div className="flex items-center gap-2">
         <Label>stdout</Label>
         {/* Chạy tự nhập KHÔNG có đáp án để so, nên "AC" ở đây chẳng nói lên điều gì —

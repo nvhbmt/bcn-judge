@@ -62,11 +62,11 @@ describe('ValidateReport', () => {
     expect(screen.queryByRole('group', { name: /So output/ })).toBeNull()
   })
 
-  it('lời giải mẫu không biên dịch được thì hiện log, không hiện bảng testcase', () => {
-    view(run({ compileOutput: 'solution.c:3: error: expected ‘;’' }))
+  it('lời giải mẫu KHÔNG BIÊN DỊCH ĐƯỢC (verdict CE) thì hiện log, không hiện bảng testcase', () => {
+    view(run({ verdict: 'CE', compileOutput: 'solution.c:3: error: expected \u2018;\u2019', results: [] }))
     expect(screen.getByText(/không biên dịch được/)).toBeTruthy()
-    expect(screen.getByText(/solution.c:3/)).toBeTruthy()
-    expect(screen.queryByRole('list', { name: 'Kết quả từng testcase' })).toBeNull()
+    // Không dựng bảng từng testcase: dấu hiệu là không có tiêu đề "Testcase #".
+    expect(screen.queryByText(/Testcase #/)).not.toBeInTheDocument()
   })
 
   it('TLE thì KHÔNG đặt output cạnh expected — output dở dang không phải "sai đáp án"', () => {

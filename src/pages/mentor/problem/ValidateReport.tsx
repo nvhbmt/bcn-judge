@@ -29,17 +29,22 @@ export function ValidateReport({
   testcases: MentorTestcaseView[]
   compareMode: CompareMode
 }) {
-  if (result.compileOutput) {
+  // "không biên dịch được" chỉ khi verdict thật là CE. Lời giải biên dịch được kèm
+  // cảnh báo (exit 0) vẫn kiểm testcase bình thường — xem ResultTable.
+  if (result.verdict === 'CE') {
     return (
       <div className="space-y-2">
         <Notice tone="error">Lời giải mẫu không biên dịch được — chưa kiểm được testcase nào.</Notice>
         <pre className="max-h-40 overflow-auto border border-line bg-surface-code p-2 font-mono text-xs whitespace-pre-wrap text-ink-2">
-          {result.compileOutput}
+          {result.compileOutput || 'Biên dịch thất bại.'}
         </pre>
       </div>
     )
   }
 
+  // Tới đây verdict CHẮC CHẮN không phải CE (đã return ở trên), nên compileOutput
+  // còn lại chỉ có thể là CẢNH BÁO của một bài biên dịch được.
+  const warnings = result.compileOutput || null
   const results = result.results ?? []
   if (results.length === 0) {
     return <Notice tone="warn">Lượt kiểm chạy xong nhưng không có kết quả testcase nào.</Notice>
@@ -50,6 +55,12 @@ export function ValidateReport({
 
   return (
     <div className="space-y-3">
+      {warnings ? (
+        <details className="border-l-2 border-earth bg-(--tint-earth) px-3 py-2 text-earth">
+          <summary className="cursor-pointer text-xs font-medium">Cảnh báo khi biên dịch lời giải — vẫn kiểm được</summary>
+          <pre className="mt-1 max-h-40 overflow-auto font-mono text-xs whitespace-pre-wrap text-ink-3">{warnings}</pre>
+        </details>
+      ) : null}
       {failed.length === 0 ? (
         <Notice tone="ok">
           <strong>
