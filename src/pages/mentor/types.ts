@@ -65,6 +65,10 @@ export interface MentorProblemDetail {
   tags: string[]
   allowedLanguageIds: string[] | null
   compareMode: string
+  /** Dung sai khi compareMode = 'float'; null = mặc định 1e-6 của máy chấm. */
+  floatEps: number | null
+  /** {languageId: code} — nạp sẵn vào editor của member khi mở bài. */
+  starterCode: Record<string, string>
   testcaseRev: number
   solutionLanguageId: string | null
   solutionSource: string | null

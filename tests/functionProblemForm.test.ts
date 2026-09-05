@@ -11,7 +11,7 @@
  *  3. Không đổi harness thì không gửi trường đó, vì PATCH dùng COALESCE.
  */
 import { describe, expect, it } from 'vitest'
-import { toFormValues, toPatchPayload, validateForm, type ProblemFormValues } from '@/pages/mentor/form'
+import { parseTags, toFormValues, toPatchPayload, validateForm, type ProblemFormValues } from '@/pages/mentor/form'
 import type { MentorProblemDetail } from '@/pages/mentor/types'
 
 const detail = (over: Partial<MentorProblemDetail> = {}): MentorProblemDetail => ({
@@ -27,6 +27,8 @@ const detail = (over: Partial<MentorProblemDetail> = {}): MentorProblemDetail =>
   memoryLimitMb: 256,
   difficulty: 'easy',
   tags: [],
+  floatEps: null,
+  starterCode: {},
   allowedLanguageIds: null,
   compareMode: 'trim',
   testcaseRev: 1,
@@ -126,5 +128,91 @@ describe('form bài dạng function — FR-D10', () => {
   ])('cho qua: %s', (_ten, over) => {
     // Đối chứng hai đầu mút: chặn không được chặn nhầm giá trị hợp lệ.
     expect(validateForm(stdio(over as Partial<ProblemFormValues>))).toBeNull()
+  })
+})
+
+describe('tags — FR-D1 bắt buộc có, mà form từng không có ô nào', () => {
+  // Server nhận, lưu và trả tags từ đầu; chỉ giao diện là câm. Ba phép canh dưới đây
+  // giữ vòng đời: nạp về dạng gõ được → chỉ gửi khi THẬT SỰ đổi → xoá được.
+
+  it('nạp mảng tag từ API thành chuỗi gõ được, phân cách phẩy', () => {
+    const v = toFormValues(detail({ tags: ['số học', 'vòng lặp', 'sàng'] }))
+    expect(v.tags).toBe('số học, vòng lặp, sàng')
+  })
+
+  it('parseTags dọn dấu phẩy thừa, khoảng trắng và mẩu trùng', () => {
+    expect(parseTags(' số học,, vòng lặp ,sàng, số học ')).toEqual(['số học', 'vòng lặp', 'sàng'])
+    expect(parseTags('')).toEqual([])
+  })
+
+  it('đổi tag thì gửi MẢNG đã chuẩn hoá; xáo khoảng trắng thì không gửi gì', () => {
+    const init = toFormValues(detail({ tags: ['số học'] }))
+
+    expect(toPatchPayload(init, { ...init, tags: 'số học,  đệ quy' }).tags).toEqual(['số học', 'đệ quy'])
+    // Cùng bộ tag, chỉ khác cách gõ — không phải thay đổi, không được gửi.
+    expect(toPatchPayload(init, { ...init, tags: '  số học , ' })).not.toHaveProperty('tags')
+  })
+
+  it('xoá hết chữ rồi lưu là gửi [] — server hiểu là bỏ hết tag', () => {
+    const init = toFormValues(detail({ tags: ['số học'] }))
+    expect(toPatchPayload(init, { ...init, tags: '' }).tags).toEqual([])
+  })
+
+  it('chặn quá 20 tag và tag dài quá 40 ký tự bằng câu tiếng người', () => {
+    const v = toFormValues(detail())
+    const nhieu = Array.from({ length: 21 }, (_, i) => `t${i}`).join(', ')
+    expect(validateForm({ ...v, tags: nhieu })).toContain('Tối đa 20 tag')
+    expect(validateForm({ ...v, tags: 'x'.repeat(41) })).toContain('dài quá 40 ký tự')
+    expect(validateForm({ ...v, tags: 'số học, sàng' })).toBeNull()
+  })
+})
+
+describe('bốn trường từng chết trên giao diện — FR-D2/D3/D5/D7', () => {
+  it('ngôn ngữ: siết rồi MỞ LẠI được — null gửi đi đúng nghĩa "mọi ngôn ngữ"', () => {
+    const init = toFormValues(detail({ allowedLanguageIds: null }))
+    expect(toPatchPayload(init, { ...init, allowedLanguageIds: ['c11'] }).allowedLanguageIds).toEqual(['c11'])
+
+    const daSiet = toFormValues(detail({ allowedLanguageIds: ['c11'] }))
+    expect(toPatchPayload(daSiet, { ...daSiet, allowedLanguageIds: null }).allowedLanguageIds).toBeNull()
+    expect(toPatchPayload(daSiet, { ...daSiet })).not.toHaveProperty('allowedLanguageIds')
+  })
+
+  it('ngôn ngữ: bỏ tick hết bị chặn bằng câu tiếng người, không phải lỗi zod', () => {
+    const v = toFormValues(detail())
+    expect(validateForm({ ...v, allowedLanguageIds: [] })).toContain('không ai nộp được')
+    expect(validateForm({ ...v, allowedLanguageIds: ['c11'] })).toBeNull()
+  })
+
+  it('floatEps: chỉ gửi khi là số hợp lệ và THẬT SỰ đổi; sai thì chặn từ FE', () => {
+    const init = toFormValues(detail({ compareMode: 'float', floatEps: null }))
+    expect(init.floatEps).toBe('')
+
+    expect(toPatchPayload(init, { ...init, floatEps: '0.001' }).floatEps).toBe(0.001)
+    expect(toPatchPayload(init, { ...init, floatEps: '' })).not.toHaveProperty('floatEps')
+
+    expect(validateForm({ ...init, floatEps: '-1' })).toContain('Dung sai')
+    expect(validateForm({ ...init, floatEps: 'abc' })).toContain('Dung sai')
+    // Không ở chế độ float thì ô không hiện, giá trị cũ không được phép chặn lưu.
+    expect(validateForm({ ...init, compareMode: 'trim', floatEps: 'abc' })).toBeNull()
+  })
+
+  it('solutionVisibility: nạp từ API, đổi thì gửi, giá trị lạ rơi về mentor', () => {
+    const init = toFormValues(detail({ solutionVisibility: 'after_ac' }))
+    expect(init.solutionVisibility).toBe('after_ac')
+    expect(toFormValues(detail({ solutionVisibility: 'gi-do-la' })).solutionVisibility).toBe('mentor')
+
+    expect(toPatchPayload(init, { ...init, solutionVisibility: 'after_contest' }).solutionVisibility)
+      .toBe('after_contest')
+    expect(toPatchPayload(init, { ...init })).not.toHaveProperty('solutionVisibility')
+  })
+
+  it('starterCode: gửi CẢ map như harness, lọc ngôn ngữ rỗng — không xoá nhầm của ngôn ngữ khác', () => {
+    const init = toFormValues(detail({ starterCode: { c11: 'int ham(int);' } }))
+    const patch = toPatchPayload(init, {
+      ...init,
+      starterCode: { ...init.starterCode, python3: 'def ham(n): ...', cpp17: '   ' },
+    })
+    expect(patch.starterCode).toEqual({ c11: 'int ham(int);', python3: 'def ham(n): ...' })
+    expect(toPatchPayload(init, { ...init })).not.toHaveProperty('starterCode')
   })
 })

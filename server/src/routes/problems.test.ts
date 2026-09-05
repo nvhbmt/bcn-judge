@@ -222,3 +222,66 @@ describe.skipIf(!INTEGRATION)('FR-G3 · bài nộp theo BÀI', () => {
     expect(JSON.stringify(res.body)).not.toContain('"source"')
   })
 })
+
+describe.skipIf(!INTEGRATION)('mentor · ngôn ngữ cho phép và dung sai (FR-D2/D5)', () => {
+  let mentor: TestUser
+  let problemId: string
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    mentor = await makeUser('mentor')
+    problemId = await makeProblem(mentor.id, { title: 'Bài eps' })
+  })
+
+  const doc = async () =>
+    (await call(`/api/mentor/problems/${problemId}`, { as: mentor })).body.data
+
+  it('siết ngôn ngữ rồi MỞ LẠI được bằng null — ba ngả vắng mặt / null / mảng', async () => {
+    // siết
+    await call(`/api/mentor/problems/${problemId}`, {
+      as: mentor, method: 'PATCH', body: { allowedLanguageIds: ['c11'] },
+    })
+    expect((await doc()).allowedLanguageIds).toEqual(['c11'])
+
+    // PATCH trường KHÁC — vắng mặt phải là "giữ nguyên", không phải "xoá"
+    await call(`/api/mentor/problems/${problemId}`, { as: mentor, method: 'PATCH', body: { title: 'Đổi tên' } })
+    expect((await doc()).allowedLanguageIds).toEqual(['c11'])
+
+    // null = mở lại cho mọi ngôn ngữ. Bản cũ gộp null với vắng mặt nên bài đã siết
+    // vĩnh viễn không đường nào quay về — chỉ lộ khi mentor đổi ý, tức là lộ muộn.
+    await call(`/api/mentor/problems/${problemId}`, {
+      as: mentor, method: 'PATCH', body: { allowedLanguageIds: null },
+    })
+    expect((await doc()).allowedLanguageIds).toBeNull()
+  })
+
+  it('mảng RỖNG bị chặn 400 — [] nghĩa là không ai nộp được, ở cả POST lẫn PATCH', async () => {
+    const patched = await call(`/api/mentor/problems/${problemId}`, {
+      as: mentor, method: 'PATCH', body: { allowedLanguageIds: [] },
+    })
+    expect(patched.status).toBe(400)
+
+    const posted = await call('/api/mentor/problems', {
+      as: mentor, body: { title: 'X', statementMd: 'x', allowedLanguageIds: [] },
+    })
+    expect(posted.status).toBe(400)
+  })
+
+  it('floatEps âm hoặc > 1 bị chặn — eps âm làm MỌI phép so số thực trả sai, lặng lẽ', async () => {
+    for (const eps of [-0.1, 0, 1.5]) {
+      const res = await call(`/api/mentor/problems/${problemId}`, {
+        as: mentor, method: 'PATCH', body: { floatEps: eps },
+      })
+      expect(res.status).toBe(400)
+    }
+    const ok = await call(`/api/mentor/problems/${problemId}`, {
+      as: mentor, method: 'PATCH', body: { compareMode: 'float', floatEps: 1e-9 },
+    })
+    expect(ok.status).toBe(200)
+    expect((await doc()).floatEps).toBeCloseTo(1e-9)
+  })
+})

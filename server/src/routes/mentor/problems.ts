@@ -51,9 +51,16 @@ const problemSchema = z.object({
   memoryLimitMb: z.number().int().min(16).max(2048).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
   tags: z.array(z.string().max(40)).max(20).optional(),
-  allowedLanguageIds: z.array(z.string().max(40)).optional(),
+  /**
+   * null = mọi ngôn ngữ đang bật (cột NULL). Mảng RỖNG bị chặn từ zod: [] nghĩa là
+   * "không ngôn ngữ nào được phép" — một bài không ai nộp nổi, và không có màn nào
+   * nói cho mentor biết vì sao. Muốn mở hết thì gửi null, đừng gửi [].
+   */
+  allowedLanguageIds: z.array(z.string().max(40)).min(1).nullable().optional(),
   compareMode: z.enum(['trim', 'exact', 'float']).optional(),
-  floatEps: z.number().optional(),
+  /** Dương và ≤ 1: eps âm làm compareFloat coi MỌI cặp số là lệch — toàn bài WA
+   *  mà không dấu hiệu nào; eps > 1 thì ngược lại, cái gì cũng "bằng nhau". */
+  floatEps: z.number().positive().max(1).optional(),
   starterCode: z.record(z.string(), z.string()).optional(),
   solutionLanguageId: z.string().max(40).optional(),
   solutionSource: z.string().max(200_000).optional(),
@@ -319,11 +326,16 @@ mentorProblemRoutes.patch('/:id', async (c) => {
       solution_language_id = COALESCE(${d.solutionLanguageId ?? null}, solution_language_id),
       solution_source = COALESCE(${d.solutionSource ?? null}, solution_source),
       solution_visibility = COALESCE(${d.solutionVisibility ?? null}, solution_visibility),
-      allowed_language_ids = CASE
-        WHEN ${d.allowedLanguageIds ? JSON.stringify(d.allowedLanguageIds) : null}::jsonb IS NULL
-          THEN allowed_language_ids
-        ELSE ARRAY(SELECT jsonb_array_elements_text(${d.allowedLanguageIds ? JSON.stringify(d.allowedLanguageIds) : null}::jsonb))
-      END,
+      -- Ba ngả, và phải phân biệt VẮNG MẶT với null: vắng mặt = giữ nguyên,
+      -- null = xoá về "mọi ngôn ngữ" (cột NULL), mảng = đặt danh sách. Bản cũ gộp
+      -- hai ngả đầu làm một nên bài đã siết ngôn ngữ không có đường nào MỞ LẠI.
+      allowed_language_ids = ${
+        d.allowedLanguageIds === undefined
+          ? sql`allowed_language_ids`
+          : d.allowedLanguageIds === null
+            ? sql`NULL`
+            : sql`ARRAY(SELECT jsonb_array_elements_text(${JSON.stringify(d.allowedLanguageIds)}::jsonb))`
+      },
       -- Năm cột dưới đây từng bị zod cho qua rồi UPDATE bỏ quên: dữ liệu mất im
       -- lặng còn audit thì ghi như đã đổi (agent UI phát hiện). FR-D1 bắt buộc tags.
       -- KHÔNG nội suy thẳng mảng JS rồi ép ::text[]: drizzle bung mảng thành hai

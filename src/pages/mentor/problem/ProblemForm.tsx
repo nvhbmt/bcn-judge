@@ -8,6 +8,8 @@
 import { Field, Section, Select, TextArea, TextInput } from '@/pages/mentor/fields'
 import type { ProblemFormValues } from '@/pages/mentor/form'
 import { HarnessSection } from './HarnessSection'
+import { LanguageAllowedField } from './LanguageAllowedField'
+import { StarterCodeSection } from './StarterCodeSection'
 import { SolutionSection } from './SolutionSection'
 import { COMPARE_MODE_LABEL, type CompareMode, type Difficulty, type ProblemKind } from '@/pages/mentor/types'
 
@@ -63,6 +65,22 @@ export function ProblemForm({
             rows={4}
             value={values.constraintsMd}
             onChange={(e) => onChange({ constraintsMd: e.target.value })}
+          />
+        </Field>
+
+        {/* FR-D1 bắt buộc có tags, mà trước đây form KHÔNG có ô này: server nhận,
+            lưu, trả về — chỉ giao diện là câm. Tag chỉ đặt được qua seed hoặc nạp
+            .docx, còn mentor soạn tay thì không có đường nào. */}
+        <Field
+          id="f-tags"
+          label="Thẻ (tag)"
+          hint="Phân cách bằng dấu phẩy — ví dụ: số học, vòng lặp, sàng. Tối đa 20 tag, mỗi tag 40 ký tự. Xoá hết chữ rồi lưu là bỏ hết tag."
+        >
+          <TextInput
+            id="f-tags"
+            value={values.tags}
+            aria-describedby="f-tags-hint"
+            onChange={(e) => onChange({ tags: e.target.value })}
           />
         </Field>
       </Section>
@@ -144,8 +162,28 @@ export function ProblemForm({
               ))}
             </Select>
           </Field>
+
+          {/* Chỉ hiện khi so số thực. Select ở trên cho chọn 'float' từ lâu mà không
+              có chỗ đặt dung sai — nửa cái tính năng: mentor chọn xong đứng nhìn,
+              còn máy chấm âm thầm dùng 1e-6. */}
+          {values.compareMode === 'float' ? (
+            <Field id="f-eps" label="Dung sai số thực" hint="Bỏ trống = 1e-6. |a − b| ≤ eps là coi như bằng.">
+              <TextInput
+                id="f-eps"
+                inputMode="decimal"
+                placeholder="1e-6"
+                value={values.floatEps}
+                aria-describedby="f-eps-hint"
+                onChange={(e) => onChange({ floatEps: e.target.value })}
+              />
+            </Field>
+          ) : null}
         </div>
+
+        <LanguageAllowedField values={values} onChange={onChange} />
       </Section>
+
+      <StarterCodeSection values={values} onChange={onChange} />
 
       {/* FR-D10: chỉ hiện khi bài ở dạng function — bài stdio không có harness. */}
       {values.kind === 'function' ? <HarnessSection values={values} onChange={onChange} /> : null}

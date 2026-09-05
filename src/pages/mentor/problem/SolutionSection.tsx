@@ -31,12 +31,12 @@ export function SolutionSection({
   })
 
   return (
-    <Section title="Lời giải mẫu (chỉ mentor/admin thấy)">
+    <Section title="Lời giải mẫu">
       <Notice tone="info">
         Lưu lời giải trước rồi mới bấm kiểm — máy chủ chạy bản đã lưu, không phải chữ đang gõ trong ô dưới.
       </Notice>
 
-      <div className="mt-3">
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <Field id="solution-language" label="Ngôn ngữ của lời giải">
           <Select
             id="solution-language"
@@ -50,6 +50,33 @@ export function SolutionSection({
                 {l.versionLabel ? ` (${l.versionLabel})` : ''}
               </option>
             ))}
+          </Select>
+        </Field>
+
+        {/* FR-D7: ai được thấy lời giải, và TỪ LÚC NÀO. Server thi hành bằng
+            mayMemberSeeSolution() từ lâu; thiếu ô này thì mọi bài kẹt ở 'mentor'
+            và vế (S) của FR-D7 — "cho member xem sau khi AC / sau contest" —
+            không bao giờ bật được từ giao diện. */}
+        <Field
+          id="solution-visibility"
+          label="Ai thấy lời giải"
+          hint={
+            values.solutionVisibility === 'mentor'
+              ? undefined
+              : 'Member đủ điều kiện sẽ đọc được TOÀN VĂN lời giải này — cân nhắc trước khi mở.'
+          }
+        >
+          <Select
+            id="solution-visibility"
+            value={values.solutionVisibility}
+            aria-describedby={values.solutionVisibility === 'mentor' ? undefined : 'solution-visibility-hint'}
+            onChange={(e) =>
+              onChange({ solutionVisibility: e.target.value as ProblemFormValues['solutionVisibility'] })
+            }
+          >
+            <option value="mentor">Chỉ mentor/admin</option>
+            <option value="after_ac">Member thấy sau khi AC bài này</option>
+            <option value="after_contest">Member thấy sau khi contest kết thúc</option>
           </Select>
         </Field>
       </div>

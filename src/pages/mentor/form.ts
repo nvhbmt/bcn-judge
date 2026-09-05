@@ -27,13 +27,33 @@ export interface ProblemFormValues {
   timeLimitMs: string
   memoryLimitMb: string
   difficulty: '' | Difficulty
+  /**
+   * Thẻ tag, giữ NGUYÊN chuỗi người soạn gõ ("số học, vòng lặp"). Dịch sang mảng
+   * bằng `parseTags` đúng lúc gửi — cùng lý do với luật 1 ở đầu file: chuẩn hoá
+   * ngay lúc gõ thì dấu phẩy vừa gõ ra đã bị nuốt và không ai gõ nổi tag thứ hai.
+   */
+  tags: string
+  /**
+   * null = mọi ngôn ngữ đang bật. Mảng ứng với các ô đã tick. KHÔNG cho tồn tại
+   * mảng rỗng ở trạng thái gửi đi: [] nghĩa là "cấm nộp toàn bộ" và server cũng
+   * chặn từ zod — validateForm dịch điều đó thành câu tiếng người trước.
+   */
+  allowedLanguageIds: string[] | null
   compareMode: CompareMode
+  /** Dung sai của compareMode='float', giữ dạng CHUỖI theo luật 1. Rỗng = mặc định 1e-6. */
+  floatEps: string
+  solutionVisibility: 'mentor' | 'after_ac' | 'after_contest'
+  /** {languageId: code khởi tạo} — member mở bài là thấy sẵn trong editor (FR-D3). */
+  starterCode: Record<string, string>
+  /** Ngôn ngữ đang soạn starter code — trạng thái màn hình, không gửi đi. */
+  starterLanguageId: string
   solutionLanguageId: string
   solutionSource: string
 }
 
 const COMPARE_MODES: CompareMode[] = ['trim', 'exact', 'float']
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
+const VISIBILITIES = ['mentor', 'after_ac', 'after_contest'] as const
 
 export function toFormValues(detail: MentorProblemDetail): ProblemFormValues {
   return {
@@ -48,10 +68,24 @@ export function toFormValues(detail: MentorProblemDetail): ProblemFormValues {
     timeLimitMs: String(detail.timeLimitMs),
     memoryLimitMb: String(detail.memoryLimitMb),
     difficulty: DIFFICULTIES.find((d) => d === detail.difficulty) ?? '',
+    tags: detail.tags.join(', '),
+    allowedLanguageIds: detail.allowedLanguageIds,
     compareMode: COMPARE_MODES.find((m) => m === detail.compareMode) ?? 'trim',
+    floatEps: detail.floatEps === null ? '' : String(detail.floatEps),
+    solutionVisibility: VISIBILITIES.find((v) => v === detail.solutionVisibility) ?? 'mentor',
+    starterCode: detail.starterCode ?? {},
+    starterLanguageId: Object.keys(detail.starterCode ?? {})[0] ?? '',
     solutionLanguageId: detail.solutionLanguageId ?? '',
     solutionSource: detail.solutionSource ?? '',
   }
+}
+
+/**
+ * "số học, vòng lặp , ,sàng" → ['số học', 'vòng lặp', 'sàng'].
+ * Bỏ mẩu rỗng và mẩu trùng — gõ thừa dấu phẩy không thành tag ma.
+ */
+export function parseTags(raw: string): string[] {
+  return [...new Set(raw.split(',').map((t) => t.trim()).filter(Boolean))]
 }
 
 /** Kiểm ở FE để lỗi nói tiếng người: zod của server chỉ trả "Dữ liệu không hợp lệ." */
@@ -73,6 +107,19 @@ export function validateForm(v: ProblemFormValues): string | null {
   if (!Number.isFinite(memory) || memory < 16 || memory > 2048) {
     return 'Giới hạn bộ nhớ phải là số nguyên từ 16 đến 2048 MB.'
   }
+  if (v.allowedLanguageIds !== null && v.allowedLanguageIds.length === 0) {
+    return 'Bỏ tick hết ngôn ngữ là không ai nộp được bài này — muốn cho mọi ngôn ngữ thì tick "Mọi ngôn ngữ".'
+  }
+  if (v.compareMode === 'float' && v.floatEps.trim() !== '') {
+    const eps = Number(v.floatEps)
+    if (!Number.isFinite(eps) || eps <= 0 || eps > 1) {
+      return 'Dung sai số thực phải là số dương ≤ 1 (bỏ trống thì dùng mặc định 1e-6).'
+    }
+  }
+  const tags = parseTags(v.tags)
+  if (tags.length > 20) return 'Tối đa 20 tag mỗi bài.'
+  const daiQua = tags.find((t) => t.length > 40)
+  if (daiQua) return `Tag "${daiQua.slice(0, 40)}…" dài quá 40 ký tự.`
   // FR-D6 cần CẢ HAI mới chạy kiểm được; thiếu ngôn ngữ thì lời giải dán vào là vô dụng.
   if (v.solutionSource.trim().length > 0 && v.solutionLanguageId === '') {
     return 'Đã có lời giải mẫu thì phải chọn ngôn ngữ của lời giải.'
@@ -106,6 +153,29 @@ export function toPatchPayload(
   if (JSON.stringify(current.harness) !== JSON.stringify(initial.harness)) {
     patch.harness = Object.fromEntries(
       Object.entries(current.harness).filter(([, src]) => src.trim().length > 0),
+    )
+  }
+  // So SAU chuẩn hoá: xáo khoảng trắng hay dấu phẩy thừa không phải là thay đổi.
+  // Khác độ khó, tags XOÁ được: PATCH của server đi vòng qua jsonb thay vì COALESCE,
+  // và mảng rỗng bên JS là truthy nên `[]` gửi lên nghĩa là "xoá hết" — cố ý dùng.
+  if (JSON.stringify(parseTags(current.tags)) !== JSON.stringify(parseTags(initial.tags))) {
+    patch.tags = parseTags(current.tags)
+  }
+  // null XOÁ ĐƯỢC về "mọi ngôn ngữ": PATCH của server phân biệt vắng mặt / null / mảng.
+  if (JSON.stringify(current.allowedLanguageIds) !== JSON.stringify(initial.allowedLanguageIds)) {
+    patch.allowedLanguageIds = current.allowedLanguageIds
+  }
+  const eps = Number(current.floatEps)
+  if (current.floatEps !== initial.floatEps && current.floatEps.trim() !== '' && Number.isFinite(eps)) {
+    patch.floatEps = eps
+  }
+  if (current.solutionVisibility !== initial.solutionVisibility) {
+    patch.solutionVisibility = current.solutionVisibility
+  }
+  // Cùng luật với harness: gửi CẢ map vì server ghi đè nguyên cột jsonb.
+  if (JSON.stringify(current.starterCode) !== JSON.stringify(initial.starterCode)) {
+    patch.starterCode = Object.fromEntries(
+      Object.entries(current.starterCode).filter(([, src]) => src.trim().length > 0),
     )
   }
   // Độ khó rỗng KHÔNG gửi: schema là enum nên `''` bị 400, và COALESCE không xoá được.

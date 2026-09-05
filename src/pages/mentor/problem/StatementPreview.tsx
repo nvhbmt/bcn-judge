@@ -12,7 +12,7 @@
  */
 import { StatementPanel } from '@/pages/workspace/StatementPanel'
 import type { ProblemView, SampleIO } from '@/types/api'
-import type { ProblemFormValues } from '@/pages/mentor/form'
+import { parseTags, type ProblemFormValues } from '@/pages/mentor/form'
 import type { MentorTestcaseView } from '@/pages/mentor/types'
 
 export function StatementPreview({
@@ -39,8 +39,9 @@ export function StatementPreview({
     timeLimitMs: Number.parseInt(values.timeLimitMs, 10) || 0,
     memoryLimitMb: Number.parseInt(values.memoryLimitMb, 10) || 0,
     difficulty: values.difficulty || null,
-    // Form soạn bài chưa có ô tag; để rỗng thì StatementPanel bỏ luôn hàng đó.
-    tags: [],
+    // Cùng nguồn với payload gửi đi (parseTags) — khung xem trước phải hiện đúng
+    // thứ member sẽ thấy, kể cả dấu phẩy thừa đã được dọn.
+    tags: parseTags(values.tags),
     compareMode: values.compareMode,
     allowedLanguageIds: null,
     starterCode: {},
