@@ -24,13 +24,13 @@ export function ContestProblemList({ contestId, currentId }: { contestId?: strin
               to={`/contest/${contestId}/bai/${p.id}`}
               aria-current={p.id === currentId ? 'page' : undefined}
               className={cn(
-                'flex items-center gap-2 px-2 py-1.5 text-sm',
+                'flex items-center gap-2 px-2 py-2 text-[15px]',
                 p.id === currentId ? 'bg-primary-soft font-medium' : 'hover:bg-surface-sel',
               )}
             >
-              <span className="w-4 shrink-0 font-mono text-xs text-ink-5">{p.label}</span>
+              <span className="w-5 shrink-0 font-mono text-[13px] text-ink-5">{p.label}</span>
               <span className="truncate">{p.title}</span>
-              <span className="ml-auto shrink-0 font-mono text-xs text-ink-6">{p.maxScore}đ</span>
+              <span className="ml-auto shrink-0 font-mono text-[13px] text-ink-6">{p.maxScore}đ</span>
             </Link>
           </li>
         ))}

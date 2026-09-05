@@ -46,14 +46,14 @@ export function SyllabusPanel({ courseId, currentItemId }: { courseId: string; c
                   to={`/khoa-hoc/${courseId}/bai/${item.id}`}
                   aria-current={item.id === currentItemId ? 'page' : undefined}
                   className={cn(
-                    'flex items-center gap-2 px-2 py-1.5 text-sm',
+                    'flex items-center gap-2 px-2 py-2 text-[15px]',
                     item.id === currentItemId ? 'bg-primary-soft font-medium' : 'hover:bg-surface-sel',
                   )}
                 >
                   <StatusIcon item={item} />
                   <span className="truncate">{item.title}</span>
                   {item.attempts > 0 ? (
-                    <span className="ml-auto shrink-0 font-mono text-xs text-ink-6">{item.attempts} lần</span>
+                    <span className="ml-auto shrink-0 font-mono text-[13px] text-ink-6">{item.attempts} lần</span>
                   ) : null}
                 </Link>
               </li>
