@@ -85,22 +85,30 @@
   touch-action: none;
 }
 
-/* SectionRule ở bản SÁNG: mực của nó — nhãn VÀ meta mép phải — tô moss, đậm hơn;
-   đường kẻ dày 2px thay vì 1px. `.rule-ink` áp cho cả hai đầu vì chúng là một cặp
-   đóng khung ("KHOÁ HỌC CỦA BẠN ———— 3 khoá"): nhãn nổi mà meta lịm thì con số —
-   nửa mang thông tin của dòng — đọc ra như chú thích bị bỏ quên.
-   Vì sao chỉ bản sáng: trên nền kem, mực nhạt TỐI hơn nền — cùng hướng với chữ
-   thường — nên đầu mục chìm xuống dưới chính khối chữ nó dẫn (cùng lỗi đã ghi ở
-   --label trong tokens/colors.css). Chữa bằng màu và độ dày, tức bằng DIỆN TÍCH,
-   không phải bằng cỡ chữ. Bản tối giữ nguyên: ở đó moss sáng hơn nền nên mực moss
-   sẽ tranh chỗ với verdict AC vốn cũng là moss. */
-[data-theme='light'] .rule-ink {
+/* SectionRule: mực của nó — nhãn VÀ meta mép phải — tô moss, đậm hơn, ở CẢ HAI
+   theme. `.rule-ink` áp cho cả hai đầu vì chúng là một cặp đóng khung
+   ("KHOÁ HỌC CỦA BẠN ———— 3 khoá"): nhãn nổi mà meta lịm thì con số — nửa mang
+   thông tin của dòng — đọc ra như chú thích bị bỏ quên.
+
+   Bản đầu chỉ tô ở bản sáng (sợ nền tối moss tranh chỗ với verdict AC); người dùng
+   nhìn bản chạy thật và CHỌN nhất quán giữa hai theme. Token --moss tự đổi giá trị
+   theo theme nên một luật đủ cho cả hai.
+
+   `:root` nâng specificity CÓ CHỦ ĐÍCH, không phải cho đẹp: phần tử mang sẵn class
+   tiện ích `text-(--label)` của Tailwind, nằm trong `@layer utilities`. CSS trong
+   một @layer LUÔN thua CSS không-layer khi so, nhưng `styles.css` được nạp qua
+   `@import ... layer(base)` — tức luật này cũng ở trong một layer (base), và base
+   xếp TRƯỚC utilities nên thua. `:root .rule-ink` (0,2,0 so với 0,1,0) thắng bằng
+   specificity, thứ được so TRƯỚC thứ tự layer. Thiếu `:root` thì cả khối này biên
+   dịch xong vẫn bị `text-(--label)` nuốt — đúng lỗi vừa xảy ra. */
+:root .rule-ink {
   color: var(--moss);
   font-weight: var(--weight-semibold);
 }
 
+/* Đường kẻ 2px CHỈ bản sáng: bản tối tách mặt phẳng bằng đường mảnh (xem
+   tokens/colors.css), kẻ dày ở đó là phá kết cấu theme chứ không phải nhấn mạnh. */
 [data-theme='light'] .rule-line {
-  color: var(--moss);
   height: 2px;
 }
 

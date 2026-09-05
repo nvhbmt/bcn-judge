@@ -129,3 +129,28 @@ test('nét chữ đậm nằm trong danh sách font đã tải', async ({ page }
   const net = /IBM\+Plex\+Sans:wght@([\d;]+)/.exec(link ?? '')?.[1]?.split(';') ?? []
   expect(net).toContain(netXin)
 })
+
+test('SectionRule tô moss ở CẢ HAI theme — không kẹt lại mực trung tính', async ({ page }) => {
+  // Người dùng từng bắt được: bản tối nhãn vẫn #9e9481 (ink-6). Đo COMPUTED color
+  // của chính nhãn và so với --moss đã phân giải ở :root — kiểm tầng cascade thật,
+  // thứ jsdom không có.
+  await page.goto('/')
+  const nhan = page.locator('.rule-ink').first()
+  await expect(nhan).toBeVisible()
+
+  const mauNhan = async () => nhan.evaluate((el) => getComputedStyle(el).color)
+  const mauMoss = async () =>
+    page.evaluate(() => {
+      const d = document.createElement('div')
+      d.style.color = 'var(--moss)'
+      document.body.append(d)
+      const c = getComputedStyle(d).color
+      d.remove()
+      return c
+    })
+
+  expect(await mauNhan(), 'bản sáng: nhãn SectionRule phải là moss').toBe(await mauMoss())
+
+  await doiTheme(page, 'tối')
+  expect(await mauNhan(), 'bản tối: nhãn SectionRule phải là moss').toBe(await mauMoss())
+})
