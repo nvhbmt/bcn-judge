@@ -73,11 +73,6 @@ export function TeamPage() {
       <header className="mb-7">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="font-display text-[30px] text-ink-1">{team.name}</h1>
-          {team.isLeader ? (
-            <span className="border border-brass px-2.5 py-1 font-mono text-[12px] tracking-[0.06em] text-brass uppercase">
-              Bạn là leader
-            </span>
-          ) : null}
         </div>
         <p className="num mt-2 font-mono text-[13px] text-ink-5">
           {team.members.length} thành viên

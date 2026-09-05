@@ -43,7 +43,14 @@ export function authorizeUrl(state: string): string {
 
 export interface DiscordUser {
   id: string
+  /** Handle định danh (post-2023 không còn discriminator) — ví dụ `minhanh`. */
   username: string
+  /**
+   * Tên người dùng tự đặt để HIỂN THỊ — thứ mọi nơi trong Discord gọi họ. `null`
+   * khi tài khoản chưa đặt (Discord rơi về username). Đây mới là tên nên dùng làm
+   * displayName; username chỉ là khoá định danh, thường viết thường và cụt.
+   */
+  globalName: string | null
   /** `null` khi người dùng không có email hoặc CHƯA xác minh — xem `verified`. */
   email: string | null
   verified: boolean
@@ -93,6 +100,7 @@ export async function exchangeCodeForUser(code: string): Promise<DiscordLogin | 
       user: {
         id: me.id,
         username: typeof me.username === 'string' ? me.username : me.id,
+        globalName: typeof me.global_name === 'string' && me.global_name !== '' ? me.global_name : null,
         email: typeof me.email === 'string' && me.email !== '' ? me.email : null,
         verified: me.verified === true,
         avatar: typeof me.avatar === 'string' && me.avatar !== '' ? me.avatar : null,

@@ -31,7 +31,7 @@ import { users } from '@/db/schema'
 import { errors, ok } from '@/lib/apiResponse'
 import { audit } from '@/lib/audit'
 import { clientIp, rateLimit, readSessionCookie, setSessionCookie } from '@/lib/http'
-import { authorizeUrl, discordEnabled, exchangeCodeForUser, fetchGuildMember, guildGateOn } from './discordApi'
+import { authorizeUrl, discordEnabled, exchangeCodeForUser, fetchGuildMember, guildGateOn, type DiscordUser } from './discordApi'
 import { requireAuth } from './middleware'
 import { createSession, resolveSession } from './session'
 
@@ -168,7 +168,7 @@ async function doLink(
 
 async function doLogin(
   c: Parameters<typeof setSessionCookie>[0],
-  profile: { id: string; username: string; email: string | null; verified: boolean; avatar: string | null },
+  profile: DiscordUser,
   accessToken: string,
 ): Promise<Response> {
   const byDiscord = await findLive(eq(users.discordId, profile.id))
@@ -260,7 +260,7 @@ async function findLive(where: Parameters<typeof and>[0]) {
  */
 async function taoTaiKhoanTuGuild(
   c: Parameters<typeof setSessionCookie>[0],
-  profile: { id: string; username: string; email: string | null; verified: boolean; avatar: string | null },
+  profile: DiscordUser,
 ): Promise<Response> {
   // Cột `email` là NOT NULL + UNIQUE. Discord không cho email (hoặc chưa xác minh)
   // thì dựng địa chỉ theo id — không gửi thư tới được, và đó là chủ ý: nó chỉ đóng
@@ -272,7 +272,10 @@ async function taoTaiKhoanTuGuild(
     .insert(users)
     .values({
       email,
-      displayName: profile.username,
+      // Tên HIỂN THỊ ưu tiên global_name — thứ người ta tự đặt và quen thấy; rơi về
+      // username (handle) chỉ khi tài khoản Discord chưa đặt tên hiển thị. Trước đây
+      // lấy thẳng username nên "Nguyễn Minh Anh" thành "minhanh" ngay khi vừa tạo.
+      displayName: profile.globalName || profile.username,
       role: 'member',
       passwordHash: null,
       hashAlgo: null,

@@ -109,6 +109,33 @@ describe.skipIf(!INTEGRATION)('cổng theo server Discord', () => {
       expect(row.email).toBe('moi@gmail.com')
     })
 
+    it('tên HIỂN THỊ lấy từ global_name, KHÔNG phải username (handle)', async () => {
+      // Bug người dùng gặp: tài khoản mới hiện "nguyen_minh_anh" (handle) thay vì
+      // "Nguyễn Minh Anh". username là khoá định danh viết thường, global_name mới
+      // là tên người ta tự đặt để hiện.
+      await dangNhap(
+        { id: '88', username: 'nguyen_minh_anh', global_name: 'Nguyễn Minh Anh', email: 'a@gmail.com', verified: true },
+        TRONG_GUILD,
+      )
+      const row = (
+        await q<{ dn: string; du: string }>(
+          sql`SELECT display_name AS dn, discord_username AS du FROM users WHERE discord_id = '88'`,
+        )
+      )[0]!
+      expect(row.dn).toBe('Nguyễn Minh Anh')
+      // Handle vẫn được giữ ở discord_username (màn tài khoản hiện "đang gắn: …").
+      expect(row.du).toBe('nguyen_minh_anh')
+    })
+
+    it('tài khoản Discord chưa đặt tên hiển thị thì rơi về username', async () => {
+      await dangNhap(
+        { id: '89', username: 'chi_co_handle', global_name: null, email: 'b@gmail.com', verified: true },
+        TRONG_GUILD,
+      )
+      const dn = (await q<{ dn: string }>(sql`SELECT display_name AS dn FROM users WHERE discord_id = '89'`))[0]!.dn
+      expect(dn).toBe('chi_co_handle')
+    })
+
     it('không được ghi danh khoá nào — "được vào nhà" khác "được vào lớp"', async () => {
       await dangNhap(NGUOI_LA, TRONG_GUILD)
       const n = (
