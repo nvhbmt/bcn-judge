@@ -160,15 +160,16 @@ export function SectionRule({
   const Heading = `h${level}` as 'h2' | 'h3' | 'h4'
   return (
     <div className="flex items-end gap-0">
-      {/* `rule-label` / `rule-line`: bản SÁNG tô nhãn moss, đậm hơn, và kẻ dày 2px.
-          Luật nằm ở src/index.css vì hai theme vẽ khác nhau chứ không chỉ đổi giá
-          trị token — xem chú thích ở đó. */}
-      <Heading className="rule-label pr-3 font-mono text-[12px] font-normal tracking-[0.14em] text-(--label) uppercase">
+      {/* `rule-ink` / `rule-line`: bản SÁNG tô mực moss đậm hơn, kẻ dày 2px. Luật
+          nằm ở src/index.css vì hai theme vẽ khác nhau chứ không chỉ đổi giá trị
+          token — xem chú thích ở đó. Meta mang CÙNG mực với nhãn: hai đầu của một
+          cặp đóng khung, một đầu nổi một đầu lịm là con số đọc ra như bị bỏ quên. */}
+      <Heading className="rule-ink pr-3 font-mono text-[12px] font-normal tracking-[0.14em] text-(--label) uppercase">
         {label}
       </Heading>
       <div aria-hidden className="rule-line h-px flex-1 bg-line" />
       {meta ? (
-        <div className="num pl-3 font-mono text-[12px] text-ink-5">{meta}</div>
+        <div className="num rule-ink pl-3 font-mono text-[12px] text-(--label)">{meta}</div>
       ) : (
         <div aria-hidden className="h-1.5 w-4.5 bg-line-strong" />
       )}

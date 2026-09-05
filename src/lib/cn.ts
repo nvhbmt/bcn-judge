@@ -17,7 +17,7 @@
  *
  * Không cấu hình thêm cho `tailwind-merge`: đã đo trên toàn bộ chuỗi class của repo,
  * kể cả token riêng (`text-(--label)`, `bg-(--tint-earth)`, `bg-primary-soft`) và các
- * class không phải Tailwind (`num`, `chip-do-kho`, `rule-label`, `split-handle`) —
+ * class không phải Tailwind (`num`, `chip-do-kho`, `rule-ink`, `split-handle`) —
  * nhóm nào nó không biết thì nó để nguyên, và `text-(--label)` được nhận đúng là MÀU
  * chứ không phải cỡ chữ, nên nó không nuốt `text-[12px]` đứng cạnh.
  */

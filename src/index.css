@@ -85,13 +85,16 @@
   touch-action: none;
 }
 
-/* SectionRule ở bản SÁNG: nhãn tô moss và đậm hơn, đường kẻ dày 2px thay vì 1px.
-   Vì sao chỉ bản sáng: trên nền kem, nhãn mực nhạt TỐI hơn nền — cùng hướng với chữ
+/* SectionRule ở bản SÁNG: mực của nó — nhãn VÀ meta mép phải — tô moss, đậm hơn;
+   đường kẻ dày 2px thay vì 1px. `.rule-ink` áp cho cả hai đầu vì chúng là một cặp
+   đóng khung ("KHOÁ HỌC CỦA BẠN ———— 3 khoá"): nhãn nổi mà meta lịm thì con số —
+   nửa mang thông tin của dòng — đọc ra như chú thích bị bỏ quên.
+   Vì sao chỉ bản sáng: trên nền kem, mực nhạt TỐI hơn nền — cùng hướng với chữ
    thường — nên đầu mục chìm xuống dưới chính khối chữ nó dẫn (cùng lỗi đã ghi ở
    --label trong tokens/colors.css). Chữa bằng màu và độ dày, tức bằng DIỆN TÍCH,
-   không phải bằng cỡ chữ. Bản tối giữ nguyên: ở đó moss sáng hơn nền nên nhãn moss
+   không phải bằng cỡ chữ. Bản tối giữ nguyên: ở đó moss sáng hơn nền nên mực moss
    sẽ tranh chỗ với verdict AC vốn cũng là moss. */
-[data-theme='light'] .rule-label {
+[data-theme='light'] .rule-ink {
   color: var(--moss);
   font-weight: var(--weight-semibold);
 }
