@@ -6,7 +6,7 @@ import { ArrowLeft, Download } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { buttonClass, EmptyState, SectionRule, Spinner, VerdictBadge } from '@/components/ui'
-import { Notice } from './fields'
+import { Notice } from '@/pages/mentor/fields'
 import { groupByProblem, percent } from './contestStats'
 import { useContestStats } from './useContests'
 

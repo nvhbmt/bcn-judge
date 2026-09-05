@@ -4,11 +4,11 @@ import { ArrowDown, ArrowUp, Plus } from 'lucide-react'
 import { Button, EmptyState } from '@/components/ui'
 import { ItemRow } from './ItemRow'
 import { NewItemForm } from './NewItemForm'
-import { Notice } from './fields'
-import type { SyllabusSection } from './mentorTypes'
-import { readApiMessage } from './publishGate'
-import type { MentorProblemRow } from './types'
-import { useCreateItem } from './useCourseContent'
+import { Notice } from '@/pages/mentor/fields'
+import type { SyllabusSection } from '@/pages/mentor/mentorTypes'
+import { readApiMessage } from '@/pages/mentor/publishGate'
+import type { MentorProblemRow } from '@/pages/mentor/types'
+import { useCreateItem } from '@/pages/mentor/useCourseContent'
 
 export function SectionBlock({
   courseId,

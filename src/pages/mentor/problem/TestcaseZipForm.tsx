@@ -21,7 +21,7 @@ import { FileArchive, Upload, X } from 'lucide-react'
 import { useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui'
 import { api, ApiFailure } from '@/lib/api'
-import { Notice, TextInput } from './fields'
+import { Notice, TextInput } from '@/pages/mentor/fields'
 import { cn } from '@/lib/cn'
 
 export interface ZipImportResult {

@@ -1,6 +1,6 @@
 /** Gom `byProblem` của `GET /api/mentor/contests/:id/stats` thành từng bài (FR-I7). */
 import type { Verdict } from '@/types/api'
-import type { StatsRow } from './mentorTypes'
+import type { StatsRow } from '@/pages/mentor/mentorTypes'
 
 export interface ProblemVerdicts {
   contestProblemId: string

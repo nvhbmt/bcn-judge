@@ -5,7 +5,7 @@
  * THỨ TỰ TRONG MẢNG CHÍNH LÀ `position`: server đánh số lại 1..n theo index, nên
  * không có trường thứ tự nào để sửa — đổi vị trí là đổi chỗ trong mảng.
  */
-import type { ContestProblemDraft } from './mentorTypes'
+import type { ContestProblemDraft } from '@/pages/mentor/mentorTypes'
 
 /** Nhãn mặc định A, B, C… theo vị trí — đúng thói quen đề thi. */
 export const defaultLabel = (index: number): string => String.fromCharCode(65 + (index % 26))

@@ -11,8 +11,8 @@ import { Save } from 'lucide-react'
 import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui'
-import { Field, Notice, TextArea } from './fields'
-import type { CourseMentorRow, MentorCourseDetail } from './mentorTypes'
+import { Field, Notice, TextArea } from '@/pages/mentor/fields'
+import type { CourseMentorRow, MentorCourseDetail } from '@/pages/mentor/mentorTypes'
 
 const STATUS_LABEL: Record<string, string> = {
   draft: 'Nháp',

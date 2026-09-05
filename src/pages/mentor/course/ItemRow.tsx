@@ -2,12 +2,12 @@
 import { useState } from 'react'
 import { ArrowDown, ArrowUp, BookOpen, Code2, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { Notice } from './fields'
-import { PublishGateNotice } from './PublishGateNotice'
+import { Notice } from '@/pages/mentor/fields'
+import { PublishGateNotice } from '@/pages/mentor/PublishGateNotice'
 import { ItemEditor } from './ItemEditor'
-import type { SyllabusItem } from './mentorTypes'
-import { readApiMessage, readPublishGate, type PublishGate } from './publishGate'
-import { useItemMutations } from './useCourseContent'
+import type { SyllabusItem } from '@/pages/mentor/mentorTypes'
+import { readApiMessage, readPublishGate, type PublishGate } from '@/pages/mentor/publishGate'
+import { useItemMutations } from '@/pages/mentor/useCourseContent'
 import { cn } from '@/lib/cn'
 
 export function ItemRow({

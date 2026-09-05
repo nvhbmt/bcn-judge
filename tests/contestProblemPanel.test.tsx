@@ -14,7 +14,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
-import { ContestProblemPanel } from '@/pages/mentor/ContestProblemPanel'
+import { ContestProblemPanel } from '@/pages/mentor/contest/ContestProblemPanel'
 import type { ContestProblemDraft } from '@/pages/mentor/mentorTypes'
 
 const INITIAL: ContestProblemDraft[] = [

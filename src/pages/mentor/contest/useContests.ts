@@ -1,8 +1,8 @@
 /** Query + mutation của khu contest mentor (FR-I2/I7/I9). */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import type { ContestStats, MentorContestDetail, MentorContestRow } from './mentorTypes'
-import type { MentorCourseRow } from './types'
+import type { ContestStats, MentorContestDetail, MentorContestRow } from '@/pages/mentor/mentorTypes'
+import type { MentorCourseRow } from '@/pages/mentor/types'
 
 const CONTESTS_KEY = ['mentor', 'contests'] as const
 

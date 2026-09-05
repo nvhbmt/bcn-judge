@@ -1,9 +1,9 @@
 /** Form sửa một mục (FR-C1) — mở tại chỗ, không modal. */
 import { useId, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui'
-import { Field, TextArea, TextInput } from './fields'
-import type { SyllabusItem } from './mentorTypes'
-import type { PatchItemBody } from './useCourseContent'
+import { Field, TextArea, TextInput } from '@/pages/mentor/fields'
+import type { SyllabusItem } from '@/pages/mentor/mentorTypes'
+import type { PatchItemBody } from '@/pages/mentor/useCourseContent'
 
 export function ItemEditor({
   item,

@@ -15,8 +15,8 @@ import { useQuery } from '@tanstack/react-query'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { api } from '@/lib/api'
 import type { LanguageOption } from '@/types/api'
-import { Field, Notice, Select, Section } from './fields'
-import type { ProblemFormValues } from './form'
+import { Field, Notice, Select, Section } from '@/pages/mentor/fields'
+import type { ProblemFormValues } from '@/pages/mentor/form'
 
 export function SolutionSection({
   values,

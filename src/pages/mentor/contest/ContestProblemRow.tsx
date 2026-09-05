@@ -15,8 +15,8 @@ import { Link } from 'react-router-dom'
 // `max-w-*` chứ không phải `w-*` cho hai ô dưới: CONTROL của TextInput đã có `w-full`,
 // và hai lớp width cùng độ đặc hiệu thì thắng thua do thứ tự trong file CSS sinh ra,
 // không do thứ tự viết trong className — nên `w-12` thua im lặng và ô giãn hết hàng.
-import { TextInput } from './fields'
-import type { ContestProblemDraft } from './mentorTypes'
+import { TextInput } from '@/pages/mentor/fields'
+import type { ContestProblemDraft } from '@/pages/mentor/mentorTypes'
 
 /** Nút biểu tượng của hàng: vuông, không nhãn chữ, nên phải có `title` + `aria-label`. */
 function RowButton({

@@ -14,12 +14,12 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui'
 import { api, ApiFailure } from '@/lib/api'
-import { Notice } from './fields'
+import { Notice } from '@/pages/mentor/fields'
 import { TestcaseTable } from './TestcaseTable'
 import { TestcaseZipForm, type ZipImportResult } from './TestcaseZipForm'
 import { ValidateButton } from './ValidateButton'
 import { sampleCount, testcaseError, toDrafts, toPutPayload, type TestcaseDraft } from './testcases'
-import type { CompareMode, MentorTestcaseView } from './types'
+import type { CompareMode, MentorTestcaseView } from '@/pages/mentor/types'
 
 export function TestcasePanel({
   problemId,

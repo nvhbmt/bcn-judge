@@ -1,7 +1,7 @@
 /** Cổng xuất bản mềm/cứng (FR-D6) + quirk LEFT JOIN của thống kê contest. */
 import { describe, expect, it } from 'vitest'
 import { ApiFailure } from '@/lib/api'
-import { groupByProblem } from './contestStats'
+import { groupByProblem } from '@/pages/mentor/contest/contestStats'
 import { readPublishGate } from './publishGate'
 
 const conflict = (code: string) => new ApiFailure(409, { code, message: 'x' })

@@ -13,8 +13,8 @@ import { Plus } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { Button, EmptyState } from '@/components/ui'
 import { SectionBlock } from './SectionBlock'
-import { Field, Notice, TextInput } from './fields'
-import { readApiMessage } from './publishGate'
+import { Field, Notice, TextInput } from '@/pages/mentor/fields'
+import { readApiMessage } from '@/pages/mentor/publishGate'
 import {
   itemOrder,
   sectionOrder,
@@ -22,7 +22,7 @@ import {
   useContentMutations,
   useMentorProblems,
   useSyllabus,
-} from './useCourseContent'
+} from '@/pages/mentor/useCourseContent'
 
 export function CourseSyllabusTab({ courseId }: { courseId: string }) {
   const titleId = useId()

@@ -9,34 +9,8 @@ import { courseEnrollments, courses } from '@/db/schema'
 import { errors, ok } from '@/lib/apiResponse'
 import { audit } from '@/lib/audit'
 import { parseBody } from '@/lib/http'
-import { getSettings } from '@/lib/settings'
 
 export const memberCourseRoutes = new Hono()
-
-/**
- * GET /api/member/announcement — banner thông báo toàn hệ thống (FR-H5).
- *
- * Đặt cạnh `memberLanguageRoutes` vì cùng tính chất: dữ liệu toàn cục, ai đăng nhập
- * cũng đọc được, không phụ thuộc khoá hay vai. Trả `{ text: '' }` khi không có thông
- * báo — chuỗi rỗng chứ không phải 404, để FE chỉ cần kiểm tra một thứ.
- */
-export const memberAnnouncementRoutes = new Hono()
-
-memberAnnouncementRoutes.get('/', async (c) => {
-  const s = await getSettings()
-  return ok(c, { text: typeof s.announcement === 'string' ? s.announcement.trim() : '' })
-})
-
-/** Danh sách ngôn ngữ đang bật — FE dựng dropdown từ đây (FR-D2, US-8). */
-export const memberLanguageRoutes = new Hono()
-
-memberLanguageRoutes.get('/', async (c) => {
-  const rows = await q<{ id: string; name: string; versionLabel: string | null; cmMode: string | null }>(sql`
-    SELECT id, name, version_label AS "versionLabel", cm_mode AS "cmMode"
-    FROM languages WHERE enabled = true ORDER BY position
-  `)
-  return ok(c, rows)
-})
 
 /**
  * true khi user MỞ ĐƯỢC bản xem của member: đang ghi danh active vào khoá đang mở,

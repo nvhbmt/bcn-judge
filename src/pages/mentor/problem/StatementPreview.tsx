@@ -12,8 +12,8 @@
  */
 import { StatementPanel } from '@/pages/workspace/StatementPanel'
 import type { ProblemView, SampleIO } from '@/types/api'
-import type { ProblemFormValues } from './form'
-import type { MentorTestcaseView } from './types'
+import type { ProblemFormValues } from '@/pages/mentor/form'
+import type { MentorTestcaseView } from '@/pages/mentor/types'
 
 export function StatementPreview({
   values,

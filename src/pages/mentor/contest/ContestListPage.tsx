@@ -11,8 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { ContestCard } from "./ContestCard";
 import { ContestForm } from "./ContestForm";
 import { EMPTY_CONTEST } from "./contestFormValues";
-import { Notice } from "./fields";
-import { readApiMessage } from "./publishGate";
+import { Notice } from "@/pages/mentor/fields";
+import { readApiMessage } from "@/pages/mentor/publishGate";
 import {
   useContestMutations,
   useContests,

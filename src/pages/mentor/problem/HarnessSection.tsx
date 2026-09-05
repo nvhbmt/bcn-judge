@@ -17,8 +17,8 @@ import { useQuery } from '@tanstack/react-query'
 import { CodeEditor } from '@/components/editor/CodeEditor'
 import { api } from '@/lib/api'
 import type { LanguageOption } from '@/types/api'
-import { Field, Notice, Section, Select } from './fields'
-import type { ProblemFormValues } from './form'
+import { Field, Notice, Section, Select } from '@/pages/mentor/fields'
+import type { ProblemFormValues } from '@/pages/mentor/form'
 
 /** Khớp `languages.function_source_filename` ở máy chủ (drizzle/0003). */
 const MEMBER_FILE: Record<string, string> = {

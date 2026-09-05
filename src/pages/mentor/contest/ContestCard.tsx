@@ -4,8 +4,8 @@ import { BarChart3, Copy, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui'
 import { PHASE_CLASS, PHASE_LABEL, contestPhase } from './contestPhase'
-import { formatDateTime } from './mentorTime'
-import type { MentorContestRow } from './mentorTypes'
+import { formatDateTime } from '@/pages/mentor/mentorTime'
+import type { MentorContestRow } from '@/pages/mentor/mentorTypes'
 import { cn } from '@/lib/cn'
 
 export function ContestCard({

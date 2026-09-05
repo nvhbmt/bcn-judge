@@ -2,10 +2,10 @@
 import { useState } from 'react'
 import { Send } from 'lucide-react'
 import { Button, SectionRule } from '@/components/ui'
-import { PublishGateNotice } from './PublishGateNotice'
-import { Notice } from './fields'
-import type { PublishStatus } from './mentorTypes'
-import { readPublishGate, type PublishGate } from './publishGate'
+import { PublishGateNotice } from '@/pages/mentor/PublishGateNotice'
+import { Notice } from '@/pages/mentor/fields'
+import type { PublishStatus } from '@/pages/mentor/mentorTypes'
+import { readPublishGate, type PublishGate } from '@/pages/mentor/publishGate'
 import { useContestMutations } from './useContests'
 
 export function ContestPublishPanel({ contestId, status }: { contestId: string; status: PublishStatus }) {

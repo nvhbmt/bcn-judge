@@ -11,7 +11,7 @@
  */
 import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui'
-import { Notice, Select, TextArea, TextInput } from './fields'
+import { Notice, Select, TextArea, TextInput } from '@/pages/mentor/fields'
 import { emptyDraft, sampleCount, utf8Bytes, type TestcaseDraft } from './testcases'
 import { cn } from '@/lib/cn'
 

@@ -9,8 +9,8 @@
  */
 import { Link } from 'react-router-dom'
 import { Row } from '@/components/ui/patterns'
-import { ValidationBadge, validationState } from './badges'
-import { DIFFICULTY_LABEL, isValidated, type MentorProblemRow } from './types'
+import { ValidationBadge, validationState } from '@/pages/mentor/badges'
+import { DIFFICULTY_LABEL, isValidated, type MentorProblemRow } from '@/pages/mentor/types'
 import { cn } from '@/lib/cn'
 
 /** Lưới cột lấy đúng từ bản vẽ; `RowHead` ở trang cha dùng lại hằng số này. */

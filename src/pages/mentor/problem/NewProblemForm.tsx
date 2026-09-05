@@ -12,8 +12,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, SectionRule } from '@/components/ui'
 import { api, ApiFailure } from '@/lib/api'
-import { Field, Notice, Select, TextInput } from './fields'
-import type { MentorCourseRow } from './types'
+import { Field, Notice, Select, TextInput } from '@/pages/mentor/fields'
+import type { MentorCourseRow } from '@/pages/mentor/types'
 
 const STATEMENT_TEMPLATE = [
   'Viết đề bài ở đây.',

@@ -18,8 +18,8 @@
  */
 import { ShieldCheck } from 'lucide-react'
 import { Button, Spinner } from '@/components/ui'
-import { Notice } from './fields'
-import type { CompareMode, MentorTestcaseView } from './types'
+import { Notice } from '@/pages/mentor/fields'
+import type { CompareMode, MentorTestcaseView } from '@/pages/mentor/types'
 import { useValidateRun } from './useValidateRun'
 import { ValidateReport } from './ValidateReport'
 

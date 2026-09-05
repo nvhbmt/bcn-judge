@@ -15,9 +15,9 @@ import { useId, useState } from 'react'
 import { Button, EmptyState, SectionRule } from '@/components/ui'
 import { ContestProblemRow } from './ContestProblemRow'
 import { defaultLabel, moved, toPayload, validateDrafts } from './contestProblems'
-import { Field, Notice, Select } from './fields'
-import type { ContestProblemDraft } from './mentorTypes'
-import { isValidated, type MentorProblemRow } from './types'
+import { Field, Notice, Select } from '@/pages/mentor/fields'
+import type { ContestProblemDraft } from '@/pages/mentor/mentorTypes'
+import { isValidated, type MentorProblemRow } from '@/pages/mentor/types'
 
 export function ContestProblemPanel({
   bank,

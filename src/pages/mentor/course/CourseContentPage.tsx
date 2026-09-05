@@ -28,12 +28,12 @@ import { CourseInfoPanel } from "./CourseInfoPanel";
 import { CourseSyllabusTab } from "./CourseSyllabusTab";
 import { CourseTabRail } from "./CourseTabRail";
 import { resolveTab, tabsFor } from "./courseTabs";
-import { readApiMessage } from "./publishGate";
+import { readApiMessage } from "@/pages/mentor/publishGate";
 import {
   useCourseDescription,
   useCourseMentors,
   useMentorCourse,
-} from "./useCourseContent";
+} from "@/pages/mentor/useCourseContent";
 
 export function CourseContentPage() {
   const { courseId = "", tab: rawTab } = useParams();

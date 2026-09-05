@@ -19,7 +19,7 @@ import { RowGroup, RowHead, StatStrip } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import { NewProblemForm } from './NewProblemForm'
 import { PROBLEM_COLS, ProblemRow } from './ProblemRow'
-import { isValidated, type MentorCourseRow, type MentorProblemRow } from './types'
+import { isValidated, type MentorCourseRow, type MentorProblemRow } from '@/pages/mentor/types'
 
 export function ProblemListPage() {
   const [creating, setCreating] = useState(false)

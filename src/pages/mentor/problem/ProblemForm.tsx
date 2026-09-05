@@ -5,11 +5,11 @@
  * liên tục, giới hạn chấm đặt một lần, lời giải mẫu dán một lần rồi chỉ đụng lại
  * khi kiểm hỏng.
  */
-import { Field, Section, Select, TextArea, TextInput } from './fields'
-import type { ProblemFormValues } from './form'
+import { Field, Section, Select, TextArea, TextInput } from '@/pages/mentor/fields'
+import type { ProblemFormValues } from '@/pages/mentor/form'
 import { HarnessSection } from './HarnessSection'
 import { SolutionSection } from './SolutionSection'
-import { COMPARE_MODE_LABEL, type CompareMode, type Difficulty, type ProblemKind } from './types'
+import { COMPARE_MODE_LABEL, type CompareMode, type Difficulty, type ProblemKind } from '@/pages/mentor/types'
 
 export function ProblemForm({
   values,

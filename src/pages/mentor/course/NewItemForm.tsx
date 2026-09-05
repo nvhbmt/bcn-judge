@@ -1,10 +1,10 @@
 /** Thêm mục vào chương: bài đọc (Markdown) hoặc mục bài tập trỏ vào ngân hàng bài. */
 import { useId, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui'
-import { Field, Select, TextArea, TextInput } from './fields'
-import type { ItemKind } from './mentorTypes'
-import { isValidated, type MentorProblemRow } from './types'
-import type { NewItemBody } from './useCourseContent'
+import { Field, Select, TextArea, TextInput } from '@/pages/mentor/fields'
+import type { ItemKind } from '@/pages/mentor/mentorTypes'
+import { isValidated, type MentorProblemRow } from '@/pages/mentor/types'
+import type { NewItemBody } from '@/pages/mentor/useCourseContent'
 
 /** Nhãn option gói luôn tình trạng FR-D6: mentor thấy "chưa kiểm" NGAY LÚC CHỌN,
  *  thay vì mãi tới lúc bấm Xuất bản mới ăn 409. */

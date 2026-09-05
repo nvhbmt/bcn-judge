@@ -22,7 +22,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { api, ApiFailure } from '@/lib/api'
-import type { ValidateRunView } from './types'
+import type { ValidateRunView } from '@/pages/mentor/types'
 
 const POLL_MS = 1500
 /** ~2,5 phút. Quá mốc này thì hàng đợi hoặc worker có vấn đề, không phải bài chậm. */

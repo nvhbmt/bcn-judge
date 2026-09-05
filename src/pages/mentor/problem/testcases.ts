@@ -8,7 +8,7 @@
  * cắt cụt, testcase 5 MB sẽ âm thầm bị ghi đè bằng 2 KB đầu và bộ test hỏng mà
  * không báo gì. `truncated` tồn tại để chặn đúng đường đó.
  */
-import type { MentorTestcaseView, TestcaseKind } from './types'
+import type { MentorTestcaseView, TestcaseKind } from '@/pages/mentor/types'
 
 export interface TestcaseDraft {
   /** Khoá React ổn định qua thêm/xoá dòng — KHÔNG dùng vị trí làm key. */

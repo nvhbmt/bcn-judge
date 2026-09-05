@@ -70,7 +70,7 @@ node scripts/judge-e2e.mjs  # 93 kiểm tra, chỉ soi luồng chấm nhưng soi
 Và bộ E2E lái **trình duyệt thật** qua toàn bộ luồng giao diện:
 
 ```bash
-npm run e2e         # 39 kiểm tra Playwright, tự dựng cả stack (~2,5 phút)
+npm run e2e         # 55 kiểm tra Playwright, tự dựng cả stack (~3 phút)
 npm run e2e:ui      # chế độ xem từng bước
 ```
 
@@ -177,7 +177,7 @@ có ở CLB hay không.
 
 | Phase | Nội dung | Trạng thái |
 |---|---|---|
-| **P0** | Nguyên mẫu sandbox + bộ abuse | ✅ 23 ca xanh trên Docker thật |
+| **P0** | Nguyên mẫu sandbox + bộ abuse | ✅ 26 ca, chạy lại xanh 05.09.2026 |
 | **P1** | Schema, auth, khoá học, ma trận quyền | ✅ |
 | **P2** | Hàng đợi, worker, API nộp bài, chống rò dữ liệu ẩn | ✅ |
 | **P3** | Workspace: thanh icon, split, CodeMirror, verdict trực tiếp | ✅ |
@@ -186,10 +186,20 @@ có ở CLB hay không.
 | **P6** | API quản trị, compose, deploy, sao lưu | ✅ · **chưa deploy lên VPS thật** |
 | **P7** | Kiểm chứng end-to-end | ✅ smoke 29/29 |
 
-**415 test xanh**: 87 server (đơn vị) + 157 server (integration, cần Postgres — gồm 23 ca
-abuse trên Docker và các ca chấm thật qua hàng đợi) + 171 SPA. Cộng 39 kiểm tra
-Playwright lái trình duyệt thật, và 29 kiểm tra smoke qua HTTP với worker và container
-thật.
+**737 test xanh, đo lại 05.09.2026** — bốn tầng, mỗi tầng cần thêm một thứ:
+
+| tầng | số | cần gì |
+|---|---|---|
+| SPA (vitest + jsdom) | 343 | không cần gì |
+| server đơn vị | 87 | không cần gì |
+| server tích hợp (`INTEGRATION=1`, DB tên phải chứa `test`) | 291 | Postgres thật |
+| judge trên Docker (`DOCKER=1` — abuse + chấm thật qua hàng đợi + function-mode) | 48 | runner image (`bash scripts/build-runner-images.sh`) |
+| Playwright (Chromium thật, nguyên stack, DB riêng `bcn_judge_e2e_ui`) | 55 | Docker |
+
+(291 tích hợp đã bao 87 đơn vị; 737 = 343 + 339 server + 55 e2e — đếm mỗi test một lần.
+Bộ judge-Docker từng đỏ ở ca vệ sinh sau khi bể container ấm ra đời mà phép đếm rò rỉ
+không được cập nhật — không ai thấy vì bộ này mặc định skip. Nay các suite tự xả bể khi
+xong và cả 48 ca xanh với **0** container sót lại.)
 
 Mọi yêu cầu mức **M** và mức **S** của `requirements.md` đã hiện thực hoá, gồm cả những mục
 lắt léo nhất: chấm lại có shadow attempt và audit (FR-D9), contest mở tuần tự (FR-I8), đóng
@@ -414,8 +424,17 @@ abuse trên đúng kernel/Docker của máy đích (`docs/deploy.md` §9).
 ## Bố cục
 
 ```
-src/                     SPA: components/{layout,editor,markdown,ui}, pages/{,mentor,admin,workspace}
+src/                     SPA
+  components/{layout,editor,markdown,ui,submission}
+  pages/
+    home/ course/ contest/ team/ workspace/    các cụm màn của member
+    mentor/{contest,course,problem}/           ba cụm việc của mentor; đồ dùng chung
+                                               (types, fields, publishGate…) ở gốc mentor/
+    admin/                                     cụm quản trị
+  lib/                   api client · cn (clsx+tailwind-merge) · theme · drafts
+design-system/           NGUỒN CHUẨN giao diện: tokens/{colors,typography,…}.css + readme
 tests/                   test SPA (vitest + jsdom)
+e2e/                     Playwright: auth setup theo vai + spec luồng + lưới mọi-route
 server/
   src/
     auth/                session token mờ (không JWT), argon2id, guard 3 vai trò
@@ -423,14 +442,16 @@ server/
     judge/               languages · sandbox · runner · queue (+ chấm lại) · verdict · compare
                          pool (container ấm) · wake (đánh thức worker) · reap (dọn mồ côi)
     serialize/           cổng chặn dữ liệu ẩn (NFR-2) — trường cấm khai kiểu never
-    routes/{admin,mentor,member}/   cây route tách theo vai trò
+    routes/{admin,mentor,member}/   cây route tách theo vai trò; mỗi router một file
+                         đứng tên mình (languages, announcement… không ở nhờ file khác)
     contest/standings.ts truy vấn xếp hạng dẫn xuất
     realtime/            LISTEN/NOTIFY + SSE có replay
     worker.ts            judge worker
   runner/                Dockerfile 4 ngôn ngữ + run.sh + fixture abuse
   drizzle/               SQL migration viết tay (FK deferrable, partial index, trigger)
   deploy/                deploy · provision · backup · cổng migration · Caddy+SPA image
-scripts/                 build image · run-local · smoke · ràng buộc nguồn
+scripts/                 build image · run-local · e2e-stack · smoke · ràng buộc nguồn
+contests/                dữ liệu đề "Code C hằng tuần": fix.json + lời giải mẫu từng tuần
 docs/                    requirements.md · design.md · deploy.md
 ```
 

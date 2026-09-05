@@ -15,8 +15,8 @@
  */
 import { VerdictBadge } from '@/components/ui'
 import { OutputDiff } from '@/pages/workspace/OutputDiff'
-import { Notice } from './fields'
-import type { CompareMode, MentorTestcaseView, ValidateResultView, ValidateRunView } from './types'
+import { Notice } from '@/pages/mentor/fields'
+import type { CompareMode, MentorTestcaseView, ValidateResultView, ValidateRunView } from '@/pages/mentor/types'
 import { cn } from '@/lib/cn'
 
 export function ValidateReport({

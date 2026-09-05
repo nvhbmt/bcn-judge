@@ -1,9 +1,9 @@
 /** Form contest dùng chung cho tạo mới và sửa (FR-I1/I2/I8/I10). */
 import { useId, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui'
-import { Field, Notice, Select, TextArea, TextInput } from './fields'
+import { Field, Notice, Select, TextArea, TextInput } from '@/pages/mentor/fields'
 import { toCreateBody, toUpdateBody, validateContest, type ContestFormValues } from './contestFormValues'
-import type { MentorCourseRow } from './types'
+import type { MentorCourseRow } from '@/pages/mentor/types'
 import type { ContestBody } from './useContests'
 
 export function ContestForm({

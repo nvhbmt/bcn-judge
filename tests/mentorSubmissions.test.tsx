@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { CourseSubmissionsPage } from '@/pages/mentor/CourseSubmissionsPage'
+import { CourseSubmissionsPage } from '@/pages/mentor/course/CourseSubmissionsPage'
 
 afterEach(() => vi.restoreAllMocks())
 

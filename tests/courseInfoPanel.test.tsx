@@ -14,7 +14,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
-import { CourseInfoPanel } from '@/pages/mentor/CourseInfoPanel'
+import { CourseInfoPanel } from '@/pages/mentor/course/CourseInfoPanel'
 import type { MentorCourseDetail } from '@/pages/mentor/mentorTypes'
 
 const COURSE: MentorCourseDetail = {

@@ -12,7 +12,7 @@
  *   - giáo trình không phải tab — nó là panel phải, luôn hiện cho cả hai vai.
  */
 import { describe, expect, it } from 'vitest'
-import { resolveTab, tabsFor } from '@/pages/mentor/courseTabs'
+import { resolveTab, tabsFor } from '@/pages/mentor/course/courseTabs'
 
 const ids = (role: string | undefined) => tabsFor(role).map((t) => t.id)
 

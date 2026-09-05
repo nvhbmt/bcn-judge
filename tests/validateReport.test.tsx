@@ -10,7 +10,7 @@
  */
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { ValidateReport } from '@/pages/mentor/ValidateReport'
+import { ValidateReport } from '@/pages/mentor/problem/ValidateReport'
 import type { MentorTestcaseView, ValidateRunView } from '@/pages/mentor/types'
 
 const TESTCASES: MentorTestcaseView[] = [

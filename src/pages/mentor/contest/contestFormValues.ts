@@ -12,7 +12,7 @@
  *   3. `PATCH` không kiểm `endAt > startAt` (chỉ `POST` kiểm) → FE phải tự chặn,
  *      không thì contest kết thúc trước khi bắt đầu và bảng xếp hạng rỗng.
  */
-import { localInputToIso } from './mentorTime'
+import { localInputToIso } from '@/pages/mentor/mentorTime'
 import type { ContestBody } from './useContests'
 
 export interface ContestFormValues {
