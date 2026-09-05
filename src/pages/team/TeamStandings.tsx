@@ -76,24 +76,24 @@ export function TeamStandings() {
               row.isMine && 'bg-primary-soft shadow-[inset_2px_0_0_var(--moss)]',
             )}
           >
-            <td className={cn('num px-2.5 py-2 font-mono text-[13px]', row.isMine ? 'text-moss' : 'text-ink-5')}>
+            <td className={cn('num px-2.5 py-2.5 font-mono text-[14px]', row.isMine ? 'text-moss' : 'text-ink-5')}>
               {row.rank}
             </td>
             <td
               title={row.name}
               className={cn(
-                'max-w-0 truncate px-2.5 py-2 text-[13px]',
+                'max-w-0 truncate px-2.5 py-2.5 text-[15px]',
                 row.isMine ? 'font-semibold text-ink-1' : 'text-ink-2',
               )}
             >
               {row.name}
               {/* Tổng điểm chứ không phải trung bình, nên số người phải hiện: team
                   đông hơn thì tổng cao hơn, giấu đi là để bảng nói dối một nửa. */}
-              <span className="num ml-1.5 font-mono text-[11px] text-ink-6">{row.memberCount} người</span>
+              <span className="num ml-1.5 font-mono text-[12px] text-ink-6">{row.memberCount} người</span>
             </td>
-            <td className="num px-2.5 py-2 text-right font-mono text-[13px] text-ink-3">{row.acCount}</td>
+            <td className="num px-2.5 py-2.5 text-right font-mono text-[14px] text-ink-3">{row.acCount}</td>
             <td className={cn(
-              'num px-2.5 py-2 text-right font-mono text-[13px]',
+              'num px-2.5 py-2.5 text-right font-mono text-[14px]',
               row.isMine ? 'text-ink-1' : 'text-ink-4',
             )}>
               {row.totalPoints}

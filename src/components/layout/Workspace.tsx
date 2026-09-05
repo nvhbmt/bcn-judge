@@ -144,19 +144,21 @@ export function Workspace({ rail, content, editor, contentLabel, storageKey, col
     </div>
   )
 
-  return (
-    <div className="flex h-full min-h-0 w-full" data-testid="workspace">
-      {/* `contents` để bọc ngoài không chen thêm hộp nào vào flex row — rail vẫn đúng 48px. */}
-      <div className="contents" onClickCapture={handleRailClickCapture}>
-        {rail}
-      </div>
+  const railNode = (
+    // `contents` để bọc ngoài không chen thêm hộp nào vào flex — rail tự giữ kích
+    // thước của mình (56px dọc khi rộng, thanh ngang khi hẹp).
+    <div className="contents" onClickCapture={handleRailClickCapture}>
+      {rail}
+    </div>
+  )
 
-      {editor === undefined ? (
-        // Không có khung code: nội dung chiếm hết phần còn lại, ở cả hai cỡ màn hình.
-        // Không dựng tablist một tab, cũng không dựng SplitPane một bên — cả hai đều là
-        // bộ điều khiển không điều khiển được gì.
-        <div className="min-w-0 flex-1">{content}</div>
-      ) : narrow ? (
+  const mainNode =
+    editor === undefined ? (
+      // Không có khung code: nội dung chiếm hết phần còn lại, ở cả hai cỡ màn hình.
+      // Không dựng tablist một tab, cũng không dựng SplitPane một bên — cả hai đều là
+      // bộ điều khiển không điều khiển được gì.
+      <div className="min-w-0 flex-1">{content}</div>
+    ) : narrow ? (
         <div className="flex min-w-0 flex-1 flex-col" data-testid="workspace-tabs">
           <div
             role="tablist"
@@ -174,19 +176,42 @@ export function Workspace({ rail, content, editor, contentLabel, storageKey, col
           </div>
         </div>
       ) : (
-        <div className="min-w-0 flex-1">
-          {/* 0.474 chứ không phải 0.5: bản vẽ chia `56px | 656px | 1fr` trên khung 1440,
-              tức khung nội dung chiếm 656/1384 chiều ngang còn lại. Lệch lưới cố ý —
-              khung code cần rộng hơn khung đề. Người dùng kéo được, và nhấp đúp vào
-              vạch chia đưa về đúng tỉ lệ này (FR-E2). */}
-          <SplitPane
-            left={content}
-            right={editor}
-            storageKey={storageKey}
-            defaultRatio={656 / 1384}
-            collapsed={collapsed}
-          />
-        </div>
+      <div className="min-w-0 flex-1">
+        {/* 0.474 chứ không phải 0.5: bản vẽ chia `56px | 656px | 1fr` trên khung 1440,
+            tức khung nội dung chiếm 656/1384 chiều ngang còn lại. Lệch lưới cố ý —
+            khung code cần rộng hơn khung đề. Người dùng kéo được, và nhấp đúp vào
+            vạch chia đưa về đúng tỉ lệ này (FR-E2). */}
+        <SplitPane
+          left={content}
+          right={editor}
+          storageKey={storageKey}
+          defaultRatio={656 / 1384}
+          collapsed={collapsed}
+        />
+      </div>
+    )
+
+  // Rộng: rail DỌC bên trái. Hẹp: xếp dọc và rail xuống ĐÁY — thứ tự JSX đảo hẳn thay
+  // vì dùng CSS `order`, vì rail là flex item qua `display:contents` nên không nhận
+  // được `order` từ một lớp bọc.
+  // `pb-14` khi hẹp = đúng chiều cao thanh rail cố định ở đáy (h-14). Rail `fixed`
+  // đã ra khỏi luồng nên không tự đẩy nội dung lên; thiếu padding này thì dòng cuối
+  // của khung code / danh sách nằm khuất sau thanh, không cuộn tới được.
+  return (
+    <div
+      className={cn('flex h-full min-h-0 w-full', narrow && 'flex-col pb-14')}
+      data-testid="workspace"
+    >
+      {narrow ? (
+        <>
+          {mainNode}
+          {railNode}
+        </>
+      ) : (
+        <>
+          {railNode}
+          {mainNode}
+        </>
       )}
     </div>
   )

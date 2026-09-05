@@ -57,7 +57,7 @@ export function TopBar() {
   if (!me) return null
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-6 border-b border-line bg-surface-1 px-7">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface-1 px-3 sm:gap-6 sm:px-7">
       {/* Chữ ký thứ hai của hệ: khối 14×7px moss ngay sau chữ BCN, chân chữ thẳng hàng. */}
       <span className="flex shrink-0 items-end gap-2">
         <span className="font-mono text-[13px] font-bold tracking-[0.06em] text-ink-1">BCN</span>
@@ -70,13 +70,18 @@ export function TopBar() {
             key={item.to}
             to={item.to}
             end={item.end}
+            title={item.label}
             className={({ isActive }) =>
-              `px-3 py-1.5 font-mono text-[15px] whitespace-nowrap transition-colors duration-120 ease-linear ${
+              `px-2 py-1.5 font-mono text-[13px] whitespace-nowrap transition-colors duration-120 ease-linear sm:px-3 sm:text-[15px] ${
                 isActive ? 'bg-surface-code text-ink-1' : 'text-ink-5 hover:text-ink-2'
               }`
             }
           >
-            {item.label}
+            {/* Mobile bỏ prefix `~/` cho đỡ chật: nó là chữ ký thẩm mỹ (đường dẫn
+                shell), không mang thông tin — ba mục vẫn phân biệt bằng phần tên.
+                Nhãn đầy đủ giữ ở `title` và ở tên trợ năng. */}
+            <span className="sm:hidden">{item.label.replace(/^~\//, '')}</span>
+            <span className="hidden sm:inline">{item.label}</span>
           </NavLink>
         ))}
       </nav>

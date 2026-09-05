@@ -43,16 +43,16 @@ export function CourseStandings({ courseId, courseCode }: { courseId: string; co
       <RowGroup className="border-0">
         {rows.map((row) => (
           <Row key={row.userId} accent={row.isMe ? 'moss' : null} className="gap-3 px-2.5 py-2">
-            <span className={cn('num w-4 shrink-0 font-mono text-[13px]', row.isMe ? 'text-moss' : 'text-ink-5')}>
+            <span className={cn('num w-5 shrink-0 font-mono text-[14px]', row.isMe ? 'text-moss' : 'text-ink-5')}>
               {row.rank}
             </span>
             <span className={cn(
-              'min-w-0 flex-1 truncate text-[13px]',
+              'min-w-0 flex-1 truncate text-[15px]',
               row.isMe ? 'font-semibold text-ink-1' : 'text-ink-2',
             )}>
               {row.isMe ? 'Bạn' : row.displayName}
             </span>
-            <span className={cn('num font-mono text-[13px]', row.isMe ? 'text-ink-1' : 'text-ink-4')}>
+            <span className={cn('num font-mono text-[14px]', row.isMe ? 'text-ink-1' : 'text-ink-4')}>
               {row.totalPoints}
             </span>
           </Row>

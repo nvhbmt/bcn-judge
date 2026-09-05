@@ -1,8 +1,8 @@
-import { CodeEditor } from '@/components/editor/CodeEditor'
-import { HSplit } from '@/components/layout/HSplit'
-import { Button, VerdictBadge } from '@/components/ui'
-import type { LanguageOption, SampleIO, SubmissionView } from '@/types/api'
-import { ConsolePanel, type ConsoleTab } from './ConsolePanel'
+import { CodeEditor } from "@/components/editor/CodeEditor";
+import { HSplit } from "@/components/layout/HSplit";
+import { Button, VerdictBadge } from "@/components/ui";
+import type { LanguageOption, SampleIO, SubmissionView } from "@/types/api";
+import { ConsolePanel, type ConsoleTab } from "./ConsolePanel";
 
 /** Khung phải của FR-E1: chọn ngôn ngữ + nút chạy/nộp, editor, bảng điều khiển. */
 export function EditorPane({
@@ -30,29 +30,29 @@ export function EditorPane({
   compareMode,
   practiceMode,
 }: {
-  languages: LanguageOption[]
-  languageId: string
-  onLanguage: (id: string) => void
-  source: string
-  onSource: (v: string) => void
-  draftStatus: 'saved' | 'saving' | 'error'
-  draftSavedAt: number | null
-  busy: 'run' | 'submit' | null
-  error: string | null
-  onRun: () => void
-  onRunCustom: () => void
-  onSubmit: () => void
-  consoleTab: ConsoleTab
-  onConsoleTab: (t: ConsoleTab) => void
-  customInput: string
-  onCustomInput: (v: string) => void
-  sampleRun: SubmissionView | null
-  customRun: SubmissionView | null
-  customRunPending: boolean
-  submission: SubmissionView | null
-  samples: SampleIO[]
-  compareMode: string
-  practiceMode: boolean
+  languages: LanguageOption[];
+  languageId: string;
+  onLanguage: (id: string) => void;
+  source: string;
+  onSource: (v: string) => void;
+  draftStatus: "saved" | "saving" | "error";
+  draftSavedAt: number | null;
+  busy: "run" | "submit" | null;
+  error: string | null;
+  onRun: () => void;
+  onRunCustom: () => void;
+  onSubmit: () => void;
+  consoleTab: ConsoleTab;
+  onConsoleTab: (t: ConsoleTab) => void;
+  customInput: string;
+  onCustomInput: (v: string) => void;
+  sampleRun: SubmissionView | null;
+  customRun: SubmissionView | null;
+  customRunPending: boolean;
+  submission: SubmissionView | null;
+  samples: SampleIO[];
+  compareMode: string;
+  practiceMode: boolean;
 }) {
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -61,53 +61,83 @@ export function EditorPane({
           để nó co giãn thì nội dung đẩy thanh editor cao hơn thanh bên trái vài
           pixel và cả màn hình trông như so le — đúng thứ biến chung này sinh ra để
           tránh. Nút trong thanh dùng cỡ `md` (đệm dọc 6px) nên 47px vẫn đủ chỗ. */}
-      <div className="flex h-(--panel-header-h) shrink-0 flex-wrap items-center gap-2 border-b border-line px-2 py-1.5">
+      <div className="flex h-(--panel-header-h) shrink-0 flex-nowrap items-center gap-2 border-b border-line px-2 py-1.5">
         <select
           aria-label="Ngôn ngữ"
           value={languageId}
           onChange={(e) => onLanguage(e.target.value)}
-          className="border border-line-strong py-1 pr-7 pl-2 font-mono text-[13px]"
+          className="shrink-0 border border-line-strong py-1 pr-7 pl-2 font-mono text-[13px]"
         >
           {languages.map((l) => (
             <option key={l.id} value={l.id}>
-              {l.name} {l.versionLabel ?? ''}
+              {l.name} {l.versionLabel ?? ""}
             </option>
           ))}
         </select>
 
-        {submission ? <VerdictBadge verdict={submission.verdict} pending={submission.status !== 'done'} /> : null}
+        {submission ? (
+          <VerdictBadge
+            verdict={submission.verdict}
+            pending={submission.status !== "done"}
+          />
+        ) : null}
         {/* Bản vẽ ghi "nháp đã lưu 14:41" — có GIỜ chứ không chỉ "đã lưu". Đó đúng là
             thứ người gõ cần biết trước khi đóng tab. */}
-        <span className="font-mono text-[13px] text-ink-6" aria-live="polite">
-          {draftStatus === 'saving'
-            ? 'đang lưu nháp…'
-            : draftStatus === 'error'
-              ? 'không lưu được nháp'
+        {/* Phần co DUY NHẤT của thanh: khi hẹp, CHỮ này rút lại (…) chứ không phải
+            nút bị đẩy khuất. `min-w-0` là mấu chốt — flex item mặc định min-width
+            là auto nên từ chối co dưới cỡ nội dung, đẩy cụm nút tràn khỏi mép phải;
+            có nó thì span nhường chỗ trước. `flex-1` cho span nuốt khoảng trống,
+            thay vai `ml-auto` cũ ở cụm nút. */}
+        <span
+          className="min-w-0 flex-1 truncate font-mono text-[13px] text-ink-6"
+          aria-live="polite"
+        >
+          {draftStatus === "saving"
+            ? "đang lưu nháp…"
+            : draftStatus === "error"
+              ? "không lưu được nháp"
               : draftSavedAt
-                ? `nháp đã lưu ${new Date(draftSavedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
-                : ''}
+                ? `nháp đã lưu ${new Date(draftSavedAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`
+                : ""}
         </span>
 
-        <div className="ml-auto flex items-center gap-2">
-          {/* FR-I6: chế độ luyện tập phải nói rõ, không để member tưởng còn tính điểm. */}
-          {practiceMode ? (
-            <span className="bg-(--tint-earth) px-2 py-0.5 text-xs text-earth">
-              Luyện tập — không tính BXH
-            </span>
-          ) : null}
+        {/* FR-I6: badge luyện tập KHÔNG ẩn trên mobile (member phải biết đang không
+            tính điểm). Nó ở NGOÀI cụm nút shrink-0 và tự co (min-w-0 + truncate) để
+            nhường chỗ — nút thì không bao giờ khuất. */}
+        {practiceMode ? (
+          <span className="min-w-0 shrink truncate bg-(--tint-earth) px-2 py-0.5 text-xs whitespace-nowrap text-earth">
+            Luyện tập — không tính BXH
+          </span>
+        ) : null}
+
+        <div className="flex shrink-0 items-center gap-2">
           {/* Phím tắt nói ngay trên chính nút (FR-E8). Bản trước để chúng thành hai
               chip riêng đứng cạnh — trông y như hai cái nút nữa mà bấm không được. */}
-          <Button onClick={onRun} disabled={busy !== null} title="Chạy với testcase mẫu (⌘↵ / Ctrl+↵)">
-            {busy === 'run' ? 'Đang chạy…' : 'Chạy thử'}
+          <Button
+            className="shrink-0"
+            onClick={onRun}
+            disabled={busy !== null}
+            title="Chạy với testcase mẫu (⌘↵ / Ctrl+↵)"
+          >
+            {busy === "run" ? "Đang chạy…" : "Chạy thử"}
           </Button>
-          <Button variant="primary" onClick={onSubmit} disabled={busy !== null} title="Nộp bài (⇧⌘↵ / Ctrl+Shift+↵)">
-            {busy === 'submit' ? 'Đang nộp…' : 'Nộp bài'}
+          <Button
+            className="shrink-0"
+            variant="primary"
+            onClick={onSubmit}
+            disabled={busy !== null}
+            title="Nộp bài (⇧⌘↵ / Ctrl+Shift+↵)"
+          >
+            {busy === "submit" ? "Đang nộp…" : "Nộp bài"}
           </Button>
         </div>
       </div>
 
       {error ? (
-        <p role="alert" className="shrink-0 bg-(--tint-clay) px-3 py-1.5 text-xs text-wa">
+        <p
+          role="alert"
+          className="shrink-0 bg-(--tint-clay) px-3 py-1.5 text-xs text-wa"
+        >
           {error}
         </p>
       ) : null}
@@ -145,5 +175,5 @@ export function EditorPane({
         />
       </div>
     </div>
-  )
+  );
 }

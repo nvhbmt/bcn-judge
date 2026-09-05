@@ -15,6 +15,7 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { ComponentPropsWithoutRef, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/cn'
+import { NARROW_QUERY, useMediaQuery } from './Workspace'
 
 /** Nhãn tạm sau khi chạm sống bao lâu (ms) — "vài giây" của FR-E7. */
 const TOUCH_LABEL_MS = 2000
@@ -93,6 +94,11 @@ function Item({
 }
 
 export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hướng khu làm bài' }: IconRailProps) {
+  // Dưới 900px thanh icon rời sang mép DƯỚI và nằm NGANG — trên màn dọc của điện
+  // thoại, một cột icon bên trái ăn mất bề ngang quý giá của khung code, còn thanh
+  // dưới đáy là nơi ngón cái với tới. Cùng ngưỡng với Workspace (hai bên đọc chung
+  // NARROW_QUERY) nên rail và bố cục khung luôn đổi cùng lúc, không có nhịp lệch.
+  const narrow = useMediaQuery(NARROW_QUERY)
   const tipIdBase = useId()
   // Tách hover/focus khỏi chạm: nhãn do chạm phải tự tắt theo giờ, còn hover tắt theo con trỏ.
   const [pointedKey, setPointedKey] = useState<string | null>(null)
@@ -133,14 +139,30 @@ export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hư�
     <nav
       aria-label={ariaLabel}
       data-testid="icon-rail"
-      // 48px cố định (w-12) — FR-E1 tính phần còn lại cho hai khung dựa trên con số này.
-      className="flex w-14 shrink-0 flex-col items-center gap-1 border-r border-line bg-surface-2 py-2"
+      // Dọc: 56px cố định, viền phải — FR-E1 tính phần còn lại cho hai khung dựa vào
+      // con số này. Ngang (hẹp): thanh CỐ ĐỊNH ở đáy khung, chạy hết bề ngang, viền
+      // TRÊN. `fixed inset-x-0 bottom-0` để nó không cuộn theo nội dung — ngón cái
+      // luôn với tới; khung nội dung tự chừa đúng chiều cao thanh bằng padding dưới
+      // (xem WorkspacePage), nên thanh không đè lên dòng cuối.
+      className={cn(
+        'flex shrink-0 items-center gap-1 border-line bg-surface-2',
+        narrow
+          ? 'fixed inset-x-0 bottom-0 z-40 h-14 w-full flex-row border-t px-2'
+          : 'w-14 flex-col border-r py-2',
+      )}
     >
       {[false, true].map((bottom) => {
         const group = items.filter((i) => Boolean(i.atBottom) === bottom)
         if (group.length === 0) return null
         return (
-      <ul key={String(bottom)} className={cn('flex flex-col items-center gap-1', bottom && 'mt-auto')}>
+      <ul
+        key={String(bottom)}
+        className={cn(
+          'flex items-center gap-1',
+          narrow ? 'flex-row' : 'flex-col',
+          bottom && (narrow ? 'ml-auto' : 'mt-auto'),
+        )}
+      >
         {group.map((item) => {
           const isActive = activeKey === item.key
           const showTip = visibleTipKey === item.key
@@ -168,7 +190,9 @@ export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hư�
                 // be trung tính — để nguyên surface-sel là mục đang mở mất hẳn màu.
                 className={cn(
                   'relative flex h-11 w-14 items-center justify-center transition-colors duration-120 ease-linear focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss',
-                  isActive ? 'bg-primary-soft text-moss shadow-[inset_2px_0_0_var(--moss)]' : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2',
+                  isActive
+                    ? cn('bg-primary-soft text-moss', narrow ? 'shadow-[inset_0_2px_0_var(--moss)]' : 'shadow-[inset_2px_0_0_var(--moss)]')
+                    : 'text-ink-5 hover:bg-surface-sel hover:text-ink-2',
                 )}
                 onPointerDown={(e: ReactPointerEvent) => onPointerDown(e, item.key)}
                 onMouseEnter={() => showByPointer(item.key)}
@@ -200,7 +224,12 @@ export function IconRail({ items, activeKey, onSelect, ariaLabel = 'Điều hư�
                   role="tooltip"
                   id={tipId}
                   data-testid="rail-tooltip"
-                  className="pointer-events-none absolute top-1/2 left-full z-50 ml-2 -translate-y-1/2 border border-line bg-surface-sel px-2 py-1 font-mono text-[13px] whitespace-nowrap text-ink-1"
+                  className={cn(
+                    'pointer-events-none absolute z-50 border border-line bg-surface-sel px-2 py-1 font-mono text-[13px] whitespace-nowrap text-ink-1',
+                    narrow
+                      ? 'bottom-full left-1/2 mb-2 -translate-x-1/2'
+                      : 'top-1/2 left-full ml-2 -translate-y-1/2',
+                  )}
                 >
                   {item.label}
                 </span>

@@ -300,3 +300,28 @@ test('leader: danh sách thành viên → trang riêng hai panel (FR-J)', async 
 
   expect(errors).toEqual([])
 })
+
+test('mobile: thanh icon cố định ở ĐÁY, không cuộn theo nội dung, header gọn', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 780 }) // cỡ điện thoại
+  await page.goto('/')
+  await openFirstProblem(page) // rail chỉ sống trong khu làm bài
+  // KHÔNG đòi .cm-content hiện: trên mobile editor nằm trong tab "Code" đang ẩn,
+  // mặc định mở tab Nội dung — đó là đúng hành vi FR-E9, không phải lỗi.
+  const rail = page.getByTestId('icon-rail')
+  await expect(rail).toBeVisible()
+
+  const vh = page.viewportSize()!.height
+  const box = await rail.boundingBox()
+  // Dính đáy: mép dưới của rail chạm mép dưới viewport (sai số 1px).
+  expect(Math.abs((box!.y + box!.height) - vh), 'rail phải chạm đáy màn hình').toBeLessThanOrEqual(1)
+  // Thanh ngang, không phải cột dọc: rộng gần hết màn, cao một hàng icon.
+  expect(box!.width).toBeGreaterThan(page.viewportSize()!.width * 0.8)
+  expect(box!.height).toBeLessThan(80)
+
+  // position:fixed — cuộn nội dung thì rail đứng yên.
+  const posBefore = (await rail.boundingBox())!.y
+  await page.mouse.wheel(0, 400)
+  await page.waitForTimeout(150)
+  const posAfter = (await rail.boundingBox())!.y
+  expect(Math.abs(posAfter - posBefore), 'rail không được cuộn theo nội dung').toBeLessThanOrEqual(1)
+})
