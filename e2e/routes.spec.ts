@@ -8,13 +8,20 @@
 import { expect, test } from '@playwright/test'
 import { login, watchForErrors } from './helpers'
 
-/** Route tĩnh theo vai trò. Route có tham số kiểm ở các spec luồng. */
+/**
+ * Route tĩnh theo vai trò. Route có tham số kiểm ở các spec luồng.
+ *
+ * Danh sách này là THỦ CÔNG, nên tên test "mọi route" chỉ đúng bằng chính nó: thêm
+ * một trang vào App.tsx mà quên thêm vào đây là trang đó không bao giờ được mở lần
+ * nào — đúng lớp lỗi mà file này sinh ra để chắn. Thêm route mới thì thêm cả ở đây.
+ */
 const ROUTES = {
   member: ['/', '/contest', '/team', '/tai-khoan'],
   mentor: ['/', '/contest', '/team', '/tai-khoan', '/mentor/bai-tap', '/mentor/contest'],
   admin: [
     '/', '/contest', '/team', '/tai-khoan', '/mentor/bai-tap', '/mentor/contest',
     '/quan-tri', '/quan-tri/tai-khoan', '/quan-tri/khoa-hoc', '/quan-tri/team', '/quan-tri/cai-dat',
+    '/quan-tri/nhat-ky',
   ],
 } as const
 
