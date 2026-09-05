@@ -8,7 +8,8 @@
  * stdin, gọi hàm đó rồi in kết quả. Sau khi ghép, chương trình vẫn là stdin →
  * stdout như mọi bài stdio — đó chính là lý do không tầng nào bên dưới phải đổi.
  */
-import { describe, expect, it } from 'vitest'
+import { drainPool } from './pool'
+import { afterAll, describe, expect, it } from 'vitest'
 import { LANGUAGES, type LanguageConfig } from './languages'
 import { judgeSubmission } from './runner'
 import { DEFAULT_LIMITS, type SourceFile, type TestcaseInput } from './types'
@@ -224,6 +225,9 @@ function langFor(id: keyof typeof LANGUAGES): LanguageConfig {
 }
 
 describe.skipIf(!RUN_DOCKER)('Bài dạng function (kiểu LeetCode)', () => {
+  // Cùng lý do với queue.test: judgeSubmission nuôi bể ấm, test phải tự xả khi xong.
+  afterAll(() => drainPool())
+
   for (const [id, c] of Object.entries(CASES) as [keyof typeof LANGUAGES, Case][]) {
     const lang = langFor(id)
 

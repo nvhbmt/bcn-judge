@@ -4,7 +4,7 @@
  * Các ca chạy container thật cần cả INTEGRATION=1 lẫn DOCKER=1.
  */
 import { sql } from 'drizzle-orm'
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { q } from '@/db/pool'
 import {
   INTEGRATION,
@@ -20,6 +20,7 @@ import {
   assignMentor,
   type TestUser,
 } from '@/testing/harness'
+import { drainPool } from './pool'
 import {
   claimNext,
   claimRejudge,
@@ -319,6 +320,13 @@ describe.skipIf(!INTEGRATION)('hàng đợi chấm bài', () => {
   })
 
   describe.skipIf(!DOCKER)('chấm thật qua hàng đợi (Docker)', () => {
+    // Xả bể container ấm khi xong: processOneJob nuôi bể y như worker thật, mà test
+    // thì không có reaper dọn sau lưng — thiếu dòng này thì mỗi lượt chạy để lại
+    // một container Up, và phép đếm vệ sinh của sandbox.test (chạy song song ở
+    // tiến trình khác) không với tới được bể của tiến trình này.
+    afterAll(() => drainPool())
+
+
     it('nộp qua API → worker chấm → AC với điểm 100', async () => {
       const posted = await call('/api/member/submissions', {
         as: member,

@@ -190,6 +190,13 @@ production đi gọi thẳng máy đó, bỏ qua reverse proxy.
 Mọi số đo hiệu năng và **toàn bộ bộ abuse hiện mới chạy trên máy dev (OrbStack)**.
 `design.md` §11 yêu cầu chạy lại trên **đúng kernel/Docker của VPS đích**:
 
+> Chuyện có thật cho thấy vì sao món nợ này không được quên: bộ abuse từng đỏ ở ca
+> vệ sinh suốt một thời gian mà không ai biết — bể container ấm (pool.ts) ra đời sau
+> phép đếm "không sót container", và vì bộ chỉ chạy khi `DOCKER=1` nên không lượt CI
+> thường nào đụng tới. Đã sửa (05.09.2026, các suite tự xả bể khi xong, 48/48 xanh,
+> 0 container sót), nhưng bài học đứng nguyên: **bộ này phải được chạy chủ động, nó
+> không tự kêu khi hỏng.**
+
 ```bash
 cd server && DOCKER=1 npm run test:sandbox
 ```
@@ -225,6 +232,12 @@ docker compose logs -f worker | grep 'chờ'
 `chờ` là thời gian bài nằm trong hàng đợi trước khi worker nhặt. Con số này phải cỡ
 **chục mili giây**. Lên tới ~500 ms nghĩa là chuông LISTEN/NOTIFY không tới và hệ thống
 đang chạy bằng nhịp poll dự phòng 1 giây.
+
+Cuối cùng, mở trang bằng trình duyệt thật và nhìn **mặt chữ**: tiêu đề phải là chữ có
+chân (Lora), số và verdict phải là mono (IBM Plex Mono). Nếu cả trang là font hệ thống
+thì CSP đang chặn Google Fonts — dev không có CSP nên lỗi này **chỉ** hiện sau deploy,
+và nó chặn câm, không log gì. Đối chiếu `style-src`/`font-src` trong `server/Caddyfile`
+với các thẻ `<link>` trong `index.html`.
 
 ---
 

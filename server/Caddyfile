@@ -24,8 +24,16 @@
 		# bình thường, còn ở đây trình duyệt chặn CÂM — không lỗi mạng, không dòng log
 		# nào ngoài console của người dùng. Đúng kiểu hỏng chỉ lộ ra sau khi deploy.
 		#
-		# Chỉ nới đúng một host và đúng img-src; script-src/connect-src giữ nguyên
-		# 'self'. Đánh đổi thật: CDN của Discord thấy IP người đang xem trang.
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://cdn.discordapp.com; connect-src 'self'; frame-ancestors 'none'"
+		# Chỉ nới đúng host cần và đúng directive cần; script-src/connect-src giữ
+		# nguyên 'self'. Đánh đổi thật: CDN của Discord thấy IP người đang xem trang.
+		#
+		# `style-src` có fonts.googleapis.com và `font-src` có fonts.gstatic.com vì
+		# index.html nạp cả ba họ chữ (Lora, IBM Plex, Montserrat của logo) từ Google
+		# Fonts. Thiếu hai host này thì trình duyệt chặn CÂM y như ca ảnh Discord ở
+		# trên: dev không có CSP nên chữ đẹp bình thường, deploy xong cả ba mặt chữ
+		# lặng lẽ rơi về font hệ thống — nhận diện của hệ thiết kế biến mất mà không
+		# một dòng log nào. Muốn bỏ hai host này thì self-host font trước
+		# (tải .woff2 về, xem design-system/tokens/fonts.css), đừng bỏ suông.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://cdn.discordapp.com; connect-src 'self'; frame-ancestors 'none'"
 	}
 }

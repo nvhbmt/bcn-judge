@@ -12,6 +12,7 @@ import { LANGUAGES } from './languages'
 import { judgeSubmission } from './runner'
 import { Sandbox, docker } from './sandbox'
 import { DEFAULT_LIMITS, type JudgeLimits, type TestcaseInput } from './types'
+import { drainPool } from './pool'
 
 const RUN_DOCKER = process.env.DOCKER === '1'
 const ABUSE_DIR = join(import.meta.dirname, '../../runner/abuse')
@@ -264,7 +265,16 @@ describe.skipIf(!RUN_DOCKER)('P0 — sandbox trên Docker thật', () => {
   })
 
   // ---- Vệ sinh: không để lại container mồ côi.
-  it('không còn container sandbox nào sót lại', async () => {
+  it('không còn container sandbox nào sót lại (sau khi xả bể ấm)', async () => {
+    // PHẢI xả bể trước khi đếm. Phép kiểm này viết TRƯỚC khi có bể container ấm
+    // (pool.ts): hồi đó "còn container mang nhãn" đồng nghĩa "rò rỉ". Nay bể cố ý
+    // giữ container Up để lượt chấm sau khỏi trả giá khởi động, nên đếm thẳng là
+    // đếm nhầm đồ đang dùng thành đồ bỏ quên — bộ này đỏ ở chính ca vệ sinh mà
+    // không ai thấy suốt, vì nó chỉ chạy khi DOCKER=1.
+    //
+    // Xả-rồi-đếm còn kiểm được NHIỀU hơn bản cũ: nếu drainPool bỏ sót một container
+    // (đúng lớp lỗi mà reap.ts phải dọn ở production), phép đếm dưới đây bắt được.
+    await drainPool()
     const list = await docker.listContainers({
       all: true,
       filters: { label: ['bcnjudge.sandbox=1'] },
