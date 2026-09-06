@@ -1,4 +1,4 @@
-import { BookOpen, CircleHelp, FileText, History, Trophy } from 'lucide-react'
+import { BookOpen, CircleHelp, FileText, History, MessagesSquare, Trophy } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 /**
@@ -12,7 +12,7 @@ import type { ReactNode } from 'react'
  *
  * Bốn icon đầu theo đúng bản vẽ (file-text · history · book-open · trophy · circle-help).
  */
-export type RailKey = 'de-bai' | 'bai-nop' | 'giao-trinh' | 'bang-xep-hang' | 'tro-giup'
+export type RailKey = 'de-bai' | 'bai-nop' | 'giao-trinh' | 'bang-xep-hang' | 'thao-luan' | 'tro-giup'
 
 export interface RailDef {
   key: RailKey
@@ -36,8 +36,22 @@ export const RAIL_LABEL: Record<RailKey, string> = {
   'bai-nop': 'Bài nộp',
   'giao-trinh': 'Giáo trình',
   'bang-xep-hang': 'Bảng xếp hạng',
+  'thao-luan': 'Thảo luận',
   'tro-giup': 'Trợ giúp',
 }
+
+/**
+ * Rail cho BÀI LUYỆN của khoá: thêm "Thảo luận" (ngay trước "Trợ giúp" ở đáy).
+ *
+ * KHÔNG dùng trong contest — thảo luận dễ thành kênh mách nước lúc thi, nên workspace
+ * chỉ lắp rail này khi đang ở bài luyện (xem WorkspacePage). An toàn thật nằm ở tầng
+ * quyền (chỉ ai đã AC mới đọc/đăng), đây chỉ là ẩn lối vào cho gọn.
+ */
+export const RAIL_ITEMS_DISCUSSION: RailDef[] = [
+  ...RAIL_ITEMS.filter((i) => !i.atBottom),
+  { key: 'thao-luan', label: 'Thảo luận', icon: <MessagesSquare size={19} /> },
+  ...RAIL_ITEMS.filter((i) => i.atBottom),
+]
 
 /**
  * Rail cho một BÀI ĐỌC: bỏ "Bài nộp", và "Đề bài" đổi tên thành "Bài đọc".

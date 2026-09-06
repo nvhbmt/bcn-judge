@@ -11,7 +11,7 @@ import type { LanguageOption, ProblemView, SubmissionView } from '@/types/api'
 import type { ConsoleTab } from './ConsolePanel'
 import { ContentPanels } from './ContentPanels'
 import { EditorPane } from './EditorPane'
-import { RAIL_ITEMS, RAIL_ITEMS_LESSON, RAIL_LABEL, type RailKey } from './rail'
+import { RAIL_ITEMS, RAIL_ITEMS_DISCUSSION, RAIL_ITEMS_LESSON, RAIL_LABEL, type RailKey } from './rail'
 import { SolvedDialog } from './SolvedDialog'
 import { useSolvedDialog } from './useSolvedDialog'
 import { useSiblings } from './siblings'
@@ -141,7 +141,13 @@ export function WorkspacePage() {
   const solved = useSolvedDialog(submission, watchedId, handle)
 
   // "Đề bài" là sai tên cho một trang lý thuyết — và nhãn này còn là tên tab ở màn hẹp.
-  const contentLabel = rail === 'de-bai' && laBaiDoc ? 'Bài đọc' : RAIL_LABEL[rail]
+  // Bài đọc: không thảo luận. Contest: ẩn thảo luận (chống mách nước lúc thi). Chỉ bài
+  // luyện của khoá mới có mục "Thảo luận".
+  const railItems = laBaiDoc ? RAIL_ITEMS_LESSON : contestProblemId ? RAIL_ITEMS : RAIL_ITEMS_DISCUSSION
+  // Tab đang chọn có thể không còn trong rail sau khi đổi bài (vd đang ở "Thảo luận" rồi
+  // mở một bài contest) — rơi về "Đề bài" thay vì hiện panel lạc ngữ cảnh.
+  const effectiveRail: RailKey = railItems.some((i) => i.key === rail) ? rail : 'de-bai'
+  const contentLabel = effectiveRail === 'de-bai' && laBaiDoc ? 'Bài đọc' : RAIL_LABEL[effectiveRail]
   // Truy vấn ĐANG TẮT thì react-query báo isLoading = false, nên nếu chỉ nhìn nó thì
   // trong lúc còn chờ giáo trình màn hình đã kết luận "không mở được" rồi mới đi hỏi.
   const dangCho = !siblings.resolved || isLoading
@@ -152,7 +158,7 @@ export function WorkspacePage() {
   const content = (
     <ContentPanels
       contentLabel={contentLabel}
-      rail={rail}
+      rail={effectiveRail}
       siblings={siblings}
       dangCho={dangCho}
       role={me?.role ?? 'member'}
@@ -208,8 +214,8 @@ export function WorkspacePage() {
       contentLabel={contentLabel}
       rail={
         <IconRail
-          items={laBaiDoc ? RAIL_ITEMS_LESSON : RAIL_ITEMS}
-          activeKey={rail}
+          items={railItems}
+          activeKey={effectiveRail}
           onSelect={(key) => setRail(key as RailKey)}
         />
       }

@@ -10,6 +10,7 @@ import { EmptyState, Spinner } from '@/components/ui'
 import type { ProblemView, LanguageOption, SubmissionView } from '@/types/api'
 import { ContestProblemList } from './ContestProblemList'
 import { ContentHeader } from './ContentHeader'
+import { DiscussionPanel } from './discussion/DiscussionPanel'
 import { HelpPanel } from './HelpPanel'
 import { LeaderboardPanel } from './LeaderboardPanel'
 import { LessonPanel } from './LessonPanel'
@@ -86,6 +87,7 @@ export function ContentPanels({
           )
         ) : null}
         {rail === 'bang-xep-hang' ? <LeaderboardPanel courseId={courseId} contestId={contestId} /> : null}
+        {rail === 'thao-luan' ? <DiscussionPanel problemId={problem?.id} /> : null}
         {rail === 'de-bai' ? (
           laBaiDoc && itemId ? (
             <LessonPanel itemId={itemId} />

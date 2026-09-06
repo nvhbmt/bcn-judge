@@ -20,7 +20,7 @@ export function LeaderboardTable({ rows }: { rows: LbEntry[] }) {
         <col className="w-20" />
       </colgroup>
       <thead>
-        <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.12em] text-ink-6 uppercase">
+        <tr className="border-b border-line text-left font-mono text-[11px] tracking-[0.12em] text-(--label) uppercase">
           <th className="px-3 py-2 font-normal">#</th>
           <th className="py-2 font-normal">Tên</th>
           <th className="px-3 py-2 text-right font-normal">Bài</th>
