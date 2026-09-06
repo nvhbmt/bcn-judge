@@ -152,11 +152,52 @@ Hai biến nên đặt:
 
 ## 8. Cập nhật hằng ngày
 
+### 8.0. Lấy code mới về VPS — làm TRƯỚC deploy.sh
+
+`deploy.sh` build image từ **code đang nằm trên VPS**; nó KHÔNG tự kéo code về. Bỏ
+bước này thì "deploy" chỉ dựng lại đúng bản cũ, và không có gì báo — log vẫn xanh.
+
+```bash
+cd /đường/tới/bcn-judge          # thư mục repo trên VPS
+git fetch origin
+git checkout main && git pull --ff-only origin main
+```
+
+- `--ff-only`: nếu ai đó lỡ sửa tay trên VPS làm rẽ nhánh, lệnh DỪNG thay vì đẻ một
+  merge commit lạ ngay trên máy chủ. Gặp thì `git status` xem sửa gì, `git stash` hoặc
+  `git reset --hard origin/main` (chỉ khi chắc chắn bỏ được) rồi pull lại.
+- Bí mật KHÔNG bị đụng: `.env.api` / `.env.worker` / `.env.migrate` đều nằm trong
+  `.gitignore`, `git pull` không ghi đè. Đừng bao giờ commit chúng lên máy chủ.
+- Lên thẳng một bản đã đóng dấu thì `git checkout <tag-hoặc-sha>` thay cho `main` —
+  và để rollback thì cũng chính là lệnh này với sha cũ, rồi chạy lại `deploy.sh`
+  (blue/green nên đổi qua đổi lại an toàn).
+
+Migration nằm trong repo nên tự áp ở bước sau — `deploy.sh` gọi `migrate` (§8.1),
+không cần chạy tay. Ví dụ đổi cờ biên dịch C nghiêm hơn đi qua `drizzle/0006_*.sql`
+và vào DB ngay lượt deploy kế.
+
+### 8.1. Dựng lại
+
 ```bash
 cd server
 bash deploy/deploy.sh              # đầy đủ: API (blue/green) + worker + giao diện
 bash deploy/deploy.sh --spa-only   # chỉ giao diện, không đụng judge/DB
 ```
+
+> **Khi `server/runner/**` đổi (Dockerfile ngôn ngữ, `run.sh`, char map…):**
+> `deploy.sh` build image API và caddy, nhưng **KHÔNG** dựng lại runner image — đó là
+> các image sandbox, dựng riêng lúc provision. Bỏ sót thì code mới chạy trên sandbox
+> CŨ, và lỗi kiểu "ngôn ngữ mới không nhận" hay "cờ compile không đổi" chỉ lộ khi chấm.
+> Kiểm nhanh `git diff --stat <sha-cũ>..HEAD -- server/runner/`; có thay đổi thì dựng
+> lại trước:
+>
+> ```bash
+> bash scripts/build-runner-images.sh --all
+> ```
+>
+> Cờ biên dịch trong `languages.compile_argv` (ví dụ `-Werror=implicit…` của C) nằm ở
+> **DB**, không ở runner image — đổi cờ thì đi qua migration (§8.0), không cần dựng lại
+> runner. Chỉ khi đụng chính Dockerfile/toolchain của sandbox mới cần lệnh trên.
 
 Trình tự của bản đầy đủ:
 
