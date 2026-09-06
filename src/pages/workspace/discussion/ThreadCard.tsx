@@ -100,23 +100,33 @@ export function ThreadCard({ problemId, thread }: { problemId: string; thread: T
         )}
       </div>
 
+      {/* Khối TRẢ LỜI là cấp con của chủ đề: xuống nền surface-2 và thụt vào sau một
+          thanh dọc bên trái, để mắt thấy ngay "những cái này thuộc bài trên", không
+          lẫn thành bài ngang hàng. */}
       {thread.replies.length > 0 || replying ? (
-        <div className="px-4 py-1">
-          {thread.replies.map((r) => (
-            <ReplyItem key={r.id} problemId={problemId} reply={r} />
-          ))}
-          {replying ? (
-            <div className="border-t border-line py-3 pl-3">
-              <Composer
-                submitLabel="Gửi trả lời"
-                placeholder="Trả lời… (Markdown & LaTeX)"
-                pending={reply.isPending}
-                autoFocus
-                onSubmit={({ bodyMd }) => reply.mutate(bodyMd)}
-                onCancel={() => setReplying(false)}
-              />
-            </div>
-          ) : null}
+        <div className="bg-surface-2 px-4 py-3">
+          <div className="border-l-2 border-line-strong pl-4">
+            {thread.replies.length > 0 ? (
+              <div className="mb-0.5 font-mono text-[11px] tracking-[0.08em] text-ink-6">
+                {thread.replies.length} trả lời
+              </div>
+            ) : null}
+            {thread.replies.map((r) => (
+              <ReplyItem key={r.id} problemId={problemId} reply={r} />
+            ))}
+            {replying ? (
+              <div className="border-t border-line pt-3">
+                <Composer
+                  submitLabel="Gửi trả lời"
+                  placeholder="Trả lời… (Markdown & LaTeX)"
+                  pending={reply.isPending}
+                  autoFocus
+                  onSubmit={({ bodyMd }) => reply.mutate(bodyMd)}
+                  onCancel={() => setReplying(false)}
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </article>

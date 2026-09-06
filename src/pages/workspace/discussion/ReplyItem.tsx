@@ -27,7 +27,7 @@ export function ReplyItem({ problemId, reply }: { problemId: string; reply: Repl
   })
 
   return (
-    <div className="border-t border-line py-2.5 pl-3">
+    <div className="border-t border-line py-2.5">
       <div className="mb-1 flex items-center gap-2 font-mono text-[11px] text-ink-6">
         <span className={cn(reply.isMine ? 'text-moss' : 'text-ink-5')}>{reply.isMine ? 'Bạn' : reply.authorName}</span>
         <span>· {formatWhen(reply.createdAt)}</span>
