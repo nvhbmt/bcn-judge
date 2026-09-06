@@ -56,12 +56,12 @@ function mockGet(data: DiscussionData) {
   })
 }
 
-function draw() {
+function draw(props: { codeLang?: string; currentCode?: string } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>{children}</QueryClientProvider>
   )
-  render(<DiscussionPanel problemId="p1" />, { wrapper })
+  render(<DiscussionPanel problemId="p1" {...props} />, { wrapper })
 }
 
 describe('DiscussionPanel', () => {
@@ -78,6 +78,27 @@ describe('DiscussionPanel', () => {
     await waitFor(() => expect(screen.getByText('Vì sao WA test 3?')).toBeInTheDocument())
     expect(screen.getByText('Lan')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Đặt câu hỏi' })).toBeInTheDocument()
+  })
+
+  it('"Chèn code đang viết" bọc mã editor bằng fence đúng ngôn ngữ', async () => {
+    mockGet(OPEN)
+    draw({ codeLang: 'c', currentCode: 'int main(){return 0;}' })
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Đặt câu hỏi' })).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Đặt câu hỏi' }))
+    fireEvent.click(screen.getByRole('button', { name: /Chèn code đang viết/ }))
+    const ta = screen.getByLabelText('Nội dung') as HTMLTextAreaElement
+    expect(ta.value).toContain('```c')
+    expect(ta.value).toContain('int main(){return 0;}')
+    expect(ta.value.trimEnd().endsWith('```')).toBe(true)
+  })
+
+  it('không có code đang viết: ẩn nút "Chèn code đang viết", vẫn có "Khối code"', async () => {
+    mockGet(OPEN)
+    draw() // không truyền currentCode
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Đặt câu hỏi' })).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: 'Đặt câu hỏi' }))
+    expect(screen.getByRole('button', { name: /Khối code/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Chèn code đang viết/ })).toBeNull()
   })
 
   it('đăng chủ đề: mở ô soạn, điền, gửi POST đúng endpoint', async () => {

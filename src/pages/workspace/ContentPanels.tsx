@@ -36,6 +36,8 @@ export function ContentPanels({
   handleQuery,
   watchedId,
   languages,
+  editorLang,
+  editorSource,
   onSelectSubmission,
   onLoadIntoEditor,
 }: {
@@ -53,6 +55,9 @@ export function ContentPanels({
   handleQuery: string
   watchedId: string | null
   languages: LanguageOption[]
+  /** Ngôn ngữ (fence) + mã đang viết ở editor — cho nút chèn code ở panel Thảo luận. */
+  editorLang?: string
+  editorSource?: string
   onSelectSubmission: (id: string) => void
   onLoadIntoEditor: (s: SubmissionView) => void
 }) {
@@ -87,7 +92,9 @@ export function ContentPanels({
           )
         ) : null}
         {rail === 'bang-xep-hang' ? <LeaderboardPanel courseId={courseId} contestId={contestId} /> : null}
-        {rail === 'thao-luan' ? <DiscussionPanel problemId={problem?.id} /> : null}
+        {rail === 'thao-luan' ? (
+          <DiscussionPanel problemId={problem?.id} codeLang={editorLang} currentCode={editorSource} />
+        ) : null}
         {rail === 'de-bai' ? (
           laBaiDoc && itemId ? (
             <LessonPanel itemId={itemId} />

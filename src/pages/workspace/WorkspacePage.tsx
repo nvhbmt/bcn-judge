@@ -171,6 +171,8 @@ export function WorkspacePage() {
       handleQuery={handleQuery}
       watchedId={watchedId}
       languages={languages ?? []}
+      editorLang={(languages ?? []).find((l) => l.id === languageId)?.cmMode ?? ''}
+      editorSource={source}
       onSelectSubmission={(id) => {
         setWatchedId(id)
         setConsoleTab('ket-qua')

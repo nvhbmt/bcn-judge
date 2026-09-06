@@ -11,10 +11,20 @@ import { useState } from 'react'
 import { Button, EmptyState, SectionRule, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import { Composer } from './Composer'
+import { DiscussionEditorContext } from './editorContext'
 import { ThreadCard } from './ThreadCard'
 import type { DiscussionData } from './types'
 
-export function DiscussionPanel({ problemId }: { problemId?: string }) {
+export function DiscussionPanel({
+  problemId,
+  codeLang = '',
+  currentCode = '',
+}: {
+  problemId?: string
+  /** Ngôn ngữ editor (fence ```lang) + mã đang viết — cho nút chèn code trong Composer. */
+  codeLang?: string
+  currentCode?: string
+}) {
   const client = useQueryClient()
   const [composing, setComposing] = useState(false)
 
@@ -58,6 +68,7 @@ export function DiscussionPanel({ problemId }: { problemId?: string }) {
   }
 
   return (
+    <DiscussionEditorContext.Provider value={{ codeLang, currentCode }}>
     <div className="px-4 py-4">
       <div className="mb-3 flex items-end gap-3">
         <div className="min-w-0 flex-1">
@@ -96,5 +107,6 @@ export function DiscussionPanel({ problemId }: { problemId?: string }) {
         </div>
       )}
     </div>
+    </DiscussionEditorContext.Provider>
   )
 }
