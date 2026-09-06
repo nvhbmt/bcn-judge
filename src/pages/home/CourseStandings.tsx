@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Row, RowGroup, SidePanel } from '@/components/ui/patterns'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/cn'
+import { medal } from '@/lib/medal'
 
 interface StandingRow {
   rank: number
@@ -43,8 +44,11 @@ export function CourseStandings({ courseId, courseCode }: { courseId: string; co
       <RowGroup className="border-0">
         {rows.map((row) => (
           <Row key={row.userId} accent={row.isMe ? 'moss' : null} className="gap-3 px-2.5 py-2">
-            <span className={cn('num w-5 shrink-0 font-mono text-[14px]', row.isMe ? 'text-moss' : 'text-ink-5')}>
-              {row.rank}
+            <span
+              title={`Hạng ${row.rank}`}
+              className={cn('num w-6 shrink-0 font-mono text-[14px]', row.isMe ? 'text-moss' : 'text-ink-5')}
+            >
+              {medal(row.rank) ?? row.rank}
             </span>
             <span className={cn(
               'min-w-0 flex-1 truncate text-[15px]',

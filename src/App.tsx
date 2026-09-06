@@ -17,6 +17,7 @@ import { ContestListPage as MemberContestListPage } from '@/pages/ContestListPag
 import { ContestPage } from '@/pages/ContestPage'
 import { CourseDetailPage } from '@/pages/CourseDetailPage'
 import { CoursesPage } from '@/pages/CoursesPage'
+import { BXHPage } from '@/pages/leaderboard/BXHPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { AccountPage } from '@/pages/AccountPage'
 import { ChangePasswordPage } from '@/pages/ChangePasswordPage'
@@ -94,6 +95,7 @@ function AppRoutes({ role }: { role: Me['role'] }) {
       <Route path="/contest/:contestId" element={<ContestPage />} />
       <Route path="/contest/:contestId/bai/:contestProblemId" element={<WorkspacePage />} />
       <Route path="/team" element={<TeamPage />} />
+      <Route path="/bang-xep-hang" element={<BXHPage />} />
       {/* Bài nộp của MỘT thành viên — trang riêng vì danh sách đó dài hàng nghìn
           pixel, xem TeamMemberPage.tsx. Chỉ leader mở được; server chặn 403 và
           trang tự đưa về /team nếu không phải leader. */}

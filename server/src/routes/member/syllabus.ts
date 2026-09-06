@@ -4,7 +4,7 @@
  * Tiến độ và BXH đều **dẫn xuất** bằng SQL (ADR-9/§2.7): không bảng điểm, không
  * job rebuild → chấm lại (FR-D9) tự nhất quán, không bao giờ lệch.
  */
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { q } from '@/db/pool'
 import { errors, ok } from '@/lib/apiResponse'
@@ -21,7 +21,12 @@ export const memberSyllabusRoutes = new Hono()
  * `courseId = null` = không giới hạn khoá, dùng cho bảng xếp hạng toàn CLB (team
  * không gắn khoá nào). Ba chỗ gọi cũ đều truyền một chuỗi nên hành vi không đổi.
  */
-const bestSubmissions = (courseId: string | null) => sql`
+/**
+ * `since` (tuỳ chọn): chỉ tính bài nộp TỪ mốc này trở đi — dùng cho BXH theo tuần/
+ * tháng (member/leaderboard.ts). null = toàn thời gian. Lọc trước khi DISTINCT ON
+ * nên "bài tốt nhất" là bài tốt nhất TRONG cửa sổ, đúng nghĩa "top tuần này".
+ */
+const bestSubmissions = (courseId: string | null, since: SQL | null = null) => sql`
   SELECT DISTINCT ON (s.user_id, s.item_id)
          s.user_id, s.item_id, s.problem_id, s.verdict,
          ROUND(s.passed_weight::numeric / NULLIF(s.total_weight, 0) * 100, 2) AS points,
@@ -33,6 +38,7 @@ const bestSubmissions = (courseId: string | null) => sql`
     AND i.status = 'published'
     AND s.kind = 'submit' AND s.status = 'done'
     AND s.verdict NOT IN ('CE', 'IE')
+    ${since === null ? sql`` : sql`AND s.received_at >= ${since}`}
   ORDER BY s.user_id, s.item_id,
            (s.verdict = 'AC') DESC,
            (s.passed_weight::numeric / NULLIF(s.total_weight, 0)) DESC NULLS LAST,

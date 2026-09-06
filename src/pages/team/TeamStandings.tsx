@@ -16,6 +16,7 @@ import { useQuery } from '@tanstack/react-query'
 import { EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/cn'
+import { medal } from '@/lib/medal'
 
 interface TeamStandingRow {
   rank: number
@@ -76,8 +77,11 @@ export function TeamStandings() {
               row.isMine && 'bg-primary-soft shadow-[inset_2px_0_0_var(--moss)]',
             )}
           >
-            <td className={cn('num px-2.5 py-2.5 font-mono text-[14px]', row.isMine ? 'text-moss' : 'text-ink-5')}>
-              {row.rank}
+            <td
+              title={`Hạng ${row.rank}`}
+              className={cn('num px-2.5 py-2.5 font-mono text-[14px]', row.isMine ? 'text-moss' : 'text-ink-5')}
+            >
+              {medal(row.rank) ?? row.rank}
             </td>
             <td
               title={row.name}

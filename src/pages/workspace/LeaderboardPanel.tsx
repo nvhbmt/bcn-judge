@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { EmptyState, Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/cn'
+import { medal } from '@/lib/medal'
 
 interface Row {
   rank: number
@@ -55,7 +56,9 @@ export function LeaderboardPanel({ courseId, contestId }: { courseId?: string; c
               key={row.userId}
               className={cn('border-t border-line', row.isMe && 'bg-primary-soft font-medium')}
             >
-              <td className="px-2 py-1.5 tabular-nums">{row.rank}</td>
+              <td className="px-2 py-1.5 tabular-nums" title={`Hạng ${row.rank}`}>
+                {medal(row.rank) ?? row.rank}
+              </td>
               <td className="truncate">{row.displayName}</td>
               <td className="text-right tabular-nums">{row.acCount}</td>
               <td className="px-2 text-right tabular-nums">{row.totalPoints}</td>

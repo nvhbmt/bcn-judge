@@ -33,6 +33,7 @@ function navFor(role: string): NavItem[] {
     { to: '/', label: '~/khoá-học', end: true },
     { to: '/contest', label: '~/contest' },
     { to: '/team', label: '~/team' },
+    { to: '/bang-xep-hang', label: '~/xếp-hạng' },
   ]
   if (role !== 'member') {
     items.push({ to: '/mentor/bai-tap', label: '~/bài-tập' }, { to: '/mentor/contest', label: '~/soạn-contest' })

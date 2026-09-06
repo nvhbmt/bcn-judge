@@ -17,6 +17,7 @@ import { adminUserRoutes } from '@/routes/admin/users'
 import { memberContestRoutes } from '@/routes/member/contests'
 import { memberAnnouncementRoutes } from '@/routes/member/announcement'
 import { memberCourseRoutes } from '@/routes/member/courses'
+import { memberLeaderboardRoutes } from '@/routes/member/leaderboard'
 import { memberLanguageRoutes } from '@/routes/member/languages'
 import { memberProblemRoutes, memberSubmissionRoutes } from '@/routes/member/submissions'
 import { memberItemRoutes, memberSyllabusRoutes } from '@/routes/member/syllabus'
@@ -71,6 +72,7 @@ export function createApp(): Hono {
   member.route('/languages', memberLanguageRoutes)
   member.route('/announcement', memberAnnouncementRoutes)
   member.route('/teams', memberTeamRoutes)
+  member.route('/leaderboard', memberLeaderboardRoutes)
   member.route('/contests', memberContestRoutes)
   member.route('/problems', memberProblemRoutes)
   member.route('/submissions', memberSubmissionRoutes)
