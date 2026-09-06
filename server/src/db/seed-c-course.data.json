@@ -1,0 +1,4637 @@
+{
+  "chapters": [
+    {
+      "title": "Biến và các kiểu dữ liệu",
+      "problems": [
+        {
+          "key": "bien-01-in-so-nguyen",
+          "title": "In lại số nguyên",
+          "statementMd": "Bài đầu tiên để làm quen với **biến kiểu số nguyên**.\n\nHãy khai báo một biến số nguyên, đọc giá trị của nó từ bàn phím rồi in chính giá trị đó ra màn hình.",
+          "inputDescMd": "Một dòng duy nhất chứa một số nguyên `n`.",
+          "outputDescMd": "In ra một dòng chứa đúng giá trị `n` vừa đọc.",
+          "constraintsMd": "- `-1000000000 <= n <= 1000000000`",
+          "difficulty": "easy",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-nguyen",
+            "nhap-xuat"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    scanf(\"%d\", &n);\n    printf(\"%d\\n\", n);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "-3\n",
+              "expected": "-3\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "-1000000000\n",
+              "expected": "-1000000000\n"
+            },
+            {
+              "input": "42\n",
+              "expected": "42\n"
+            },
+            {
+              "input": "-1\n",
+              "expected": "-1\n"
+            },
+            {
+              "input": "999999999\n",
+              "expected": "999999999\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "123456789\n",
+              "expected": "123456789\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-02-in-so-thuc",
+          "title": "In lại số thực với 2 chữ số thập phân",
+          "statementMd": "Làm quen với **biến kiểu số thực** (`double`).\n\nĐọc một số thực từ bàn phím rồi in lại số đó **với đúng 2 chữ số thập phân** (làm tròn nếu cần).",
+          "inputDescMd": "Một dòng duy nhất chứa một số thực `x`.",
+          "outputDescMd": "In ra một dòng chứa giá trị `x` với **đúng 2 chữ số thập phân**.\n\nGợi ý: dùng `printf(\"%.2f\\n\", x);`.",
+          "constraintsMd": "- `-1000000 <= x <= 1000000`",
+          "difficulty": "easy",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-thuc",
+            "nhap-xuat"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    double x;\n    scanf(\"%lf\", &x);\n    printf(\"%.2f\\n\", x);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3.14\n",
+              "expected": "3.14\n"
+            },
+            {
+              "input": "-2.5\n",
+              "expected": "-2.50\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0.00\n"
+            },
+            {
+              "input": "1000000\n",
+              "expected": "1000000.00\n"
+            },
+            {
+              "input": "-1000000\n",
+              "expected": "-1000000.00\n"
+            },
+            {
+              "input": "3.14159\n",
+              "expected": "3.14\n"
+            },
+            {
+              "input": "-0.1\n",
+              "expected": "-0.10\n"
+            },
+            {
+              "input": "999999.99\n",
+              "expected": "999999.99\n"
+            },
+            {
+              "input": "2.718\n",
+              "expected": "2.72\n"
+            },
+            {
+              "input": "-45.678\n",
+              "expected": "-45.68\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-03-in-ky-tu",
+          "title": "In lại một ký tự",
+          "statementMd": "Làm quen với **biến kiểu ký tự** (`char`).\n\nĐọc một ký tự từ bàn phím rồi in lại đúng ký tự đó.",
+          "inputDescMd": "Một dòng chứa một ký tự in được `c` (không phải khoảng trắng).",
+          "outputDescMd": "In ra một dòng chứa đúng ký tự `c` vừa đọc.",
+          "constraintsMd": "- `c` là một ký tự in được có mã ASCII trong khoảng `[33, 126]`.",
+          "difficulty": "easy",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "ky-tu",
+            "nhap-xuat"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    char c;\n    scanf(\"%c\", &c);\n    printf(\"%c\\n\", c);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "A\n",
+              "expected": "A\n"
+            },
+            {
+              "input": "z\n",
+              "expected": "z\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "!\n",
+              "expected": "!\n"
+            },
+            {
+              "input": "~\n",
+              "expected": "~\n"
+            },
+            {
+              "input": "@\n",
+              "expected": "@\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "Q\n",
+              "expected": "Q\n"
+            },
+            {
+              "input": "+\n",
+              "expected": "+\n"
+            },
+            {
+              "input": "m\n",
+              "expected": "m\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-04-ma-ascii",
+          "title": "Mã ASCII của ký tự",
+          "statementMd": "Trong C, một biến `char` thực chất lưu **mã số nguyên** của ký tự.\n\nĐọc một ký tự rồi in ra **mã ASCII** (số nguyên) tương ứng của nó.",
+          "inputDescMd": "Một dòng chứa một ký tự in được `c` (không phải khoảng trắng).",
+          "outputDescMd": "In ra một dòng chứa một số nguyên là mã ASCII của `c`.",
+          "constraintsMd": "- `c` là một ký tự in được có mã ASCII trong khoảng `[33, 126]`.",
+          "difficulty": "easy",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "ky-tu",
+            "ascii"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    char c;\n    scanf(\"%c\", &c);\n    printf(\"%d\\n\", (int)c);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "A\n",
+              "expected": "65\n"
+            },
+            {
+              "input": "a\n",
+              "expected": "97\n"
+            },
+            {
+              "input": "!\n",
+              "expected": "33\n"
+            },
+            {
+              "input": "~\n",
+              "expected": "126\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "48\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "57\n"
+            },
+            {
+              "input": "Z\n",
+              "expected": "90\n"
+            },
+            {
+              "input": "z\n",
+              "expected": "122\n"
+            },
+            {
+              "input": "{\n",
+              "expected": "123\n"
+            },
+            {
+              "input": "`\n",
+              "expected": "96\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-05-ky-tu-tu-ma",
+          "title": "Ký tự từ mã ASCII",
+          "statementMd": "Chiều ngược lại của bài trước.\n\nĐọc một số nguyên là **mã ASCII** rồi in ra **ký tự** tương ứng.",
+          "inputDescMd": "Một dòng chứa một số nguyên `code`.",
+          "outputDescMd": "In ra một dòng chứa ký tự có mã ASCII bằng `code`.",
+          "constraintsMd": "- `33 <= code <= 126`",
+          "difficulty": "easy",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "ky-tu",
+            "ascii"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int code;\n    scanf(\"%d\", &code);\n    printf(\"%c\\n\", (char)code);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "65\n",
+              "expected": "A\n"
+            },
+            {
+              "input": "97\n",
+              "expected": "a\n"
+            },
+            {
+              "input": "33\n",
+              "expected": "!\n"
+            },
+            {
+              "input": "126\n",
+              "expected": "~\n"
+            },
+            {
+              "input": "48\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "57\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "90\n",
+              "expected": "Z\n"
+            },
+            {
+              "input": "122\n",
+              "expected": "z\n"
+            },
+            {
+              "input": "64\n",
+              "expected": "@\n"
+            },
+            {
+              "input": "35\n",
+              "expected": "#\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-06-lien-truoc-lien-sau",
+          "title": "Số liền trước và liền sau",
+          "statementMd": "Đọc một số nguyên `n` rồi in ra **số liền trước** (`n - 1`) và **số liền sau** (`n + 1`) của nó.",
+          "inputDescMd": "Một dòng chứa một số nguyên `n`.",
+          "outputDescMd": "In ra một dòng gồm hai số nguyên: số liền trước và số liền sau của `n`, cách nhau bởi một dấu cách.",
+          "constraintsMd": "- `-1000000000 <= n <= 1000000000`",
+          "difficulty": "easy",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-nguyen",
+            "so-hoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    scanf(\"%d\", &n);\n    printf(\"%d %d\\n\", n - 1, n + 1);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n",
+              "expected": "4 6\n"
+            },
+            {
+              "input": "-3\n",
+              "expected": "-4 -2\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "-1 1\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "999999999 1000000001\n"
+            },
+            {
+              "input": "-1000000000\n",
+              "expected": "-1000000001 -999999999\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "0 2\n"
+            },
+            {
+              "input": "-1\n",
+              "expected": "-2 0\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "99 101\n"
+            },
+            {
+              "input": "999999999\n",
+              "expected": "999999998 1000000000\n"
+            },
+            {
+              "input": "-500\n",
+              "expected": "-501 -499\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-07-tong-hieu-tich",
+          "title": "Tổng, hiệu, tích hai số nguyên",
+          "statementMd": "Đọc hai số nguyên `a` và `b`, sau đó tính và in ra **tổng**, **hiệu** và **tích** của chúng.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm ba số nguyên theo thứ tự: `a + b`, `a - b`, `a * b`, mỗi số cách nhau bởi một dấu cách.",
+          "constraintsMd": "- `-1000 <= a, b <= 1000`",
+          "difficulty": "easy",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-nguyen",
+            "so-hoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    scanf(\"%lld %lld\", &a, &b);\n    printf(\"%lld %lld %lld\\n\", a + b, a - b, a * b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 5\n",
+              "expected": "8 -2 15\n"
+            },
+            {
+              "input": "10 4\n",
+              "expected": "14 6 40\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "0 0 0\n"
+            },
+            {
+              "input": "-1000 1000\n",
+              "expected": "0 -2000 -1000000\n"
+            },
+            {
+              "input": "1000 1000\n",
+              "expected": "2000 0 1000000\n"
+            },
+            {
+              "input": "-1000 -1000\n",
+              "expected": "-2000 0 1000000\n"
+            },
+            {
+              "input": "-5 3\n",
+              "expected": "-2 -8 -15\n"
+            },
+            {
+              "input": "7 -2\n",
+              "expected": "5 9 -14\n"
+            },
+            {
+              "input": "1 -1\n",
+              "expected": "0 2 -1\n"
+            },
+            {
+              "input": "1000 -1000\n",
+              "expected": "0 2000 -1000000\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-08-hinh-chu-nhat",
+          "title": "Chu vi và diện tích hình chữ nhật",
+          "statementMd": "Cho một hình chữ nhật có chiều dài `a` và chiều rộng `b` (đều là số nguyên).\n\nHãy tính **chu vi** `2 * (a + b)` và **diện tích** `a * b` của hình chữ nhật đó.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm hai số nguyên: chu vi và diện tích, cách nhau bởi một dấu cách.",
+          "constraintsMd": "- `1 <= a, b <= 10000`",
+          "difficulty": "medium",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-nguyen",
+            "hinh-hoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    scanf(\"%lld %lld\", &a, &b);\n    printf(\"%lld %lld\\n\", 2 * (a + b), a * b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 4\n",
+              "expected": "14 12\n"
+            },
+            {
+              "input": "5 5\n",
+              "expected": "20 25\n"
+            },
+            {
+              "input": "1 1\n",
+              "expected": "4 1\n"
+            },
+            {
+              "input": "10000 10000\n",
+              "expected": "40000 100000000\n"
+            },
+            {
+              "input": "1 10000\n",
+              "expected": "20002 10000\n"
+            },
+            {
+              "input": "10000 1\n",
+              "expected": "20002 10000\n"
+            },
+            {
+              "input": "100 200\n",
+              "expected": "600 20000\n"
+            },
+            {
+              "input": "7 3\n",
+              "expected": "20 21\n"
+            },
+            {
+              "input": "9999 9999\n",
+              "expected": "39996 99980001\n"
+            },
+            {
+              "input": "2 2\n",
+              "expected": "8 4\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-09-hoan-doi",
+          "title": "Hoán đổi giá trị hai biến",
+          "statementMd": "Đọc hai số nguyên `a` và `b`. Hãy **hoán đổi** (đổi chỗ) giá trị của hai biến cho nhau rồi in kết quả.\n\nGợi ý: dùng một biến trung gian để lưu tạm giá trị.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm hai số nguyên là giá trị của `a` và `b` **sau khi hoán đổi**, cách nhau bởi một dấu cách. (Tức là in ra giá trị ban đầu của `b` trước, rồi đến giá trị ban đầu của `a`.)",
+          "constraintsMd": "- `-1000000000 <= a, b <= 1000000000`",
+          "difficulty": "medium",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-nguyen",
+            "hoan-doi"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int a, b, t;\n    scanf(\"%d %d\", &a, &b);\n    t = a;\n    a = b;\n    b = t;\n    printf(\"%d %d\\n\", a, b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 5\n",
+              "expected": "5 3\n"
+            },
+            {
+              "input": "10 20\n",
+              "expected": "20 10\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "0 0\n"
+            },
+            {
+              "input": "-1000000000 1000000000\n",
+              "expected": "1000000000 -1000000000\n"
+            },
+            {
+              "input": "1 -1\n",
+              "expected": "-1 1\n"
+            },
+            {
+              "input": "-5 5\n",
+              "expected": "5 -5\n"
+            },
+            {
+              "input": "7 7\n",
+              "expected": "7 7\n"
+            },
+            {
+              "input": "100 -200\n",
+              "expected": "-200 100\n"
+            },
+            {
+              "input": "1000000000 -1000000000\n",
+              "expected": "-1000000000 1000000000\n"
+            },
+            {
+              "input": "-1 -2\n",
+              "expected": "-2 -1\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-10-ep-kieu",
+          "title": "Ép kiểu số thực về số nguyên",
+          "statementMd": "Đọc một số thực `x` rồi **ép kiểu** về số nguyên bằng cách **cắt bỏ phần thập phân** (lấy phần nguyên, làm tròn về phía số 0).\n\nVí dụ: `3.9` cho ra `3`, còn `-3.9` cho ra `-3`.",
+          "inputDescMd": "Một dòng chứa một số thực `x`.",
+          "outputDescMd": "In ra một dòng chứa phần nguyên của `x` (một số nguyên).",
+          "constraintsMd": "- `-1000000 <= x <= 1000000`",
+          "difficulty": "medium",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "ep-kieu",
+            "so-thuc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    double x;\n    scanf(\"%lf\", &x);\n    printf(\"%lld\\n\", (long long)x);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3.9\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "-3.9\n",
+              "expected": "-3\n"
+            },
+            {
+              "input": "0.0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "5.0\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "-0.5\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "999999.99\n",
+              "expected": "999999\n"
+            },
+            {
+              "input": "-999999.99\n",
+              "expected": "-999999\n"
+            },
+            {
+              "input": "1000000.0\n",
+              "expected": "1000000\n"
+            },
+            {
+              "input": "0.99\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "-0.99\n",
+              "expected": "0\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-11-dao-ba-so",
+          "title": "Đảo thứ tự ba số nguyên",
+          "statementMd": "Đọc ba số nguyên rồi in chúng ra theo **thứ tự ngược lại**, mỗi số trên một dòng.",
+          "inputDescMd": "Một dòng chứa ba số nguyên `a`, `b`, `c`, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra ba dòng: dòng thứ nhất là `c`, dòng thứ hai là `b`, dòng thứ ba là `a`.",
+          "constraintsMd": "- `-1000000000 <= a, b, c <= 1000000000`",
+          "difficulty": "medium",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-nguyen",
+            "nhap-xuat"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int a, b, c;\n    scanf(\"%d %d %d\", &a, &b, &c);\n    printf(\"%d\\n%d\\n%d\\n\", c, b, a);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1 2 3\n",
+              "expected": "3\n2\n1\n"
+            },
+            {
+              "input": "10 20 30\n",
+              "expected": "30\n20\n10\n"
+            },
+            {
+              "input": "0 0 0\n",
+              "expected": "0\n0\n0\n"
+            },
+            {
+              "input": "1000000000 0 -1000000000\n",
+              "expected": "-1000000000\n0\n1000000000\n"
+            },
+            {
+              "input": "-1 -2 -3\n",
+              "expected": "-3\n-2\n-1\n"
+            },
+            {
+              "input": "5 5 5\n",
+              "expected": "5\n5\n5\n"
+            },
+            {
+              "input": "-1000000000 -1000000000 -1000000000\n",
+              "expected": "-1000000000\n-1000000000\n-1000000000\n"
+            },
+            {
+              "input": "100 -50 25\n",
+              "expected": "25\n-50\n100\n"
+            },
+            {
+              "input": "7 -7 0\n",
+              "expected": "0\n-7\n7\n"
+            },
+            {
+              "input": "1000000000 1000000000 1000000000\n",
+              "expected": "1000000000\n1000000000\n1000000000\n"
+            }
+          ]
+        },
+        {
+          "key": "bien-12-giay-sang-gio",
+          "title": "Đổi số giây ra giờ, phút, giây",
+          "statementMd": "Cho một khoảng thời gian tính bằng **giây**. Hãy đổi nó sang định dạng **giờ:phút:giây**.",
+          "inputDescMd": "Một dòng chứa một số nguyên không âm `s` là số giây.",
+          "outputDescMd": "In ra một dòng theo định dạng `H:MM:SS`, trong đó:\n- `H` là số giờ (in bình thường, không thêm số 0 phía trước),\n- `MM` là số phút và `SS` là số giây, **luôn gồm đúng 2 chữ số** (thêm số 0 phía trước nếu cần).\n\nVí dụ: `3661` giây in ra `1:01:01`; `59` giây in ra `0:00:59`.",
+          "constraintsMd": "- `0 <= s <= 1000000000`",
+          "difficulty": "hard",
+          "tags": [
+            "bien",
+            "kieu-du-lieu",
+            "so-hoc",
+            "dinh-dang"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long s, h, m, sec;\n    scanf(\"%lld\", &s);\n    h = s / 3600;\n    m = (s % 3600) / 60;\n    sec = s % 60;\n    printf(\"%lld:%02lld:%02lld\\n\", h, m, sec);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3661\n",
+              "expected": "1:01:01\n"
+            },
+            {
+              "input": "59\n",
+              "expected": "0:00:59\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0:00:00\n"
+            },
+            {
+              "input": "3600\n",
+              "expected": "1:00:00\n"
+            },
+            {
+              "input": "60\n",
+              "expected": "0:01:00\n"
+            },
+            {
+              "input": "86399\n",
+              "expected": "23:59:59\n"
+            },
+            {
+              "input": "86400\n",
+              "expected": "24:00:00\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "277777:46:40\n"
+            },
+            {
+              "input": "3599\n",
+              "expected": "0:59:59\n"
+            },
+            {
+              "input": "7325\n",
+              "expected": "2:02:05\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Các toán tử và đầu vào",
+      "problems": [
+        {
+          "key": "toantu-01-chia-lay-nguyen-va-du",
+          "title": "Chia lấy nguyên và chia lấy dư",
+          "statementMd": "Cho hai số nguyên không âm `a` và `b` (với `b` khác 0). Hãy tính thương của phép chia lấy nguyên `a / b` và số dư của phép chia lấy dư `a % b`.\n\nĐây là hai toán tử số học cơ bản trên số nguyên trong C: `/` cho thương nguyên, `%` cho số dư.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm hai số nguyên: thương `a / b` và số dư `a % b`, cách nhau bởi một dấu cách.",
+          "constraintsMd": "- `0 <= a <= 1000000000`\n- `1 <= b <= 1000000000`",
+          "difficulty": "easy",
+          "tags": [
+            "toantu",
+            "so-hoc",
+            "chia-lay-du"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    if (scanf(\"%lld %lld\", &a, &b) != 2) return 0;\n    printf(\"%lld %lld\\n\", a / b, a % b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "17 5\n",
+              "expected": "3 2\n"
+            },
+            {
+              "input": "10 3\n",
+              "expected": "3 1\n"
+            },
+            {
+              "input": "0 1\n",
+              "expected": "0 0\n"
+            },
+            {
+              "input": "1000000000 1\n",
+              "expected": "1000000000 0\n"
+            },
+            {
+              "input": "1000000000 999999999\n",
+              "expected": "1 1\n"
+            },
+            {
+              "input": "7 7\n",
+              "expected": "1 0\n"
+            },
+            {
+              "input": "6 7\n",
+              "expected": "0 6\n"
+            },
+            {
+              "input": "1 1000000000\n",
+              "expected": "0 1\n"
+            },
+            {
+              "input": "999999999 1000000000\n",
+              "expected": "0 999999999\n"
+            },
+            {
+              "input": "100 7\n",
+              "expected": "14 2\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-02-kiem-tra-chia-het",
+          "title": "Kiểm tra chia hết",
+          "statementMd": "Cho hai số nguyên không âm `a` và `b` (với `b` khác 0). Hãy kiểm tra xem `a` có chia hết cho `b` hay không.\n\nGợi ý: `a` chia hết cho `b` khi và chỉ khi `a % b == 0`.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra `1` nếu `a` chia hết cho `b`, ngược lại in ra `0`.",
+          "constraintsMd": "- `0 <= a <= 1000000000`\n- `1 <= b <= 1000000000`",
+          "difficulty": "easy",
+          "tags": [
+            "toantu",
+            "chia-lay-du",
+            "so-hoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    if (scanf(\"%lld %lld\", &a, &b) != 2) return 0;\n    printf(\"%d\\n\", (a % b == 0) ? 1 : 0);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "12 4\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "13 4\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "0 5\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1000000000 1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "999999999 3\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "7 7\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1 1000000000\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000 7\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "100 10\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "100 3\n",
+              "expected": "0\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-03-so-sanh-quan-he",
+          "title": "Các phép so sánh quan hệ",
+          "statementMd": "Cho hai số nguyên `a` và `b`. Hãy dùng các toán tử quan hệ để so sánh chúng và cho biết:\n\n1. `a` có nhỏ hơn `b` không (`a < b`)?\n2. `a` có bằng `b` không (`a == b`)?\n3. `a` có lớn hơn `b` không (`a > b`)?\n\nMỗi kết quả in ra `1` (đúng) hoặc `0` (sai).",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm ba số (mỗi số là `0` hoặc `1`), cách nhau bởi dấu cách, lần lượt là kết quả của `a < b`, `a == b`, `a > b`.",
+          "constraintsMd": "- `-1000000000 <= a, b <= 1000000000`",
+          "difficulty": "easy",
+          "tags": [
+            "toantu",
+            "quan-he",
+            "so-sanh"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    if (scanf(\"%lld %lld\", &a, &b) != 2) return 0;\n    printf(\"%d %d %d\\n\", a < b, a == b, a > b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 5\n",
+              "expected": "1 0 0\n"
+            },
+            {
+              "input": "5 5\n",
+              "expected": "0 1 0\n"
+            },
+            {
+              "input": "7 2\n",
+              "expected": "0 0 1\n"
+            },
+            {
+              "input": "-1000000000 1000000000\n",
+              "expected": "1 0 0\n"
+            },
+            {
+              "input": "1000000000 -1000000000\n",
+              "expected": "0 0 1\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "0 1 0\n"
+            },
+            {
+              "input": "-5 -5\n",
+              "expected": "0 1 0\n"
+            },
+            {
+              "input": "-3 -7\n",
+              "expected": "0 0 1\n"
+            },
+            {
+              "input": "-7 -3\n",
+              "expected": "1 0 0\n"
+            },
+            {
+              "input": "0 -1\n",
+              "expected": "0 0 1\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-04-logic-and-or-not",
+          "title": "Toán tử logic AND, OR, NOT",
+          "statementMd": "Cho hai số nguyên `a` và `b`. Xét điều kiện \"số đó là số dương\" (lớn hơn 0) cho từng số. Hãy dùng các toán tử logic để cho biết:\n\n1. Cả hai số đều dương? (`a > 0 && b > 0`)\n2. Có ít nhất một số dương? (`a > 0 || b > 0`)\n3. KHÔNG phải cả hai đều dương? (`!(a > 0 && b > 0)`)\n\nMỗi kết quả in ra `1` (đúng) hoặc `0` (sai).",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm ba số (mỗi số là `0` hoặc `1`), cách nhau bởi dấu cách, lần lượt là kết quả của ba điều kiện AND, OR, NOT nêu trên.",
+          "constraintsMd": "- `-1000000000 <= a, b <= 1000000000`\n- Lưu ý: số 0 KHÔNG được coi là số dương.",
+          "difficulty": "easy",
+          "tags": [
+            "toantu",
+            "logic"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    if (scanf(\"%lld %lld\", &a, &b) != 2) return 0;\n    int both = (a > 0 && b > 0);\n    int atleast = (a > 0 || b > 0);\n    int notboth = !both;\n    printf(\"%d %d %d\\n\", both, atleast, notboth);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 5\n",
+              "expected": "1 1 0\n"
+            },
+            {
+              "input": "-2 4\n",
+              "expected": "0 1 1\n"
+            },
+            {
+              "input": "-3 -8\n",
+              "expected": "0 0 1\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "0 0 1\n"
+            },
+            {
+              "input": "1000000000 1000000000\n",
+              "expected": "1 1 0\n"
+            },
+            {
+              "input": "-1000000000 -1000000000\n",
+              "expected": "0 0 1\n"
+            },
+            {
+              "input": "0 5\n",
+              "expected": "0 1 1\n"
+            },
+            {
+              "input": "5 0\n",
+              "expected": "0 1 1\n"
+            },
+            {
+              "input": "1 -1\n",
+              "expected": "0 1 1\n"
+            },
+            {
+              "input": "-1 1\n",
+              "expected": "0 1 1\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-05-bit-and-or-xor",
+          "title": "Toán tử bit AND, OR, XOR",
+          "statementMd": "Cho hai số nguyên không âm `a` và `b`. Hãy tính kết quả của ba toán tử thao tác trên bit:\n\n1. AND theo bit: `a & b`\n2. OR theo bit: `a | b`\n3. XOR theo bit: `a ^ b`\n\nCác toán tử này thực hiện phép AND/OR/XOR trên từng cặp bit tương ứng của hai số.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm ba số nguyên: `a & b`, `a | b`, `a ^ b`, cách nhau bởi dấu cách.",
+          "constraintsMd": "- `0 <= a, b <= 1000000000`",
+          "difficulty": "medium",
+          "tags": [
+            "toantu",
+            "bit"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    unsigned long long a, b;\n    if (scanf(\"%llu %llu\", &a, &b) != 2) return 0;\n    printf(\"%llu %llu %llu\\n\", a & b, a | b, a ^ b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "6 3\n",
+              "expected": "2 7 5\n"
+            },
+            {
+              "input": "12 10\n",
+              "expected": "8 14 6\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "0 0 0\n"
+            },
+            {
+              "input": "0 1000000000\n",
+              "expected": "0 1000000000 1000000000\n"
+            },
+            {
+              "input": "1000000000 1000000000\n",
+              "expected": "1000000000 1000000000 0\n"
+            },
+            {
+              "input": "255 255\n",
+              "expected": "255 255 0\n"
+            },
+            {
+              "input": "1 2\n",
+              "expected": "0 3 3\n"
+            },
+            {
+              "input": "1023 1\n",
+              "expected": "1 1023 1022\n"
+            },
+            {
+              "input": "5 5\n",
+              "expected": "5 5 0\n"
+            },
+            {
+              "input": "7 8\n",
+              "expected": "0 15 15\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-06-dich-bit",
+          "title": "Dịch bit trái và phải",
+          "statementMd": "Cho số nguyên không âm `n` và số nguyên không âm `k`. Hãy tính:\n\n1. Kết quả dịch bit trái `n << k` (tương đương nhân `n` với `2` mũ `k`).\n2. Kết quả dịch bit phải `n >> k` (tương đương chia nguyên `n` cho `2` mũ `k`).",
+          "inputDescMd": "Một dòng chứa hai số nguyên `n` và `k`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng gồm hai số nguyên: `n << k` và `n >> k`, cách nhau bởi dấu cách.",
+          "constraintsMd": "- `0 <= n <= 1000000000`\n- `0 <= k <= 30`",
+          "difficulty": "medium",
+          "tags": [
+            "toantu",
+            "bit",
+            "dich-bit"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n, k;\n    if (scanf(\"%lld %lld\", &n, &k) != 2) return 0;\n    printf(\"%lld %lld\\n\", n << k, n >> k);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1 3\n",
+              "expected": "8 0\n"
+            },
+            {
+              "input": "5 2\n",
+              "expected": "20 1\n"
+            },
+            {
+              "input": "0 5\n",
+              "expected": "0 0\n"
+            },
+            {
+              "input": "1000000000 0\n",
+              "expected": "1000000000 1000000000\n"
+            },
+            {
+              "input": "1000000000 30\n",
+              "expected": "1073741824000000000 0\n"
+            },
+            {
+              "input": "8 3\n",
+              "expected": "64 1\n"
+            },
+            {
+              "input": "1 30\n",
+              "expected": "1073741824 0\n"
+            },
+            {
+              "input": "255 1\n",
+              "expected": "510 127\n"
+            },
+            {
+              "input": "1024 5\n",
+              "expected": "32768 32\n"
+            },
+            {
+              "input": "7 1\n",
+              "expected": "14 3\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-07-do-uu-tien-toan-tu",
+          "title": "Độ ưu tiên của toán tử",
+          "statementMd": "Cho ba số nguyên `a`, `b`, `c`. Hãy tính giá trị của hai biểu thức sau và quan sát sự khác nhau do độ ưu tiên và dấu ngoặc:\n\n1. `a + b * c` — phép nhân `*` được thực hiện trước phép cộng `+`.\n2. `(a + b) * c` — dấu ngoặc buộc phép cộng thực hiện trước.",
+          "inputDescMd": "Một dòng chứa ba số nguyên `a`, `b`, `c`, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra một dòng gồm hai số nguyên: giá trị của `a + b * c` và giá trị của `(a + b) * c`, cách nhau bởi dấu cách.",
+          "constraintsMd": "- `-1000 <= a, b, c <= 1000`",
+          "difficulty": "medium",
+          "tags": [
+            "toantu",
+            "do-uu-tien",
+            "so-hoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b, c;\n    if (scanf(\"%lld %lld %lld\", &a, &b, &c) != 3) return 0;\n    printf(\"%lld %lld\\n\", a + b * c, (a + b) * c);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2 3 4\n",
+              "expected": "14 20\n"
+            },
+            {
+              "input": "1 1 1\n",
+              "expected": "2 2\n"
+            },
+            {
+              "input": "0 0 0\n",
+              "expected": "0 0\n"
+            },
+            {
+              "input": "-1000 -1000 -1000\n",
+              "expected": "999000 2000000\n"
+            },
+            {
+              "input": "1000 1000 1000\n",
+              "expected": "1001000 2000000\n"
+            },
+            {
+              "input": "5 -3 2\n",
+              "expected": "-1 4\n"
+            },
+            {
+              "input": "-5 3 2\n",
+              "expected": "1 -4\n"
+            },
+            {
+              "input": "10 0 5\n",
+              "expected": "10 50\n"
+            },
+            {
+              "input": "0 5 3\n",
+              "expected": "15 15\n"
+            },
+            {
+              "input": "7 2 0\n",
+              "expected": "7 0\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-08-doi-phut-sang-gio",
+          "title": "Đổi phút sang giờ và phút",
+          "statementMd": "Cho một số nguyên không âm `m` là tổng số phút. Hãy đổi ra số giờ đầy đủ và số phút còn dư.\n\nGợi ý: số giờ là `m / 60`, số phút dư là `m % 60`.",
+          "inputDescMd": "Một dòng chứa một số nguyên `m` (tổng số phút).",
+          "outputDescMd": "In ra một dòng gồm hai số nguyên: số giờ và số phút còn dư, cách nhau bởi dấu cách.",
+          "constraintsMd": "- `0 <= m <= 1000000000`",
+          "difficulty": "easy",
+          "tags": [
+            "toantu",
+            "chia-lay-du",
+            "doi-don-vi"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long m;\n    if (scanf(\"%lld\", &m) != 1) return 0;\n    printf(\"%lld %lld\\n\", m / 60, m % 60);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "125\n",
+              "expected": "2 5\n"
+            },
+            {
+              "input": "60\n",
+              "expected": "1 0\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0 0\n"
+            },
+            {
+              "input": "59\n",
+              "expected": "0 59\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "16666666 40\n"
+            },
+            {
+              "input": "3600\n",
+              "expected": "60 0\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "0 1\n"
+            },
+            {
+              "input": "119\n",
+              "expected": "1 59\n"
+            },
+            {
+              "input": "1440\n",
+              "expected": "24 0\n"
+            },
+            {
+              "input": "12345\n",
+              "expected": "205 45\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-09-trung-binh-cong-ba-so",
+          "title": "Trung bình cộng ba số (phần nguyên)",
+          "statementMd": "Cho ba số nguyên không âm `a`, `b`, `c`. Hãy tính phần nguyên của trung bình cộng ba số đó.\n\nGợi ý: kết quả là `(a + b + c) / 3` với phép chia lấy nguyên.",
+          "inputDescMd": "Một dòng chứa ba số nguyên `a`, `b`, `c`, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra một số nguyên là phần nguyên của trung bình cộng ba số.",
+          "constraintsMd": "- `0 <= a, b, c <= 1000000000`",
+          "difficulty": "easy",
+          "tags": [
+            "toantu",
+            "so-hoc",
+            "trung-binh"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b, c;\n    if (scanf(\"%lld %lld %lld\", &a, &b, &c) != 3) return 0;\n    printf(\"%lld\\n\", (a + b + c) / 3);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1 2 3\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "10 20 30\n",
+              "expected": "20\n"
+            },
+            {
+              "input": "0 0 0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000 1000000000 1000000000\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "1 1 1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1 1 2\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "5 5 6\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "0 0 1\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "7 8 9\n",
+              "expected": "8\n"
+            },
+            {
+              "input": "1000000000 0 0\n",
+              "expected": "333333333\n"
+            }
+          ]
+        },
+        {
+          "key": "toantu-10-tich-tong-va-hieu",
+          "title": "Tính (a+b)*(a-b)",
+          "statementMd": "Cho hai số nguyên `a` và `b`. Hãy tính giá trị của biểu thức `(a + b) * (a - b)`.\n\nĐây là dịp luyện tập kết hợp nhiều toán tử số học cùng dấu ngoặc trong một biểu thức.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một số nguyên là giá trị của `(a + b) * (a - b)`.",
+          "constraintsMd": "- `-100000 <= a, b <= 100000`",
+          "difficulty": "medium",
+          "tags": [
+            "toantu",
+            "so-hoc",
+            "bieu-thuc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    if (scanf(\"%lld %lld\", &a, &b) != 2) return 0;\n    printf(\"%lld\\n\", (a + b) * (a - b));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5 3\n",
+              "expected": "16\n"
+            },
+            {
+              "input": "10 4\n",
+              "expected": "84\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "100000 100000\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "100000 -100000\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "-100000 100000\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "100000 0\n",
+              "expected": "10000000000\n"
+            },
+            {
+              "input": "0 100000\n",
+              "expected": "-10000000000\n"
+            },
+            {
+              "input": "7 7\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "-5 3\n",
+              "expected": "16\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Câu lệnh rẽ nhánh",
+      "problems": [
+        {
+          "key": "renhanh-01-chan-le",
+          "title": "Kiểm tra số chẵn lẻ",
+          "statementMd": "Cho một số nguyên `n`. Hãy kiểm tra xem `n` là số chẵn hay số lẻ.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên `n`.",
+          "outputDescMd": "In ra `CHAN` nếu `n` là số chẵn, in ra `LE` nếu `n` là số lẻ.",
+          "constraintsMd": "`-10^9 <= n <= 10^9`.",
+          "difficulty": "easy",
+          "tags": [
+            "renhanh",
+            "chan-le",
+            "dieu-kien"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    long long n;\n    if(scanf(\"%lld\",&n)!=1) return 0;\n    if(n%2==0) printf(\"CHAN\\n\");\n    else printf(\"LE\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "4\n",
+              "expected": "CHAN\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "LE\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "CHAN\n"
+            },
+            {
+              "input": "-6\n",
+              "expected": "CHAN\n"
+            },
+            {
+              "input": "-3\n",
+              "expected": "LE\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "CHAN\n"
+            },
+            {
+              "input": "999999999\n",
+              "expected": "LE\n"
+            },
+            {
+              "input": "-1000000000\n",
+              "expected": "CHAN\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "LE\n"
+            },
+            {
+              "input": "-1\n",
+              "expected": "LE\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-02-xet-dau",
+          "title": "Xét dấu của một số",
+          "statementMd": "Cho một số nguyên `n`. Hãy cho biết `n` là số dương, số âm hay bằng không.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên `n`.",
+          "outputDescMd": "In ra `AM` nếu `n` nhỏ hơn 0, `DUONG` nếu `n` lớn hơn 0, `KHONG` nếu `n` bằng 0.",
+          "constraintsMd": "`-10^9 <= n <= 10^9`.",
+          "difficulty": "easy",
+          "tags": [
+            "renhanh",
+            "xet-dau",
+            "dieu-kien"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    long long n;\n    if(scanf(\"%lld\",&n)!=1) return 0;\n    if(n<0) printf(\"AM\\n\");\n    else if(n>0) printf(\"DUONG\\n\");\n    else printf(\"KHONG\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n",
+              "expected": "DUONG\n"
+            },
+            {
+              "input": "-3\n",
+              "expected": "AM\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "KHONG\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "DUONG\n"
+            },
+            {
+              "input": "-1000000000\n",
+              "expected": "AM\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "DUONG\n"
+            },
+            {
+              "input": "-1\n",
+              "expected": "AM\n"
+            },
+            {
+              "input": "999999999\n",
+              "expected": "DUONG\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-03-max-hai-so",
+          "title": "Số lớn hơn trong hai số",
+          "statementMd": "Cho hai số nguyên `a` và `b`. Hãy in ra số lớn hơn trong hai số đó. Nếu hai số bằng nhau thì in ra chính giá trị đó.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một số nguyên là giá trị lớn hơn (hoặc bằng) trong hai số.",
+          "constraintsMd": "`-10^9 <= a, b <= 10^9`.",
+          "difficulty": "easy",
+          "tags": [
+            "renhanh",
+            "so-sanh",
+            "max"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    long long a,b;\n    if(scanf(\"%lld %lld\",&a,&b)!=2) return 0;\n    printf(\"%lld\\n\", a>b?a:b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 8\n",
+              "expected": "8\n"
+            },
+            {
+              "input": "10 2\n",
+              "expected": "10\n"
+            },
+            {
+              "input": "5 5\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "-3 -7\n",
+              "expected": "-3\n"
+            },
+            {
+              "input": "-1000000000 1000000000\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "0 -1\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000 999999999\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "-5 0\n",
+              "expected": "0\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-04-nam-nhuan",
+          "title": "Kiểm tra năm nhuận",
+          "statementMd": "Cho một số nguyên `y` là một năm dương lịch. Một năm được gọi là năm nhuận nếu nó chia hết cho 4 nhưng không chia hết cho 100, hoặc chia hết cho 400. Hãy kiểm tra `y` có phải năm nhuận không.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên `y`.",
+          "outputDescMd": "In ra `NHUAN` nếu `y` là năm nhuận, ngược lại in ra `THUONG`.",
+          "constraintsMd": "`1 <= y <= 3000`.",
+          "difficulty": "easy",
+          "tags": [
+            "renhanh",
+            "nam-nhuan",
+            "dieu-kien-ghep"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    int y;\n    if(scanf(\"%d\",&y)!=1) return 0;\n    if((y%4==0 && y%100!=0) || y%400==0) printf(\"NHUAN\\n\");\n    else printf(\"THUONG\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2024\n",
+              "expected": "NHUAN\n"
+            },
+            {
+              "input": "2023\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "2000\n",
+              "expected": "NHUAN\n"
+            },
+            {
+              "input": "1900\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "4\n",
+              "expected": "NHUAN\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "2100\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "1600\n",
+              "expected": "NHUAN\n"
+            },
+            {
+              "input": "3000\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "THUONG\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-05-so-ngay-trong-thang",
+          "title": "Số ngày trong tháng",
+          "statementMd": "Cho số thứ tự của một tháng trong năm (năm thường, không phải năm nhuận). Hãy cho biết tháng đó có bao nhiêu ngày. Gợi ý: dùng câu lệnh `switch`. Trong năm thường, tháng 2 có 28 ngày.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên `m` là số thứ tự của tháng.",
+          "outputDescMd": "In ra một số nguyên là số ngày của tháng `m`.",
+          "constraintsMd": "`1 <= m <= 12`.",
+          "difficulty": "easy",
+          "tags": [
+            "renhanh",
+            "switch",
+            "so-ngay"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    int m;\n    if(scanf(\"%d\",&m)!=1) return 0;\n    int d;\n    switch(m){\n        case 1: case 3: case 5: case 7: case 8: case 10: case 12: d=31; break;\n        case 4: case 6: case 9: case 11: d=30; break;\n        case 2: d=28; break;\n        default: d=0; break;\n    }\n    printf(\"%d\\n\", d);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1\n",
+              "expected": "31\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "28\n"
+            },
+            {
+              "input": "4\n",
+              "expected": "30\n"
+            },
+            {
+              "input": "12\n",
+              "expected": "31\n"
+            },
+            {
+              "input": "6\n",
+              "expected": "30\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "31\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "30\n"
+            },
+            {
+              "input": "11\n",
+              "expected": "30\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "31\n"
+            },
+            {
+              "input": "8\n",
+              "expected": "31\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-06-xep-loai-diem",
+          "title": "Xếp loại điểm số",
+          "statementMd": "Cho điểm `s` của một học sinh theo thang 100. Hãy xếp loại theo quy tắc:\n\n- `90 <= s <= 100`: loại `A`\n- `80 <= s <= 89`: loại `B`\n- `70 <= s <= 79`: loại `C`\n- `60 <= s <= 69`: loại `D`\n- `0 <= s <= 59`: loại `F`",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên `s`.",
+          "outputDescMd": "In ra một ký tự là loại xếp hạng: `A`, `B`, `C`, `D` hoặc `F`.",
+          "constraintsMd": "`0 <= s <= 100`.",
+          "difficulty": "medium",
+          "tags": [
+            "renhanh",
+            "xep-loai",
+            "else-if"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    int s;\n    if(scanf(\"%d\",&s)!=1) return 0;\n    if(s>=90) printf(\"A\\n\");\n    else if(s>=80) printf(\"B\\n\");\n    else if(s>=70) printf(\"C\\n\");\n    else if(s>=60) printf(\"D\\n\");\n    else printf(\"F\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "95\n",
+              "expected": "A\n"
+            },
+            {
+              "input": "72\n",
+              "expected": "C\n"
+            },
+            {
+              "input": "90\n",
+              "expected": "A\n"
+            },
+            {
+              "input": "89\n",
+              "expected": "B\n"
+            },
+            {
+              "input": "80\n",
+              "expected": "B\n"
+            },
+            {
+              "input": "79\n",
+              "expected": "C\n"
+            },
+            {
+              "input": "70\n",
+              "expected": "C\n"
+            },
+            {
+              "input": "69\n",
+              "expected": "D\n"
+            },
+            {
+              "input": "60\n",
+              "expected": "D\n"
+            },
+            {
+              "input": "59\n",
+              "expected": "F\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "F\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "A\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-07-max-min-ba-so",
+          "title": "Lớn nhất và nhỏ nhất của ba số",
+          "statementMd": "Cho ba số nguyên `a`, `b`, `c`. Hãy tìm giá trị lớn nhất và giá trị nhỏ nhất trong ba số đó.",
+          "inputDescMd": "Một dòng chứa ba số nguyên `a`, `b`, `c`, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra trên một dòng hai số nguyên: giá trị lớn nhất trước, giá trị nhỏ nhất sau, cách nhau bởi một dấu cách.",
+          "constraintsMd": "`-10^9 <= a, b, c <= 10^9`.",
+          "difficulty": "medium",
+          "tags": [
+            "renhanh",
+            "so-sanh",
+            "max-min"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    long long a,b,c;\n    if(scanf(\"%lld %lld %lld\",&a,&b,&c)!=3) return 0;\n    long long mx=a, mn=a;\n    if(b>mx) mx=b;\n    if(c>mx) mx=c;\n    if(b<mn) mn=b;\n    if(c<mn) mn=c;\n    printf(\"%lld %lld\\n\", mx, mn);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 7 5\n",
+              "expected": "7 3\n"
+            },
+            {
+              "input": "10 10 10\n",
+              "expected": "10 10\n"
+            },
+            {
+              "input": "-1 -2 -3\n",
+              "expected": "-1 -3\n"
+            },
+            {
+              "input": "5 3 8\n",
+              "expected": "8 3\n"
+            },
+            {
+              "input": "1000000000 -1000000000 0\n",
+              "expected": "1000000000 -1000000000\n"
+            },
+            {
+              "input": "1 2 2\n",
+              "expected": "2 1\n"
+            },
+            {
+              "input": "2 2 1\n",
+              "expected": "2 1\n"
+            },
+            {
+              "input": "0 0 0\n",
+              "expected": "0 0\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-08-phuong-trinh-bac-nhat",
+          "title": "Giải phương trình bậc nhất",
+          "statementMd": "Cho phương trình bậc nhất dạng `a*x + b = 0` với `a`, `b` là các số nguyên. Hãy biện luận và giải phương trình:\n\n- Nếu `a = 0` và `b = 0`: phương trình có vô số nghiệm.\n- Nếu `a = 0` và `b != 0`: phương trình vô nghiệm.\n- Nếu `a != 0`: phương trình có nghiệm duy nhất `x = -b/a`.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi dấu cách.",
+          "outputDescMd": "- Nếu vô số nghiệm: in ra `VO SO NGHIEM`.\n- Nếu vô nghiệm: in ra `VO NGHIEM`.\n- Nếu có nghiệm duy nhất: in ra `x = ` theo sau là giá trị nghiệm với **đúng 2 chữ số thập phân** (ví dụ `x = -2.00`).",
+          "constraintsMd": "`-1000 <= a, b <= 1000`.",
+          "difficulty": "medium",
+          "tags": [
+            "renhanh",
+            "phuong-trinh",
+            "bien-luan"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    int a,b;\n    if(scanf(\"%d %d\",&a,&b)!=2) return 0;\n    if(a==0){\n        if(b==0) printf(\"VO SO NGHIEM\\n\");\n        else printf(\"VO NGHIEM\\n\");\n    } else {\n        double x = -(double)b / a;\n        if(x==0.0) x=0.0; /* tranh -0.00 */\n        printf(\"x = %.2f\\n\", x);\n    }\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2 4\n",
+              "expected": "x = -2.00\n"
+            },
+            {
+              "input": "0 5\n",
+              "expected": "VO NGHIEM\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "VO SO NGHIEM\n"
+            },
+            {
+              "input": "3 1\n",
+              "expected": "x = -0.33\n"
+            },
+            {
+              "input": "-2 6\n",
+              "expected": "x = 3.00\n"
+            },
+            {
+              "input": "1 0\n",
+              "expected": "x = 0.00\n"
+            },
+            {
+              "input": "5 10\n",
+              "expected": "x = -2.00\n"
+            },
+            {
+              "input": "-3 -9\n",
+              "expected": "x = -3.00\n"
+            },
+            {
+              "input": "7 -14\n",
+              "expected": "x = 2.00\n"
+            },
+            {
+              "input": "6 4\n",
+              "expected": "x = -0.67\n"
+            },
+            {
+              "input": "0 -1000\n",
+              "expected": "VO NGHIEM\n"
+            },
+            {
+              "input": "1000 -500\n",
+              "expected": "x = 0.50\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-09-tam-giac",
+          "title": "Phân loại tam giác theo cạnh",
+          "statementMd": "Cho ba số nguyên `a`, `b`, `c` là độ dài ba đoạn thẳng. Ba đoạn tạo thành một tam giác khi cả ba đều dương và tổng hai cạnh bất kỳ luôn lớn hơn cạnh còn lại. Nếu tạo thành tam giác, hãy phân loại theo cạnh:\n\n- Ba cạnh bằng nhau: tam giác đều.\n- Đúng hai cạnh bằng nhau: tam giác cân.\n- Ba cạnh khác nhau: tam giác thường.",
+          "inputDescMd": "Một dòng chứa ba số nguyên `a`, `b`, `c`, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra `KHONG` nếu ba đoạn không tạo thành tam giác. Ngược lại in ra `DEU`, `CAN` hoặc `THUONG` tương ứng với loại tam giác.",
+          "constraintsMd": "`0 <= a, b, c <= 1000`.",
+          "difficulty": "medium",
+          "tags": [
+            "renhanh",
+            "tam-giac",
+            "dieu-kien-long-nhau"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    long long a,b,c;\n    if(scanf(\"%lld %lld %lld\",&a,&b,&c)!=3) return 0;\n    if(a>0 && b>0 && c>0 && a+b>c && b+c>a && a+c>b){\n        if(a==b && b==c) printf(\"DEU\\n\");\n        else if(a==b || b==c || a==c) printf(\"CAN\\n\");\n        else printf(\"THUONG\\n\");\n    } else {\n        printf(\"KHONG\\n\");\n    }\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 3 3\n",
+              "expected": "DEU\n"
+            },
+            {
+              "input": "3 3 5\n",
+              "expected": "CAN\n"
+            },
+            {
+              "input": "3 4 5\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "1 2 3\n",
+              "expected": "KHONG\n"
+            },
+            {
+              "input": "1 1 3\n",
+              "expected": "KHONG\n"
+            },
+            {
+              "input": "0 4 5\n",
+              "expected": "KHONG\n"
+            },
+            {
+              "input": "5 5 5\n",
+              "expected": "DEU\n"
+            },
+            {
+              "input": "5 5 8\n",
+              "expected": "CAN\n"
+            },
+            {
+              "input": "6 8 10\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "1000 1000 1000\n",
+              "expected": "DEU\n"
+            },
+            {
+              "input": "2 3 4\n",
+              "expected": "THUONG\n"
+            },
+            {
+              "input": "10 1 1\n",
+              "expected": "KHONG\n"
+            }
+          ]
+        },
+        {
+          "key": "renhanh-10-do-truot",
+          "title": "Xét đỗ hay trượt",
+          "statementMd": "Một thí sinh thi ba môn, mỗi môn có điểm nguyên `m1`, `m2`, `m3` (thang 100) và được cộng thêm `p` điểm ưu tiên. Quy tắc xét tuyển:\n\n- Nếu có bất kỳ môn nào bị điểm liệt (điểm nhỏ hơn 30) thì thí sinh **trượt** ngay, không cần xét tổng.\n- Ngược lại, tính tổng `= m1 + m2 + m3 + p`. Nếu tổng lớn hơn hoặc bằng 180 thì **đỗ**, ngược lại **trượt**.",
+          "inputDescMd": "Một dòng chứa bốn số nguyên `m1`, `m2`, `m3`, `p`, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra `DO` nếu thí sinh đỗ, ngược lại in ra `TRUOT`.",
+          "constraintsMd": "`0 <= m1, m2, m3 <= 100`, `0 <= p <= 30`.",
+          "difficulty": "hard",
+          "tags": [
+            "renhanh",
+            "do-truot",
+            "dieu-kien-ghep"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void){\n    int m1,m2,m3,p;\n    if(scanf(\"%d %d %d %d\",&m1,&m2,&m3,&p)!=4) return 0;\n    if(m1<30 || m2<30 || m3<30){\n        printf(\"TRUOT\\n\");\n    } else {\n        int total=m1+m2+m3+p;\n        if(total>=180) printf(\"DO\\n\");\n        else printf(\"TRUOT\\n\");\n    }\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "60 70 80 0\n",
+              "expected": "DO\n"
+            },
+            {
+              "input": "20 90 90 10\n",
+              "expected": "TRUOT\n"
+            },
+            {
+              "input": "50 50 50 0\n",
+              "expected": "TRUOT\n"
+            },
+            {
+              "input": "50 60 70 5\n",
+              "expected": "DO\n"
+            },
+            {
+              "input": "30 30 30 30\n",
+              "expected": "TRUOT\n"
+            },
+            {
+              "input": "100 100 100 0\n",
+              "expected": "DO\n"
+            },
+            {
+              "input": "29 100 100 30\n",
+              "expected": "TRUOT\n"
+            },
+            {
+              "input": "60 60 60 0\n",
+              "expected": "DO\n"
+            },
+            {
+              "input": "60 60 59 0\n",
+              "expected": "TRUOT\n"
+            },
+            {
+              "input": "30 60 90 0\n",
+              "expected": "DO\n"
+            },
+            {
+              "input": "100 40 40 0\n",
+              "expected": "DO\n"
+            },
+            {
+              "input": "0 0 0 0\n",
+              "expected": "TRUOT\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Vòng lặp: for",
+      "problems": [
+        {
+          "key": "for-01-tong-1-den-n",
+          "title": "Tổng từ 1 đến n",
+          "statementMd": "Cho một số nguyên dương `n`. Hãy dùng vòng lặp `for` để tính tổng của tất cả các số nguyên từ 1 đến `n`, tức là `S = 1 + 2 + 3 + ... + n`.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên dương `n`.",
+          "outputDescMd": "In ra một số nguyên duy nhất là tổng `S`, kết thúc bằng dấu xuống dòng.",
+          "constraintsMd": "`1 ≤ n ≤ 1 000 000`.\n\nKết quả có thể lớn (tối đa khoảng 5·10¹¹) nên cần dùng kiểu số nguyên 64-bit (`long long`).",
+          "difficulty": "easy",
+          "tags": [
+            "for",
+            "vong-lap",
+            "tong",
+            "so-nguyen"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    long long sum = 0;\n    for (long long i = 1; i <= n; i++) {\n        sum += i;\n    }\n    printf(\"%lld\\n\", sum);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n",
+              "expected": "15\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "55\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "28\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "5050\n"
+            },
+            {
+              "input": "1000\n",
+              "expected": "500500\n"
+            },
+            {
+              "input": "12345\n",
+              "expected": "76205685\n"
+            },
+            {
+              "input": "999999\n",
+              "expected": "499999500000\n"
+            },
+            {
+              "input": "1000000\n",
+              "expected": "500000500000\n"
+            }
+          ]
+        },
+        {
+          "key": "for-02-tong-so-chan",
+          "title": "Tổng các số chẵn từ 1 đến n",
+          "statementMd": "Cho một số nguyên dương `n`. Hãy dùng vòng lặp `for` để tính tổng của tất cả các số **chẵn** nằm trong đoạn từ 1 đến `n`. Ví dụ với `n = 10` thì tổng là `2 + 4 + 6 + 8 + 10 = 30`.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên dương `n`.",
+          "outputDescMd": "In ra một số nguyên duy nhất là tổng các số chẵn trong đoạn `[1, n]`, kết thúc bằng dấu xuống dòng. Nếu trong đoạn không có số chẵn nào thì in ra `0`.",
+          "constraintsMd": "`1 ≤ n ≤ 1 000 000`.\n\nKết quả có thể lớn nên cần dùng kiểu số nguyên 64-bit (`long long`).",
+          "difficulty": "easy",
+          "tags": [
+            "for",
+            "vong-lap",
+            "tong",
+            "so-chan"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    long long sum = 0;\n    for (long long i = 2; i <= n; i += 2) {\n        sum += i;\n    }\n    printf(\"%lld\\n\", sum);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "10\n",
+              "expected": "30\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "5\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "12\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "2550\n"
+            },
+            {
+              "input": "1000\n",
+              "expected": "250500\n"
+            },
+            {
+              "input": "999999\n",
+              "expected": "249999500000\n"
+            },
+            {
+              "input": "1000000\n",
+              "expected": "250000500000\n"
+            }
+          ]
+        },
+        {
+          "key": "for-03-dem-chia-het",
+          "title": "Đếm số chia hết cho k",
+          "statementMd": "Cho hai số nguyên dương `n` và `k`. Hãy dùng vòng lặp `for` để đếm xem trong đoạn từ 1 đến `n` có bao nhiêu số chia hết cho `k`.",
+          "inputDescMd": "Một dòng duy nhất chứa hai số nguyên dương `n` và `k`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một số nguyên duy nhất là số lượng các số trong đoạn `[1, n]` chia hết cho `k`, kết thúc bằng dấu xuống dòng.",
+          "constraintsMd": "`1 ≤ k ≤ n ≤ 1 000 000`.",
+          "difficulty": "easy",
+          "tags": [
+            "for",
+            "vong-lap",
+            "chia-het",
+            "dem"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n, k;\n    if (scanf(\"%lld %lld\", &n, &k) != 2) return 0;\n    long long cnt = 0;\n    for (long long i = 1; i <= n; i++) {\n        if (i % k == 0) {\n            cnt++;\n        }\n    }\n    printf(\"%lld\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "10 2\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "10 3\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "1 1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "17 5\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "100 7\n",
+              "expected": "14\n"
+            },
+            {
+              "input": "1000000 1\n",
+              "expected": "1000000\n"
+            },
+            {
+              "input": "1000000 1000000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1000000 3\n",
+              "expected": "333333\n"
+            },
+            {
+              "input": "1000000 7\n",
+              "expected": "142857\n"
+            },
+            {
+              "input": "999983 999983\n",
+              "expected": "1\n"
+            }
+          ]
+        },
+        {
+          "key": "for-04-bang-cuu-chuong",
+          "title": "Bảng cửu chương của n",
+          "statementMd": "Cho một số nguyên dương `n`. Hãy dùng vòng lặp `for` để in ra bảng cửu chương của `n`, gồm 10 dòng ứng với các phép nhân `n × 1` đến `n × 10`.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên dương `n`.",
+          "outputDescMd": "In ra đúng 10 dòng. Dòng thứ `i` (với `i` từ 1 đến 10) có dạng chính xác:\n\n```\nn x i = tich\n```\n\ntrong đó `tich = n * i`. Lưu ý: dùng chữ thường `x` làm dấu nhân, và giữa các thành phần có đúng một dấu cách. Mỗi dòng kết thúc bằng dấu xuống dòng.",
+          "constraintsMd": "`1 ≤ n ≤ 100`.",
+          "difficulty": "easy",
+          "tags": [
+            "for",
+            "vong-lap",
+            "in-bang",
+            "dinh-dang"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    for (int i = 1; i <= 10; i++) {\n        printf(\"%d x %d = %d\\n\", n, i, n * i);\n    }\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2\n",
+              "expected": "2 x 1 = 2\n2 x 2 = 4\n2 x 3 = 6\n2 x 4 = 8\n2 x 5 = 10\n2 x 6 = 12\n2 x 7 = 14\n2 x 8 = 16\n2 x 9 = 18\n2 x 10 = 20\n"
+            },
+            {
+              "input": "5\n",
+              "expected": "5 x 1 = 5\n5 x 2 = 10\n5 x 3 = 15\n5 x 4 = 20\n5 x 5 = 25\n5 x 6 = 30\n5 x 7 = 35\n5 x 8 = 40\n5 x 9 = 45\n5 x 10 = 50\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1 x 1 = 1\n1 x 2 = 2\n1 x 3 = 3\n1 x 4 = 4\n1 x 5 = 5\n1 x 6 = 6\n1 x 7 = 7\n1 x 8 = 8\n1 x 9 = 9\n1 x 10 = 10\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "9 x 1 = 9\n9 x 2 = 18\n9 x 3 = 27\n9 x 4 = 36\n9 x 5 = 45\n9 x 6 = 54\n9 x 7 = 63\n9 x 8 = 72\n9 x 9 = 81\n9 x 10 = 90\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "7 x 1 = 7\n7 x 2 = 14\n7 x 3 = 21\n7 x 4 = 28\n7 x 5 = 35\n7 x 6 = 42\n7 x 7 = 49\n7 x 8 = 56\n7 x 9 = 63\n7 x 10 = 70\n"
+            },
+            {
+              "input": "12\n",
+              "expected": "12 x 1 = 12\n12 x 2 = 24\n12 x 3 = 36\n12 x 4 = 48\n12 x 5 = 60\n12 x 6 = 72\n12 x 7 = 84\n12 x 8 = 96\n12 x 9 = 108\n12 x 10 = 120\n"
+            },
+            {
+              "input": "50\n",
+              "expected": "50 x 1 = 50\n50 x 2 = 100\n50 x 3 = 150\n50 x 4 = 200\n50 x 5 = 250\n50 x 6 = 300\n50 x 7 = 350\n50 x 8 = 400\n50 x 9 = 450\n50 x 10 = 500\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "100 x 1 = 100\n100 x 2 = 200\n100 x 3 = 300\n100 x 4 = 400\n100 x 5 = 500\n100 x 6 = 600\n100 x 7 = 700\n100 x 8 = 800\n100 x 9 = 900\n100 x 10 = 1000\n"
+            }
+          ]
+        },
+        {
+          "key": "for-05-giai-thua",
+          "title": "Giai thừa n!",
+          "statementMd": "Cho một số nguyên không âm `n`. Hãy dùng vòng lặp `for` để tính giai thừa của `n`, ký hiệu `n!`, được định nghĩa là tích của tất cả các số nguyên dương từ 1 đến `n`: `n! = 1 × 2 × 3 × ... × n`.\n\nQuy ước `0! = 1`.",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên không âm `n`.",
+          "outputDescMd": "In ra một số nguyên duy nhất là giá trị `n!`, kết thúc bằng dấu xuống dòng.",
+          "constraintsMd": "`0 ≤ n ≤ 20`.\n\nVới `n = 20`, kết quả là 2 432 902 008 176 640 000, vẫn nằm gọn trong kiểu số nguyên 64-bit (`long long`), nên hãy dùng `long long` để chứa kết quả.",
+          "difficulty": "medium",
+          "tags": [
+            "for",
+            "vong-lap",
+            "giai-thua",
+            "tich"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    long long f = 1;\n    for (int i = 2; i <= n; i++) {\n        f *= i;\n    }\n    printf(\"%lld\\n\", f);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n",
+              "expected": "120\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "5040\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "3628800\n"
+            },
+            {
+              "input": "13\n",
+              "expected": "6227020800\n"
+            },
+            {
+              "input": "15\n",
+              "expected": "1307674368000\n"
+            },
+            {
+              "input": "20\n",
+              "expected": "2432902008176640000\n"
+            }
+          ]
+        },
+        {
+          "key": "for-06-luy-thua",
+          "title": "Lũy thừa a mũ b",
+          "statementMd": "Cho hai số nguyên không âm `a` và `b`. Hãy dùng vòng lặp `for` để tính `a` mũ `b` (tức `a^b`), bằng cách nhân `a` với chính nó `b` lần.\n\nQuy ước `a^0 = 1` với mọi `a` (kể cả `a = 0`).",
+          "inputDescMd": "Một dòng duy nhất chứa hai số nguyên không âm `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một số nguyên duy nhất là giá trị `a^b`, kết thúc bằng dấu xuống dòng.",
+          "constraintsMd": "`0 ≤ a ≤ 15` và `0 ≤ b ≤ 15`.\n\nKết quả lớn nhất là `15^15 = 437 893 890 380 859 375`, vẫn nằm trong kiểu số nguyên 64-bit (`long long`).",
+          "difficulty": "medium",
+          "tags": [
+            "for",
+            "vong-lap",
+            "luy-thua",
+            "tich"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a;\n    int b;\n    if (scanf(\"%lld %d\", &a, &b) != 2) return 0;\n    long long result = 1;\n    for (int i = 1; i <= b; i++) {\n        result *= a;\n    }\n    printf(\"%lld\\n\", result);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2 10\n",
+              "expected": "1024\n"
+            },
+            {
+              "input": "3 3\n",
+              "expected": "27\n"
+            },
+            {
+              "input": "5 0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "0 5\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1 15\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "2 15\n",
+              "expected": "32768\n"
+            },
+            {
+              "input": "7 8\n",
+              "expected": "5764801\n"
+            },
+            {
+              "input": "10 9\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "15 15\n",
+              "expected": "437893890380859375\n"
+            }
+          ]
+        },
+        {
+          "key": "for-07-tam-giac-sao",
+          "title": "Tam giác sao",
+          "statementMd": "Cho một số nguyên dương `n`. Hãy dùng vòng lặp `for` (lồng nhau) để in ra một tam giác gồm `n` dòng, trong đó dòng thứ `i` chứa đúng `i` dấu sao `*` liền nhau.\n\nVí dụ với `n = 3`:\n\n```\n*\n**\n***\n```",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên dương `n`.",
+          "outputDescMd": "In ra đúng `n` dòng. Dòng thứ `i` (với `i` từ 1 đến `n`) gồm đúng `i` ký tự `*`, không có dấu cách xen giữa. Mỗi dòng kết thúc bằng dấu xuống dòng.",
+          "constraintsMd": "`1 ≤ n ≤ 100`.",
+          "difficulty": "medium",
+          "tags": [
+            "for",
+            "vong-lap",
+            "vong-lap-long",
+            "in-hinh"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    for (int i = 1; i <= n; i++) {\n        for (int j = 1; j <= i; j++) {\n            printf(\"*\");\n        }\n        printf(\"\\n\");\n    }\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3\n",
+              "expected": "*\n**\n***\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "*\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "*\n**\n"
+            },
+            {
+              "input": "5\n",
+              "expected": "*\n**\n***\n****\n*****\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "*\n**\n***\n****\n*****\n******\n*******\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "*\n**\n***\n****\n*****\n******\n*******\n********\n*********\n**********\n"
+            },
+            {
+              "input": "50\n",
+              "expected": "*\n**\n***\n****\n*****\n******\n*******\n********\n*********\n**********\n***********\n************\n*************\n**************\n***************\n****************\n*****************\n******************\n*******************\n********************\n*********************\n**********************\n***********************\n************************\n*************************\n**************************\n***************************\n****************************\n*****************************\n******************************\n*******************************\n********************************\n*********************************\n**********************************\n***********************************\n************************************\n*************************************\n**************************************\n***************************************\n****************************************\n*****************************************\n******************************************\n*******************************************\n********************************************\n*********************************************\n**********************************************\n***********************************************\n************************************************\n*************************************************\n**************************************************\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "*\n**\n***\n****\n*****\n******\n*******\n********\n*********\n**********\n***********\n************\n*************\n**************\n***************\n****************\n*****************\n******************\n*******************\n********************\n*********************\n**********************\n***********************\n************************\n*************************\n**************************\n***************************\n****************************\n*****************************\n******************************\n*******************************\n********************************\n*********************************\n**********************************\n***********************************\n************************************\n*************************************\n**************************************\n***************************************\n****************************************\n*****************************************\n******************************************\n*******************************************\n********************************************\n*********************************************\n**********************************************\n***********************************************\n************************************************\n*************************************************\n**************************************************\n***************************************************\n****************************************************\n*****************************************************\n******************************************************\n*******************************************************\n********************************************************\n*********************************************************\n**********************************************************\n***********************************************************\n************************************************************\n*************************************************************\n**************************************************************\n***************************************************************\n****************************************************************\n*****************************************************************\n******************************************************************\n*******************************************************************\n********************************************************************\n*********************************************************************\n**********************************************************************\n***********************************************************************\n************************************************************************\n*************************************************************************\n**************************************************************************\n***************************************************************************\n****************************************************************************\n*****************************************************************************\n******************************************************************************\n*******************************************************************************\n********************************************************************************\n*********************************************************************************\n**********************************************************************************\n***********************************************************************************\n************************************************************************************\n*************************************************************************************\n**************************************************************************************\n***************************************************************************************\n****************************************************************************************\n*****************************************************************************************\n******************************************************************************************\n*******************************************************************************************\n********************************************************************************************\n*********************************************************************************************\n**********************************************************************************************\n***********************************************************************************************\n************************************************************************************************\n*************************************************************************************************\n**************************************************************************************************\n***************************************************************************************************\n****************************************************************************************************\n"
+            }
+          ]
+        },
+        {
+          "key": "for-08-dem-uoc-so",
+          "title": "Đếm ước số của n",
+          "statementMd": "Cho một số nguyên dương `n`. Hãy đếm xem `n` có bao nhiêu ước số nguyên dương (bao gồm cả 1 và chính `n`).\n\nVì `n` có thể rất lớn, hãy dùng vòng lặp `for` chạy biến `i` chỉ tới căn bậc hai của `n` (điều kiện `i * i <= n`): mỗi khi `i` là ước của `n` thì `n / i` cũng là ước, nên có thể đếm cả cặp cùng lúc (chú ý trường hợp `i * i == n` chỉ tính một lần).",
+          "inputDescMd": "Một dòng duy nhất chứa số nguyên dương `n`.",
+          "outputDescMd": "In ra một số nguyên duy nhất là số lượng ước số nguyên dương của `n`, kết thúc bằng dấu xuống dòng.",
+          "constraintsMd": "`1 ≤ n ≤ 10¹²`.\n\nCần dùng kiểu số nguyên 64-bit (`long long`) cho `n` và cho biến chạy `i`, vì `i * i` có thể đạt tới 10¹².",
+          "difficulty": "hard",
+          "tags": [
+            "for",
+            "vong-lap",
+            "uoc-so",
+            "can-bac-hai"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    long long cnt = 0;\n    for (long long i = 1; i * i <= n; i++) {\n        if (n % i == 0) {\n            if (i * i == n) {\n                cnt += 1;\n            } else {\n                cnt += 2;\n            }\n        }\n    }\n    printf(\"%lld\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "12\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "6\n",
+              "expected": "4\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "16\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "49\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "36\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "725760\n",
+              "expected": "180\n"
+            },
+            {
+              "input": "999999999937\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "1000000000000\n",
+              "expected": "169\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Vòng lặp: while và do-while",
+      "problems": [
+        {
+          "key": "while-01-dao-chu-so",
+          "title": "Đảo các chữ số",
+          "statementMd": "Cho một số nguyên không âm `N`. Hãy in ra số nhận được khi viết các chữ số của `N` theo thứ tự ngược lại. Các chữ số 0 ở đầu kết quả (nếu có) được bỏ đi. Ví dụ: đảo `1200` cho `21`; đảo `0` cho `0`.\n\nYêu cầu: dùng vòng lặp `while` để tách dần từng chữ số.",
+          "inputDescMd": "Một dòng chứa một số nguyên `N`.",
+          "outputDescMd": "In ra một dòng duy nhất là số thu được sau khi đảo các chữ số của `N`.",
+          "constraintsMd": "0 ≤ N ≤ 1 000 000 000",
+          "difficulty": "easy",
+          "tags": [
+            "while",
+            "vong-lap",
+            "chu-so"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    long long rev = 0;\n    while (n > 0) {\n        rev = rev * 10 + n % 10;\n        n /= 10;\n    }\n    printf(\"%lld\\n\", rev);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1234\n",
+              "expected": "4321\n"
+            },
+            {
+              "input": "5\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1200\n",
+              "expected": "21\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "987654321\n",
+              "expected": "123456789\n"
+            },
+            {
+              "input": "120\n",
+              "expected": "21\n"
+            },
+            {
+              "input": "999999999\n",
+              "expected": "999999999\n"
+            }
+          ]
+        },
+        {
+          "key": "while-02-tong-chu-so",
+          "title": "Tổng các chữ số",
+          "statementMd": "Cho một số nguyên không âm `N`. Hãy tính tổng tất cả các chữ số của `N`.\n\nYêu cầu: dùng vòng lặp `while`, mỗi bước lấy chữ số cuối bằng phép chia lấy dư cho 10 rồi bỏ chữ số đó đi.",
+          "inputDescMd": "Một dòng chứa một số nguyên `N`.",
+          "outputDescMd": "In ra một dòng duy nhất là tổng các chữ số của `N`.",
+          "constraintsMd": "0 ≤ N ≤ 1 000 000 000 000 000 000 (tối đa 19 chữ số)",
+          "difficulty": "easy",
+          "tags": [
+            "while",
+            "vong-lap",
+            "chu-so"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    long long s = 0;\n    while (n > 0) {\n        s += n % 10;\n        n /= 10;\n    }\n    printf(\"%lld\\n\", s);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "123\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "1000000000000000000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "999999999999999999\n",
+              "expected": "162\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "9999\n",
+              "expected": "36\n"
+            },
+            {
+              "input": "111111\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "505\n",
+              "expected": "10\n"
+            },
+            {
+              "input": "88\n",
+              "expected": "16\n"
+            }
+          ]
+        },
+        {
+          "key": "while-03-dem-chu-so",
+          "title": "Đếm số chữ số",
+          "statementMd": "Cho một số nguyên không âm `N`. Hãy đếm xem `N` có bao nhiêu chữ số. Lưu ý: số `0` có đúng 1 chữ số.\n\nYêu cầu: dùng vòng lặp `while`, mỗi bước chia `N` cho 10 và tăng biến đếm.",
+          "inputDescMd": "Một dòng chứa một số nguyên `N`.",
+          "outputDescMd": "In ra một dòng duy nhất là số lượng chữ số của `N`.",
+          "constraintsMd": "0 ≤ N ≤ 1 000 000 000 000 000 000 (tối đa 19 chữ số)",
+          "difficulty": "easy",
+          "tags": [
+            "while",
+            "vong-lap",
+            "chu-so"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    int cnt = 0;\n    if (n == 0) cnt = 1;\n    while (n > 0) {\n        cnt++;\n        n /= 10;\n    }\n    printf(\"%d\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "12345\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "1000000000000000000\n",
+              "expected": "19\n"
+            },
+            {
+              "input": "999999999999999999\n",
+              "expected": "18\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "123456789\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "99\n",
+              "expected": "2\n"
+            }
+          ]
+        },
+        {
+          "key": "while-04-uoc-chung-lon-nhat",
+          "title": "Ước chung lớn nhất",
+          "statementMd": "Cho hai số nguyên dương `a` và `b`. Hãy tìm ước chung lớn nhất (ƯCLN) của chúng bằng thuật toán Euclid.\n\nThuật toán Euclid: lặp lại phép thay `(a, b)` bằng `(b, a mod b)` cho đến khi `b` bằng 0; khi đó `a` chính là ƯCLN. Yêu cầu dùng vòng lặp `while`.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một dòng duy nhất là ƯCLN của `a` và `b`.",
+          "constraintsMd": "1 ≤ a, b ≤ 1 000 000 000",
+          "difficulty": "easy",
+          "tags": [
+            "while",
+            "vong-lap",
+            "euclid",
+            "uoc-chung"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long a, b;\n    if (scanf(\"%lld %lld\", &a, &b) != 2) return 0;\n    while (b != 0) {\n        long long t = a % b;\n        a = b;\n        b = t;\n    }\n    printf(\"%lld\\n\", a);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "12 18\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "7 5\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1 1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1000000000 1000000000\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "1000000000 1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "100 25\n",
+              "expected": "25\n"
+            },
+            {
+              "input": "17 51\n",
+              "expected": "17\n"
+            },
+            {
+              "input": "36 60\n",
+              "expected": "12\n"
+            },
+            {
+              "input": "999999937 999999937\n",
+              "expected": "999999937\n"
+            },
+            {
+              "input": "48 36\n",
+              "expected": "12\n"
+            }
+          ]
+        },
+        {
+          "key": "while-05-kiem-tra-nguyen-to",
+          "title": "Kiểm tra số nguyên tố",
+          "statementMd": "Cho một số nguyên dương `N`. Hãy kiểm tra `N` có phải là số nguyên tố hay không. Số nguyên tố là số tự nhiên lớn hơn 1 và chỉ chia hết cho 1 và chính nó.\n\nYêu cầu: dùng vòng lặp `while` thử các ước từ 2 trở lên; chỉ cần thử tới khi `i*i` vượt quá `N`.",
+          "inputDescMd": "Một dòng chứa một số nguyên `N`.",
+          "outputDescMd": "In ra `YES` nếu `N` là số nguyên tố, ngược lại in ra `NO`.",
+          "constraintsMd": "1 ≤ N ≤ 2 000 000 000",
+          "difficulty": "medium",
+          "tags": [
+            "while",
+            "vong-lap",
+            "nguyen-to"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    int prime = (n >= 2);\n    long long i = 2;\n    while (i * i <= n) {\n        if (n % i == 0) {\n            prime = 0;\n            break;\n        }\n        i++;\n    }\n    printf(\"%s\\n\", prime ? \"YES\" : \"NO\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "7\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "2000000000\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "999999937\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "999999938\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "4\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "1000000007\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "1000000009\n",
+              "expected": "YES\n"
+            }
+          ]
+        },
+        {
+          "key": "while-06-so-hoan-hao",
+          "title": "Số hoàn hảo",
+          "statementMd": "Một số nguyên dương được gọi là **số hoàn hảo** nếu nó bằng tổng tất cả các ước dương thực sự của nó (các ước nhỏ hơn chính nó). Ví dụ `6 = 1 + 2 + 3` nên 6 là số hoàn hảo.\n\nCho số nguyên dương `N`, hãy kiểm tra `N` có phải số hoàn hảo hay không. Yêu cầu dùng vòng lặp `while` để cộng dồn các ước.",
+          "inputDescMd": "Một dòng chứa một số nguyên `N`.",
+          "outputDescMd": "In ra `YES` nếu `N` là số hoàn hảo, ngược lại in ra `NO`.",
+          "constraintsMd": "1 ≤ N ≤ 100 000",
+          "difficulty": "medium",
+          "tags": [
+            "while",
+            "vong-lap",
+            "uoc-so",
+            "so-hoan-hao"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    long long sum = 0, i = 1;\n    while (i <= n / 2) {\n        if (n % i == 0) sum += i;\n        i++;\n    }\n    printf(\"%s\\n\", (n > 0 && sum == n) ? \"YES\" : \"NO\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "6\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "28\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "496\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "8128\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "100000\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "12\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "27\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "8129\n",
+              "expected": "NO\n"
+            }
+          ]
+        },
+        {
+          "key": "while-07-fibonacci-thu-n",
+          "title": "Số Fibonacci thứ n",
+          "statementMd": "Dãy Fibonacci được định nghĩa: `F(1) = 1`, `F(2) = 1`, và `F(n) = F(n-1) + F(n-2)` với mọi `n ≥ 3`. Như vậy các số đầu tiên là 1, 1, 2, 3, 5, 8, 13, ...\n\nCho số nguyên dương `n`, hãy in ra `F(n)`. Yêu cầu tính bằng vòng lặp `while` (không dùng đệ quy).",
+          "inputDescMd": "Một dòng chứa một số nguyên `n`.",
+          "outputDescMd": "In ra một dòng duy nhất là giá trị `F(n)`.",
+          "constraintsMd": "1 ≤ n ≤ 90 (giá trị `F(n)` luôn nằm trong phạm vi kiểu số nguyên 64 bit)",
+          "difficulty": "medium",
+          "tags": [
+            "while",
+            "vong-lap",
+            "fibonacci"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    long long a = 1, b = 1;\n    if (n <= 2) {\n        printf(\"1\\n\");\n        return 0;\n    }\n    int i = 3;\n    while (i <= n) {\n        long long c = a + b;\n        a = b;\n        b = c;\n        i++;\n    }\n    printf(\"%lld\\n\", b);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "13\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "55\n"
+            },
+            {
+              "input": "90\n",
+              "expected": "2880067194370816120\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "20\n",
+              "expected": "6765\n"
+            },
+            {
+              "input": "50\n",
+              "expected": "12586269025\n"
+            },
+            {
+              "input": "45\n",
+              "expected": "1134903170\n"
+            },
+            {
+              "input": "89\n",
+              "expected": "1779979416004714189\n"
+            }
+          ]
+        },
+        {
+          "key": "while-08-tong-day-den-so-0",
+          "title": "Tổng dãy đến khi gặp 0",
+          "statementMd": "Đọc lần lượt các số nguyên và cộng dồn lại, cho đến khi đọc được số `0` thì dừng. Số `0` đánh dấu kết thúc và không ảnh hưởng tới tổng. Hãy in ra tổng của tất cả các số đã đọc (không kể số 0 kết thúc).\n\nDữ liệu bảo đảm luôn có số `0` kết thúc. Vì phải đọc ít nhất một số trước khi kiểm tra điều kiện dừng, hãy dùng vòng lặp `do-while`.",
+          "inputDescMd": "Dãy các số nguyên cách nhau bởi dấu cách hoặc dấu xuống dòng. Việc đọc dừng lại ngay khi gặp số `0`.",
+          "outputDescMd": "In ra một dòng duy nhất là tổng các số đọc được trước số `0`. Nếu số đầu tiên đã là `0` thì tổng bằng 0.",
+          "constraintsMd": "Mỗi số x thỏa -1 000 000 000 ≤ x ≤ 1 000 000 000; có không quá 100 000 số trước số 0.",
+          "difficulty": "medium",
+          "tags": [
+            "while",
+            "do-while",
+            "vong-lap",
+            "tong"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    long long sum = 0, x;\n    do {\n        if (scanf(\"%lld\", &x) != 1) break;\n        sum += x;\n    } while (x != 0);\n    printf(\"%lld\\n\", sum);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5 3 0\n",
+              "expected": "8\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "10 20 30 0\n",
+              "expected": "60\n"
+            },
+            {
+              "input": "-5 5 0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000 1000000000 0\n",
+              "expected": "2000000000\n"
+            },
+            {
+              "input": "-1000000000 -1000000000 0\n",
+              "expected": "-2000000000\n"
+            },
+            {
+              "input": "1 2 3 4 5 0\n",
+              "expected": "15\n"
+            },
+            {
+              "input": "100 -50 0\n",
+              "expected": "50\n"
+            },
+            {
+              "input": "7 0\n",
+              "expected": "7\n"
+            },
+            {
+              "input": "-3 0\n",
+              "expected": "-3\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Mảng",
+      "problems": [
+        {
+          "key": "mang-01-tong-trung-binh",
+          "title": "Tổng và trung bình cộng của mảng",
+          "statementMd": "Cho một mảng gồm `n` số nguyên. Hãy tính tổng của tất cả các phần tử và trung bình cộng của chúng.\n\nTrung bình cộng bằng tổng chia cho số phần tử `n`.",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n` là số phần tử của mảng.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra trên một dòng gồm hai giá trị, cách nhau bởi đúng một dấu cách:\n- Tổng của mảng (số nguyên).\n- Trung bình cộng, in ra với **đúng 2 chữ số thập phân**.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000 ≤ a[i] ≤ 1000`",
+          "difficulty": "easy",
+          "tags": [
+            "mang",
+            "tong",
+            "trung-binh"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    long long sum = 0;\n    for (int i = 0; i < n; i++) {\n        int x;\n        scanf(\"%d\", &x);\n        sum += x;\n    }\n    double avg = (double)sum / n;\n    printf(\"%lld %.2f\\n\", sum, avg);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n1 2 3 4 5\n",
+              "expected": "15 3.00\n"
+            },
+            {
+              "input": "3\n10 20 33\n",
+              "expected": "63 21.00\n"
+            },
+            {
+              "input": "1\n0\n",
+              "expected": "0 0.00\n"
+            },
+            {
+              "input": "1\n1000\n",
+              "expected": "1000 1000.00\n"
+            },
+            {
+              "input": "1\n-1000\n",
+              "expected": "-1000 -1000.00\n"
+            },
+            {
+              "input": "4\n-1 -2 -3 -4\n",
+              "expected": "-10 -2.50\n"
+            },
+            {
+              "input": "6\n1 2 3 4 5 6\n",
+              "expected": "21 3.50\n"
+            },
+            {
+              "input": "2\n1 2\n",
+              "expected": "3 1.50\n"
+            },
+            {
+              "input": "7\n-1000 1000 -1000 1000 -1000 1000 0\n",
+              "expected": "0 0.00\n"
+            },
+            {
+              "input": "10\n5 5 5 5 5 5 5 5 5 5\n",
+              "expected": "50 5.00\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-02-max-va-vi-tri",
+          "title": "Giá trị lớn nhất và vị trí",
+          "statementMd": "Cho một mảng gồm `n` số nguyên. Hãy tìm giá trị lớn nhất trong mảng và vị trí xuất hiện đầu tiên của giá trị đó.\n\nVị trí được đánh số bắt đầu từ `1` (phần tử đầu tiên ở vị trí `1`).",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra trên một dòng gồm hai số nguyên, cách nhau bởi một dấu cách: giá trị lớn nhất và vị trí (đánh số từ 1) của lần xuất hiện đầu tiên của nó.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000000 ≤ a[i] ≤ 1000000`",
+          "difficulty": "easy",
+          "tags": [
+            "mang",
+            "max",
+            "tim-kiem"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int best, pos = 1;\n    for (int i = 0; i < n; i++) {\n        int x;\n        scanf(\"%d\", &x);\n        if (i == 0 || x > best) {\n            best = x;\n            pos = i + 1;\n        }\n    }\n    printf(\"%d %d\\n\", best, pos);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n3 1 4 1 5\n",
+              "expected": "5 5\n"
+            },
+            {
+              "input": "4\n7 7 2 7\n",
+              "expected": "7 1\n"
+            },
+            {
+              "input": "1\n42\n",
+              "expected": "42 1\n"
+            },
+            {
+              "input": "1\n-1000000\n",
+              "expected": "-1000000 1\n"
+            },
+            {
+              "input": "3\n-5 -3 -9\n",
+              "expected": "-3 2\n"
+            },
+            {
+              "input": "6\n1 2 3 4 5 6\n",
+              "expected": "6 6\n"
+            },
+            {
+              "input": "6\n6 5 4 3 2 1\n",
+              "expected": "6 1\n"
+            },
+            {
+              "input": "5\n1000000 1000000 -1000000 0 1\n",
+              "expected": "1000000 1\n"
+            },
+            {
+              "input": "8\n-1 -1 -1 -1 -1 -1 -1 -1\n",
+              "expected": "-1 1\n"
+            },
+            {
+              "input": "2\n2 2\n",
+              "expected": "2 1\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-03-gia-tri-nho-nhat",
+          "title": "Giá trị nhỏ nhất của mảng",
+          "statementMd": "Cho một mảng gồm `n` số nguyên. Hãy tìm và in ra giá trị nhỏ nhất trong mảng.",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra một số nguyên duy nhất là giá trị nhỏ nhất trong mảng.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000000 ≤ a[i] ≤ 1000000`",
+          "difficulty": "easy",
+          "tags": [
+            "mang",
+            "min",
+            "tim-kiem"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int best = 0;\n    for (int i = 0; i < n; i++) {\n        int x;\n        scanf(\"%d\", &x);\n        if (i == 0 || x < best) best = x;\n    }\n    printf(\"%d\\n\", best);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n3 1 4 1 5\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "4\n7 7 2 7\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "1\n42\n",
+              "expected": "42\n"
+            },
+            {
+              "input": "1\n-1000000\n",
+              "expected": "-1000000\n"
+            },
+            {
+              "input": "1\n1000000\n",
+              "expected": "1000000\n"
+            },
+            {
+              "input": "3\n-5 -3 -9\n",
+              "expected": "-9\n"
+            },
+            {
+              "input": "6\n6 5 4 3 2 1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "6\n1 2 3 4 5 6\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "5\n0 0 0 0 0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "8\n-1 -2 -3 -4 4 3 2 1\n",
+              "expected": "-4\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-04-dem-so-duong",
+          "title": "Đếm số phần tử dương",
+          "statementMd": "Cho một mảng gồm `n` số nguyên. Hãy đếm xem có bao nhiêu phần tử là số dương (lớn hơn 0).\n\nLưu ý: số 0 không phải là số dương.",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra một số nguyên duy nhất là số lượng phần tử dương trong mảng.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000 ≤ a[i] ≤ 1000`",
+          "difficulty": "easy",
+          "tags": [
+            "mang",
+            "dem",
+            "dieu-kien"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int cnt = 0;\n    for (int i = 0; i < n; i++) {\n        int x;\n        scanf(\"%d\", &x);\n        if (x > 0) cnt++;\n    }\n    printf(\"%d\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n1 -2 3 -4 5\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "4\n-1 -2 -3 -4\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1\n0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1\n1000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1\n-1000\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "6\n0 0 0 1 0 0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "5\n1 2 3 4 5\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "7\n-1 0 1 -2 0 2 -3\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "3\n0 0 0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "8\n1000 -1000 1000 -1000 0 0 5 -5\n",
+              "expected": "3\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-05-dao-nguoc-mang",
+          "title": "Đảo ngược mảng",
+          "statementMd": "Cho một mảng gồm `n` số nguyên. Hãy in ra các phần tử của mảng theo thứ tự ngược lại (phần tử cuối cùng in ra đầu tiên).",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra trên một dòng `n` số nguyên là mảng đã được đảo ngược, cách nhau bởi đúng một dấu cách.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000 ≤ a[i] ≤ 1000`",
+          "difficulty": "easy",
+          "tags": [
+            "mang",
+            "dao-nguoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int a[1000];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    for (int i = n - 1; i >= 0; i--) {\n        printf(\"%d\", a[i]);\n        if (i > 0) printf(\" \");\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n1 2 3 4 5\n",
+              "expected": "5 4 3 2 1\n"
+            },
+            {
+              "input": "3\n10 20 30\n",
+              "expected": "30 20 10\n"
+            },
+            {
+              "input": "1\n7\n",
+              "expected": "7\n"
+            },
+            {
+              "input": "1\n-1000\n",
+              "expected": "-1000\n"
+            },
+            {
+              "input": "2\n-1 1\n",
+              "expected": "1 -1\n"
+            },
+            {
+              "input": "6\n1 2 3 4 5 6\n",
+              "expected": "6 5 4 3 2 1\n"
+            },
+            {
+              "input": "4\n0 0 0 0\n",
+              "expected": "0 0 0 0\n"
+            },
+            {
+              "input": "5\n-1 -2 -3 -4 -5\n",
+              "expected": "-5 -4 -3 -2 -1\n"
+            },
+            {
+              "input": "7\n1000 -1000 500 -500 0 1 -1\n",
+              "expected": "-1 1 0 -500 500 -1000 1000\n"
+            },
+            {
+              "input": "8\n8 7 6 5 4 3 2 1\n",
+              "expected": "1 2 3 4 5 6 7 8\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-06-tim-kiem-tuyen-tinh",
+          "title": "Tìm kiếm tuyến tính",
+          "statementMd": "Cho một mảng gồm `n` số nguyên và một giá trị `x`. Hãy tìm vị trí xuất hiện đầu tiên của `x` trong mảng.\n\nVị trí được đánh số bắt đầu từ `1`. Nếu `x` không xuất hiện trong mảng, in ra `-1`.",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.\n- Dòng thứ ba chứa số nguyên `x` cần tìm.",
+          "outputDescMd": "In ra vị trí (đánh số từ 1) của lần xuất hiện đầu tiên của `x` trong mảng, hoặc `-1` nếu không tìm thấy.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000000 ≤ a[i], x ≤ 1000000`",
+          "difficulty": "medium",
+          "tags": [
+            "mang",
+            "tim-kiem",
+            "tim-kiem-tuyen-tinh"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int a[1000];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    int x;\n    scanf(\"%d\", &x);\n    int pos = -1;\n    for (int i = 0; i < n; i++) {\n        if (a[i] == x) { pos = i + 1; break; }\n    }\n    printf(\"%d\\n\", pos);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n3 1 4 1 5\n1\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "5\n3 1 4 1 5\n9\n",
+              "expected": "-1\n"
+            },
+            {
+              "input": "1\n7\n7\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1\n7\n8\n",
+              "expected": "-1\n"
+            },
+            {
+              "input": "6\n2 2 2 2 2 2\n2\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "4\n-1000000 0 1000000 5\n1000000\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "5\n10 20 30 40 50\n50\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "5\n10 20 30 40 50\n10\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "3\n-5 -3 -1\n-3\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "8\n1 2 3 4 5 6 7 8\n0\n",
+              "expected": "-1\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-07-sap-xep-tang-dan",
+          "title": "Sắp xếp mảng tăng dần",
+          "statementMd": "Cho một mảng gồm `n` số nguyên. Hãy sắp xếp mảng theo thứ tự tăng dần (không giảm) và in ra kết quả.",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra trên một dòng `n` số nguyên đã được sắp xếp tăng dần, cách nhau bởi đúng một dấu cách.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000000 ≤ a[i] ≤ 1000000`",
+          "difficulty": "medium",
+          "tags": [
+            "mang",
+            "sap-xep"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int a[1000];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    for (int i = 0; i < n - 1; i++) {\n        for (int j = 0; j < n - 1 - i; j++) {\n            if (a[j] > a[j + 1]) {\n                int t = a[j];\n                a[j] = a[j + 1];\n                a[j + 1] = t;\n            }\n        }\n    }\n    for (int i = 0; i < n; i++) {\n        printf(\"%d\", a[i]);\n        if (i < n - 1) printf(\" \");\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n3 1 4 1 5\n",
+              "expected": "1 1 3 4 5\n"
+            },
+            {
+              "input": "4\n9 7 5 3\n",
+              "expected": "3 5 7 9\n"
+            },
+            {
+              "input": "1\n42\n",
+              "expected": "42\n"
+            },
+            {
+              "input": "2\n2 1\n",
+              "expected": "1 2\n"
+            },
+            {
+              "input": "6\n5 5 5 5 5 5\n",
+              "expected": "5 5 5 5 5 5\n"
+            },
+            {
+              "input": "5\n-1 -3 -2 -5 -4\n",
+              "expected": "-5 -4 -3 -2 -1\n"
+            },
+            {
+              "input": "6\n1 2 3 4 5 6\n",
+              "expected": "1 2 3 4 5 6\n"
+            },
+            {
+              "input": "7\n1000000 -1000000 0 500 -500 1 -1\n",
+              "expected": "-1000000 -500 -1 0 1 500 1000000\n"
+            },
+            {
+              "input": "8\n8 7 6 5 4 3 2 1\n",
+              "expected": "1 2 3 4 5 6 7 8\n"
+            },
+            {
+              "input": "5\n0 -1 1 -2 2\n",
+              "expected": "-2 -1 0 1 2\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-08-dem-phan-tu-phan-biet",
+          "title": "Đếm số phần tử phân biệt",
+          "statementMd": "Cho một mảng gồm `n` số nguyên. Hãy đếm xem trong mảng có bao nhiêu giá trị **phân biệt** (khác nhau).\n\nVí dụ mảng `[1, 2, 2, 3, 3, 3]` có 3 giá trị phân biệt là 1, 2 và 3.",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra một số nguyên duy nhất là số lượng giá trị phân biệt trong mảng.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000000 ≤ a[i] ≤ 1000000`",
+          "difficulty": "medium",
+          "tags": [
+            "mang",
+            "dem",
+            "phan-biet"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int a[1000];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    int cnt = 0;\n    for (int i = 0; i < n; i++) {\n        int seen = 0;\n        for (int j = 0; j < i; j++) {\n            if (a[j] == a[i]) { seen = 1; break; }\n        }\n        if (!seen) cnt++;\n    }\n    printf(\"%d\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "6\n1 2 2 3 3 3\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "5\n5 5 5 5 5\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1\n42\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "4\n1 2 3 4\n",
+              "expected": "4\n"
+            },
+            {
+              "input": "5\n-1 -1 0 0 1\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "7\n1000000 -1000000 1000000 0 0 1 -1\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "8\n1 1 2 2 3 3 4 4\n",
+              "expected": "4\n"
+            },
+            {
+              "input": "5\n7 7 7 7 8\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "6\n1 2 3 3 2 1\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "3\n0 0 0\n",
+              "expected": "1\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-09-tong-hai-mang",
+          "title": "Tổng hai mảng theo từng vị trí",
+          "statementMd": "Cho hai mảng `a` và `b`, mỗi mảng có `n` số nguyên. Hãy tạo mảng `c` sao cho `c[i] = a[i] + b[i]` với mọi `i`, rồi in ra mảng `c`.",
+          "inputDescMd": "- Dòng đầu tiên chứa số nguyên `n`.\n- Dòng thứ hai chứa `n` số nguyên là mảng `a`, cách nhau bởi dấu cách.\n- Dòng thứ ba chứa `n` số nguyên là mảng `b`, cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra trên một dòng `n` số nguyên là mảng `c`, cách nhau bởi đúng một dấu cách.",
+          "constraintsMd": "- `1 ≤ n ≤ 1000`\n- `-1000000 ≤ a[i], b[i] ≤ 1000000`",
+          "difficulty": "medium",
+          "tags": [
+            "mang",
+            "tong",
+            "hai-mang"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    int a[1000], b[1000];\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    for (int i = 0; i < n; i++) scanf(\"%d\", &b[i]);\n    for (int i = 0; i < n; i++) {\n        printf(\"%d\", a[i] + b[i]);\n        if (i < n - 1) printf(\" \");\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3\n1 2 3\n4 5 6\n",
+              "expected": "5 7 9\n"
+            },
+            {
+              "input": "4\n10 20 30 40\n1 2 3 4\n",
+              "expected": "11 22 33 44\n"
+            },
+            {
+              "input": "1\n5\n7\n",
+              "expected": "12\n"
+            },
+            {
+              "input": "1\n1000000\n1000000\n",
+              "expected": "2000000\n"
+            },
+            {
+              "input": "1\n-1000000\n-1000000\n",
+              "expected": "-2000000\n"
+            },
+            {
+              "input": "5\n1 -1 1 -1 0\n-1 1 -1 1 0\n",
+              "expected": "0 0 0 0 0\n"
+            },
+            {
+              "input": "6\n1 2 3 4 5 6\n6 5 4 3 2 1\n",
+              "expected": "7 7 7 7 7 7\n"
+            },
+            {
+              "input": "2\n-5 5\n5 -5\n",
+              "expected": "0 0\n"
+            },
+            {
+              "input": "5\n0 0 0 0 0\n0 0 0 0 0\n",
+              "expected": "0 0 0 0 0\n"
+            },
+            {
+              "input": "7\n1000000 -1000000 500 -500 0 1 -1\n1000000 -1000000 -500 500 0 -1 1\n",
+              "expected": "2000000 -2000000 0 0 0 0 0\n"
+            }
+          ]
+        },
+        {
+          "key": "mang-10-tong-theo-hang",
+          "title": "Tổng các phần tử theo từng hàng",
+          "statementMd": "Cho một mảng hai chiều (ma trận) gồm `m` hàng và `n` cột chứa các số nguyên. Hãy tính tổng các phần tử của từng hàng và in ra kết quả.\n\nHàng thứ nhất in ra trước, hàng thứ hai in sau, và cứ thế.",
+          "inputDescMd": "- Dòng đầu tiên chứa hai số nguyên `m` và `n`, cách nhau bởi dấu cách (số hàng và số cột).\n- `m` dòng tiếp theo, mỗi dòng chứa `n` số nguyên cách nhau bởi dấu cách.",
+          "outputDescMd": "In ra `m` dòng, mỗi dòng chứa một số nguyên là tổng các phần tử của hàng tương ứng (theo đúng thứ tự các hàng trong input).",
+          "constraintsMd": "- `1 ≤ m, n ≤ 100`\n- `-1000 ≤ a[i][j] ≤ 1000`",
+          "difficulty": "hard",
+          "tags": [
+            "mang",
+            "mang-2-chieu",
+            "ma-tran",
+            "tong"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint main(void) {\n    int m, n;\n    if (scanf(\"%d %d\", &m, &n) != 2) return 0;\n    for (int i = 0; i < m; i++) {\n        long long s = 0;\n        for (int j = 0; j < n; j++) {\n            int x;\n            scanf(\"%d\", &x);\n            s += x;\n        }\n        printf(\"%lld\\n\", s);\n    }\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2 3\n1 2 3\n4 5 6\n",
+              "expected": "6\n15\n"
+            },
+            {
+              "input": "3 2\n1 1\n2 2\n3 3\n",
+              "expected": "2\n4\n6\n"
+            },
+            {
+              "input": "1 1\n7\n",
+              "expected": "7\n"
+            },
+            {
+              "input": "1 1\n-1000\n",
+              "expected": "-1000\n"
+            },
+            {
+              "input": "1 4\n1000 1000 1000 1000\n",
+              "expected": "4000\n"
+            },
+            {
+              "input": "4 1\n5\n-5\n0\n10\n",
+              "expected": "5\n-5\n0\n10\n"
+            },
+            {
+              "input": "3 3\n-1 -2 -3\n4 5 6\n0 0 0\n",
+              "expected": "-6\n15\n0\n"
+            },
+            {
+              "input": "2 5\n1 2 3 4 5\n-1 -2 -3 -4 -5\n",
+              "expected": "15\n-15\n"
+            },
+            {
+              "input": "3 3\n1000 1000 1000\n-1000 -1000 -1000\n0 0 0\n",
+              "expected": "3000\n-3000\n0\n"
+            },
+            {
+              "input": "2 2\n-1000 -1000\n1000 1000\n",
+              "expected": "-2000\n2000\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Chuỗi",
+      "problems": [
+        {
+          "key": "chuoi-01-do-dai-chuoi",
+          "title": "Độ dài chuỗi",
+          "statementMd": "Cho một chuỗi ký tự `S` (có thể chứa dấu cách). Hãy đếm và in ra số ký tự của chuỗi.\n\nGợi ý: dùng `fgets` để đọc cả dòng, rồi đếm ký tự cho tới khi gặp ký tự kết thúc dòng (`\\n`) hoặc kết thúc chuỗi. Bạn có thể dùng `strlen` hoặc tự đếm bằng vòng lặp.",
+          "inputDescMd": "Một dòng duy nhất chứa chuỗi `S`. Chuỗi có thể chứa dấu cách.",
+          "outputDescMd": "In ra một số nguyên là số ký tự của `S` (không tính ký tự xuống dòng), theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= độ dài S <= 1000`\n- `S` chỉ gồm các ký tự ASCII hiển thị được và dấu cách.",
+          "difficulty": "easy",
+          "tags": [
+            "chuoi",
+            "do-dai"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char s[2005];\n    if (fgets(s, sizeof(s), stdin) == NULL) return 0;\n    long n = 0;\n    while (s[n] != '\\0' && s[n] != '\\n') n++;\n    printf(\"%ld\\n\", n);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "hello\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "lap trinh C\n",
+              "expected": "11\n"
+            },
+            {
+              "input": "a\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "12345\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "  \n",
+              "expected": "2\n"
+            },
+            {
+              "input": "Hello World\n",
+              "expected": "11\n"
+            },
+            {
+              "input": "a!b@c#\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "x y z\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+              "expected": "1000\n"
+            },
+            {
+              "input": "programming\n",
+              "expected": "11\n"
+            }
+          ]
+        },
+        {
+          "key": "chuoi-02-dem-nguyen-am",
+          "title": "Đếm nguyên âm",
+          "statementMd": "Cho một chuỗi `S`. Hãy đếm số ký tự là nguyên âm trong chuỗi. Nguyên âm gồm các chữ cái `a`, `e`, `i`, `o`, `u`, tính cả chữ thường lẫn chữ hoa (`A`, `E`, `I`, `O`, `U`).",
+          "inputDescMd": "Một dòng duy nhất chứa chuỗi `S` (có thể chứa dấu cách).",
+          "outputDescMd": "In ra một số nguyên là số nguyên âm đếm được, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= độ dài S <= 1000`\n- `S` chỉ gồm các ký tự ASCII hiển thị được và dấu cách.",
+          "difficulty": "easy",
+          "tags": [
+            "chuoi",
+            "dem",
+            "ky-tu"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char s[2005];\n    if (fgets(s, sizeof(s), stdin) == NULL) return 0;\n    long cnt = 0;\n    for (long i = 0; s[i] != '\\0' && s[i] != '\\n'; i++) {\n        char c = s[i];\n        if (c >= 'A' && c <= 'Z') c = c - 'A' + 'a';\n        if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') cnt++;\n    }\n    printf(\"%ld\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "hello\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "Programming\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "xyz\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "AEIOU\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "aaaa\n",
+              "expected": "4\n"
+            },
+            {
+              "input": "b\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "Hello World\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "Lap trinh C rat vui\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "BCDFG bcdfg\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "AeIoU aei\n",
+              "expected": "8\n"
+            }
+          ]
+        },
+        {
+          "key": "chuoi-03-dao-nguoc-chuoi",
+          "title": "Đảo ngược chuỗi",
+          "statementMd": "Cho một chuỗi `S`. Hãy in ra chuỗi thu được khi viết các ký tự của `S` theo thứ tự ngược lại.\n\nVí dụ, chuỗi `abc` khi đảo ngược thành `cba`.",
+          "inputDescMd": "Một dòng duy nhất chứa chuỗi `S` (có thể chứa dấu cách).",
+          "outputDescMd": "In ra chuỗi `S` sau khi đảo ngược, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= độ dài S <= 1000`\n- `S` chỉ gồm các ký tự ASCII hiển thị được và dấu cách.",
+          "difficulty": "easy",
+          "tags": [
+            "chuoi",
+            "dao-nguoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char s[2005];\n    if (fgets(s, sizeof(s), stdin) == NULL) return 0;\n    long n = 0;\n    while (s[n] != '\\0' && s[n] != '\\n') n++;\n    for (long i = n - 1; i >= 0; i--) putchar(s[i]);\n    putchar('\\n');\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "hello\n",
+              "expected": "olleh\n"
+            },
+            {
+              "input": "abc def\n",
+              "expected": "fed cba\n"
+            },
+            {
+              "input": "a\n",
+              "expected": "a\n"
+            },
+            {
+              "input": "aba\n",
+              "expected": "aba\n"
+            },
+            {
+              "input": "12345\n",
+              "expected": "54321\n"
+            },
+            {
+              "input": "ab\n",
+              "expected": "ba\n"
+            },
+            {
+              "input": "Hello World\n",
+              "expected": "dlroW olleH\n"
+            },
+            {
+              "input": "racecar\n",
+              "expected": "racecar\n"
+            },
+            {
+              "input": "x y z\n",
+              "expected": "z y x\n"
+            },
+            {
+              "input": "AbCdEf\n",
+              "expected": "fEdCbA\n"
+            }
+          ]
+        },
+        {
+          "key": "chuoi-04-doi-hoa-thuong",
+          "title": "Đổi hoa thành thường và ngược lại",
+          "statementMd": "Cho một chuỗi `S`. Với mỗi chữ cái trong chuỗi: nếu là chữ thường thì đổi thành chữ hoa, nếu là chữ hoa thì đổi thành chữ thường. Các ký tự khác (chữ số, dấu cách, dấu câu...) giữ nguyên. Hãy in ra chuỗi kết quả.",
+          "inputDescMd": "Một dòng duy nhất chứa chuỗi `S` (có thể chứa dấu cách).",
+          "outputDescMd": "In ra chuỗi `S` sau khi hoán đổi hoa/thường, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= độ dài S <= 1000`\n- `S` chỉ gồm các ký tự ASCII hiển thị được và dấu cách.\n- Chỉ đổi các chữ cái Latin `a`-`z`, `A`-`Z`; các ký tự còn lại giữ nguyên.",
+          "difficulty": "easy",
+          "tags": [
+            "chuoi",
+            "ky-tu",
+            "hoa-thuong"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char s[2005];\n    if (fgets(s, sizeof(s), stdin) == NULL) return 0;\n    for (long i = 0; s[i] != '\\0' && s[i] != '\\n'; i++) {\n        char c = s[i];\n        if (c >= 'a' && c <= 'z') putchar(c - 'a' + 'A');\n        else if (c >= 'A' && c <= 'Z') putchar(c - 'A' + 'a');\n        else putchar(c);\n    }\n    putchar('\\n');\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "Hello\n",
+              "expected": "hELLO\n"
+            },
+            {
+              "input": "aBc123\n",
+              "expected": "AbC123\n"
+            },
+            {
+              "input": "a\n",
+              "expected": "A\n"
+            },
+            {
+              "input": "Z\n",
+              "expected": "z\n"
+            },
+            {
+              "input": "12345\n",
+              "expected": "12345\n"
+            },
+            {
+              "input": "Hello World\n",
+              "expected": "hELLO wORLD\n"
+            },
+            {
+              "input": "abcdef\n",
+              "expected": "ABCDEF\n"
+            },
+            {
+              "input": "ABCDEF\n",
+              "expected": "abcdef\n"
+            },
+            {
+              "input": "Lap Trinh C 2026!\n",
+              "expected": "lAP tRINH c 2026!\n"
+            },
+            {
+              "input": "  MixED  \n",
+              "expected": "  mIXed  \n"
+            }
+          ]
+        },
+        {
+          "key": "chuoi-05-so-sanh-chuoi",
+          "title": "So sánh hai chuỗi",
+          "statementMd": "Cho hai chuỗi `A` và `B`. Hãy kiểm tra xem hai chuỗi có giống nhau hoàn toàn hay không. Việc so sánh phân biệt chữ hoa và chữ thường (ví dụ `Hello` khác `hello`).\n\nIn ra `YES` nếu hai chuỗi giống hệt nhau, ngược lại in ra `NO`.",
+          "inputDescMd": "Dòng thứ nhất chứa chuỗi `A`.\nDòng thứ hai chứa chuỗi `B`.\nMỗi chuỗi có thể chứa dấu cách.",
+          "outputDescMd": "In ra `YES` nếu `A` và `B` giống hệt nhau, ngược lại in ra `NO`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= độ dài A, B <= 1000`\n- Các chuỗi chỉ gồm các ký tự ASCII hiển thị được và dấu cách.\n- Việc so sánh có phân biệt hoa/thường.",
+          "difficulty": "easy",
+          "tags": [
+            "chuoi",
+            "so-sanh"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char a[2005], b[2005];\n    if (fgets(a, sizeof(a), stdin) == NULL) return 0;\n    if (fgets(b, sizeof(b), stdin) == NULL) return 0;\n    for (long i = 0; a[i] != '\\0'; i++) { if (a[i] == '\\n') { a[i] = '\\0'; break; } }\n    for (long i = 0; b[i] != '\\0'; i++) { if (b[i] == '\\n') { b[i] = '\\0'; break; } }\n    long i = 0;\n    while (a[i] != '\\0' && b[i] != '\\0' && a[i] == b[i]) i++;\n    if (a[i] == '\\0' && b[i] == '\\0') printf(\"YES\\n\");\n    else printf(\"NO\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "abc\nabc\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "abc\nabd\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "a\na\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "a\nb\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "abc\nab\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "ab\nabc\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "Hello\nhello\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "hello world\nhello world\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "lap trinh\nlap  trinh\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "12345\n12345\n",
+              "expected": "YES\n"
+            }
+          ]
+        },
+        {
+          "key": "chuoi-06-dem-ky-tu",
+          "title": "Đếm số lần xuất hiện của một ký tự",
+          "statementMd": "Cho một ký tự `c` và một chuỗi `S`. Hãy đếm xem ký tự `c` xuất hiện bao nhiêu lần trong chuỗi `S`. Việc đếm phân biệt chữ hoa và chữ thường.",
+          "inputDescMd": "Dòng thứ nhất chứa đúng một ký tự `c` (là một chữ cái hoặc chữ số).\nDòng thứ hai chứa chuỗi `S` (có thể chứa dấu cách).",
+          "outputDescMd": "In ra một số nguyên là số lần ký tự `c` xuất hiện trong `S`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `c` là một chữ cái Latin (`a`-`z`, `A`-`Z`) hoặc chữ số.\n- `1 <= độ dài S <= 1000`\n- `S` chỉ gồm các ký tự ASCII hiển thị được và dấu cách.\n- Việc đếm có phân biệt hoa/thường.",
+          "difficulty": "medium",
+          "tags": [
+            "chuoi",
+            "dem",
+            "ky-tu"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char line[2005], s[2005];\n    if (fgets(line, sizeof(line), stdin) == NULL) return 0;\n    char c = line[0];\n    if (fgets(s, sizeof(s), stdin) == NULL) return 0;\n    long cnt = 0;\n    for (long i = 0; s[i] != '\\0' && s[i] != '\\n'; i++) {\n        if (s[i] == c) cnt++;\n    }\n    printf(\"%ld\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "l\nhello\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "a\nbanana\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "z\nhello\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "a\na\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "x\nxxxx\n",
+              "expected": "4\n"
+            },
+            {
+              "input": "o\nlap trinh online judge\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "L\nhello Lap\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1\n1010101\n",
+              "expected": "4\n"
+            },
+            {
+              "input": "e\nProgramming is fun\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "b\naaaaaa\n",
+              "expected": "0\n"
+            }
+          ]
+        },
+        {
+          "key": "chuoi-07-kiem-tra-palindrome",
+          "title": "Kiểm tra chuỗi đối xứng (palindrome)",
+          "statementMd": "Một chuỗi được gọi là *đối xứng* (palindrome) nếu đọc từ trái sang phải giống hệt khi đọc từ phải sang trái. Ví dụ `abcba` là chuỗi đối xứng, còn `hello` thì không.\n\nCho một chuỗi `S`, hãy kiểm tra xem nó có đối xứng hay không. Việc so sánh phân biệt chữ hoa và chữ thường và tính cả dấu cách.\n\nIn ra `YES` nếu `S` đối xứng, ngược lại in ra `NO`.",
+          "inputDescMd": "Một dòng duy nhất chứa chuỗi `S` (có thể chứa dấu cách).",
+          "outputDescMd": "In ra `YES` nếu `S` là chuỗi đối xứng, ngược lại in ra `NO`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= độ dài S <= 1000`\n- `S` chỉ gồm các ký tự ASCII hiển thị được và dấu cách.\n- Việc so sánh có phân biệt hoa/thường và tính cả dấu cách.",
+          "difficulty": "medium",
+          "tags": [
+            "chuoi",
+            "palindrome",
+            "doi-xung"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char s[2005];\n    if (fgets(s, sizeof(s), stdin) == NULL) return 0;\n    long n = 0;\n    while (s[n] != '\\0' && s[n] != '\\n') n++;\n    int ok = 1;\n    for (long i = 0, j = n - 1; i < j; i++, j--) {\n        if (s[i] != s[j]) { ok = 0; break; }\n    }\n    printf(ok ? \"YES\\n\" : \"NO\\n\");\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "abcba\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "hello\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "a\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "aa\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "ab\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "abccba\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "12321\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "Aba\n",
+              "expected": "NO\n"
+            },
+            {
+              "input": "racecar\n",
+              "expected": "YES\n"
+            },
+            {
+              "input": "was it a car or a cat i saw\n",
+              "expected": "NO\n"
+            }
+          ]
+        },
+        {
+          "key": "chuoi-08-dem-so-tu",
+          "title": "Đếm số từ",
+          "statementMd": "Cho một dòng văn bản `S`. Các từ trong `S` được ngăn cách nhau bởi một hoặc nhiều dấu cách. Chuỗi cũng có thể có dấu cách ở đầu dòng hoặc cuối dòng. Hãy đếm xem trong `S` có bao nhiêu từ.\n\nMột *từ* là một dãy ký tự liên tiếp khác dấu cách. Nếu chuỗi chỉ gồm toàn dấu cách thì số từ là `0`.",
+          "inputDescMd": "Một dòng duy nhất chứa chuỗi `S`. Chuỗi có thể chứa nhiều dấu cách liên tiếp, kể cả ở đầu và cuối dòng.",
+          "outputDescMd": "In ra một số nguyên là số từ trong `S`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= độ dài S <= 1000`\n- `S` chỉ gồm các ký tự ASCII hiển thị được và dấu cách.\n- Các từ ngăn cách nhau bởi một hoặc nhiều dấu cách.",
+          "difficulty": "hard",
+          "tags": [
+            "chuoi",
+            "dem",
+            "tu"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\nint main(void) {\n    char s[2005];\n    if (fgets(s, sizeof(s), stdin) == NULL) return 0;\n    long cnt = 0;\n    int in_word = 0;\n    for (long i = 0; s[i] != '\\0' && s[i] != '\\n'; i++) {\n        if (s[i] == ' ') {\n            in_word = 0;\n        } else {\n            if (!in_word) { cnt++; in_word = 1; }\n        }\n    }\n    printf(\"%ld\\n\", cnt);\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "hello world\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "lap trinh C rat vui\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "hello\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "  hello   world  \n",
+              "expected": "2\n"
+            },
+            {
+              "input": "a b c d e\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "     \n",
+              "expected": "0\n"
+            },
+            {
+              "input": "  one\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "two  \n",
+              "expected": "1\n"
+            },
+            {
+              "input": "x  y   z    w\n",
+              "expected": "4\n"
+            },
+            {
+              "input": "the quick brown fox jumps\n",
+              "expected": "5\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Hàm",
+      "problems": [
+        {
+          "key": "ham-01-tong-hai-so",
+          "title": "Tổng hai số",
+          "statementMd": "Viết chương trình có định nghĩa hàm `tong(a, b)` trả về tổng của hai số nguyên `a` và `b`, sau đó gọi hàm này trong `main` để tính và in ra tổng của hai số đọc từ bàn phím.\n\nYêu cầu: phần cộng phải được thực hiện bên trong một hàm riêng, không viết trực tiếp trong `main`.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra một số nguyên duy nhất là tổng `a + b`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `-10^9 <= a, b <= 10^9`",
+          "difficulty": "easy",
+          "tags": [
+            "ham",
+            "so-hoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nlong long tong(long long a, long long b) {\n    return a + b;\n}\n\nint main(void) {\n    long long a, b;\n    if (scanf(\"%lld %lld\", &a, &b) != 2) return 0;\n    printf(\"%lld\\n\", tong(a, b));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 5\n",
+              "expected": "8\n"
+            },
+            {
+              "input": "-2 7\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000 1000000000\n",
+              "expected": "2000000000\n"
+            },
+            {
+              "input": "-1000000000 -1000000000\n",
+              "expected": "-2000000000\n"
+            },
+            {
+              "input": "-1000000000 1000000000\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "123456 654321\n",
+              "expected": "777777\n"
+            },
+            {
+              "input": "-5 -5\n",
+              "expected": "-10\n"
+            },
+            {
+              "input": "999999999 1\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "5 -10\n",
+              "expected": "-5\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-02-so-lon-nhat",
+          "title": "Số lớn nhất trong hai số",
+          "statementMd": "Viết chương trình có định nghĩa hàm `maxHai(a, b)` trả về giá trị lớn hơn trong hai số nguyên `a` và `b`, rồi gọi hàm trong `main` để in ra số lớn hơn.\n\nNếu hai số bằng nhau thì in ra chính giá trị đó.",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra số nguyên lớn hơn trong hai số, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `-10^9 <= a, b <= 10^9`",
+          "difficulty": "easy",
+          "tags": [
+            "ham",
+            "so-sanh"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint maxHai(int a, int b) {\n    return a > b ? a : b;\n}\n\nint main(void) {\n    int a, b;\n    if (scanf(\"%d %d\", &a, &b) != 2) return 0;\n    printf(\"%d\\n\", maxHai(a, b));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3 5\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "10 2\n",
+              "expected": "10\n"
+            },
+            {
+              "input": "-4 -9\n",
+              "expected": "-4\n"
+            },
+            {
+              "input": "7 7\n",
+              "expected": "7\n"
+            },
+            {
+              "input": "-1000000000 1000000000\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "0 -1\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000 999999999\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "-1000000000 -1000000000\n",
+              "expected": "-1000000000\n"
+            },
+            {
+              "input": "100 -100\n",
+              "expected": "100\n"
+            },
+            {
+              "input": "-50 50\n",
+              "expected": "50\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-03-dem-chu-so",
+          "title": "Đếm chữ số",
+          "statementMd": "Viết chương trình có định nghĩa hàm `demChuSo(n)` trả về số lượng chữ số của số nguyên không âm `n`, sau đó gọi hàm trong `main` để in kết quả.\n\nLưu ý: số `0` có đúng 1 chữ số.",
+          "inputDescMd": "Một dòng chứa một số nguyên không âm `n`.",
+          "outputDescMd": "In ra số lượng chữ số của `n`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `0 <= n <= 10^18`",
+          "difficulty": "easy",
+          "tags": [
+            "ham",
+            "chu-so"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint demChuSo(long long n) {\n    int dem = 0;\n    if (n == 0) return 1;\n    while (n > 0) {\n        dem++;\n        n /= 10;\n    }\n    return dem;\n}\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    printf(\"%d\\n\", demChuSo(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "12345\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "1000000000000000000\n",
+              "expected": "19\n"
+            },
+            {
+              "input": "999999999999999999\n",
+              "expected": "18\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "123456789\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "10\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-04-tong-chu-so",
+          "title": "Tổng các chữ số",
+          "statementMd": "Viết chương trình có định nghĩa hàm `tongChuSo(n)` trả về tổng các chữ số của số nguyên không âm `n`, sau đó gọi hàm trong `main` để in kết quả.\n\nVí dụ: `tongChuSo(1234)` bằng `1 + 2 + 3 + 4 = 10`.",
+          "inputDescMd": "Một dòng chứa một số nguyên không âm `n`.",
+          "outputDescMd": "In ra tổng các chữ số của `n`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `0 <= n <= 10^18`",
+          "difficulty": "easy",
+          "tags": [
+            "ham",
+            "chu-so"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint tongChuSo(long long n) {\n    int s = 0;\n    while (n > 0) {\n        s += (int)(n % 10);\n        n /= 10;\n    }\n    return s;\n}\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    printf(\"%d\\n\", tongChuSo(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1234\n",
+              "expected": "10\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "9\n",
+              "expected": "9\n"
+            },
+            {
+              "input": "1000000000000000000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "999999999999999999\n",
+              "expected": "162\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "99\n",
+              "expected": "18\n"
+            },
+            {
+              "input": "123456789\n",
+              "expected": "45\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "555\n",
+              "expected": "15\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-05-giai-thua",
+          "title": "Tính giai thừa",
+          "statementMd": "Giai thừa của số nguyên không âm `n`, ký hiệu `n!`, là tích các số nguyên từ `1` đến `n`; quy ước `0! = 1`.\n\nViết chương trình có định nghĩa hàm `giaiThua(n)` trả về `n!`, sau đó gọi hàm trong `main` để in kết quả.",
+          "inputDescMd": "Một dòng chứa một số nguyên không âm `n`.",
+          "outputDescMd": "In ra giá trị `n!`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `0 <= n <= 20`\n- Kết quả bảo đảm nằm trong phạm vi kiểu số nguyên 64 bit.",
+          "difficulty": "medium",
+          "tags": [
+            "ham",
+            "giai-thua"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nlong long giaiThua(int n) {\n    long long kq = 1;\n    for (int i = 2; i <= n; i++) {\n        kq *= i;\n    }\n    return kq;\n}\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    printf(\"%lld\\n\", giaiThua(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n",
+              "expected": "120\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "20\n",
+              "expected": "2432902008176640000\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "3628800\n"
+            },
+            {
+              "input": "12\n",
+              "expected": "479001600\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "13\n",
+              "expected": "6227020800\n"
+            },
+            {
+              "input": "15\n",
+              "expected": "1307674368000\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "2\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-06-luy-thua",
+          "title": "Lũy thừa",
+          "statementMd": "Viết chương trình có định nghĩa hàm `luyThua(a, n)` trả về giá trị `a` mũ `n` (`a^n`), sau đó gọi hàm trong `main` để in kết quả.\n\nQuy ước `a^0 = 1` với mọi `a` (kể cả `a = 0`).",
+          "inputDescMd": "Một dòng chứa hai số nguyên `a` và `n`, cách nhau bởi một dấu cách; `a` là cơ số, `n` là số mũ.",
+          "outputDescMd": "In ra giá trị `a^n`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `-10 <= a <= 10`\n- `0 <= n <= 15`\n- Kết quả bảo đảm nằm trong phạm vi kiểu số nguyên 64 bit.",
+          "difficulty": "medium",
+          "tags": [
+            "ham",
+            "luy-thua"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nlong long luyThua(int a, int n) {\n    long long kq = 1;\n    for (int i = 0; i < n; i++) {\n        kq *= a;\n    }\n    return kq;\n}\n\nint main(void) {\n    int a, n;\n    if (scanf(\"%d %d\", &a, &n) != 2) return 0;\n    printf(\"%lld\\n\", luyThua(a, n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2 10\n",
+              "expected": "1024\n"
+            },
+            {
+              "input": "3 0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "-2 3\n",
+              "expected": "-8\n"
+            },
+            {
+              "input": "10 15\n",
+              "expected": "1000000000000000\n"
+            },
+            {
+              "input": "-10 15\n",
+              "expected": "-1000000000000000\n"
+            },
+            {
+              "input": "0 5\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "0 0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "-1 15\n",
+              "expected": "-1\n"
+            },
+            {
+              "input": "-1 10\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "5 5\n",
+              "expected": "3125\n"
+            },
+            {
+              "input": "1 0\n",
+              "expected": "1\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-07-dao-so",
+          "title": "Đảo ngược số",
+          "statementMd": "Viết chương trình có định nghĩa hàm `daoSo(n)` trả về số nhận được khi viết các chữ số của `n` theo thứ tự ngược lại, sau đó gọi hàm trong `main` để in kết quả.\n\nCác chữ số 0 ở đầu kết quả sau khi đảo sẽ bị bỏ đi một cách tự nhiên. Ví dụ: `daoSo(1200) = 21`, `daoSo(1234) = 4321`.",
+          "inputDescMd": "Một dòng chứa một số nguyên không âm `n`.",
+          "outputDescMd": "In ra số thu được sau khi đảo ngược các chữ số của `n`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `0 <= n <= 10^9`",
+          "difficulty": "medium",
+          "tags": [
+            "ham",
+            "chu-so"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nlong long daoSo(long long n) {\n    long long kq = 0;\n    while (n > 0) {\n        kq = kq * 10 + n % 10;\n        n /= 10;\n    }\n    return kq;\n}\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    printf(\"%lld\\n\", daoSo(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "1234\n",
+              "expected": "4321\n"
+            },
+            {
+              "input": "1200\n",
+              "expected": "21\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "5\n",
+              "expected": "5\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "123456789\n",
+              "expected": "987654321\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "999999999\n",
+              "expected": "999999999\n"
+            },
+            {
+              "input": "120\n",
+              "expected": "21\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-08-nam-nhuan",
+          "title": "Kiểm tra năm nhuận",
+          "statementMd": "Một năm được gọi là năm nhuận nếu nó chia hết cho 4 nhưng không chia hết cho 100, hoặc chia hết cho 400.\n\nViết chương trình có định nghĩa hàm `laNamNhuan(y)` trả về `1` nếu `y` là năm nhuận và `0` nếu không, sau đó gọi hàm trong `main` để in kết quả.",
+          "inputDescMd": "Một dòng chứa một số nguyên dương `y` là năm cần kiểm tra.",
+          "outputDescMd": "In ra `1` nếu `y` là năm nhuận, ngược lại in ra `0`; theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= y <= 9999`",
+          "difficulty": "medium",
+          "tags": [
+            "ham",
+            "dieu-kien"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint laNamNhuan(int y) {\n    if ((y % 4 == 0 && y % 100 != 0) || y % 400 == 0) {\n        return 1;\n    }\n    return 0;\n}\n\nint main(void) {\n    int y;\n    if (scanf(\"%d\", &y) != 1) return 0;\n    printf(\"%d\\n\", laNamNhuan(y));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "2000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1900\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "2024\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "2023\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "9999\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "4\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "400\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "2100\n",
+              "expected": "0\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-09-uoc-chung-lon-nhat",
+          "title": "Ước chung lớn nhất",
+          "statementMd": "Viết chương trình có định nghĩa hàm `ucln(a, b)` trả về ước chung lớn nhất của hai số nguyên dương `a` và `b` (có thể dùng thuật toán Euclid), sau đó gọi hàm trong `main` để in kết quả.",
+          "inputDescMd": "Một dòng chứa hai số nguyên dương `a` và `b`, cách nhau bởi một dấu cách.",
+          "outputDescMd": "In ra ước chung lớn nhất của `a` và `b`, theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= a, b <= 10^9`",
+          "difficulty": "medium",
+          "tags": [
+            "ham",
+            "so-hoc"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint ucln(int a, int b) {\n    while (b != 0) {\n        int t = a % b;\n        a = b;\n        b = t;\n    }\n    return a;\n}\n\nint main(void) {\n    int a, b;\n    if (scanf(\"%d %d\", &a, &b) != 2) return 0;\n    printf(\"%d\\n\", ucln(a, b));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "12 18\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "17 5\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "100 100\n",
+              "expected": "100\n"
+            },
+            {
+              "input": "1 1000000000\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1000000000 1000000000\n",
+              "expected": "1000000000\n"
+            },
+            {
+              "input": "36 24\n",
+              "expected": "12\n"
+            },
+            {
+              "input": "1000000000 999999999\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "48 36\n",
+              "expected": "12\n"
+            },
+            {
+              "input": "7 49\n",
+              "expected": "7\n"
+            },
+            {
+              "input": "13 26\n",
+              "expected": "13\n"
+            }
+          ]
+        },
+        {
+          "key": "ham-10-kiem-tra-nguyen-to",
+          "title": "Kiểm tra số nguyên tố",
+          "statementMd": "Số nguyên tố là số nguyên lớn hơn 1 và chỉ có đúng hai ước là 1 và chính nó.\n\nViết chương trình có định nghĩa hàm `laNguyenTo(n)` trả về `1` nếu `n` là số nguyên tố và `0` nếu không, sau đó gọi hàm trong `main` để in kết quả. Chú ý các trường hợp `n = 1` (không phải số nguyên tố).",
+          "inputDescMd": "Một dòng chứa một số nguyên dương `n`.",
+          "outputDescMd": "In ra `1` nếu `n` là số nguyên tố, ngược lại in ra `0`; theo sau là ký tự xuống dòng.",
+          "constraintsMd": "- `1 <= n <= 10^9`",
+          "difficulty": "hard",
+          "tags": [
+            "ham",
+            "nguyen-to"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\nint laNguyenTo(long long n) {\n    if (n < 2) return 0;\n    if (n < 4) return 1;\n    if (n % 2 == 0) return 0;\n    for (long long i = 3; i * i <= n; i += 2) {\n        if (n % i == 0) return 0;\n    }\n    return 1;\n}\n\nint main(void) {\n    long long n;\n    if (scanf(\"%lld\", &n) != 1) return 0;\n    printf(\"%d\\n\", laNguyenTo(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "7\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1000000000\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "999999937\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "4\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "997\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "999999999\n",
+              "expected": "0\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Hàm đệ quy",
+      "problems": [
+        {
+          "key": "dequy-01-tong-1-den-n",
+          "title": "Tổng 1 đến n bằng đệ quy",
+          "statementMd": "Cho một số nguyên dương `n`. Hãy tính tổng của tất cả các số nguyên từ `1` đến `n`:\n\n```\nS = 1 + 2 + 3 + ... + n\n```\n\n**Yêu cầu:** phải tính bằng **hàm đệ quy** (hàm tự gọi lại chính nó), dựa trên công thức `S(n) = n + S(n-1)` với trường hợp cơ sở `S(0) = 0`.",
+          "inputDescMd": "Một dòng duy nhất chứa một số nguyên `n`.",
+          "outputDescMd": "In ra một dòng duy nhất là giá trị tổng `S`.",
+          "constraintsMd": "- `1 ≤ n ≤ 10000`\n- Kết quả có thể lớn, hãy dùng kiểu `long long`.",
+          "difficulty": "easy",
+          "tags": [
+            "dequy",
+            "tong",
+            "vong-lap"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\n/* Tinh tong 1 + 2 + ... + n bang de quy that su */\nlong long tong(int n) {\n    if (n == 0) return 0;          /* truong hop co so */\n    return (long long)n + tong(n - 1); /* buoc de quy: ham tu goi chinh no */\n}\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    printf(\"%lld\\n\", tong(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "5\n",
+              "expected": "15\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "55\n"
+            },
+            {
+              "input": "100\n",
+              "expected": "5050\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "3\n"
+            },
+            {
+              "input": "99\n",
+              "expected": "4950\n"
+            },
+            {
+              "input": "1000\n",
+              "expected": "500500\n"
+            },
+            {
+              "input": "10000\n",
+              "expected": "50005000\n"
+            },
+            {
+              "input": "3\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "9999\n",
+              "expected": "49995000\n"
+            }
+          ]
+        },
+        {
+          "key": "dequy-02-giai-thua",
+          "title": "Giai thừa bằng đệ quy",
+          "statementMd": "Cho một số nguyên không âm `n`. Hãy tính giai thừa của `n`, ký hiệu `n!`:\n\n```\nn! = 1 * 2 * 3 * ... * n\n```\n\nQuy ước `0! = 1`.\n\n**Yêu cầu:** phải tính bằng **hàm đệ quy** (hàm tự gọi lại chính nó), dựa trên công thức `n! = n * (n-1)!` với trường hợp cơ sở `0! = 1`.",
+          "inputDescMd": "Một dòng duy nhất chứa một số nguyên `n`.",
+          "outputDescMd": "In ra một dòng duy nhất là giá trị `n!`.",
+          "constraintsMd": "- `0 ≤ n ≤ 20`\n- Với `n = 20` kết quả vượt quá phạm vi `int`, hãy dùng kiểu `long long`.",
+          "difficulty": "easy",
+          "tags": [
+            "dequy",
+            "giai-thua"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\n/* Tinh n! bang de quy that su */\nlong long giai_thua(int n) {\n    if (n == 0) return 1;          /* 0! = 1, truong hop co so */\n    return (long long)n * giai_thua(n - 1); /* buoc de quy */\n}\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    printf(\"%lld\\n\", giai_thua(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "3\n",
+              "expected": "6\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "5\n",
+              "expected": "120\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "3628800\n"
+            },
+            {
+              "input": "20\n",
+              "expected": "2432902008176640000\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "2\n"
+            },
+            {
+              "input": "13\n",
+              "expected": "6227020800\n"
+            },
+            {
+              "input": "15\n",
+              "expected": "1307674368000\n"
+            },
+            {
+              "input": "19\n",
+              "expected": "121645100408832000\n"
+            }
+          ]
+        },
+        {
+          "key": "dequy-03-fibonacci",
+          "title": "Số Fibonacci thứ n bằng đệ quy",
+          "statementMd": "Dãy Fibonacci được định nghĩa như sau:\n\n```\nF(0) = 0\nF(1) = 1\nF(n) = F(n-1) + F(n-2)   (với n >= 2)\n```\n\nCho số nguyên không âm `n`, hãy tính số Fibonacci thứ `n`, tức `F(n)`.\n\n**Yêu cầu:** phải tính bằng **hàm đệ quy** (hàm tự gọi lại chính nó) theo đúng công thức truy hồi ở trên, với hai trường hợp cơ sở `F(0) = 0` và `F(1) = 1`.",
+          "inputDescMd": "Một dòng duy nhất chứa một số nguyên `n`.",
+          "outputDescMd": "In ra một dòng duy nhất là giá trị `F(n)`.",
+          "constraintsMd": "- `0 ≤ n ≤ 35`\n- Kết quả in ra là một số nguyên; nên dùng kiểu `long long`.",
+          "difficulty": "medium",
+          "tags": [
+            "dequy",
+            "fibonacci",
+            "day-so"
+          ],
+          "timeLimitMs": 1000,
+          "referenceC": "#include <stdio.h>\n\n/* F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2), tinh bang de quy that su */\nlong long fib(int n) {\n    if (n < 2) return n;           /* truong hop co so: F(0)=0, F(1)=1 */\n    return fib(n - 1) + fib(n - 2); /* buoc de quy */\n}\n\nint main(void) {\n    int n;\n    if (scanf(\"%d\", &n) != 1) return 0;\n    printf(\"%lld\\n\", fib(n));\n    return 0;\n}\n",
+          "testcases": [
+            {
+              "input": "6\n",
+              "expected": "8\n"
+            },
+            {
+              "input": "0\n",
+              "expected": "0\n"
+            },
+            {
+              "input": "1\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "2\n",
+              "expected": "1\n"
+            },
+            {
+              "input": "10\n",
+              "expected": "55\n"
+            },
+            {
+              "input": "20\n",
+              "expected": "6765\n"
+            },
+            {
+              "input": "35\n",
+              "expected": "9227465\n"
+            },
+            {
+              "input": "30\n",
+              "expected": "832040\n"
+            },
+            {
+              "input": "7\n",
+              "expected": "13\n"
+            },
+            {
+              "input": "25\n",
+              "expected": "75025\n"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
