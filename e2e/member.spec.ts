@@ -217,6 +217,9 @@ test('nộp bài đúng → AC, nộp bài sai → WA, cả hai vào lịch sử
   await typeCode(page, AC_SOURCE)
   await page.getByRole('button', { name: 'Nộp bài' }).click()
   expect(await waitForVerdict(page)).toBe('AC')
+  // Nộp đúng nay bật hộp thoại mừng AC che nút Nộp — đóng nó bằng "Ở lại" rồi mới
+  // nộp lần sau. (Hộp thoại có ca riêng ngay dưới.)
+  await page.getByRole('button', { name: 'Ở lại' }).click()
 
   await typeCode(page, WA_SOURCE)
   await page.getByRole('button', { name: 'Nộp bài' }).click()
@@ -231,6 +234,36 @@ test('nộp bài đúng → AC, nộp bài sai → WA, cả hai vào lịch sử
   await expect(page.getByText(nhanVerdict('AC'), { exact: true }).first()).toBeVisible()
   await expect(page.getByText(nhanVerdict('WA'), { exact: true }).first()).toBeVisible()
   expect(errors).toEqual([])
+})
+
+test('nộp AC bật hộp thoại → "Làm bài tiếp" sang đúng bài kề sau (yêu cầu người dùng)', async ({ page }) => {
+  await page.goto('/')
+  await openFirstProblem(page) // Tổng hai số — bài kề sau là "Ước chung lớn nhất"
+
+  await typeCode(page, AC_SOURCE)
+  await page.getByRole('button', { name: 'Nộp bài' }).click()
+  expect(await waitForVerdict(page)).toBe('AC')
+
+  // Hộp thoại mừng AC hiện, hỏi đi tiếp hay ở lại.
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await dialog.getByRole('link', { name: /Làm bài tiếp/ }).click()
+
+  // Sang đúng bài kề sau, và hộp thoại biến mất.
+  await expect(page.getByRole('heading', { name: 'Ước chung lớn nhất' })).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('nộp AC rồi bấm "Ở lại" thì ở nguyên bài, xem lại kết quả', async ({ page }) => {
+  await page.goto('/')
+  await openFirstProblem(page)
+  await typeCode(page, AC_SOURCE)
+  await page.getByRole('button', { name: 'Nộp bài' }).click()
+  expect(await waitForVerdict(page)).toBe('AC')
+
+  await page.getByRole('dialog').getByRole('button', { name: 'Ở lại' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Tổng hai số' })).toBeVisible()
 })
 
 test('danh sách contest → chi tiết → bảng xếp hạng', async ({ page }) => {

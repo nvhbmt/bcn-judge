@@ -1,27 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { IconRail } from '@/components/layout/IconRail'
 import { Workspace } from '@/components/layout/Workspace'
-import { EmptyState, Spinner } from '@/components/ui'
 import { useSubmissionStream } from '@/hooks/useSubmissionStream'
 import { api, ApiFailure } from '@/lib/api'
 import { useDraft } from '@/lib/drafts'
 import { useAuth } from '@/stores/auth'
 import type { LanguageOption, ProblemView, SubmissionView } from '@/types/api'
 import type { ConsoleTab } from './ConsolePanel'
-import { ContestProblemList } from './ContestProblemList'
-import { ContentHeader } from './ContentHeader'
+import { ContentPanels } from './ContentPanels'
 import { EditorPane } from './EditorPane'
-import { HelpPanel } from './HelpPanel'
-import { LeaderboardPanel } from './LeaderboardPanel'
-import { LessonPanel } from './LessonPanel'
-import { NoteBanner } from './NoteBanner'
 import { RAIL_ITEMS, RAIL_ITEMS_LESSON, RAIL_LABEL, type RailKey } from './rail'
-import { StatementPanel } from './StatementPanel'
-import { SubmissionsPanel } from './SubmissionsPanel'
+import { SolvedDialog } from './SolvedDialog'
+import { useSolvedDialog } from './useSolvedDialog'
 import { useSiblings } from './siblings'
-import { SyllabusPanel } from './SyllabusPanel'
 
 /**
  * Màn hình làm bài (FR-E1): thanh icon · khung nội dung · khung code.
@@ -46,6 +39,7 @@ export function WorkspacePage() {
   // testcase mẫu vừa xem — đúng lúc người ta đang lấy nó làm mốc để dò.
   const [sampleRunId, setSampleRunId] = useState<string | null>(null)
   const [customRunId, setCustomRunId] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   const handleQuery = contestProblemId ? `contestProblemId=${contestProblemId}` : `itemId=${itemId}`
 
@@ -139,7 +133,12 @@ export function WorkspacePage() {
   const handle = contestProblemId ?? itemId
   useEffect(() => {
     setRail('de-bai')
+    // Sang bài khác thì kết quả bài cũ không còn của màn này — reset để tab Kết quả
+    // không hiện AC của bài trước. (Cổng mừng AC tự reset theo `handle`, xem hook.)
+    setWatchedId(null)
   }, [handle])
+
+  const solved = useSolvedDialog(submission, watchedId, handle)
 
   // "Đề bài" là sai tên cho một trang lý thuyết — và nhãn này còn là tên tab ở màn hẹp.
   const contentLabel = rail === 'de-bai' && laBaiDoc ? 'Bài đọc' : RAIL_LABEL[rail]
@@ -151,63 +150,27 @@ export function WorkspacePage() {
   const practiceMode = Boolean(contestEndAt && new Date(contestEndAt) <= new Date())
 
   const content = (
-    <div className="flex h-full min-h-0 flex-col">
-      <ContentHeader
-        label={contentLabel}
-        // Panel Đề bài tự mang <h1> (tên bài) — nhãn ở đây lùi về chữ thường để màn
-        // hình chỉ có đúng MỘT tiêu đề cấp 1.
-        asHeading={rail !== 'de-bai'}
-        position={rail === 'de-bai' || rail === 'bai-nop' ? siblings.position : undefined}
-        prev={rail === 'de-bai' || rail === 'bai-nop' ? siblings.prev : null}
-        next={rail === 'de-bai' || rail === 'bai-nop' ? siblings.next : null}
-      />
-
-      {/* Ghi chú leader gửi cho mình (FR-J6) — bản vẽ đặt nó ở đúng màn này. */}
-      <NoteBanner />
-
-      <div className="min-h-0 flex-1 overflow-auto">
-        {dangCho ? (
-          <div className="p-4">
-            <Spinner />
-          </div>
-        ) : null}
-        {rail === 'tro-giup' ? <HelpPanel role={me?.role ?? 'member'} /> : null}
-        {rail === 'giao-trinh' ? (
-          courseId ? (
-            <SyllabusPanel courseId={courseId} currentItemId={itemId} />
-          ) : (
-            <ContestProblemList contestId={contestId} currentId={contestProblemId} />
-          )
-        ) : null}
-        {rail === 'bang-xep-hang' ? <LeaderboardPanel courseId={courseId} contestId={contestId} /> : null}
-        {rail === 'de-bai' ? (
-          laBaiDoc && itemId ? (
-            <LessonPanel itemId={itemId} />
-          ) : problem ? (
-            <StatementPanel problem={problem} />
-          ) : dangCho ? null : (
-            // Không có bài mà không nói gì thì khung nội dung trống trơn, trông như
-            // app treo. Gặp thật khi mở một link cũ sau lúc dữ liệu bị dựng lại.
-            <EmptyState
-              title="Không mở được bài này"
-              hint="Bài có thể đã bị gỡ, hoặc bạn chưa được ghi danh vào khoá chứa nó."
-            />
-          )
-        ) : null}
-        {rail === 'bai-nop' ? (
-          <SubmissionsPanel
-            handleQuery={handleQuery}
-            selectedId={watchedId}
-            languages={languages ?? []}
-            onSelect={(id) => {
-              setWatchedId(id)
-              setConsoleTab('ket-qua')
-            }}
-            onLoadIntoEditor={loadIntoEditor}
-          />
-        ) : null}
-      </div>
-    </div>
+    <ContentPanels
+      contentLabel={contentLabel}
+      rail={rail}
+      siblings={siblings}
+      dangCho={dangCho}
+      role={me?.role ?? 'member'}
+      courseId={courseId}
+      itemId={itemId}
+      contestId={contestId}
+      contestProblemId={contestProblemId}
+      laBaiDoc={laBaiDoc}
+      problem={problem}
+      handleQuery={handleQuery}
+      watchedId={watchedId}
+      languages={languages ?? []}
+      onSelectSubmission={(id) => {
+        setWatchedId(id)
+        setConsoleTab('ket-qua')
+      }}
+      onLoadIntoEditor={loadIntoEditor}
+    />
   )
 
   const editor = laBaiDoc ? undefined : (
@@ -239,6 +202,7 @@ export function WorkspacePage() {
   )
 
   return (
+    <>
     <Workspace
       storageKey="bcn:workspace"
       contentLabel={contentLabel}
@@ -252,5 +216,17 @@ export function WorkspacePage() {
       content={content}
       editor={editor}
     />
+      {solved.open && submission ? (
+        <SolvedDialog
+          score={submission.score}
+          next={siblings.next}
+          onStay={solved.close}
+          onNext={() => {
+            solved.close()
+            if (siblings.next) navigate(siblings.next.href)
+          }}
+        />
+      ) : null}
+    </>
   )
 }
