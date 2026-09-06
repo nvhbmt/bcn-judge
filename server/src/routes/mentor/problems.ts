@@ -12,6 +12,8 @@ import { audit } from '@/lib/audit'
 import { parseBody } from '@/lib/http'
 import { getSettings } from '@/lib/settings'
 import { iso } from '@/lib/time'
+import { vnSlug } from '@/lib/slug'
+import { zipStore, type ZipEntry } from '@/lib/zip'
 import { scoreOf } from '@/serialize/submission'
 import { ZipImportError, parseTestcaseZip } from '@/lib/zipImport'
 import { toMentorProblem, type RawProblemRow, type RawTestcaseRow } from '@/serialize/problem'
@@ -199,6 +201,71 @@ mentorProblemRoutes.get('/:id/submissions', async (c) => {
       receivedAt: iso(r.receivedAt),
     })),
   )
+})
+
+/**
+ * GET /api/mentor/problems/:id/submissions/download?mode=best|all — tải bài làm về .zip.
+ *
+ * ĐẶT TRƯỚC `/:submissionId` để đoạn tĩnh "download" không bị bắt thành một submissionId.
+ *
+ * - best (mặc định): mỗi người MỘT file — bài AC mới nhất; ai chưa AC thì lấy lượt nộp
+ *   mới nhất (để mentor thấy lỗi). DISTINCT ON theo user, ưu tiên AC rồi mới nhất.
+ * - all: mọi lượt nộp (kind='submit'); trùng tên thì thêm hậu tố _2, _3…
+ *
+ * Tên file: "<tên-không-dấu>_bai_nop.<đuôi>" (đuôi lấy từ languages.source_filename).
+ * Cùng cổng `canEdit` với màn xem bài nộp.
+ */
+mentorProblemRoutes.get('/:id/submissions/download', async (c) => {
+  const me = c.get('user')
+  const problemId = c.req.param('id')
+  if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
+  const mode = c.req.query('mode') === 'all' ? 'all' : 'best'
+
+  interface Row {
+    displayName: string
+    source: string
+    sourceFilename: string
+  }
+  const rows = await q<Row>(
+    mode === 'all'
+      ? sql`
+          SELECT u.display_name AS "displayName", s.source, l.source_filename AS "sourceFilename"
+          FROM submissions s
+          JOIN users u ON u.id = s.user_id
+          JOIN languages l ON l.id = s.language_id
+          WHERE s.problem_id = ${problemId} AND s.kind = 'submit' AND s.source IS NOT NULL
+          ORDER BY u.display_name ASC, s.received_at ASC
+        `
+      : sql`
+          SELECT DISTINCT ON (s.user_id)
+                 u.display_name AS "displayName", s.source, l.source_filename AS "sourceFilename"
+          FROM submissions s
+          JOIN users u ON u.id = s.user_id
+          JOIN languages l ON l.id = s.language_id
+          WHERE s.problem_id = ${problemId} AND s.kind = 'submit' AND s.source IS NOT NULL
+          ORDER BY s.user_id, (s.verdict = 'AC') DESC, s.received_at DESC
+        `,
+  )
+
+  if (rows.length === 0) return errors.notFound(c, 'Chưa có bài nộp nào để tải.')
+
+  const enc = new TextEncoder()
+  const used = new Set<string>()
+  const entries: ZipEntry[] = rows.map((r) => {
+    const ext = r.sourceFilename.split('.').pop() || 'txt'
+    const base = `${vnSlug(r.displayName)}_bai_nop`
+    let name = `${base}.${ext}`
+    for (let n = 2; used.has(name); n++) name = `${base}_${n}.${ext}`
+    used.add(name)
+    return { name, data: enc.encode(r.source) }
+  })
+
+  const zip = zipStore(entries)
+  // c.body không nhận Buffer/Uint8Array trực tiếp → đưa ArrayBuffer đúng cửa sổ byte.
+  const body = zip.buffer.slice(zip.byteOffset, zip.byteOffset + zip.byteLength) as ArrayBuffer
+  c.header('Content-Type', 'application/zip')
+  c.header('Content-Disposition', `attachment; filename="bai-nop-${mode}.zip"`)
+  return c.body(body)
 })
 
 /**

@@ -10,7 +10,7 @@
  * Vào từ nút "Xem bài nộp" cạnh nút Lưu.
  */
 import { useQuery } from '@tanstack/react-query'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { SplitPane } from '@/components/layout/SplitPane'
@@ -18,11 +18,13 @@ import { SubmissionDetail, type CodeView } from '@/components/submission/Submiss
 import { Spinner } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { LanguageOption } from '@/types/api'
+import { DownloadDialog } from './DownloadDialog'
 import { ProblemSubmissions } from './ProblemSubmissions'
 
 export function ProblemSubmissionsPage() {
   const { problemId } = useParams()
   const [picked, setPicked] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState(false)
 
   const { data: problem } = useQuery({
     queryKey: ['mentor', 'problem', problemId],
@@ -53,6 +55,13 @@ export function ProblemSubmissionsPage() {
         </Link>
         <h1 className="truncate font-display text-[16px] text-ink-1">{problem?.title ?? 'Bài nộp'}</h1>
         <span className="font-mono text-[11px] text-ink-6">chỉ đọc</span>
+        <button
+          type="button"
+          onClick={() => setDownloading(true)}
+          className="ml-auto inline-flex shrink-0 items-center gap-1.5 border border-line-strong px-2.5 py-1 font-mono text-[11px] text-ink-3 hover:border-moss hover:text-ink-1"
+        >
+          <Download size={13} /> Tải bài làm
+        </button>
       </header>
 
       <div className="min-h-0 flex-1">
@@ -72,6 +81,8 @@ export function ProblemSubmissionsPage() {
           }
         />
       </div>
+
+      {downloading ? <DownloadDialog problemId={problemId!} onClose={() => setDownloading(false)} /> : null}
     </div>
   )
 }
