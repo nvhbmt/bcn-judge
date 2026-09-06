@@ -46,21 +46,9 @@ không bị một `.env` lạc trên máy kéo sang DB khác. `.env` chỉ lấp
 Hai chỗ cố ý KHÔNG kèm cờ đó: `test` và `test:integration`. Đường chạy test không
 nên phụ thuộc vào một file không có trong git.
 
-## Nạp contest từ đề .docx
+## Kiểm chứng end-to-end
 
-Đề "Code C hằng tuần" soạn tay trong Word. `contests/README.md` mô tả đủ; ngắn gọn:
-
-```bash
-cd server
-npm run db:import:contest -- "../<đề>.docx" --data ../contests/code-c-tuan-01 --validate
-```
-
-Script đọc .docx nguyên văn, áp `fix.json` (đính chính có ghi lý do, in ra mỗi lần
-nạp), tạo khoá + contest + bài + testcase, rồi `--validate` xếp lời giải mẫu qua đúng
-hàng đợi của sản phẩm để **máy chấm tự xác nhận bộ test** thay vì tin lời người nạp.
-File .docx của người ra đề không bị sửa.
-
-Kiểm chứng toàn hệ thống qua HTTP (cần API + worker đang chạy):
+Qua HTTP (cần API + worker đang chạy):
 
 ```bash
 node scripts/smoke.mjs      # 29 kiểm tra: cấp tài khoản → soạn bài → nộp → chấm → verdict
@@ -451,7 +439,6 @@ server/
   drizzle/               SQL migration viết tay (FK deferrable, partial index, trigger)
   deploy/                deploy · provision · backup · cổng migration · Caddy+SPA image
 scripts/                 build image · run-local · e2e-stack · smoke · ràng buộc nguồn
-contests/                dữ liệu đề "Code C hằng tuần": fix.json + lời giải mẫu từng tuần
 docs/                    requirements.md · design.md · deploy.md
 ```
 
