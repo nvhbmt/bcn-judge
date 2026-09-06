@@ -220,28 +220,38 @@ mentorProblemRoutes.get('/:id/submissions/download', async (c) => {
   const problemId = c.req.param('id')
   if (!(await canEdit(me, problemId))) return errors.notFound(c, 'Không tìm thấy bài tập.')
   const mode = c.req.query('mode') === 'all' ? 'all' : 'best'
+  const group = c.req.query('group') === '1'
+  const [prob] = await q<{ title: string }>(sql`SELECT title FROM problems WHERE id = ${problemId}`)
 
   interface Row {
     displayName: string
     source: string
     sourceFilename: string
+    teamName: string | null
   }
+  // LEFT JOIN team: mỗi member thuộc TỐI ĐA một team (unique index) nên không nhân dòng.
   const rows = await q<Row>(
     mode === 'all'
       ? sql`
-          SELECT u.display_name AS "displayName", s.source, l.source_filename AS "sourceFilename"
+          SELECT u.display_name AS "displayName", s.source, l.source_filename AS "sourceFilename",
+                 t.name AS "teamName"
           FROM submissions s
           JOIN users u ON u.id = s.user_id
           JOIN languages l ON l.id = s.language_id
+          LEFT JOIN team_members tm ON tm.user_id = s.user_id
+          LEFT JOIN teams t ON t.id = tm.team_id
           WHERE s.problem_id = ${problemId} AND s.kind = 'submit' AND s.source IS NOT NULL
-          ORDER BY u.display_name ASC, s.received_at ASC
+          ORDER BY t.name ASC NULLS LAST, u.display_name ASC, s.received_at ASC
         `
       : sql`
           SELECT DISTINCT ON (s.user_id)
-                 u.display_name AS "displayName", s.source, l.source_filename AS "sourceFilename"
+                 u.display_name AS "displayName", s.source, l.source_filename AS "sourceFilename",
+                 t.name AS "teamName"
           FROM submissions s
           JOIN users u ON u.id = s.user_id
           JOIN languages l ON l.id = s.language_id
+          LEFT JOIN team_members tm ON tm.user_id = s.user_id
+          LEFT JOIN teams t ON t.id = tm.team_id
           WHERE s.problem_id = ${problemId} AND s.kind = 'submit' AND s.source IS NOT NULL
           ORDER BY s.user_id, (s.verdict = 'AC') DESC, s.received_at DESC
         `,
@@ -253,7 +263,9 @@ mentorProblemRoutes.get('/:id/submissions/download', async (c) => {
   const used = new Set<string>()
   const entries: ZipEntry[] = rows.map((r) => {
     const ext = r.sourceFilename.split('.').pop() || 'txt'
-    const base = `${vnSlug(r.displayName)}_bai_nop`
+    // Thư mục theo nhóm: giữ tên team thật (đã bật cờ UTF-8), chỉ bỏ ký tự phá đường dẫn.
+    const folder = group ? `${(r.teamName ?? '').replace(/[/\\]/g, '_').replace(/[\x00-\x1f]/g, '').trim() || 'Chưa có nhóm'}/` : ''
+    const base = `${folder}${vnSlug(r.displayName)}_bai_nop`
     let name = `${base}.${ext}`
     for (let n = 2; used.has(name); n++) name = `${base}_${n}.${ext}`
     used.add(name)
@@ -263,8 +275,11 @@ mentorProblemRoutes.get('/:id/submissions/download', async (c) => {
   const zip = zipStore(entries)
   // c.body không nhận Buffer/Uint8Array trực tiếp → đưa ArrayBuffer đúng cửa sổ byte.
   const body = zip.buffer.slice(zip.byteOffset, zip.byteOffset + zip.byteLength) as ArrayBuffer
+  // Tên file theo TÊN BÀI (slug ASCII), kèm hậu tố cho biết chế độ/gom nhóm.
+  const baseName = vnSlug(prob?.title ?? 'bai-nop')
+  const suffix = `${mode === 'all' ? '-tat-ca' : ''}${group ? '-nhom' : ''}`
   c.header('Content-Type', 'application/zip')
-  c.header('Content-Disposition', `attachment; filename="bai-nop-${mode}.zip"`)
+  c.header('Content-Disposition', `attachment; filename="${baseName}${suffix}.zip"`)
   return c.body(body)
 })
 

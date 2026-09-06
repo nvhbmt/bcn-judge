@@ -48,6 +48,17 @@ describe('DownloadDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: /Tất cả lượt nộp/ }))
     await waitFor(() => expect(fetchSpy).toHaveBeenCalled())
     expect(String(fetchSpy.mock.calls[0]![0])).toContain('mode=all')
+    expect(String(fetchSpy.mock.calls[0]![0])).not.toContain('group=1')
+  })
+
+  it('tích "Chia theo nhóm" thì thêm group=1 vào URL', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(zipRes())
+    draw()
+    fireEvent.click(screen.getByRole('checkbox', { name: /Chia theo nhóm/ }))
+    fireEvent.click(screen.getByRole('button', { name: /AC cuối của mỗi người/ }))
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalled())
+    expect(String(fetchSpy.mock.calls[0]![0])).toContain('mode=best')
+    expect(String(fetchSpy.mock.calls[0]![0])).toContain('group=1')
   })
 
   it('lỗi từ server thì hiện thông báo, không đóng', async () => {

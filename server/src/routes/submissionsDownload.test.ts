@@ -11,6 +11,7 @@ import {
   INTEGRATION,
   addTestcases,
   app,
+  call,
   enroll,
   makeCourse,
   makeItem,
@@ -33,11 +34,15 @@ async function submit(userId: string, itemId: string, pid: string, o: { verdict:
   `)
 }
 /** Gọi endpoint, trả về {status, contentType, buf}. */
-async function download(pid: string, mode: string, as: TestUser) {
-  const res = await app.request(`/api/mentor/problems/${pid}/submissions/download?mode=${mode}`, {
-    headers: { cookie: as.cookie, 'x-api-response-version': '2' },
-  })
-  return { status: res.status, contentType: res.headers.get('content-type') ?? '', buf: Buffer.from(await res.arrayBuffer()) }
+async function download(pid: string, mode: string, as: TestUser, group = false) {
+  const url = `/api/mentor/problems/${pid}/submissions/download?mode=${mode}${group ? '&group=1' : ''}`
+  const res = await app.request(url, { headers: { cookie: as.cookie, 'x-api-response-version': '2' } })
+  return {
+    status: res.status,
+    contentType: res.headers.get('content-type') ?? '',
+    disposition: res.headers.get('content-disposition') ?? '',
+    buf: Buffer.from(await res.arrayBuffer()),
+  }
 }
 const has = (buf: Buffer, s: string) => buf.includes(Buffer.from(s))
 
@@ -64,7 +69,7 @@ describe.skipIf(!INTEGRATION)('tải bài làm .zip', () => {
     const course = await makeCourse(admin.id, { status: 'open' })
     await enroll(course.id, u1.id)
     await enroll(course.id, u2.id)
-    pid = await makeProblem(admin.id, { scopeCourseId: course.id })
+    pid = await makeProblem(admin.id, { scopeCourseId: course.id, title: 'Tổng hai số' })
     await addTestcases(pid, [{ input: '1', expected: '1' }])
     itemId = await makeItem(course.id, pid)
   })
@@ -74,9 +79,10 @@ describe.skipIf(!INTEGRATION)('tải bài làm .zip', () => {
     await submit(u1.id, itemId, pid, { verdict: 'AC', source: 'u1_ac_src' })
     await submit(u2.id, itemId, pid, { verdict: 'WA', source: 'u2_only_src' })
 
-    const { status, contentType, buf } = await download(pid, 'best', admin)
+    const { status, contentType, disposition, buf } = await download(pid, 'best', admin)
     expect(status).toBe(200)
     expect(contentType).toContain('zip')
+    expect(disposition).toContain('tong_hai_so.zip') // tên file theo TÊN BÀI, slug không dấu
     expect(has(buf, 'viet_hoang_bai_nop.c')).toBe(true)
     expect(has(buf, 'nguyen_duc_bai_nop.c')).toBe(true)
     expect(has(buf, 'u1_ac_src')).toBe(true) // lấy AC của Việt Hoàng
@@ -93,6 +99,19 @@ describe.skipIf(!INTEGRATION)('tải bài làm .zip', () => {
     expect(has(buf, 'viet_hoang_bai_nop_2.c')).toBe(true)
     expect(has(buf, 'u1_wa_src')).toBe(true)
     expect(has(buf, 'u1_ac_src')).toBe(true)
+  })
+
+  it('group: gom thư mục theo team; ai chưa có nhóm vào "Chưa có nhóm"', async () => {
+    // u1 (Việt Hoàng) thuộc "Nhóm Alpha"; u2 (Nguyễn Đức) không nhóm. Tạo qua admin API
+    // vì teams_leader_is_member_fk đòi leader đã là member (API xử lý trong transaction).
+    const created = await call('/api/admin/teams', { as: admin, body: { name: 'Nhóm Alpha', leaderId: u1.id } })
+    expect(created.status).toBe(201)
+    await submit(u1.id, itemId, pid, { verdict: 'AC', source: 'u1_ac' })
+    await submit(u2.id, itemId, pid, { verdict: 'AC', source: 'u2_ac' })
+
+    const { buf } = await download(pid, 'best', admin, true)
+    expect(has(buf, 'Nhóm Alpha/viet_hoang_bai_nop.c')).toBe(true)
+    expect(has(buf, 'Chưa có nhóm/nguyen_duc_bai_nop.c')).toBe(true)
   })
 
   it('không có bài nộp → 404', async () => {

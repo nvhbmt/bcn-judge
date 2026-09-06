@@ -9,10 +9,11 @@ import { useMutation } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui'
 
-async function taiZip(problemId: string, mode: 'best' | 'all'): Promise<void> {
-  const res = await fetch(`/api/mentor/problems/${problemId}/submissions/download?mode=${mode}`, {
-    credentials: 'same-origin',
-  })
+async function taiZip(problemId: string, mode: 'best' | 'all', group: boolean): Promise<void> {
+  const res = await fetch(
+    `/api/mentor/problems/${problemId}/submissions/download?mode=${mode}${group ? '&group=1' : ''}`,
+    { credentials: 'same-origin' },
+  )
   if (!res.ok) {
     let msg = 'Không tải được. Thử lại sau.'
     try {
@@ -39,9 +40,10 @@ async function taiZip(problemId: string, mode: 'best' | 'all'): Promise<void> {
 export function DownloadDialog({ problemId, onClose }: { problemId: string; onClose: () => void }) {
   const panelRef = useRef<HTMLDivElement>(null)
   const [err, setErr] = useState<string | null>(null)
+  const [group, setGroup] = useState(false)
 
   const tai = useMutation({
-    mutationFn: (mode: 'best' | 'all') => taiZip(problemId, mode),
+    mutationFn: (mode: 'best' | 'all') => taiZip(problemId, mode, group),
     onSuccess: () => onClose(),
     onError: (e: unknown) => setErr(e instanceof Error ? e.message : 'Không tải được.'),
   })
@@ -108,6 +110,20 @@ export function DownloadDialog({ problemId, onClose }: { problemId: string; onCl
             <div className="mt-0.5 text-[13px] text-ink-4">Mọi lượt nộp của mọi người (trùng tên sẽ thêm _2, _3…).</div>
           </button>
         </div>
+
+        <label className="mt-3 flex cursor-pointer items-start gap-2 text-[14px] text-ink-2">
+          <input
+            type="checkbox"
+            checked={group}
+            disabled={busy}
+            onChange={(e) => setGroup(e.target.checked)}
+            className="mt-0.5 accent-moss"
+          />
+          <span>
+            Chia theo nhóm
+            <span className="block text-[12px] text-ink-5">Mỗi team một thư mục; ai chưa có nhóm vào “Chưa có nhóm”.</span>
+          </span>
+        </label>
 
         {err ? (
           <p role="alert" className="mt-3 text-[13px] text-clay">

@@ -5,8 +5,11 @@
  * không chẳng khác mấy; còn cả dự án giữ ít dependency (migration viết tay, không lib
  * thừa). Store-only + CRC32 đúng chuẩn PKZIP, mọi công cụ giải nén đều mở được.
  *
- * Chỉ dùng cho tên file ASCII (đã qua vnSlug) nên không bật cờ UTF-8 — đủ và gọn.
+ * Bật cờ UTF-8 (bit 11 = 0x0800) ở cả hai header: tên file toàn ASCII (đã qua vnSlug)
+ * nhưng THƯ MỤC nhóm giữ tên team thật (có dấu/khoảng trắng), nên cần cờ này để công
+ * cụ giải nén đọc bytes là UTF-8. Vô hại với tên thuần ASCII.
  */
+const UTF8_FLAG = 0x0800
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256)
@@ -45,7 +48,7 @@ export function zipStore(entries: ZipEntry[]): Buffer {
     const lh = Buffer.alloc(30)
     lh.writeUInt32LE(0x04034b50, 0) // chữ ký local file header
     lh.writeUInt16LE(20, 4) // version cần để giải nén (2.0)
-    lh.writeUInt16LE(0, 6) // cờ chung
+    lh.writeUInt16LE(UTF8_FLAG, 6) // cờ chung (bit 11 UTF-8)
     lh.writeUInt16LE(0, 8) // method 0 = store
     lh.writeUInt16LE(0, 10) // giờ sửa (bỏ qua)
     lh.writeUInt16LE(0, 12) // ngày sửa (bỏ qua)
@@ -60,7 +63,7 @@ export function zipStore(entries: ZipEntry[]): Buffer {
     cd.writeUInt32LE(0x02014b50, 0) // chữ ký central directory
     cd.writeUInt16LE(20, 4) // version tạo bởi
     cd.writeUInt16LE(20, 6) // version cần
-    cd.writeUInt16LE(0, 8)
+    cd.writeUInt16LE(UTF8_FLAG, 8)
     cd.writeUInt16LE(0, 10)
     cd.writeUInt16LE(0, 12)
     cd.writeUInt16LE(0, 14)
