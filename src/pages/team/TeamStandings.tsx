@@ -12,42 +12,43 @@
  * 12 bài/1470đ. Trông như lỗi nếu chỉ hiện một con số, nên bảng hiện CẢ HAI: người
  * đọc thấy ngay vì sao. Giấu bớt một cột là biến một quy tắc thành một điều bí ẩn.
  */
-import { useQuery } from '@tanstack/react-query'
-import { EmptyState, Spinner } from '@/components/ui'
-import { api } from '@/lib/api'
-import { cn } from '@/lib/cn'
-import { medal } from '@/lib/medal'
+import { useQuery } from "@tanstack/react-query";
+import { EmptyState, Spinner } from "@/components/ui";
+import { api } from "@/lib/api";
+import { cn } from "@/lib/cn";
+import { medal } from "@/lib/medal";
 
 interface TeamStandingRow {
-  rank: number
-  id: string
-  name: string
-  acCount: number
-  totalPoints: number
-  memberCount: number
-  isMine: boolean
+  rank: number;
+  id: string;
+  name: string;
+  acCount: number;
+  totalPoints: number;
+  memberCount: number;
+  isMine: boolean;
 }
 
 interface TeamStandings {
-  rows: TeamStandingRow[]
+  rows: TeamStandingRow[];
 }
 
 export function TeamStandings() {
   const { data, isLoading } = useQuery({
-    queryKey: ['team', 'standings'],
-    queryFn: () => api.get<TeamStandingRow[]>('/api/member/teams/standings'),
+    queryKey: ["team", "standings"],
+    queryFn: () => api.get<TeamStandingRow[]>("/api/member/teams/standings"),
     refetchInterval: 30_000,
-  })
+  });
 
   if (isLoading) {
     return (
       <div className="p-4">
         <Spinner />
       </div>
-    )
+    );
   }
 
-  if (!data || data.length === 0) return <EmptyState title="Chưa có team nào để xếp hạng" />
+  if (!data || data.length === 0)
+    return <EmptyState title="Chưa có team nào để xếp hạng" />;
 
   return (
     // `table-fixed` + colgroup là hệ quả BẮT BUỘC của việc bỏ <thead>: các class
@@ -60,51 +61,63 @@ export function TeamStandings() {
       <colgroup>
         <col className="w-9" />
         <col />
-        <col className="w-16" />
+        {/* Đủ chỗ cho "120 bài" một dòng — tổng AC của cả team có thể ba chữ số. */}
+        <col className="w-20" />
         <col className="w-16" />
       </colgroup>
       {/* KHÔNG có <thead>: bản vẽ bỏ hàng tiêu đề cột để bảng trong cột phải chỉ còn
           dữ liệu. `<caption>` ở lại (sr-only) nên trình đọc màn hình vẫn biết đây là
           bảng gì — bỏ cả caption mới là mất thông tin thật.
-          Đánh đổi đã biết: cột "Bài AC" nay là con số trần. Cần nhãn thì gộp vào
-          chính dòng ("13 bài · 1440 đ"), đừng dựng lại hàng tiêu đề. */}
+          Cột "Bài AC" vì thế mang nhãn ngay trong ô ("13 bài", cùng kiểu với bảng
+          contest và bục vinh danh), đừng dựng lại hàng tiêu đề. */}
       <tbody>
         {data.map((row) => (
           <tr
             key={row.id}
             className={cn(
-              'border-b border-line',
-              row.isMine && 'bg-primary-soft shadow-[inset_2px_0_0_var(--moss)]',
+              "border-b border-line",
+              row.isMine &&
+                "bg-primary-soft shadow-[inset_2px_0_0_var(--moss)]",
             )}
           >
             <td
               title={`Hạng ${row.rank}`}
-              className={cn('num px-2.5 py-2.5 font-mono text-[14px]', row.isMine ? 'text-moss' : 'text-ink-5')}
+              className={cn(
+                "num px-2.5 py-2.5 font-mono text-[14px]",
+                row.isMine ? "text-moss" : "text-ink-5",
+              )}
             >
               {medal(row.rank) ?? row.rank}
             </td>
             <td
               title={row.name}
               className={cn(
-                'max-w-0 truncate px-2.5 py-2.5 text-[15px]',
-                row.isMine ? 'font-semibold text-ink-1' : 'text-ink-2',
+                "max-w-0 truncate px-2.5 py-2.5 text-[15px]",
+                row.isMine ? "font-semibold text-ink-1" : "text-ink-2",
               )}
             >
               {row.name}
               {/* Tổng điểm chứ không phải trung bình, nên số người phải hiện: team
                   đông hơn thì tổng cao hơn, giấu đi là để bảng nói dối một nửa. */}
-              <span className="num ml-1.5 font-mono text-[12px] text-ink-6">{row.memberCount} người</span>
+              <span className="num ml-1.5 font-mono text-[12px] text-ink-6">
+                {row.memberCount} người
+              </span>
             </td>
-            <td className="num px-2.5 py-2.5 text-right font-mono text-[14px] text-ink-3">{row.acCount}</td>
-            <td className={cn(
-              'num px-2.5 py-2.5 text-right font-mono text-[14px]',
-              row.isMine ? 'text-ink-1' : 'text-ink-4',
-            )}>
+            <td className="num px-2.5 py-2.5 text-right font-mono text-[14px] whitespace-nowrap text-ink-3">
+              {row.acCount}
+              <span className="ml-1 text-[12px] text-ink-6">bài</span>
+            </td>
+            <td
+              className={cn(
+                "num px-2.5 py-2.5 text-right font-mono text-[14px]",
+                row.isMine ? "text-ink-1" : "text-ink-4",
+              )}
+            >
               {row.totalPoints}
             </td>
           </tr>
         ))}
       </tbody>
     </table>
-  )
+  );
 }

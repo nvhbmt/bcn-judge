@@ -5,14 +5,19 @@
  *   npm run db:seed:demo -- --judge   # thêm một ít bài pending để worker chấm thật
  *   npm run db:seed:demo -- --reset   # xoá sạch rồi tạo lại
  *
+ * Bài nộp trong khoá được rải theo LỊCH giờ VN (đầu tuần / đầu tháng) và mỗi kỳ một
+ * nhóm dẫn đầu khác nhau, để ba bảng của trang BXH (/bang-xep-hang: tuần này / tháng
+ * này / toàn thời gian) đều có kết quả và kể ba chuyện khác nhau — xem `activity()`.
+ *
  * Mọi tài khoản mẫu dùng chung mật khẩu `matkhau123` và KHÔNG bắt đổi lần đầu, để
  * đăng nhập xem ngay. Vì vậy script từ chối chạy nếu DATABASE_URL trông giống
  * production.
  */
 import { createHash } from 'node:crypto'
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 import { hashPassword } from '@/auth/hash'
 import { config } from '@/config'
+import { bestSubmissions } from '@/routes/member/syllabus'
 import { pool, q, qt, tx } from './pool'
 import { seed as seedBase } from './seed'
 
@@ -30,6 +35,11 @@ const pick = <T,>(list: readonly T[]): T => list[Math.floor(rnd() * list.length)
 const chance = (p: number): boolean => rnd() < p
 /** `now() - n giờ`; n âm là tương lai. make_interval() không suy được kiểu tham số bind. */
 const hoursAgo = (n: number) => sql`now() - (${Math.round(n)}::int * interval '1 hour')`
+/**
+ * `now() - n phút`, không bao giờ ở tương lai. Bài nộp trong khoá tính bằng phút vì
+ * cửa sổ "tuần này" có thể mới mở được vài phút (seed chạy rạng sáng thứ Hai).
+ */
+const minutesAgo = (n: number) => sql`now() - (${Math.max(1, Math.round(n))}::int * interval '1 minute')`
 
 // ── Nội dung ────────────────────────────────────────────────────────────────
 
@@ -493,6 +503,8 @@ interface CourseBuilt {
   name: string
   /** Chỉ những mục đã publish — mục nháp không nhận bài nộp. */
   itemsByProblem: Map<string, string>
+  /** Người đã ghi danh — chỉ họ nộp được, seed không tạo bài nộp "chui" vào khoá lạ. */
+  enrolledIds: Set<string>
 }
 
 async function makeCourses(
@@ -560,7 +572,7 @@ async function makeCourses(
         if (!draft && !hengio) itemsByProblem.set(item.problem, it!.id)
       }
     }
-    out.push({ courseId, name: course.name, itemsByProblem })
+    out.push({ courseId, name: course.name, itemsByProblem, enrolledIds: new Set(enrolled.map((m) => m.id)) })
   }
   return out
 }
@@ -652,9 +664,12 @@ interface SubmissionPlan {
   itemId: string | null
   contestId: string | null
   contestProblemId: string | null
-  at: number
+  /** Số phút trước hiện tại của mốc nhận bài. */
+  agoMin: number
   /** Lần nộp thứ mấy của người này cho bài này — lần sau xác suất AC cao hơn. */
   tryIndex: number
+  /** Cộng thêm vào xác suất AC mỗi lần nộp — nhóm kỳ cựu giải chắc tay hơn. */
+  skill: number
 }
 
 /** Ghi thẳng một bài nộp đã chấm xong, kèm kết quả từng testcase. */
@@ -669,7 +684,7 @@ async function insertJudged(plan: SubmissionPlan): Promise<void> {
   let source: string
   let languageId: string
 
-  if (chance(0.35 + plan.tryIndex * 0.3)) {
+  if (chance(0.35 + plan.tryIndex * 0.3 + plan.skill)) {
     verdict = 'AC'
     passed = total
     source = problem.solution
@@ -709,7 +724,7 @@ async function insertJudged(plan: SubmissionPlan): Promise<void> {
             ${ce ? null : timeMs}, ${ce ? null : memoryKb},
             ${ce ? "main.c: In function 'main':\nmain.c:5:5: error: expected ';' before 'scanf'" : null},
             1, 1,
-            ${hoursAgo(plan.at)}, ${hoursAgo(plan.at)}, ${hoursAgo(plan.at - 1)},
+            ${minutesAgo(plan.agoMin)}, ${minutesAgo(plan.agoMin)}, ${minutesAgo(plan.agoMin - 1)},
             ${Math.floor(rnd() * 600)}, ${250 + Math.floor(rnd() * 900)}, 'seed-demo')
     RETURNING id
   `)
@@ -731,6 +746,89 @@ async function insertJudged(plan: SubmissionPlan): Promise<void> {
               ${tcVerdict === 'WA' ? 1 : null})
     `)
   }
+}
+
+// ── Rải bài nộp theo lịch ───────────────────────────────────────────────────
+
+const TZ = 'Asia/Ho_Chi_Minh'
+type Period = 'old' | 'month' | 'week'
+const PERIODS: readonly Period[] = ['old', 'month', 'week']
+
+/**
+ * Ba cửa sổ của trang BXH (tuần này / tháng này / toàn thời gian) tính theo LỊCH giờ
+ * VN, nên bài nộp phải rải theo mốc đầu tuần / đầu tháng chứ không phải "N giờ trước"
+ * cố định — đặt bài 2 ngày trước rồi chạy seed sáng thứ Hai là bảng tuần trống trơn.
+ * Hỏi Postgres bằng đúng biểu thức route dùng (member/leaderboard.ts) để khỏi lệch
+ * múi giờ giữa Node và DB. Trả số PHÚT từ mốc đầu tuần / đầu tháng tới bây giờ.
+ */
+async function calendarMarks(): Promise<{ weekMin: number; monthMin: number }> {
+  const [row] = await q<{ weekMin: number; monthMin: number }>(sql`
+    SELECT floor(extract(epoch FROM now() - date_trunc('week', now() AT TIME ZONE ${TZ}) AT TIME ZONE ${TZ}) / 60)::int AS "weekMin",
+           floor(extract(epoch FROM now() - date_trunc('month', now() AT TIME ZONE ${TZ}) AT TIME ZONE ${TZ}) / 60)::int AS "monthMin"
+  `)
+  return row!
+}
+
+/**
+ * Khoảng [gần, xa] phút trước cho từng kỳ. "month" ở đây là phần tháng TRƯỚC tuần này;
+ * nó rỗng khi mùng 1 rơi đúng thứ Hai hoặc seed chạy ngay đầu tháng — khi đó bảng
+ * tháng trùng bảng tuần theo định nghĩa, đành gộp vào cửa sổ tuần. "old" là 1–45 ngày
+ * trước đầu tháng, chỉ lên bảng toàn thời gian.
+ */
+function periodSpans(marks: { weekMin: number; monthMin: number }): Record<Period, [number, number]> {
+  const week: [number, number] = [1, Math.max(2, marks.weekMin)]
+  const monthBeforeWeek: [number, number] =
+    marks.monthMin - marks.weekMin >= 60 ? [marks.weekMin + 1, marks.monthMin] : week
+  return { week, month: monthBeforeWeek, old: [marks.monthMin + 24 * 60, marks.monthMin + 45 * 24 * 60] }
+}
+
+/**
+ * Mỗi kỳ một nhóm dẫn đầu, để ba bảng kể ba chuyện thay vì cùng một thứ tự:
+ *   toàn thời gian → tốp đầu danh sách (member1–8, Nhóm Alpha) cày từ trước tháng này;
+ *   tháng này      → nhóm giữa (member9–18, Nhóm Beta/Gamma) mới bứt lên;
+ *   tuần này       → nhóm sau (member19–28, Nhóm Delta/Epsilon) đang có chuỗi AC.
+ * Tuần nằm trong tháng nên nhóm tuần cũng góp mặt ở bảng tháng — nhóm tháng phải chăm
+ * hơn hẳn mới giữ được ngôi. Nhóm kỳ cựu được cộng `skill` để AC gọn, đủ đứng trên
+ * nhóm tháng ở bảng toàn thời gian dù nhóm tháng cũng giải gần hết (hoà AC thì xét
+ * tổng điểm rồi ai đạt mốc SỚM hơn xếp trên — §2.7, nên người cũ thắng hoà).
+ * Trả xác suất một người động vào một bài trong kỳ đó.
+ */
+function activity(mi: number, period: Period): { p: number; skill: number } {
+  const cohort = mi < 8 ? 'old' : mi < 18 ? 'month' : mi < 28 ? 'week' : 'tail'
+  const table: Record<typeof cohort, Record<Period, number>> = {
+    old: { old: 0.95, month: 0.1, week: 0.1 },
+    month: { old: 0.2, month: 0.9, week: 0.15 },
+    week: { old: 0.1, month: 0.15, week: 0.8 },
+    tail: { old: 0.15, month: 0.1, week: 0.1 },
+  }
+  return { p: table[cohort][period], skill: cohort === 'old' ? 0.3 : 0 }
+}
+
+/** Mốc đầu cửa sổ, cùng biểu thức với route; null = toàn thời gian. */
+function sinceFor(win: 'week' | 'month' | 'all'): SQL | null {
+  if (win === 'all') return null
+  return sql`date_trunc(${win}, now() AT TIME ZONE ${TZ}) AT TIME ZONE ${TZ}`
+}
+
+/**
+ * Tốp 3 cá nhân của một cửa sổ, cùng công thức và thứ tự với /api/member/leaderboard —
+ * in ra cuối seed để thấy ngay ba kỳ có ba tốp đầu khác nhau mà không cần đăng nhập.
+ */
+async function top3(win: 'week' | 'month' | 'all'): Promise<string> {
+  const rows = await q<{ name: string; ac: number }>(sql`
+    WITH best AS (${bestSubmissions(null, sinceFor(win))})
+    SELECT u.display_name AS name,
+           count(*) FILTER (WHERE best.verdict = 'AC')::int AS ac,
+           COALESCE(sum(best.points), 0) AS pts,
+           max(best.received_at) FILTER (WHERE best.points > 0) AS last_gain
+    FROM best JOIN users u ON u.id = best.user_id
+    WHERE u.disabled = false
+    GROUP BY u.id, u.display_name
+    ORDER BY ac DESC, pts DESC, last_gain ASC NULLS LAST
+    LIMIT 3
+  `)
+  if (rows.length === 0) return '(trống)'
+  return rows.map((r, i) => `${i + 1}. ${r.name} (${r.ac} AC)`).join(' · ')
 }
 
 /**
@@ -789,19 +887,28 @@ async function main(): Promise<void> {
   console.log('==> Bài nộp')
   const plans: SubmissionPlan[] = []
 
-  // Bài nộp trong khoá: càng đầu danh sách càng chăm, để bảng xếp hạng có độ dốc thật.
-  for (const [ci, course] of courses.entries()) {
+  // Bài nộp trong khoá: rải theo ba kỳ của trang BXH, mỗi kỳ một nhóm chăm (activity()).
+  const marks = await calendarMarks()
+  const spans = periodSpans(marks)
+  const perPeriod: Record<Period, number> = { old: 0, month: 0, week: 0 }
+  for (const course of courses) {
     for (const [key, itemId] of course.itemsByProblem) {
       for (const [mi, member] of members.entries()) {
-        const diligence = 1 - mi / members.length
-        if (!chance(0.15 + diligence * 0.7)) continue
-        const tries = 1 + Math.floor(rnd() * 3)
-        const base = 24 * (2 + Math.floor(rnd() * 18)) + ci * 12
-        for (let t = 0; t < tries; t++) {
-          plans.push({
-            userId: member.id, key, problemId: problemIds.get(key)!, itemId,
-            contestId: null, contestProblemId: null, at: base - t * 2, tryIndex: t,
-          })
+        if (!course.enrolledIds.has(member.id)) continue
+        for (const period of PERIODS) {
+          const { p, skill } = activity(mi, period)
+          if (!chance(p)) continue
+          const [near, far] = spans[period]
+          const tries = 1 + Math.floor(rnd() * 3)
+          // Mỗi lần nộp một mốc ngẫu nhiên trong kỳ; xa nhất là lần đầu (tryIndex 0).
+          const moments = Array.from({ length: tries }, () => near + rnd() * (far - near)).sort((a, b) => b - a)
+          for (const [t, agoMin] of moments.entries()) {
+            plans.push({
+              userId: member.id, key, problemId: problemIds.get(key)!, itemId,
+              contestId: null, contestProblemId: null, agoMin, tryIndex: t, skill,
+            })
+            perPeriod[period]++
+          }
         }
       }
     }
@@ -822,7 +929,7 @@ async function main(): Promise<void> {
           plans.push({
             userId: member.id, key: cp.key, problemId: cp.problemId, itemId: null,
             contestId: contest.id, contestProblemId: cp.contestProblemId,
-            at: contest.startedHoursAgo - offset, tryIndex: t,
+            agoMin: (contest.startedHoursAgo - offset) * 60, tryIndex: t, skill: 0,
           })
         }
       }
@@ -830,9 +937,13 @@ async function main(): Promise<void> {
   }
 
   // Cũ trước mới sau, để seq tăng dần theo thời gian đúng như hệ thống thật.
-  plans.sort((a, b) => b.at - a.at)
+  plans.sort((a, b) => b.agoMin - a.agoMin)
   for (const plan of plans) await insertJudged(plan)
   console.log(`    ${plans.length} bài nộp đã chấm (AC/WA/TLE/RE/CE trộn lẫn)`)
+  console.log(
+    `    trong khoá: ${perPeriod.old} trước tháng này · ${perPeriod.month} tháng này (trước tuần) · ` +
+      `${perPeriod.week} tuần này (tuần mở ${Math.round(marks.weekMin / 60)}h, tháng mở ${Math.round(marks.monthMin / 60)}h trước)`,
+  )
 
   if (JUDGE_FOR_REAL) {
     let queued = 0
@@ -890,6 +1001,11 @@ async function main(): Promise<void> {
 ──────────────────────────────────────────────────────────────
 Xong: ${stat!.total} bài nộp của ${stat!.users} người, ${stat!.ac} lượt AC.
 
+Bảng xếp hạng cá nhân (/bang-xep-hang, đổi "Phạm vi" sang Team để xem bảng nhóm):
+  Tuần này        ${await top3('week')}
+  Tháng này       ${await top3('month')}
+  Toàn thời gian  ${await top3('all')}
+
 Đăng nhập thử:
   Admin    ${config.seedAdminEmail}   / ${config.seedAdminPassword}   (bị bắt đổi mật khẩu)
   Mentor   mentor1@bcn.local    / ${PASSWORD}   (phụ trách cả hai khoá)
@@ -897,8 +1013,9 @@ Xong: ${stat!.total} bài nộp của ${stat!.users} người, ${stat!.ac} lư�
   Member   member9@bcn.local    / ${PASSWORD}
   Bị khoá  member32@bcn.local   / ${PASSWORD}   (thử nhánh từ chối đăng nhập)
 
-Chỗ đáng xem: tiến độ trong trang khoá học, Bảng xếp hạng trên thanh icon,
-"Contest tuần 36" đang diễn ra (đóng băng 60 phút cuối), trang Nhóm của member1.
+Chỗ đáng xem: tiến độ trong trang khoá học, Bảng xếp hạng trên thanh icon, trang
+/bang-xep-hang (ba kỳ, ba tốp đầu khác nhau), "Contest tuần 36" đang diễn ra (đóng
+băng 60 phút cuối), trang Nhóm của member1.
 `)
 }
 
