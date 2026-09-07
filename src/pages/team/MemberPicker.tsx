@@ -45,7 +45,7 @@ export function MemberPicker({
                   dang ? 'bg-primary-soft font-semibold text-ink-1 shadow-[inset_2px_0_0_var(--moss)]' : 'bg-surface-2 text-ink-3 hover:bg-surface-sel hover:text-ink-1',
                 )}
               >
-                <Avatar name={m.displayName} size={22} chars={1} />
+                <Avatar name={m.displayName} size={22} chars={1} src={m.avatarUrl} />
                 <span className="min-w-0 truncate">{m.displayName}</span>
                 {m.isLeader ? (
                   <span className="ml-auto shrink-0 font-mono text-[10px] text-brass uppercase">leader</span>

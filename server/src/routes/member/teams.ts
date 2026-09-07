@@ -9,6 +9,7 @@
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { avatarUrl } from '@/auth/discordApi'
 import { isCourseStaff, teamRole } from '@/auth/middleware'
 import { q } from '@/db/pool'
 import { created, errors, ok } from '@/lib/apiResponse'
@@ -38,12 +39,26 @@ memberTeamRoutes.get('/mine', async (c) => {
   `)
   if (!team) return ok(c, null)
 
-  const members = await q(sql`
-    SELECT u.id, u.display_name AS "displayName", (u.id = ${team.leaderId}) AS "isLeader"
+  const rows = await q<{
+    id: string
+    displayName: string
+    isLeader: boolean
+    discordId: string | null
+    discordAvatar: string | null
+  }>(sql`
+    SELECT u.id, u.display_name AS "displayName", (u.id = ${team.leaderId}) AS "isLeader",
+           u.discord_id AS "discordId", u.discord_avatar AS "discordAvatar"
     FROM team_members tm JOIN users u ON u.id = tm.user_id
     WHERE tm.team_id = ${team.id}
     ORDER BY (u.id = ${team.leaderId}) DESC, u.display_name
   `)
+  // Ảnh Discord (nếu có) để danh sách thành viên có mặt người thật; client lùi về
+  // chữ cái đầu khi null. Chỉ đưa ra URL CDN đã dựng — id/hash thô ở lại server,
+  // cùng cách UserMenu nhận ảnh của chính mình qua session.
+  const members = rows.map(({ discordId, discordAvatar, ...m }) => ({
+    ...m,
+    avatarUrl: avatarUrl(discordId, discordAvatar),
+  }))
   return ok(c, { ...team, createdAt: iso(team.createdAt), isLeader: team.leaderId === me.id, members })
 })
 

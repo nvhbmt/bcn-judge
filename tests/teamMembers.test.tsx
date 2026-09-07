@@ -31,9 +31,9 @@ const TEAM: TeamView = {
   leaderId: 'u1',
   isLeader: true,
   members: [
-    { id: 'u1', displayName: 'Huỳnh Đức Hà', isLeader: true },
-    { id: 'u2', displayName: 'Bùi Thu Ngọc', isLeader: false },
-    { id: 'u3', displayName: 'Chưa Ghi Danh', isLeader: false },
+    { id: 'u1', displayName: 'Huỳnh Đức Hà', isLeader: true, avatarUrl: 'https://cdn.discordapp.com/avatars/1/a.png?size=64' },
+    { id: 'u2', displayName: 'Bùi Thu Ngọc', isLeader: false, avatarUrl: null },
+    { id: 'u3', displayName: 'Chưa Ghi Danh', isLeader: false, avatarUrl: null },
   ],
 }
 
@@ -185,4 +185,15 @@ describe('trang riêng của một thành viên — hai panel', () => {
 
     expect(await screen.findByText('danh sách team')).toBeInTheDocument()
   })
+
+  it('có ảnh Discord thì hiện ảnh, không thì lùi về chữ cái đầu', async () => {
+    mock({ '/progress': TIEN_DO })
+    ve(<TeamMembers team={TEAM} />)
+    // "Bùi Thu Ngọc" không có ảnh → ô chữ "TN" (hai chữ cái cuối tên, như mọi Avatar).
+    expect(await screen.findByText('TN')).toBeTruthy()
+    const anh = document.querySelectorAll('img')
+    expect(anh).toHaveLength(1)
+    expect(anh[0]!.getAttribute('src')).toBe(TEAM.members[0]!.avatarUrl)
+  })
+
 })

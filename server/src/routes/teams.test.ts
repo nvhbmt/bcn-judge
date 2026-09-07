@@ -123,6 +123,18 @@ describe.skipIf(!INTEGRATION)('team & leader (FR-J)', () => {
     expect((await call('/api/member/teams/mine', { as: outsider })).body.data).toBeNull()
   })
 
+  it('thành viên có Discord thì kèm avatarUrl, không thì null (client lùi về chữ cái đầu)', async () => {
+    await q(sql`UPDATE users SET discord_id = '123456789012345678', discord_avatar = 'a1b2c3' WHERE id = ${leader.id}`)
+    const mine = await call('/api/member/teams/mine', { as: teammate })
+    const anh = Object.fromEntries(
+      mine.body.data.members.map((m: { id: string; avatarUrl: string | null }) => [m.id, m.avatarUrl]),
+    )
+    expect(anh[leader.id]).toBe('https://cdn.discordapp.com/avatars/123456789012345678/a1b2c3.png?size=64')
+    expect(anh[teammate.id]).toBeNull()
+    // Không rò id/hash thô — chỉ URL đã dựng.
+    expect(mine.body.data.members[0]).not.toHaveProperty('discordId')
+  })
+
   it('chỉ LEADER xem được tiến độ và bài nộp của team', async () => {
     expect((await call(`/api/member/teams/${teamId}/progress`, { as: leader })).status).toBe(200)
     expect((await call(`/api/member/teams/${teamId}/submissions`, { as: leader })).status).toBe(200)

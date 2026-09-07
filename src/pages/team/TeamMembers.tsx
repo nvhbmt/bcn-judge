@@ -61,7 +61,7 @@ export function TeamMembers({ team }: { team: TeamView }) {
 
         const than = (
           <>
-            <Avatar name={m.displayName} size={26} />
+            <Avatar name={m.displayName} size={26} src={m.avatarUrl} />
             <span className="min-w-0 flex-1 truncate text-left text-[15px] text-ink-2">
               {m.displayName}
             </span>

@@ -8,7 +8,8 @@ export interface TeamView {
   descriptionMd: string | null
   leaderId: string
   isLeader: boolean
-  members: { id: string; displayName: string; isLeader: boolean }[]
+  /** `avatarUrl` là ảnh Discord đã dựng sẵn URL; `null` = Avatar lùi về chữ cái đầu. */
+  members: { id: string; displayName: string; isLeader: boolean; avatarUrl: string | null }[]
 }
 
 export interface TeamProgressRow {
