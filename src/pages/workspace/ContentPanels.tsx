@@ -17,6 +17,7 @@ import { LessonPanel } from './LessonPanel'
 import { NoteBanner } from './NoteBanner'
 import type { RailKey } from './rail'
 import { StatementPanel } from './StatementPanel'
+import { StatsPanel } from './stats/StatsPanel'
 import { SubmissionsPanel } from './SubmissionsPanel'
 import type { Siblings } from './siblings'
 import { SyllabusPanel } from './SyllabusPanel'
@@ -92,6 +93,7 @@ export function ContentPanels({
           )
         ) : null}
         {rail === 'bang-xep-hang' ? <LeaderboardPanel courseId={courseId} contestId={contestId} /> : null}
+        {rail === 'thong-ke' ? <StatsPanel handleQuery={handleQuery} /> : null}
         {rail === 'thao-luan' ? (
           <DiscussionPanel problemId={problem?.id} codeLang={editorLang} currentCode={editorSource} />
         ) : null}

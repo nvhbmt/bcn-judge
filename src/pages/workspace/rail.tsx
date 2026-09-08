@@ -1,4 +1,4 @@
-import { BookOpen, CircleHelp, FileText, History, MessagesSquare, Trophy } from 'lucide-react'
+import { BarChart3, BookOpen, CircleHelp, FileText, History, MessagesSquare, Trophy } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 /**
@@ -12,7 +12,7 @@ import type { ReactNode } from 'react'
  *
  * Bốn icon đầu theo đúng bản vẽ (file-text · history · book-open · trophy · circle-help).
  */
-export type RailKey = 'de-bai' | 'bai-nop' | 'giao-trinh' | 'bang-xep-hang' | 'thao-luan' | 'tro-giup'
+export type RailKey = 'de-bai' | 'bai-nop' | 'giao-trinh' | 'bang-xep-hang' | 'thong-ke' | 'thao-luan' | 'tro-giup'
 
 export interface RailDef {
   key: RailKey
@@ -26,6 +26,8 @@ export const RAIL_ITEMS: RailDef[] = [
   { key: 'bai-nop', label: 'Bài nộp', icon: <History size={19} /> },
   { key: 'giao-trinh', label: 'Giáo trình', icon: <BookOpen size={19} /> },
   { key: 'bang-xep-hang', label: 'Bảng xếp hạng', icon: <Trophy size={19} /> },
+  // Thống kê của bài đang mở (FR-E3 v0.8): mọi vai, cả khoá lẫn contest.
+  { key: 'thong-ke', label: 'Thống kê', icon: <BarChart3 size={19} /> },
   // Xuống đáy thanh: "Trợ giúp" nói về chính giao diện, không phải về bài đang làm —
   // xếp lẫn giữa các mục nội dung thì nó trông như một panel nội dung nữa.
   { key: 'tro-giup', label: 'Trợ giúp', icon: <CircleHelp size={19} />, atBottom: true },
@@ -36,6 +38,7 @@ export const RAIL_LABEL: Record<RailKey, string> = {
   'bai-nop': 'Bài nộp',
   'giao-trinh': 'Giáo trình',
   'bang-xep-hang': 'Bảng xếp hạng',
+  'thong-ke': 'Thống kê',
   'thao-luan': 'Thảo luận',
   'tro-giup': 'Trợ giúp',
 }
@@ -54,11 +57,11 @@ export const RAIL_ITEMS_DISCUSSION: RailDef[] = [
 ]
 
 /**
- * Rail cho một BÀI ĐỌC: bỏ "Bài nộp", và "Đề bài" đổi tên thành "Bài đọc".
+ * Rail cho một BÀI ĐỌC: bỏ "Bài nộp" và "Thống kê", và "Đề bài" đổi tên thành "Bài đọc".
  *
  * Bài đọc không có bài nộp nào để liệt kê — panel đó gọi API bằng chính itemId này và
  * chỉ nhận về 404. Một icon dẫn tới khung trống thì thà không có.
  */
-export const RAIL_ITEMS_LESSON: RailDef[] = RAIL_ITEMS.filter((i) => i.key !== 'bai-nop').map((i) =>
-  i.key === 'de-bai' ? { ...i, label: 'Bài đọc' } : i,
+export const RAIL_ITEMS_LESSON: RailDef[] = RAIL_ITEMS.filter((i) => i.key !== 'bai-nop' && i.key !== 'thong-ke').map(
+  (i) => (i.key === 'de-bai' ? { ...i, label: 'Bài đọc' } : i),
 )

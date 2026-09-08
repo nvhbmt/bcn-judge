@@ -4,7 +4,7 @@
 |---|---|
 | Ngày | 08/09/2026 |
 | Nguồn | Ba mục "chưa làm" trong lượt rà thắc mắc của BCN (xem cuối `README.md` §Trạng thái) |
-| Trạng thái | Đang triển khai theo thứ tự 3 → 2a → 2b → 1a → 1b; mỗi phần một commit lên `main`, có test canh. **Phần 3, 2a, 2b xong 08/09/2026.** |
+| Trạng thái | Đang triển khai theo thứ tự 3 → 2a → 2b → 1a → 1b; mỗi phần một commit lên `main`, có test canh. **Phần 3, 2a, 2b, 1a xong 08/09/2026.** |
 | Ước lượng | ≈ 9–10 ngày công, thứ tự đề xuất: Phần 3 → 2a → 2b → 1a → 1b |
 
 Bốn quyết định cần BCN chốt nằm ở mục **0**. Không mục nào chặn việc bắt đầu phần 3.

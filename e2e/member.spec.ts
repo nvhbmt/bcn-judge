@@ -92,6 +92,9 @@ test('thanh icon đổi panel bên trái (FR-E7)', async ({ page }) => {
   await rail.getByRole('button', { name: 'Bảng xếp hạng' }).click()
   await expect(page.getByText(/Bảng xếp hạng|Chưa có/).first()).toBeVisible()
 
+  await rail.getByRole('button', { name: 'Thống kê' }).click()
+  await expect(page.getByText(/Lượt nộp|Chưa ai nộp/).first()).toBeVisible()
+
   // Bản v2 gộp về MỘT lớp tab: "Đề bài" và "Bài nộp" nay cũng là icon trên rail, nên
   // mục đưa về đề bài đổi tên từ "Mô tả" thành "Đề bài" (pages/workspace/rail.tsx).
   await rail.getByRole('button', { name: 'Đề bài' }).click()

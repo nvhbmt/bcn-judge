@@ -93,6 +93,23 @@ export interface SubmissionView {
   source?: string
 }
 
+/** GET /api/member/stats/problem — thống kê gộp của một bài, không tên người. */
+export interface ProblemStats {
+  submissions: number
+  users: number
+  solvedUsers: number
+  verdicts: Record<'AC' | 'WA' | 'TLE' | 'MLE' | 'RE' | 'CE', number>
+  languages: { id: string; count: number }[]
+  time: {
+    limitMs: number
+    p50: number | null
+    p90: number | null
+    /** `upToMs` null = ô cuối "vượt giới hạn gốc". Đếm bài AC tốt nhất mỗi người. */
+    buckets: { upToMs: number | null; count: number }[]
+  }
+  mine: { bestTimeMs: number | null; bestMemoryKb: number | null; fasterThanPct: number | null } | null
+}
+
 export interface LanguageOption {
   id: string
   name: string
