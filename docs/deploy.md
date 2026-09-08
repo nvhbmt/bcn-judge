@@ -127,6 +127,28 @@ Seed chạy lại được: nó `onConflictDoNothing`, admin đã có thì bỏ 
 Dữ liệu mẫu (`db:seed:demo`) là để xem giao diện lúc "có người dùng" — **đừng chạy trên
 máy thật**, và script cũng tự từ chối nếu `DATABASE_URL` không trông giống máy dev.
 
+### Khoá "C cơ bản" (nội dung thật, chạy được trên máy thật)
+
+Khác dữ liệu mẫu: đây là nội dung dùng thật — 9 chương, 79 bài `stdio` chỉ nộp `c11`,
+mỗi bài có lời giải mẫu và 8–12 testcase (2 sample). Toàn bộ nằm trong
+`src/db/seed-c-course.data.json` (đi theo image vì Dockerfile `COPY src ./src`), nên
+bước này **không cần trình biên dịch** — `expected` đã sinh sẵn lúc soạn.
+
+```bash
+docker compose run --rm --entrypoint node migrate \
+  --import tsx src/db/seed-c-course.ts
+```
+
+Chạy **sau** seed nền: script cần một admin để làm `created_by`. Idempotent theo mã khoá
+`c-co-ban` — chạy lại lần hai chỉ in "đã tồn tại — bỏ qua". Muốn nạp lại bản mới thì
+thêm `--reset` vào cuối dòng lệnh trên (ở máy dev, qua npm, phải viết `-- --reset`), nhưng
+nó **xoá cả bài nộp** của khoá cũ — đừng dùng khi đã có người học.
+
+Khoá tạo ra ở trạng thái `open`, `self_enroll` bật, và ghi danh sẵn mọi user chưa bị vô
+hiệu hoá — hệ không có cờ "khoá công khai", member chỉ thấy khoá khi được ghi danh.
+Người đăng ký sau tự vào bằng mã `c-co-ban`; muốn dời khoá khỏi trang chủ thì đổi
+`status` trong trang quản trị, không cần sửa seed.
+
 ---
 
 ## 6. Khởi động
