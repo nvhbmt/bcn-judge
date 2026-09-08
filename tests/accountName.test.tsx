@@ -24,6 +24,7 @@ const ME: Me = {
   mustChangePassword: false,
   discordUsername: null,
   avatarUrl: null,
+  shareSolutions: true,
 }
 
 function ve(fetchImpl?: typeof globalThis.fetch) {

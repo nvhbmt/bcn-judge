@@ -7,6 +7,9 @@ export function formatWhen(iso: string): string {
   return `${p(d.getDate())}.${p(d.getMonth() + 1)} ${p(d.getHours())}:${p(d.getMinutes())}`
 }
 
+/** Lý do đóng (v0.8): chưa giải, hay bài đang trong contest mở. Server cũ không trả → undefined. */
+export type ClosedReason = 'not_solved' | 'contest_embargo' | null
+
 export interface Reply {
   id: string
   bodyMd: string
@@ -34,6 +37,8 @@ export interface Thread {
 }
 
 export interface DiscussionData {
+  reason?: ClosedReason
+  embargoUntil?: string | null
   /** Đã mở khoá chưa (đã AC bài hoặc là staff). false = giấu toàn bộ nội dung. */
   canAccess: boolean
   canPost: boolean

@@ -131,7 +131,7 @@ Mức ưu tiên: **M** = bắt buộc trong v1 · **S** = nên có trong v1 nế
 | FR-D4 | M | Testcase: nhiều testcase, mỗi cái có input, expected output, cờ *mẫu / ẩn*, trọng số (số dương, mặc định 1 cho mỗi testcase), thứ tự. Nhập tay từng cái **hoặc** tải lên hàng loạt bằng file zip theo quy ước `01.in` / `01.out`. Mỗi file input/expected output nhận tối đa 10 MB; zip tải lên tối đa 64 MB; tổng dung lượng testcase mỗi bài tối đa 128 MB; vượt giới hạn thì báo lỗi nêu rõ file nào vượt. |
 | FR-D5 | M | Cách so sánh output: mặc định chuẩn hoá CRLF/CR thành LF ở cả hai phía, bỏ qua khoảng trắng cuối dòng và dòng trống cuối; tuỳ chọn so sánh chính xác tuyệt đối (S); so sánh số thực với sai số (C); checker tự viết (C). |
 | FR-D6 | M | **Kiểm tra testcase bằng lời giải mẫu**: mentor dán lời giải, hệ thống chạy toàn bộ testcase và báo testcase nào không khớp trước khi xuất bản. Tự sinh expected output từ lời giải mẫu cho các testcase chỉ có input (S). Xuất bản không bị chặn, nhưng nếu bài chưa từng được kiểm hoặc lần kiểm gần nhất thất bại thì phải xác nhận qua hộp thoại cảnh báo. |
-| FR-D7 | M | Lời giải tham khảo lưu kèm bài, chỉ mentor/admin xem. Cho member xem sau khi AC hoặc sau khi contest kết thúc (S). |
+| FR-D7 | M | Lời giải tham khảo lưu kèm bài, chỉ mentor/admin xem. Cho member xem sau khi AC hoặc sau khi contest kết thúc (S). **v0.8:** vế S đã nối — lời giải mẫu hiện trong mục *Lời giải* (FR-K), gập sẵn, theo đúng ba chế độ mentor đặt. |
 | FR-D8 | S | Bài tập dùng chung giữa nhiều khoá và contest (tham chiếu tới cùng một bài, không sao chép), để sửa testcase một nơi. |
 | FR-D9 | S | Chấm lại (rejudge) toàn bộ bài nộp của một bài sau khi sửa testcase; kết quả cũ được giữ trong lịch sử; bảng xếp hạng contest tính lại theo. |
 | FR-D10 | S | **Bài dạng function (kiểu LeetCode)**: người học chỉ viết một hàm theo chữ ký cho sẵn, không viết `main`. Mentor soạn *harness* riêng cho từng ngôn ngữ; hệ thống ghép harness với mã người học rồi biên dịch thành một chương trình, sau đó chấm y như bài stdio. Ngôn ngữ chưa có harness thì không nộp bằng ngôn ngữ đó được, và bài dạng này bắt buộc có harness cho ít nhất một ngôn ngữ. Harness không bao giờ lộ ra cho member. |
@@ -203,6 +203,16 @@ Mức ưu tiên: **M** = bắt buộc trong v1 · **S** = nên có trong v1 nế
 | FR-I9 | S | Nhân bản contest tuần trước làm khung cho tuần sau (giữ cấu hình, dời khung thời gian +7 ngày, danh sách bài để trống để chọn bài mới — khớp US-10). |
 | FR-I10 | S | Đóng băng bảng xếp hạng N phút cuối (mentor bật); mở lại sau khi kết thúc. |
 | FR-I11 | C | Lịch tự động: tạo contest mới mỗi tuần theo mẫu và nhắc mentor bổ sung bài. |
+
+### FR-K · Lời giải chia sẻ (v0.8)
+
+| ID | Ưu tiên | Yêu cầu |
+|---|:-:|---|
+| FR-K1 | S | Mục **Lời giải** trên thanh icon (bài luyện và bài contest đã kết thúc): member **đã AC** bài xem được bài AC **tốt nhất** (thời gian nhỏ nhất) của mỗi thành viên khác — tên, ngôn ngữ, thời gian, bộ nhớ, dung lượng; lọc theo ngôn ngữ, xếp theo thời gian / bộ nhớ / mới nhất. Không có bài WA/TLE của ai. Danh sách không mang mã nguồn; mở từng bài mới tải mã. |
+| FR-K2 | S | **So sánh**: chọn một bài để đặt cạnh bài AC tốt nhất của mình, hai cột kèm số đo. Không có nút nạp bài người khác vào editor. |
+| FR-K3 | M | **Cấm vận contest**: bài đang nằm trong một contest đã xuất bản **đang diễn ra** thì mục Lời giải **và Thảo luận** đóng với mọi member (kể cả người đã AC qua khoá) tới khi contest kết thúc; mentor/admin không bị cấm vận. Server là cổng, giao diện chỉ che. |
+| FR-K4 | S | Mỗi member có công tắc *Cho thành viên khác xem bài AC của tôi* ở trang Tài khoản, **mặc định bật**; tắt thì bài của mình biến khỏi danh sách của người khác (mentor/admin vẫn thấy qua đường mentor); chính chủ luôn xem được bài của mình. |
+| FR-K5 | M | Mã nguồn của người khác đi kèm **chỉ số đo**: không kết quả từng testcase, log biên dịch, stdout hay điểm từng phần (NFR-2 giữ nguyên). |
 
 ### FR-J · Team & Leader
 

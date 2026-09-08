@@ -128,4 +128,20 @@ describe.skipIf(!INTEGRATION)('thảo luận theo bài (/api/member/discussion)'
     const titles = (await list(solver)).body.data.threads.map((t: any) => t.title)
     expect(titles[0]).toBe('Cũ') // đã ghim nên lên đầu dù cũ hơn
   })
+
+  it('cấm vận contest (v0.8): bài đang trong contest mở → đóng với member đã AC qua khoá; staff thì không', async () => {
+    const [ct] = await q<{ id: string }>(sql`
+      INSERT INTO contests (title, course_id, start_at, end_at, status)
+      VALUES ('C', NULL, now() - interval '1 hour', now() + interval '5 hours', 'published') RETURNING id`)
+    await q(sql`INSERT INTO contest_problems (contest_id, problem_id, position, label, max_score) VALUES (${ct!.id}, ${pid}, 1, 'A', 100)`)
+
+    const res = await list(solver)
+    expect(res.body.data).toMatchObject({ canAccess: false, reason: 'contest_embargo', threads: [] })
+    expect(res.body.data.embargoUntil).toBeTruthy()
+    expect((await newThread(solver, { title: 'Hỏi', bodyMd: 'x' })).status).toBe(403)
+    expect((await list(mentor)).body.data.canAccess).toBe(true)
+
+    await q(sql`UPDATE contests SET end_at = now() - interval '1 minute' WHERE id = ${ct!.id}`)
+    expect((await list(solver)).body.data).toMatchObject({ canAccess: true, reason: null })
+  })
 })

@@ -62,6 +62,8 @@ export const users = pgTable(
     /** 'admin' = khoá tay, 'discord_kick' = bộ quét khoá vì rời server — xem drizzle/0008. */
     disabledReason: text('disabled_reason'),
     disabledAt: timestamp('disabled_at', { withTimezone: true }),
+    /** Cho người khác xem bài AC của mình (FR-K, opt-out) — xem drizzle/0009. */
+    shareSolutions: boolean('share_solutions').notNull().default(true),
     createdAt: createdAt(),
     lastLogin: timestamp('last_login', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),

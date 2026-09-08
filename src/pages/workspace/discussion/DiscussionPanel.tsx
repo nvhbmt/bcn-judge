@@ -53,14 +53,22 @@ export function DiscussionPanel({
   }
 
   if (!data.canAccess) {
+    // Hai lý do đóng là hai câu khác nhau: "làm đi rồi quay lại" và "chờ contest xong" —
+    // gộp làm một là bảo người đã AC đi giải bài họ vừa giải.
+    const embargo = data.reason === 'contest_embargo'
     return (
       <div className="px-4 py-10">
         <div className="mx-auto flex max-w-sm flex-col items-center gap-3 text-center">
           <Lock size={28} className="text-ink-5" />
-          <p className="font-display text-[19px] text-ink-1">Giải được bài để mở thảo luận</p>
+          <p className="font-display text-[19px] text-ink-1">
+            {embargo ? 'Contest đang diễn ra' : 'Giải được bài để mở thảo luận'}
+          </p>
           <p className="text-[14px] text-ink-4">
-            Thảo luận của mỗi bài chỉ mở sau khi bạn nộp được lời giải Chấp nhận (AC) — để không lộ
-            hướng làm cho người chưa thử.
+            {embargo
+              ? `Bài này đang nằm trong một contest. Thảo luận mở lại sau ${
+                  data.embargoUntil ? new Date(data.embargoUntil).toLocaleString('vi-VN') : 'khi contest kết thúc'
+                }.`
+              : 'Thảo luận của mỗi bài chỉ mở sau khi bạn nộp được lời giải Chấp nhận (AC) — để không lộ hướng làm cho người chưa thử.'}
           </p>
         </div>
       </div>

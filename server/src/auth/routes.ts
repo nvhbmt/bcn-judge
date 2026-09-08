@@ -97,22 +97,35 @@ authRoutes.get('/me', requireAuth, (c) => ok(c, c.get('user')))
  * users.ts): hai đường ghi vào một cột mà nhận hai khoảng độ dài khác nhau thì có
  * tên hợp lệ ở đường này lại vỡ ở đường kia.
  */
-const renameSchema = z.object({ displayName: z.string().min(1).max(200) })
+const meSchema = z.object({
+  displayName: z.string().min(1).max(200).optional(),
+  /** FR-K: công tắc chia sẻ bài AC — thứ thứ hai người dùng tự sửa được, cũng vô hại. */
+  shareSolutions: z.boolean().optional(),
+})
 
 authRoutes.patch('/me', requireAuth, async (c) => {
-  const body = await parseBody(c, renameSchema)
+  const body = await parseBody(c, meSchema)
   if (!body.ok) return body.response
   const me = c.get('user')
+  if (body.data.displayName === undefined && body.data.shareSolutions === undefined) {
+    return errors.badRequest(c, 'Không có gì để sửa.')
+  }
 
-  // Cắt khoảng trắng hai đầu rồi mới kiểm lại: một chuỗi toàn dấu cách qua được
-  // `min(1)` nhưng hiện ra là một ô trống, và người đó biến mất khỏi mọi bảng.
-  const ten = body.data.displayName.trim()
-  if (ten === '') return errors.badRequest(c, 'Tên hiển thị không được để trống.')
-
-  await db.update(users).set({ displayName: ten }).where(eq(users.id, me.id))
-  await audit(me.id, 'user.rename', 'user', me.id, { displayName: me.displayName }, { displayName: ten })
-
-  return ok(c, { displayName: ten })
+  const out: { displayName?: string; shareSolutions?: boolean } = {}
+  if (body.data.displayName !== undefined) {
+    // Cắt khoảng trắng hai đầu rồi mới kiểm lại: một chuỗi toàn dấu cách qua được
+    // `min(1)` nhưng hiện ra là một ô trống, và người đó biến mất khỏi mọi bảng.
+    const ten = body.data.displayName.trim()
+    if (ten === '') return errors.badRequest(c, 'Tên hiển thị không được để trống.')
+    await db.update(users).set({ displayName: ten }).where(eq(users.id, me.id))
+    await audit(me.id, 'user.rename', 'user', me.id, { displayName: me.displayName }, { displayName: ten })
+    out.displayName = ten
+  }
+  if (body.data.shareSolutions !== undefined) {
+    await db.update(users).set({ shareSolutions: body.data.shareSolutions }).where(eq(users.id, me.id))
+    out.shareSolutions = body.data.shareSolutions
+  }
+  return ok(c, out)
 })
 
 const changePasswordSchema = z.object({

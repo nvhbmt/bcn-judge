@@ -21,6 +21,8 @@ export interface AuthUser {
   discordUsername: string | null
   /** URL ảnh Discord dựng sẵn ở server; `null` = dùng chữ cái đầu tên. */
   avatarUrl: string | null
+  /** Công tắc "cho người khác xem bài AC của tôi" (FR-K). */
+  shareSolutions: boolean
 }
 
 function hashToken(token: string): Buffer {
@@ -57,6 +59,7 @@ export async function resolveSession(token: string | null): Promise<AuthUser | n
       discordUsername: users.discordUsername,
       discordId: users.discordId,
       discordAvatar: users.discordAvatar,
+      shareSolutions: users.shareSolutions,
       disabled: users.disabled,
       deletedAt: users.deletedAt,
     })
@@ -81,6 +84,7 @@ export async function resolveSession(token: string | null): Promise<AuthUser | n
     mustChangePassword: row.mustChangePassword,
     discordUsername: row.discordUsername,
     avatarUrl: avatarUrl(row.discordId, row.discordAvatar),
+    shareSolutions: row.shareSolutions,
   }
 }
 

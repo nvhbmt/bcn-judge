@@ -14,6 +14,7 @@ import { PageContainer } from '@/components/layout/PageContainer'
 import { Button } from '@/components/ui'
 import { api, ApiFailure } from '@/lib/api'
 import { DISCORD_REASON, discordOk } from '@/lib/discord'
+import { ShareSolutionsToggle } from './account/ShareSolutionsToggle'
 import { useAuth } from '@/stores/auth'
 import { cn } from '@/lib/cn'
 
@@ -101,6 +102,8 @@ export function AccountPage() {
           {unlink.error instanceof ApiFailure ? unlink.error.error.message : 'Không bỏ gắn được.'}
         </p>
       ) : null}
+
+      <ShareSolutionsToggle me={me} />
 
       <h2 className="mb-1 font-mono text-[12px] tracking-widest text-ink-5 uppercase">Mật khẩu</h2>
       <p className="mb-3 text-[14px] text-ink-5">Đổi mật khẩu sẽ đăng xuất mọi thiết bị khác.</p>

@@ -149,6 +149,57 @@ export function toMemberSubmission(
   return view
 }
 
+// ── Peer: bài AC của người khác, cho mục "Lời giải" (FR-K) ────────────────────
+
+export type PeerRawRow = Pick<
+  RawSubmissionRow,
+  'id' | 'userId' | 'languageId' | 'timeMsMax' | 'memoryKbMax' | 'sourceBytes' | 'receivedAt' | 'source'
+>
+
+export interface PeerSubmissionView {
+  id: string
+  userId: string
+  authorName: string
+  avatarUrl: string | null
+  languageId: string
+  timeMsMax: number | null
+  memoryKbMax: number | null
+  sourceBytes: number
+  receivedAt: string
+  isMine: boolean
+  /** Chỉ ở đường chi tiết (và bài của chính mình trong danh sách). */
+  source?: string
+  /** Của người khác chỉ có MÃ NGUỒN và số đo — kết quả từng test, log biên dịch, stdout,
+   *  điểm từng phần không bao giờ đi qua đây. */
+  results?: never
+  compileOutput?: never
+  stdout?: never
+  stderr?: never
+  passedWeight?: never
+  totalWeight?: never
+  verdict?: never
+}
+
+export function toPeerSubmission(
+  row: PeerRawRow,
+  opts: { authorName: string; avatarUrl: string | null; isMine: boolean; includeSource: boolean },
+): PeerSubmissionView {
+  const view: PeerSubmissionView = {
+    id: row.id,
+    userId: row.userId,
+    authorName: opts.authorName,
+    avatarUrl: opts.avatarUrl,
+    languageId: row.languageId,
+    timeMsMax: row.timeMsMax,
+    memoryKbMax: row.memoryKbMax,
+    sourceBytes: row.sourceBytes,
+    receivedAt: iso(row.receivedAt)!,
+    isMine: opts.isMine,
+  }
+  if (opts.includeSource) view.source = row.source
+  return view
+}
+
 // ── Leader: bài nộp của đồng đội (FR-J3) ─────────────────────────────────────
 
 export interface LeaderSubmissionView {

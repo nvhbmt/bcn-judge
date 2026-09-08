@@ -3,9 +3,10 @@
  *
  * CỔNG chống lộ lời giải (quyết định sản phẩm): chỉ ai ĐÃ AC bài — hoặc là staff
  * (mentor/admin) — mới đọc/đăng được. Người chưa giải được không thấy nội dung
- * (canAccess=false), nên thảo luận không thành nơi chép bài. Đây cũng là lớp an toàn
- * cho contest: dù gọi thẳng API, bạn chỉ thấy thảo luận của bài mình ĐÃ giải; giao
- * diện còn ẩn hẳn tab này trong lúc thi (workspace) cho chắc.
+ * (canAccess=false), nên thảo luận không thành nơi chép bài. Với contest còn một lớp
+ * nữa (v0.8, dùng chung với lời giải chia sẻ — xem solved.ts): bài đang nằm trong một
+ * contest ĐANG DIỄN RA thì đóng với mọi member, kể cả người đã AC qua khoá từ trước;
+ * giao diện còn ẩn hẳn tab này trong lúc thi (workspace) cho chắc.
  *
  * Kiểm duyệt: tác giả sửa/xoá bài của mình; mentor/admin xoá được bất kỳ và GHIM
  * chủ đề. Xoá chủ đề kéo theo mọi trả lời (ON DELETE CASCADE).
@@ -16,26 +17,16 @@ import { z } from 'zod'
 import { q } from '@/db/pool'
 import { created, errors, ok } from '@/lib/apiResponse'
 import { parseBody } from '@/lib/http'
+import { contestEmbargoUntil, gateEmbargo, hasAced, isStaff, type Actor } from './solved'
 
 export const memberDiscussionRoutes = new Hono()
 
-interface Actor {
-  id: string
-  role: 'admin' | 'mentor' | 'member'
-}
-const isStaff = (me: Actor): boolean => me.role === 'admin' || me.role === 'mentor'
-
-/** Đã từng AC bài này (nộp, không phải chạy thử)? */
-async function hasAced(userId: string, problemId: string): Promise<boolean> {
-  const [r] = await q(sql`
-    SELECT 1 FROM submissions
-    WHERE user_id = ${userId} AND problem_id = ${problemId} AND kind = 'submit' AND verdict = 'AC'
-    LIMIT 1
-  `)
-  return Boolean(r)
-}
-async function canAccess(me: Actor, problemId: string): Promise<boolean> {
-  return isStaff(me) || (await hasAced(me.id, problemId))
+/** null = vào được; còn lại là câu từ chối. */
+async function denial(me: Actor, problemId: string): Promise<string | null> {
+  if (isStaff(me)) return null
+  if (!(await hasAced(me.id, problemId))) return GATE
+  const until = await contestEmbargoUntil(problemId)
+  return until ? gateEmbargo(until) : null
 }
 
 const titleSchema = z.string().trim().min(1).max(200)
@@ -53,9 +44,23 @@ memberDiscussionRoutes.get('/problem/:problemId', async (c) => {
   if (!prob) return errors.notFound(c, 'Không tìm thấy bài.')
 
   const staff = isStaff(me)
-  if (!(staff || (await hasAced(me.id, problemId)))) {
-    // Chưa mở khoá: KHÔNG trả nội dung nào — chỉ nói cho FE dựng trạng thái "giải để mở".
-    return ok(c, { canAccess: false, canPost: false, isStaff: false, threads: [] })
+  if (!staff) {
+    // Chưa mở khoá: KHÔNG trả nội dung nào — chỉ nói cho FE dựng trạng thái "giải để mở",
+    // hoặc "contest đang diễn ra, mở lại lúc …".
+    if (!(await hasAced(me.id, problemId))) {
+      return ok(c, { canAccess: false, reason: 'not_solved', embargoUntil: null, canPost: false, isStaff: false, threads: [] })
+    }
+    const until = await contestEmbargoUntil(problemId)
+    if (until) {
+      return ok(c, {
+        canAccess: false,
+        reason: 'contest_embargo',
+        embargoUntil: until.toISOString(),
+        canPost: false,
+        isStaff: false,
+        threads: [],
+      })
+    }
   }
 
   const threads = await q<{
@@ -110,6 +115,8 @@ memberDiscussionRoutes.get('/problem/:problemId', async (c) => {
 
   return ok(c, {
     canAccess: true,
+    reason: null,
+    embargoUntil: null,
     canPost: true,
     isStaff: staff,
     threads: threads.map((t) => ({
@@ -135,7 +142,8 @@ memberDiscussionRoutes.post('/problem/:problemId', async (c) => {
   const problemId = c.req.param('problemId')
   const [prob] = await q(sql`SELECT id FROM problems WHERE id = ${problemId} AND deleted_at IS NULL`)
   if (!prob) return errors.notFound(c, 'Không tìm thấy bài.')
-  if (!(await canAccess(me, problemId))) return errors.forbidden(c, GATE)
+  const tuChoi = await denial(me, problemId)
+  if (tuChoi) return errors.forbidden(c, tuChoi)
 
   const body = await parseBody(c, z.object({ title: titleSchema, bodyMd: bodySchema }))
   if (!body.ok) return body.response
@@ -156,7 +164,8 @@ memberDiscussionRoutes.post('/thread/:threadId/reply', async (c) => {
     sql`SELECT problem_id AS "problemId" FROM discussion_threads WHERE id = ${c.req.param('threadId')}`,
   )
   if (!t) return errors.notFound(c, 'Không tìm thấy chủ đề.')
-  if (!(await canAccess(me, t.problemId))) return errors.forbidden(c, GATE)
+  const tuChoi = await denial(me, t.problemId)
+  if (tuChoi) return errors.forbidden(c, tuChoi)
 
   const body = await parseBody(c, z.object({ bodyMd: bodySchema }))
   if (!body.ok) return body.response

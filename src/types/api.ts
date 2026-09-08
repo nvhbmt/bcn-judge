@@ -15,6 +15,8 @@ export interface Me {
   discordUsername: string | null
   /** URL ảnh Discord do server dựng; `null` = dùng chữ cái đầu tên. */
   avatarUrl: string | null
+  /** Cho thành viên khác xem bài AC của tôi (FR-K, mặc định bật). */
+  shareSolutions: boolean
 }
 
 export interface CourseSummary {

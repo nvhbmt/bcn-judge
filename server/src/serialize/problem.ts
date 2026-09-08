@@ -137,6 +137,21 @@ export function mayMemberSeeSolution(
   }
 }
 
+/** Lời giải mẫu của mentor khi bài cho phép member xem (FR-D7) — đi ĐƯỜNG RIÊNG, không kèm đề. */
+export interface ReferenceSolutionView {
+  languageId: string | null
+  source: string
+}
+
+export function toReferenceSolution(
+  problem: Pick<RawProblemRow, 'solutionVisibility' | 'solutionSource' | 'solutionLanguageId'>,
+  ctx: { hasAc: boolean; contestEnded: boolean | null; staff: boolean },
+): ReferenceSolutionView | null {
+  if (!problem.solutionSource || problem.solutionSource.trim() === '') return null
+  if (!ctx.staff && !mayMemberSeeSolution(problem, ctx)) return null
+  return { languageId: problem.solutionLanguageId, source: problem.solutionSource }
+}
+
 export interface MentorProblemView extends Omit<MemberProblemView, 'solutionSource' | 'hiddenTestcases' | 'harness'> {
   /** {languageId: harness} — chỉ có ở đường mentor. */
   harness: unknown

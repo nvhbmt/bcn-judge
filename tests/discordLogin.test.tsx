@@ -27,6 +27,7 @@ const ME: Me = {
   mustChangePassword: false,
   discordUsername: null,
   avatarUrl: null,
+  shareSolutions: true,
 }
 
 function traLoi(map: Record<string, unknown>) {

@@ -25,6 +25,7 @@ const me = (mustChangePassword: boolean): Me => ({
   mustChangePassword,
   discordUsername: null,
   avatarUrl: null,
+  shareSolutions: true,
 })
 
 function dung(batBuoc: boolean) {

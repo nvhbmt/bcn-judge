@@ -140,10 +140,13 @@ export function WorkspacePage() {
 
   const solved = useSolvedDialog(submission, watchedId, handle)
 
+  // FR-I6: sau giờ kết thúc contest vẫn nộp và chấm được, nhưng không tính BXH.
+  const contestEndAt = meta?.contestEndAt as string | undefined
+  const practiceMode = Boolean(contestEndAt && new Date(contestEndAt) <= new Date())
   // "Đề bài" là sai tên cho một trang lý thuyết — và nhãn này còn là tên tab ở màn hẹp.
-  // Bài đọc: không thảo luận. Contest: ẩn thảo luận (chống mách nước lúc thi). Chỉ bài
-  // luyện của khoá mới có mục "Thảo luận".
-  const railItems = laBaiDoc ? RAIL_ITEMS_LESSON : contestProblemId ? RAIL_ITEMS : RAIL_ITEMS_DISCUSSION
+  // Bài đọc: không thảo luận. Contest ĐANG DIỄN RA: ẩn Lời giải và Thảo luận (chống mách
+  // nước lúc thi); contest đã kết thúc thì mở lại như bài luyện.
+  const railItems = laBaiDoc ? RAIL_ITEMS_LESSON : contestProblemId && !practiceMode ? RAIL_ITEMS : RAIL_ITEMS_DISCUSSION
   // Tab đang chọn có thể không còn trong rail sau khi đổi bài (vd đang ở "Thảo luận" rồi
   // mở một bài contest) — rơi về "Đề bài" thay vì hiện panel lạc ngữ cảnh.
   const effectiveRail: RailKey = railItems.some((i) => i.key === rail) ? rail : 'de-bai'
@@ -151,9 +154,6 @@ export function WorkspacePage() {
   // Truy vấn ĐANG TẮT thì react-query báo isLoading = false, nên nếu chỉ nhìn nó thì
   // trong lúc còn chờ giáo trình màn hình đã kết luận "không mở được" rồi mới đi hỏi.
   const dangCho = !siblings.resolved || isLoading
-  // FR-I6: sau giờ kết thúc contest vẫn nộp và chấm được, nhưng không tính BXH.
-  const contestEndAt = meta?.contestEndAt as string | undefined
-  const practiceMode = Boolean(contestEndAt && new Date(contestEndAt) <= new Date())
 
   const content = (
     <ContentPanels

@@ -22,6 +22,7 @@ const ME: Me = {
   mustChangePassword: false,
   discordUsername: null,
   avatarUrl: null,
+  shareSolutions: true,
 }
 
 function dung() {

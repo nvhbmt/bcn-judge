@@ -26,6 +26,7 @@ function renderAs(role: Role) {
     mustChangePassword: false,
     discordUsername: null,
   avatarUrl: null,
+    shareSolutions: true,
   }
   useAuth.setState({ me, loading: false })
   render(
