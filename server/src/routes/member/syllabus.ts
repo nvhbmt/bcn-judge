@@ -8,6 +8,7 @@ import { sql, type SQL } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { q } from '@/db/pool'
 import { errors, ok } from '@/lib/apiResponse'
+import { maxPointsSql } from '@/lib/settings'
 import { iso } from '@/lib/time'
 import { lessonForMember } from './access'
 import { canViewCourseAsMember } from './courses'
@@ -16,7 +17,9 @@ export const memberSyllabusRoutes = new Hono()
 
 /** Bài nộp TỐT NHẤT của mỗi (user, item) trong phạm vi khoá — dùng chung 3 chỗ. */
 /**
- * Bài nộp TỐT NHẤT của mỗi người ở mỗi mục, quy về thang 100.
+ * Bài nộp TỐT NHẤT của mỗi người ở mỗi mục; `points` = tỉ lệ testcase đúng × điểm tối
+ * đa của bài theo độ khó (`max_points`, đọc từ settings — FR-F2 v0.8). Bài nộp tốt nhất
+ * vẫn chọn theo TỈ LỆ, vì max_points là hằng trong một mục.
  *
  * `courseId = null` = không giới hạn khoá, dùng cho bảng xếp hạng toàn CLB (team
  * không gắn khoá nào). Ba chỗ gọi cũ đều truyền một chuỗi nên hành vi không đổi.
@@ -29,11 +32,14 @@ export const memberSyllabusRoutes = new Hono()
 const bestSubmissions = (courseId: string | null, since: SQL | null = null) => sql`
   SELECT DISTINCT ON (s.user_id, s.item_id)
          s.user_id, s.item_id, s.problem_id, s.verdict,
-         ROUND(s.passed_weight::numeric / NULLIF(s.total_weight, 0) * 100, 2) AS points,
+         ROUND(s.passed_weight::numeric / NULLIF(s.total_weight, 0) * mp.max_points, 2) AS points,
+         mp.max_points,
          s.received_at
   FROM submissions s
   JOIN items i ON i.id = s.item_id
   JOIN sections sec ON sec.id = i.section_id
+  JOIN problems p ON p.id = s.problem_id
+  CROSS JOIN LATERAL (SELECT ${maxPointsSql(sql`p.difficulty`)} AS max_points) mp
   WHERE ${courseId === null ? sql`TRUE` : sql`sec.course_id = ${courseId}`}
     AND i.status = 'published'
     AND s.kind = 'submit' AND s.status = 'done'
@@ -63,6 +69,7 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
     status: string | null
     attempts: number
     points: number | null
+    maxPoints: number | null
   }>(sql`
     SELECT s.id AS "sectionId", s.title AS "sectionTitle", s.position AS "sectionPosition",
            -- Mốc mở sớm nhất của chương: bài ĐÃ xuất bản nhưng chưa tới giờ hiện.
@@ -81,11 +88,14 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
            END AS status,
            COALESCE((SELECT count(*)::int FROM submissions sub
                      WHERE sub.item_id = i.id AND sub.user_id = ${me.id} AND sub.kind = 'submit'), 0) AS attempts,
-           best.points
+           best.points,
+           -- Điểm tối đa của MỤC, kể cả khi chưa ai nộp — để giáo trình nói "0/150 đ".
+           CASE WHEN i.kind = 'problem' THEN ${maxPointsSql(sql`p.difficulty`)} END AS "maxPoints"
     FROM sections s
     LEFT JOIN items i ON i.section_id = s.id
       AND i.status = 'published'
       AND (i.visible_from IS NULL OR i.visible_from <= now())
+    LEFT JOIN problems p ON p.id = i.problem_id
     LEFT JOIN (${bestSubmissions(courseId)}) best ON best.item_id = i.id AND best.user_id = ${me.id}
     WHERE s.course_id = ${courseId}
     ORDER BY s.position, i.position
@@ -116,6 +126,7 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
         status: row.status,
         attempts: row.attempts,
         points: row.points === null ? null : Number(row.points),
+        maxPoints: row.maxPoints === null ? null : Number(row.maxPoints),
       })
     }
   }
@@ -123,9 +134,10 @@ memberSyllabusRoutes.get('/:courseId/syllabus', async (c) => {
 })
 
 /**
- * GET /api/member/courses/:id/leaderboard — FR-G6.
- * Xếp theo số bài AC, rồi tổng điểm chuẩn hoá, rồi `last_gain` sớm hơn xếp trên
- * (một định nghĩa duy nhất dùng chung với standings contest — §2.7).
+ * GET /api/member/courses/:id/leaderboard — FR-G6 v0.8.
+ * Xếp theo TỔNG ĐIỂM, rồi số bài AC, rồi `last_gain` sớm hơn xếp trên — cùng thứ tự
+ * với standings contest (§2.7). Điểm trước AC là hệ quả bắt buộc của điểm theo độ khó:
+ * xếp AC trước thì mười bài dễ vẫn thắng tám bài khó, và hệ số thành vô nghĩa.
  */
 memberSyllabusRoutes.get('/:courseId/leaderboard', async (c) => {
   const me = c.get('user')
@@ -147,7 +159,7 @@ memberSyllabusRoutes.get('/:courseId/leaderboard', async (c) => {
     FROM best
     JOIN users u ON u.id = best.user_id
     GROUP BY u.id, u.display_name
-    ORDER BY "acCount" DESC, "totalPoints" DESC, "lastGain" ASC NULLS LAST
+    ORDER BY "totalPoints" DESC, "acCount" DESC, "lastGain" ASC NULLS LAST
     LIMIT 300
   `)
 

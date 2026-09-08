@@ -1,4 +1,5 @@
 /** Đọc bảng `settings` (FR-H2) với cache ngắn — mọi giới hạn đều cấu hình được. */
+import { sql, type SQL } from 'drizzle-orm'
 import { db } from '@/db/pool'
 import { settings } from '@/db/schema'
 
@@ -29,6 +30,17 @@ export interface JudgeSettings {
    * cũng bị khoá khi rời server — mentor rời server là mất luôn đường vào, nên tắt sẵn.
    */
   discord_kick_locks_password_accounts: boolean
+  /**
+   * Điểm TỐI ĐA của một bài luyện theo độ khó (FR-F2 v0.8). Điểm tích luỹ vào tiến độ
+   * và bảng xếp hạng = tỉ lệ testcase đúng × số này; điểm của một bài nộp riêng lẻ vẫn
+   * là thang 0–100 (`scoreOf`). Đặt ở settings chứ không thêm cột cho từng bài: 79 bài
+   * đã gán độ khó nhận điểm mới ngay, mentor không phải nhập lại gì.
+   */
+  points_easy: number
+  points_medium: number
+  points_hard: number
+  /** Bài chưa đặt độ khó. */
+  points_unset: number
 }
 
 /**
@@ -55,6 +67,41 @@ export const DEFAULTS: JudgeSettings = {
   judge_paused: false,
   announcement: '',
   discord_kick_locks_password_accounts: false,
+  points_easy: 100,
+  points_medium: 150,
+  points_hard: 200,
+  points_unset: 100,
+}
+
+/** Điểm tối đa của một bài theo độ khó — bản TypeScript của luật. */
+export function maxPointsFor(difficulty: string | null | undefined, s: JudgeSettings): number {
+  switch (difficulty) {
+    case 'easy':
+      return s.points_easy
+    case 'medium':
+      return s.points_medium
+    case 'hard':
+      return s.points_hard
+    default:
+      return s.points_unset
+  }
+}
+
+/**
+ * Cùng luật đó ở SQL, cho các truy vấn dẫn xuất (§2.7) — đọc thẳng bảng `settings` để
+ * builder truy vấn (`bestSubmissions`) vẫn đồng bộ, bốn nơi gọi không phải đổi chữ ký.
+ * Bốn subquery vô hướng không tương quan: Postgres tính một lần mỗi câu (InitPlan),
+ * không phải mỗi dòng. `COALESCE` về mặc định để DB chưa seed khoá mới vẫn chấm đúng.
+ * Test canh hai bản không trôi khỏi nhau: routes/leaderboard.test.ts.
+ */
+export function maxPointsSql(difficultyExpr: SQL): SQL {
+  const read = (key: keyof JudgeSettings) =>
+    sql`COALESCE((SELECT (value #>> '{}')::numeric FROM settings WHERE key = ${key}), ${DEFAULTS[key]}::numeric)`
+  return sql`CASE ${difficultyExpr}
+    WHEN 'easy' THEN ${read('points_easy')}
+    WHEN 'medium' THEN ${read('points_medium')}
+    WHEN 'hard' THEN ${read('points_hard')}
+    ELSE ${read('points_unset')} END`
 }
 
 let cache: { at: number; value: JudgeSettings } | null = null

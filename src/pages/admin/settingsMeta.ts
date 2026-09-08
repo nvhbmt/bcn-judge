@@ -59,6 +59,14 @@ export const SETTING_META: Record<string, SettingMeta> = {
     label: 'Tạm dừng nhận bài nộp',
     hint: 'Bật thì member vẫn đọc đề và lưu nháp, chỉ không nộp được. Cũng bật/tắt được ở trang Tình trạng chấm.',
   },
+  points_easy: { label: 'Điểm tối đa bài Dễ', unit: 'điểm' },
+  points_medium: { label: 'Điểm tối đa bài Trung bình', unit: 'điểm' },
+  points_hard: { label: 'Điểm tối đa bài Khó', unit: 'điểm' },
+  points_unset: {
+    label: 'Điểm tối đa bài chưa đặt độ khó',
+    unit: 'điểm',
+    hint: 'Điểm tích luỹ = tỉ lệ testcase đúng × điểm tối đa. Đổi ở đây là bảng xếp hạng đổi ngay, không cần chấm lại.',
+  },
   discord_kick_locks_password_accounts: {
     label: 'Rời server Discord thì khoá cả tài khoản admin cấp',
     hint:
@@ -77,6 +85,7 @@ const GROUPS: Group[] = [
     keys: ['default_time_limit_ms', 'default_memory_limit_mb', 'max_output_bytes', 'tle_skip_threshold'],
   },
   { title: 'Bài nộp của member', keys: ['max_source_bytes', 'max_custom_input_bytes'] },
+  { title: 'Điểm bài luyện theo độ khó', keys: ['points_easy', 'points_medium', 'points_hard', 'points_unset'] },
   {
     title: 'Chống quá tải',
     keys: ['submissions_per_minute', 'runs_per_minute', 'max_pending_submissions_per_user'],

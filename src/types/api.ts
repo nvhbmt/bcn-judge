@@ -51,6 +51,8 @@ export interface ProblemView {
   timeLimitMs: number
   memoryLimitMb: number
   difficulty: string | null
+  /** Điểm tối đa theo độ khó — điểm tích luỹ = tỉ lệ testcase đúng × số này. */
+  maxPoints: number
   tags: string[]
   /** 'exact' | 'trim' | 'float' — quyết định có bỏ qua khoảng trắng cuối dòng không. */
   compareMode: string

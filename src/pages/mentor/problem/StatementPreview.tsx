@@ -39,6 +39,9 @@ export function StatementPreview({
     timeLimitMs: Number.parseInt(values.timeLimitMs, 10) || 0,
     memoryLimitMb: Number.parseInt(values.memoryLimitMb, 10) || 0,
     difficulty: values.difficulty || null,
+    // 0 = ẩn dòng điểm ở khung xem trước: điểm tối đa theo độ khó nằm ở Cài đặt của
+    // admin, mentor không đọc được bảng đó, và đoán một con số rồi hiện sai còn tệ hơn.
+    maxPoints: 0,
     // Cùng nguồn với payload gửi đi (parseTags) — khung xem trước phải hiện đúng
     // thứ member sẽ thấy, kể cả dấu phẩy thừa đã được dọn.
     tags: parseTags(values.tags),

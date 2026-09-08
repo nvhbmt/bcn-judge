@@ -3,8 +3,9 @@
  *
  * Bảng xếp hạng TOÀN CLB (mọi khoá, mọi mục đã xuất bản), cho trang BXH riêng
  * (src/pages/leaderboard). Dẫn xuất bằng SQL từ `bestSubmissions` — cùng công thức
- * điểm và cùng thứ tự (AC trước, rồi tổng điểm, rồi mốc ghi điểm sớm hơn — §2.7) như
- * BXH khoá và standings contest, nên các con số nói cùng một chuyện ở mọi nơi.
+ * điểm (tỉ lệ × điểm tối đa theo độ khó) và cùng thứ tự (tổng điểm trước, rồi số bài
+ * AC, rồi mốc ghi điểm sớm hơn — §2.7 v0.8) như BXH khoá và standings contest, nên các
+ * con số nói cùng một chuyện ở mọi nơi.
  *
  * Cửa sổ thời gian tính THEO LỊCH giờ Việt Nam: "tuần" từ thứ Hai, "tháng" từ ngày 1.
  * date_trunc mặc định lấy tuần bắt đầu thứ Hai (chuẩn ISO), khớp thói quen ở đây.
@@ -54,7 +55,7 @@ memberLeaderboardRoutes.get('/', async (c) => {
       JOIN team_members tm ON tm.team_id = t.id
       LEFT JOIN best ON best.user_id = tm.user_id
       GROUP BY t.id, t.name
-      ORDER BY "acCount" DESC, "totalPoints" DESC, "lastGain" ASC NULLS LAST, t.name ASC
+      ORDER BY "totalPoints" DESC, "acCount" DESC, "lastGain" ASC NULLS LAST, t.name ASC
     `)
     return ok(
       c,
@@ -87,7 +88,7 @@ memberLeaderboardRoutes.get('/', async (c) => {
     JOIN users u ON u.id = best.user_id
     WHERE u.disabled = false
     GROUP BY u.id, u.display_name
-    ORDER BY "acCount" DESC, "totalPoints" DESC, "lastGain" ASC NULLS LAST
+    ORDER BY "totalPoints" DESC, "acCount" DESC, "lastGain" ASC NULLS LAST
     LIMIT 300
   `)
   return ok(

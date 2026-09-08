@@ -15,6 +15,8 @@ export function CourseSide({ course, sections }: { course: CourseDetail; section
   const total = problems.length
   const percent = total > 0 ? Math.round((ac / total) * 100) : 0
   const points = problems.reduce((sum, i) => sum + (i.points ?? 0), 0)
+  // Tổng điểm có thể đạt của cả khoá — mẫu số để "200 điểm" có nghĩa.
+  const possible = problems.reduce((sum, i) => sum + (i.maxPoints ?? 0), 0)
 
   return (
     <>
@@ -31,7 +33,8 @@ export function CourseSide({ course, sections }: { course: CourseDetail; section
             <Segments percent={percent} height={8} />
           </div>
           <p className="num font-mono text-[11px] text-ink-5">
-            {ac}/{total} bài AC{points > 0 ? ` · ${Math.round(points)} điểm` : null}
+            {ac}/{total} bài AC
+            {points > 0 || possible > 0 ? ` · ${Math.round(points)}${possible > 0 ? `/${possible}` : ''} điểm` : null}
           </p>
         </section>
       ) : null}

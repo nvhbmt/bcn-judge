@@ -179,7 +179,7 @@ describe.skipIf(!INTEGRATION)('canary — dữ liệu ẩn không bao giờ tớ
           input: Buffer.from(CANARY_HIDDEN_INPUT), expected: Buffer.from(CANARY_HIDDEN_EXPECTED),
         },
       ],
-      { timeLimitMs: 1000, memoryLimitMb: 256 },
+      { timeLimitMs: 1000, memoryLimitMb: 256, maxPoints: 100 },
     )
     expect(JSON.stringify(view)).not.toContain(CANARY_HIDDEN_INPUT)
     expect(JSON.stringify(view)).not.toContain(CANARY_SOLUTION)

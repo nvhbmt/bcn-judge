@@ -63,6 +63,11 @@ export function HelpPanel({ role }: { role: "admin" | "mentor" | "member" }) {
             </tbody>
           </table>
         </div>
+        <p className="mt-3 text-[13px] text-ink-4">
+          Điểm một bài nộp là tỉ lệ trọng số testcase đúng, thang 0–100. Điểm tích luỹ vào tiến độ và bảng xếp
+          hạng bằng tỉ lệ đó nhân với <strong>điểm tối đa của bài theo độ khó</strong> (ghi ngay dưới tên bài;
+          admin đặt ở Cài đặt). Bảng xếp hạng xếp theo tổng điểm, hoà thì số bài AC, rồi ai đạt sớm hơn.
+        </p>
       </section>
 
       <section>

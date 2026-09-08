@@ -40,7 +40,7 @@ export function StatementPanel({
         {/* Độ khó và tag đứng DƯỚI tiêu đề: tên bài là thứ mắt tìm trước, hai thứ này
             chỉ để liếc sau khi đã biết đang đọc bài nào. Độ khó tô theo màu ngữ nghĩa
             của hệ (moss/earth/clay) thay vì viền xám — xám thì nó chìm lẫn vào tag. */}
-        {problem.difficulty || problem.tags.length > 0 ? (
+        {problem.difficulty || problem.tags.length > 0 || problem.maxPoints ? (
           <p className="mt-2.5 flex flex-wrap items-center gap-2.5">
             {problem.difficulty ? (
               <span
@@ -58,6 +58,11 @@ export function StatementPanel({
               >
                 {DIFFICULTY_LABEL[problem.difficulty] ?? problem.difficulty}
               </span>
+            ) : null}
+            {/* Điểm tối đa đứng ngay cạnh độ khó — chính độ khó quyết định con số này
+                (FR-F2 v0.8), nên hai thứ đọc như một cặp: "Khó · 200 điểm". */}
+            {problem.maxPoints ? (
+              <span className="num font-mono text-[13px] text-ink-4">{problem.maxPoints} điểm</span>
             ) : null}
             {problem.tags.length > 0 ? (
               <span className="font-mono text-[13px] text-ink-6">{problem.tags.join(' · ')}</span>

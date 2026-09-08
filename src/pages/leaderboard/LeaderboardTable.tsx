@@ -1,9 +1,9 @@
 /**
  * Bảng BXH từ hạng 4 trở xuống (top-3 đã ở bục vinh danh phía trên).
  *
- * Xếp theo SỐ BÀI AC trước rồi tổng điểm (§2.7) — nên hiện cả hai cột: có lúc người
- * ít điểm hơn lại đứng trên vì AC nhiều hơn, giấu một cột là biến quy tắc thành điều
- * bí ẩn. Dòng của mình nền moss + vạch trong bên trái, đúng cách hệ đánh dấu.
+ * Xếp theo TỔNG ĐIỂM trước rồi số bài AC (§2.7 v0.8: bài khó đáng nhiều điểm hơn) —
+ * vẫn hiện cả hai cột: người ít bài hơn có thể đứng trên vì toàn bài khó, giấu một cột
+ * là biến quy tắc thành điều bí ẩn. Dòng của mình nền moss + vạch trong bên trái.
  */
 import { cn } from '@/lib/cn'
 import type { LbEntry } from './types'

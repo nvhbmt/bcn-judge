@@ -74,8 +74,8 @@ memberTeamRoutes.get('/mine', async (c) => {
  * đổi theo hoàn cảnh thì người đọc phải kiểm tra nhãn trước mỗi lần nhìn.
  *
  * Điểm tính bằng ĐÚNG công thức của BXH khoá (`bestSubmissions`): bài tốt nhất của
- * mỗi người ở mỗi mục, quy về thang 100. Xếp theo số bài AC trước rồi tổng điểm —
- * cùng thứ tự với BXH khoá và standings contest (§2.7).
+ * mỗi người ở mỗi mục × điểm tối đa theo độ khó. Xếp theo tổng điểm trước rồi số bài
+ * AC — cùng thứ tự với BXH khoá và standings contest (§2.7 v0.8).
  *
  * Tổng chứ không phải trung bình: team đông hơn thì tổng cao hơn, nên số thành viên
  * được trả kèm để người đọc tự thấy điều đó thay vì bị giấu đi.
@@ -103,7 +103,7 @@ memberTeamRoutes.get('/standings', async (c) => {
     JOIN team_members tm ON tm.team_id = t.id
     LEFT JOIN best ON best.user_id = tm.user_id
     GROUP BY t.id, t.name
-    ORDER BY "acCount" DESC, "totalPoints" DESC, t.name ASC
+    ORDER BY "totalPoints" DESC, "acCount" DESC, t.name ASC
   `)
 
   return ok(

@@ -73,9 +73,22 @@ adminSystemRoutes.patch('/settings', async (c) => {
   const body = await parseBody(c, z.record(z.string(), z.unknown()))
   if (!body.ok) return body.response
   const known = await getSettings()
+  // Kiểm KIỂU theo giá trị mặc định trước khi ghi bất kỳ khoá nào: một chuỗi lọt vào
+  // `points_hard` là mọi truy vấn xếp hạng nổ ở `::numeric`, và im lặng cho tới lúc
+  // có người mở bảng. Kiểm hết rồi mới ghi, để một khoá hỏng không để lại nửa lô.
+  const entries = Object.entries(body.data).filter(([key]) => key in known)
+  for (const [key, value] of entries) {
+    const expected = typeof (known as unknown as Record<string, unknown>)[key]
+    if (typeof value !== expected) {
+      const ten = expected === 'number' ? 'số' : expected === 'boolean' ? 'bật/tắt' : 'chuỗi'
+      return errors.badRequest(c, `Khoá ${key} phải là ${ten}.`)
+    }
+    if (typeof value === 'number' && !(Number.isFinite(value) && value >= 0)) {
+      return errors.badRequest(c, `Khoá ${key} phải là số không âm.`)
+    }
+  }
   const applied: string[] = []
-  for (const [key, value] of Object.entries(body.data)) {
-    if (!(key in known)) continue
+  for (const [key, value] of entries) {
     await setSetting(key, value, c.get('user').id)
     applied.push(key)
   }

@@ -89,8 +89,8 @@ export function BXHPage() {
         Bảng xếp hạng
       </h1>
       <p className="mb-6 text-[15px] text-ink-4">
-        Cộng điểm từ bài luyện của mọi khoá. Đầu tuần (thứ Hai) và đầu tháng làm
-        mới cuộc đua.
+        Cộng điểm từ bài luyện của mọi khoá — bài khó đáng nhiều điểm hơn. Đầu tuần
+        (thứ Hai) và đầu tháng làm mới cuộc đua.
       </p>
 
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

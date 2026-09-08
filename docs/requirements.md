@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| Trạng thái | Bản nháp **v0.5** — 31/08/2026 (v0.2: trả lời Q1–Q4, Q10 — C chuẩn, contest theo tuần, 120 member; v0.3: thêm sidebar trái; v0.4: sidebar chốt dạng **thanh icon + tooltip**, bấm icon đổi nội dung khung đầu — Mô tả · Giáo trình · Bảng xếp hạng · Trợ giúp; v0.5: sửa 32 phát hiện của vòng review song song — mô hình hai chế độ khung đầu, thang điểm chuẩn hoá 0–100, giới hạn mặc định và điều kiện đo cụ thể; v0.6 — 01/09/2026: 3 điều chỉnh theo nợ kỹ thuật của `design.md` §14 — phạm vi ≤ 5 giây chỉ cho BXH contest, diễn giải luật ưu tiên FR-F6, mặc định ghi đĩa theo tmpfs; v0.7: thêm **Team & Leader** — member thuộc một team, leader theo dõi tiến độ và bài nộp của team (FR-J)) |
+| Trạng thái | Bản nháp **v0.8** — 08/09/2026 (v0.8: điểm tích luỹ theo **độ khó** và BXH xếp **tổng điểm trước** — FR-F2/FR-G6; v0.2: trả lời Q1–Q4, Q10 — C chuẩn, contest theo tuần, 120 member; v0.3: thêm sidebar trái; v0.4: sidebar chốt dạng **thanh icon + tooltip**, bấm icon đổi nội dung khung đầu — Mô tả · Giáo trình · Bảng xếp hạng · Trợ giúp; v0.5: sửa 32 phát hiện của vòng review song song — mô hình hai chế độ khung đầu, thang điểm chuẩn hoá 0–100, giới hạn mặc định và điều kiện đo cụ thể; v0.6 — 01/09/2026: 3 điều chỉnh theo nợ kỹ thuật của `design.md` §14 — phạm vi ≤ 5 giây chỉ cho BXH contest, diễn giải luật ưu tiên FR-F6, mặc định ghi đĩa theo tmpfs; v0.7: thêm **Team & Leader** — member thuộc một team, leader theo dõi tiến độ và bài nộp của team (FR-J)) |
 | Nguồn | Kết quả `/sc:brainstorm`. Tài liệu này chỉ mô tả **yêu cầu**; kiến trúc, schema, API nằm ở `docs/design.md` (bước `/sc:design`). |
 | Người đọc | BCN (admin), mentor, người sẽ triển khai |
 
@@ -157,7 +157,7 @@ Mức ưu tiên: **M** = bắt buộc trong v1 · **S** = nên có trong v1 nế
 | ID | Ưu tiên | Yêu cầu |
 |---|:-:|---|
 | FR-F1 | M | **Chạy thử**: biên dịch và chạy với (a) tất cả testcase mẫu hoặc (b) input tự nhập. Trả về stdout, stderr, thông báo lỗi biên dịch nguyên văn (tối đa 64 KB đầu, kèm ghi chú khi bị cắt bớt), thời gian, bộ nhớ. Không lưu vào lịch sử nộp. |
-| FR-F2 | M | **Nộp bài**: chạy toàn bộ testcase (mẫu + ẩn). Mỗi testcase có verdict, thời gian, bộ nhớ. Verdict tổng là `AC` khi mọi testcase `AC`, ngược lại là verdict của testcase lỗi đầu tiên. Điểm bài = (tổng trọng số testcase `AC` ÷ tổng trọng số mọi testcase của bài) × 100, làm tròn 2 chữ số thập phân. |
+| FR-F2 | M | **Nộp bài**: chạy toàn bộ testcase (mẫu + ẩn). Mỗi testcase có verdict, thời gian, bộ nhớ. Verdict tổng là `AC` khi mọi testcase `AC`, ngược lại là verdict của testcase lỗi đầu tiên. Điểm bài = (tổng trọng số testcase `AC` ÷ tổng trọng số mọi testcase của bài) × 100, làm tròn 2 chữ số thập phân. **v0.8:** điểm **tích luỹ** (tiến độ, bảng xếp hạng khoá/toàn ban/team) = tỉ lệ đó × **điểm tối đa của bài theo độ khó** — Dễ / Trung bình / Khó / Chưa đặt do admin cấu hình (mặc định 100 / 150 / 200 / 100); đề bài hiện điểm tối đa cạnh độ khó. |
 | FR-F3 | M | Với testcase **ẩn**, member chỉ thấy verdict, thời gian, bộ nhớ — không bao giờ thấy input hay expected output. Với testcase **mẫu** bị `WA`, hiển thị diff giữa output mong đợi và output thực tế (cắt gọn còn 100 dòng khác biệt đầu hoặc 64 KB, kèm ghi chú khi bị cắt). |
 | FR-F4 | M | Trạng thái nộp cập nhật trực tiếp `PENDING → RUNNING → kết quả`, từng testcase một, không cần reload; mỗi thay đổi hiển thị ở client ≤ 2 giây sau khi có ở server. |
 | FR-F5 | M | Giới hạn cấu hình được: kích thước source (mặc định 64 KB), input tự nhập (64 KB), output mỗi lần chạy (mặc định 8 MB), số lần nộp mỗi phút mỗi người (mặc định 6), số lần chạy thử mỗi phút mỗi người (mặc định 6). Mỗi người tối đa một bài nộp `RUNNING` và một lượt chạy thử đang thực thi tại một thời điểm (quy tắc lập lịch — bài của cùng người chấm tuần tự); bài nộp mới vẫn được nhận và xếp `PENDING`, tối đa 3 bài `PENDING` mỗi người (nộp vượt bị từ chối kèm thông báo, cấu hình được). |
@@ -175,7 +175,7 @@ Mức ưu tiên: **M** = bắt buộc trong v1 · **S** = nên có trong v1 nế
 | FR-G3 | M | Mentor xem mọi bài nộp trong khoá / contest, lọc theo member / bài / verdict / ngôn ngữ / thời gian; mở source. |
 | FR-G4 | M | Bảng tiến độ khoá: ma trận member × bài tập với trạng thái tốt nhất và số lần nộp; xuất CSV (S). |
 | FR-G5 | S | Mentor để lại nhận xét trên một bài nộp; member thấy thông báo trong app. |
-| FR-G6 | M | **Bảng xếp hạng khoá học** (mục *Bảng xếp hạng* trên thanh icon): xếp member theo số bài AC rồi tổng điểm tích luỹ trong khoá (tổng điểm bài tốt nhất mỗi bài theo FR-F2); cập nhật khi có verdict mới. Contest dùng bảng xếp hạng riêng theo FR-I5. |
+| FR-G6 | M | **Bảng xếp hạng khoá học** (mục *Bảng xếp hạng* trên thanh icon): xếp member theo **tổng điểm tích luỹ** trong khoá (tổng điểm bài tốt nhất mỗi bài theo FR-F2 v0.8), hoà thì số bài AC, rồi ai đạt sớm hơn — **v0.8 đổi từ "AC trước" sang "điểm trước"**, vì bài khó đáng nhiều điểm hơn mà xếp AC trước thì hệ số vô nghĩa; BXH toàn ban và team cùng thứ tự; cập nhật khi có verdict mới. Contest dùng bảng xếp hạng riêng theo FR-I5. |
 | FR-G7 | C | Phát hiện trùng code cơ bản giữa các member trong cùng bài. |
 
 ### FR-H · Quản trị hệ thống

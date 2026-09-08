@@ -63,6 +63,8 @@ export interface MemberProblemView {
   timeLimitMs: number
   memoryLimitMb: number
   difficulty: string | null
+  /** Điểm tối đa theo độ khó (FR-F2 v0.8) — để đề bài nói "bài này đáng 150 điểm". */
+  maxPoints: number
   tags: string[]
   /**
    * Cách so output. Member CẦN biết: ở chế độ `trim` thì thừa dấu cách cuối dòng hay
@@ -90,7 +92,7 @@ export interface MemberProblemView {
 export function toMemberProblem(
   problem: RawProblemRow,
   testcases: RawTestcaseRow[],
-  defaults: { timeLimitMs: number; memoryLimitMb: number },
+  defaults: { timeLimitMs: number; memoryLimitMb: number; maxPoints: number },
 ): MemberProblemView {
   const samples = testcases.filter((t) => t.kind === 'sample')
   return {
@@ -105,6 +107,7 @@ export function toMemberProblem(
     timeLimitMs: problem.timeLimitMs ?? defaults.timeLimitMs,
     memoryLimitMb: problem.memoryLimitMb ?? defaults.memoryLimitMb,
     difficulty: problem.difficulty,
+    maxPoints: defaults.maxPoints,
     compareMode: problem.compareMode,
     tags: problem.tags,
     allowedLanguageIds: problem.allowedLanguageIds,
@@ -161,7 +164,7 @@ const PREVIEW_BYTES = 2048
 export function toMentorProblem(
   problem: RawProblemRow,
   testcases: RawTestcaseRow[],
-  defaults: { timeLimitMs: number; memoryLimitMb: number },
+  defaults: { timeLimitMs: number; memoryLimitMb: number; maxPoints: number },
 ): MentorProblemView {
   const member = toMemberProblem(problem, testcases, defaults)
   return {

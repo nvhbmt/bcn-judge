@@ -26,7 +26,9 @@ function mark(item: SyllabusItem): { text: string; className: string } {
 function meta(item: SyllabusItem): string {
   if (item.kind === 'lesson') return '—'
   if (item.attempts === 0) return 'chưa nộp'
-  const diem = item.points !== null ? `${item.points} đ · ` : ''
+  // "50/150 đ": điểm tối đa đứng cạnh điểm đạt, vì bài khó đáng nhiều điểm hơn (FR-F2 v0.8)
+  // và một con số 50 đứng một mình không nói được là nửa bài hay một phần ba.
+  const diem = item.points !== null ? `${item.points}${item.maxPoints ? `/${item.maxPoints}` : ''} đ · ` : ''
   return `${diem}${item.attempts} lần`
 }
 

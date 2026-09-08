@@ -10,7 +10,7 @@ import { enqueue, enqueueRejudgeForProblem } from '@/judge/queue'
 import { created, errors, ok } from '@/lib/apiResponse'
 import { audit } from '@/lib/audit'
 import { parseBody } from '@/lib/http'
-import { getSettings } from '@/lib/settings'
+import { getSettings, maxPointsFor } from '@/lib/settings'
 import { iso } from '@/lib/time'
 import { vnSlug } from '@/lib/slug'
 import { zipStore, type ZipEntry } from '@/lib/zip'
@@ -366,6 +366,7 @@ mentorProblemRoutes.get('/:id', async (c) => {
     toMentorProblem(problem, testcases, {
       timeLimitMs: s.default_time_limit_ms,
       memoryLimitMb: s.default_memory_limit_mb,
+      maxPoints: maxPointsFor(problem.difficulty, s),
     }),
     {
       validated: validation?.validated_testcase_rev === problem.testcaseRev,

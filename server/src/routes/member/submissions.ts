@@ -7,7 +7,7 @@ import { q } from '@/db/pool'
 import { enqueue } from '@/judge/queue'
 import { created, errors, ok } from '@/lib/apiResponse'
 import { parseBody } from '@/lib/http'
-import { getSettings } from '@/lib/settings'
+import { getSettings, maxPointsFor } from '@/lib/settings'
 import { iso } from '@/lib/time'
 import { sseStream } from '@/realtime/sse'
 import { toMemberProblem, type RawProblemRow, type RawTestcaseRow } from '@/serialize/problem'
@@ -261,6 +261,7 @@ memberProblemRoutes.get('/', async (c) => {
     toMemberProblem(problem, testcases, {
       timeLimitMs: s.default_time_limit_ms,
       memoryLimitMb: s.default_memory_limit_mb,
+      maxPoints: maxPointsFor(problem.difficulty, s),
     }),
     { contestEndAt: access.access.contestEndAt?.toISOString() ?? null },
   )

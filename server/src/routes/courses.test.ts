@@ -315,4 +315,21 @@ describe.skipIf(!INTEGRATION)('FR-H5 · banner thông báo toàn hệ thống', 
     await call('/api/admin/settings', { as: admin, method: 'PATCH', body: { announcement: '' } })
     expect((await call('/api/member/announcement', { as: member })).body.data.text).toBe('')
   })
+
+  it('sai KIỂU thì 400 và không ghi khoá nào — số phải là số không âm, cờ phải là bật/tắt', async () => {
+    // Một chuỗi lọt vào `points_hard` là mọi truy vấn xếp hạng nổ ở `::numeric`.
+    const before = (await call('/api/admin/settings', { as: admin })).body.data
+    for (const body of [
+      { points_hard: 'nhiều' },
+      { points_hard: -5 },
+      { judge_paused: 'yes' },
+      { announcement: 3 },
+      // Một khoá đúng + một khoá sai: không được ghi nửa lô.
+      { points_easy: 120, points_hard: 'x' },
+    ]) {
+      const res = await call('/api/admin/settings', { as: admin, method: 'PATCH', body })
+      expect(res.status, JSON.stringify(body)).toBe(400)
+    }
+    expect((await call('/api/admin/settings', { as: admin })).body.data).toEqual(before)
+  })
 })

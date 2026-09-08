@@ -6,10 +6,11 @@
  * nghĩa con số đổi theo hoàn cảnh thì phải đọc nhãn trước mỗi lần nhìn.
  *
  * Điểm do server tính bằng ĐÚNG công thức của BXH khoá, nên con số ở đây và ở trang
- * chủ nói cùng một chuyện. Thứ tự cũng vậy: SỐ BÀI AC trước, rồi tổng điểm (§2.7).
+ * chủ nói cùng một chuyện. Thứ tự cũng vậy: TỔNG ĐIỂM trước, rồi số bài AC (§2.7 v0.8
+ * — bài khó đáng nhiều điểm hơn).
  *
- * Vì thế có lúc team ít điểm hơn lại xếp trên — Beta 13 bài/1440đ đứng trên Alpha
- * 12 bài/1470đ. Trông như lỗi nếu chỉ hiện một con số, nên bảng hiện CẢ HAI: người
+ * Vì thế có lúc team ít bài hơn lại xếp trên — Alpha 12 bài/1470đ đứng trên Beta
+ * 13 bài/1440đ. Trông như lỗi nếu chỉ hiện một con số, nên bảng hiện CẢ HAI: người
  * đọc thấy ngay vì sao. Giấu bớt một cột là biến một quy tắc thành một điều bí ẩn.
  */
 import { useQuery } from "@tanstack/react-query";

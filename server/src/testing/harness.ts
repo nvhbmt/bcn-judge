@@ -111,15 +111,16 @@ export async function makeProblem(
     solutionLanguageId?: string
     timeLimitMs?: number
     scopeCourseId?: string
+    difficulty?: 'easy' | 'medium' | 'hard'
   } = {},
 ): Promise<string> {
   counter++
   const [row] = await q<{ id: string }>(sql`
     INSERT INTO problems (title, statement_md, time_limit_ms, solution_source, solution_language_id,
-                          scope_course_id, created_by)
+                          scope_course_id, difficulty, created_by)
     VALUES (${overrides.title ?? `Bài ${counter}`}, ${'Đề bài mẫu'}, ${overrides.timeLimitMs ?? 2000},
             ${overrides.solutionSource ?? null}, ${overrides.solutionLanguageId ?? null},
-            ${overrides.scopeCourseId ?? null}, ${createdBy})
+            ${overrides.scopeCourseId ?? null}, ${overrides.difficulty ?? null}, ${createdBy})
     RETURNING id
   `)
   return row!.id

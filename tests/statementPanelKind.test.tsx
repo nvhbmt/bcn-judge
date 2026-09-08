@@ -22,6 +22,7 @@ const problem = (over: Partial<ProblemView> = {}): ProblemView => ({
   timeLimitMs: 1000,
   memoryLimitMb: 256,
   difficulty: 'easy',
+  maxPoints: 100,
   tags: [],
   compareMode: 'trim',
   allowedLanguageIds: null,

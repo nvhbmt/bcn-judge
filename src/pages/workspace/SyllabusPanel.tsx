@@ -13,6 +13,8 @@ export interface SyllabusItem {
   status: 'chua-lam' | 'da-thu' | 'da-ac' | null
   attempts: number
   points: number | null
+  /** Điểm tối đa của bài theo độ khó; null với bài đọc (server cũ chưa trả thì undefined). */
+  maxPoints?: number | null
 }
 
 export interface SyllabusSection {
