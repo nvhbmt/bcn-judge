@@ -3,7 +3,7 @@
 Hệ thống chấm bài tập lập trình nội bộ của ban: quản lý viên đăng bài theo khoá học,
 thành viên code trên trình duyệt, chấm tự động bằng testcase, contest theo tuần có bảng xếp hạng.
 
-- Yêu cầu: [`docs/requirements.md`](docs/requirements.md) (v0.7)
+- Yêu cầu: [`docs/requirements.md`](docs/requirements.md) (v0.8)
 - Thiết kế: [`docs/design.md`](docs/design.md) — 14 ADR, delta Team/Leader, delta P0, delta FR-D10
 - **Deploy: [`docs/deploy.md`](docs/deploy.md)** — từ VPS trắng tới lúc member đăng nhập được
 
@@ -205,17 +205,17 @@ có ở CLB hay không.
 | **P6** | API quản trị, compose, deploy, sao lưu | ✅ · **chưa deploy lên VPS thật** |
 | **P7** | Kiểm chứng end-to-end | ✅ smoke 29/29 |
 
-**737 test xanh, đo lại 05.09.2026** — bốn tầng, mỗi tầng cần thêm một thứ:
+**902 test xanh, đo lại 08.09.2026** — bốn tầng, mỗi tầng cần thêm một thứ:
 
 | tầng | số | cần gì |
 |---|---|---|
-| SPA (vitest + jsdom) | 343 | không cần gì |
-| server đơn vị | 87 | không cần gì |
-| server tích hợp (`INTEGRATION=1`, DB tên phải chứa `test`) | 291 | Postgres thật |
-| judge trên Docker (`DOCKER=1` — abuse + chấm thật qua hàng đợi + function-mode) | 48 | runner image (`bash scripts/build-runner-images.sh`) |
-| Playwright (Chromium thật, nguyên stack, DB riêng `bcn_judge_e2e_ui`) | 55 | Docker |
+| SPA (vitest + jsdom) | 428 | không cần gì |
+| server đơn vị | 98 | không cần gì |
+| server tích hợp (`INTEGRATION=1`, DB tên phải chứa `test`) | 366 | Postgres thật |
+| judge trên Docker (`DOCKER=1` — abuse + chấm thật qua hàng đợi + function-mode) | 48 (đo 05.09) | runner image (`bash scripts/build-runner-images.sh`) |
+| Playwright (Chromium thật, nguyên stack, DB riêng `bcn_judge_e2e_ui`) | 60 | Docker |
 
-(291 tích hợp đã bao 87 đơn vị; 737 = 343 + 339 server + 55 e2e — đếm mỗi test một lần.
+(366 tích hợp đã bao 98 đơn vị; 902 = 428 + 414 server + 60 e2e — đếm mỗi test một lần.
 Bộ judge-Docker từng đỏ ở ca vệ sinh sau khi bể container ấm ra đời mà phép đếm rò rỉ
 không được cập nhật — không ai thấy vì bộ này mặc định skip. Nay các suite tự xả bể khi
 xong và cả 48 ca xanh với **0** container sót lại.)
@@ -236,6 +236,23 @@ leader (FR-J6), bốn ngôn ngữ chấm.
 
 Chưa làm, đều là mức **C**: đăng nhập Google (FR-A5), checker tự viết (FR-D5), phát hiện
 trùng code (FR-G7), lịch tự tạo contest hằng tuần (FR-I11).
+
+### Bổ sung v0.8 (08/09/2026) — theo `docs/plan-solution-diem-discord.md`
+
+Năm việc từ lượt rà thắc mắc của BCN, mỗi việc một commit, test canh ở cả hai tầng:
+
+- **Rời server Discord thì khoá trong ≤ 10 phút** (`auth/discordSweep.ts`, mục *Đăng nhập
+  bằng Discord* ở trên): quét bằng Bot token, tự mở khi vào lại, bốn lan can chống khoá nhầm.
+- **Điểm bài luyện theo độ khó** (FR-F2/FR-G6 v0.8): hệ số `points_easy/medium/hard/unset`
+  ở Cài đặt, công thức một chỗ (`bestSubmissions`), mọi bảng xếp hạng đổi từ "AC trước"
+  sang "tổng điểm trước".
+- **BXH toàn ban gộp contest**: ba nguồn Bài luyện · Contest · Tổng hợp; điểm contest
+  tính bằng đúng builder của standings (`scoredContestSubmissions`), tôn trọng đóng băng.
+- **Mục Thống kê** trên thanh icon (FR-E3 v0.8): verdict, ngôn ngữ, phân bố thời gian của
+  bài AC tốt nhất mỗi người, "bạn nhanh hơn X %".
+- **Mục Lời giải** (FR-K): xem và so sánh bài AC của người khác, lời giải mẫu của mentor
+  (FR-D7 nay mới thật sự tới member), cấm vận khi bài đang trong contest mở — áp cả cho
+  Thảo luận, công tắc chia sẻ ở trang Tài khoản (mặc định bật).
 
 ## Bài dạng function (kiểu LeetCode) — FR-D10
 
@@ -447,6 +464,8 @@ src/                     SPA
   components/{layout,editor,markdown,ui,submission}
   pages/
     home/ course/ contest/ team/ workspace/    các cụm màn của member
+    workspace/{stats,solutions,discussion}/    ba mục trên thanh icon: Thống kê · Lời giải · Thảo luận
+    account/                                   công tắc chia sẻ lời giải ở trang Tài khoản
     mentor/{contest,course,problem}/           ba cụm việc của mentor; đồ dùng chung
                                                (types, fields, publishGate…) ở gốc mentor/
     admin/                                     cụm quản trị
@@ -456,12 +475,14 @@ tests/                   test SPA (vitest + jsdom)
 e2e/                     Playwright: auth setup theo vai + spec luồng + lưới mọi-route
 server/
   src/
-    auth/                session token mờ (không JWT), argon2id, guard 3 vai trò
+    auth/                session token mờ (không JWT), argon2id, guard 3 vai trò · discordSweep (khoá khi rời server)
     db/                  schema Drizzle, migrate, seed, 3 role Postgres
     judge/               languages · sandbox · runner · queue (+ chấm lại) · verdict · compare
                          pool (container ấm) · wake (đánh thức worker) · reap (dọn mồ côi)
     serialize/           cổng chặn dữ liệu ẩn (NFR-2) — trường cấm khai kiểu never
     routes/{admin,mentor,member}/   cây route tách theo vai trò; mỗi router một file
+                         (member/solved.ts: "đã AC chưa" + cấm vận contest, dùng chung cho
+                         thảo luận và lời giải)
                          đứng tên mình (languages, announcement… không ở nhờ file khác)
     contest/standings.ts truy vấn xếp hạng dẫn xuất
     realtime/            LISTEN/NOTIFY + SSE có replay
