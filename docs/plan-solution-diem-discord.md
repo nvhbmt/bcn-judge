@@ -6,7 +6,7 @@
 | Nguồn | Ba mục "chưa làm" trong lượt rà thắc mắc của BCN (xem cuối `README.md` §Trạng thái) |
 | Trạng thái | Đang triển khai theo thứ tự 3 → 2a → 2b → 1a → 1b; mỗi phần một commit lên `main`, có test canh. **Cả năm phần xong 08/09/2026.** |
 | Ước lượng | ≈ 9–10 ngày công, thứ tự đề xuất: Phần 3 → 2a → 2b → 1a → 1b |
-| Kết quả | Năm commit trên `main` ngày 08/09/2026 (`62de3b5` Discord · `a8bff03` điểm độ khó · `f12e96d` BXH gộp · `a8be2e6` Thống kê · `692a66d` Lời giải). Bốn quyết định ở mục 0 lấy theo khuyến nghị; BCN đổi ý thì mỗi cái là một cài đặt hoặc một cờ. |
+| Kết quả | Năm commit trên `main` ngày 08/09/2026 (`62de3b5` Discord · `a8bff03` điểm độ khó · `f12e96d` BXH gộp · `a8be2e6` Thống kê · `692a66d` Lời giải). Bốn quyết định ở mục 0 lấy theo khuyến nghị; BCN đổi ý thì mỗi cái là một cài đặt hoặc một cờ. Ngoài kế hoạch: nợ FR-F8 (IE tự chấm lại) trả ở `feb3658`, kèm dọn container mồ côi của stack e2e. |
 
 Bốn quyết định cần BCN chốt nằm ở mục **0**. Không mục nào chặn việc bắt đầu phần 3.
 

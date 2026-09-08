@@ -58,14 +58,15 @@ node scripts/judge-e2e.mjs  # 93 kiểm tra, chỉ soi luồng chấm nhưng soi
 Và bộ E2E lái **trình duyệt thật** qua toàn bộ luồng giao diện:
 
 ```bash
-npm run e2e         # 55 kiểm tra Playwright, tự dựng cả stack (~3 phút)
+npm run e2e         # 60 kiểm tra Playwright, tự dựng cả stack (~3 phút)
 npm run e2e:ui      # chế độ xem từng bước
 ```
 
 `npm run e2e` tự lo mọi thứ: database riêng `bcn_judge_e2e_ui`, migrate, seed dữ
 liệu mẫu, API, worker, vite. Phủ: đăng nhập/đăng xuất/tài khoản bị khoá/bắt đổi mật
 khẩu lần đầu, mọi route theo từng vai trò, gõ code → chạy thử → nộp → verdict qua
-Docker thật, contest và bảng xếp hạng, team của leader, soạn bài của mentor, cấp
+Docker thật, contest và bảng xếp hạng, các mục trên thanh icon (thống kê, lời giải), team
+của leader, soạn bài của mentor, cấp
 tài khoản và tình trạng chấm của admin, đổi theme và nhớ qua lần tải lại.
 
 Đây là bộ duy nhất bắt được lớp lỗi ở giữa: route không ai link tới, class Tailwind
@@ -196,7 +197,7 @@ có ở CLB hay không.
 
 | Phase | Nội dung | Trạng thái |
 |---|---|---|
-| **P0** | Nguyên mẫu sandbox + bộ abuse | ✅ 26 ca, chạy lại xanh 05.09.2026 |
+| **P0** | Nguyên mẫu sandbox + bộ abuse | ✅ 26 ca, chạy lại xanh 08.09.2026 |
 | **P1** | Schema, auth, khoá học, ma trận quyền | ✅ |
 | **P2** | Hàng đợi, worker, API nộp bài, chống rò dữ liệu ẩn | ✅ |
 | **P3** | Workspace: thanh icon, split, CodeMirror, verdict trực tiếp | ✅ |
@@ -205,20 +206,22 @@ có ở CLB hay không.
 | **P6** | API quản trị, compose, deploy, sao lưu | ✅ · **chưa deploy lên VPS thật** |
 | **P7** | Kiểm chứng end-to-end | ✅ smoke 29/29 |
 
-**902 test xanh, đo lại 08.09.2026** — bốn tầng, mỗi tầng cần thêm một thứ:
+**904 test xanh, đo lại 08.09.2026** — bốn tầng, mỗi tầng cần thêm một thứ:
 
 | tầng | số | cần gì |
 |---|---|---|
 | SPA (vitest + jsdom) | 428 | không cần gì |
 | server đơn vị | 98 | không cần gì |
 | server tích hợp (`INTEGRATION=1`, DB tên phải chứa `test`) | 366 | Postgres thật |
-| judge trên Docker (`DOCKER=1` — abuse + chấm thật qua hàng đợi + function-mode) | 48 (đo 05.09) | runner image (`bash scripts/build-runner-images.sh`) |
+| judge trên Docker (`DOCKER=1` — abuse + chấm thật qua hàng đợi + function-mode) | 50 | runner image (`bash scripts/build-runner-images.sh`) |
 | Playwright (Chromium thật, nguyên stack, DB riêng `bcn_judge_e2e_ui`) | 60 | Docker |
 
-(366 tích hợp đã bao 98 đơn vị; 902 = 428 + 414 server + 60 e2e — đếm mỗi test một lần.
+(366 tích hợp đã bao 98 đơn vị; 904 = 428 + 416 server + 60 e2e — đếm mỗi test một lần.
 Bộ judge-Docker từng đỏ ở ca vệ sinh sau khi bể container ấm ra đời mà phép đếm rò rỉ
 không được cập nhật — không ai thấy vì bộ này mặc định skip. Nay các suite tự xả bể khi
-xong và cả 48 ca xanh với **0** container sót lại.)
+xong và cả 50 ca xanh với **0** container sót lại. Lượt đo 08.09 đỏ oan một lần ở đúng ca đó vì
+container bể ấm mồ côi của stack e2e — Playwright SIGKILL cả nhóm tiến trình nên worker không
+kịp xả bể; nay `scripts/e2e-stack.sh` dọn container của worker đã chết lúc khởi động.)
 
 Mọi yêu cầu mức **M** và mức **S** của `requirements.md` đã hiện thực hoá, gồm cả những mục
 lắt léo nhất: chấm lại có shadow attempt và audit (FR-D9), contest mở tuần tự (FR-I8), đóng

@@ -70,6 +70,14 @@ Trong `.env.worker`, `WORKER_SLOTS` đặt bằng **nửa số vCPU** (8 vCPU �
 Mỗi container ghim `NanoCpus = 1`, nên slot nhiều hơn nửa số nhân làm tổng thông lượng
 tụt chứ không tăng.
 
+Đăng nhập Discord và bộ quét khoá-khi-rời-server (cả hai tuỳ chọn) đặt trong **`.env.api`**:
+`DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` / `DISCORD_REDIRECT_URI`, rồi `DISCORD_GUILD_ID`
+(+ `DISCORD_ROLE_ID`) cho cổng guild, và `DISCORD_BOT_TOKEN` (+ `DISCORD_KICK_SWEEP_MINUTES`,
+mặc định 10) cho bộ quét — bot cần **Server Members Intent** và được mời vào server không
+cần quyền nào. Chi tiết ở README §*Đăng nhập bằng Discord*. Thiếu biến nào thì tính năng đó
+**tắt và không hiện**, không lỗi nửa vời; nhưng CSP trong `server/Caddyfile` phải cho
+`cdn.discordapp.com` ở `img-src` nếu không ảnh Discord chặn câm.
+
 ---
 
 ## 3. Dựng runner image
@@ -273,6 +281,17 @@ docker compose logs -f worker | grep 'chờ'
 `chờ` là thời gian bài nằm trong hàng đợi trước khi worker nhặt. Con số này phải cỡ
 **chục mili giây**. Lên tới ~500 ms nghĩa là chuông LISTEN/NOTIFY không tới và hệ thống
 đang chạy bằng nhịp poll dự phòng 1 giây.
+
+Hai việc nền (v0.8) phải thấy trong log ngay sau khi lên — thiếu cấu hình thì chúng
+**im lặng tắt**, không có lỗi để mà tìm:
+
+```bash
+docker compose logs worker | grep 'IE'                     # "xếp lại N bài IE" lúc khởi động (FR-F8)
+docker compose logs api-blue api-green | grep discord-sweep # "mỗi 10 phút" nếu bật; "tắt (cần …)" nếu chưa
+```
+
+Trang `/quan-tri` có khối *Quét Discord* hiện lượt gần nhất và lý do bỏ lượt (nếu có).
+Migration 0008 và 0009 đều chỉ thêm cột; vẫn chạy `db:grants` sau migrate như mọi lần.
 
 Cuối cùng, mở trang bằng trình duyệt thật và nhìn **mặt chữ**: tiêu đề phải là chữ có
 chân (Lora), số và verdict phải là mono (IBM Plex Mono). Nếu cả trang là font hệ thống
