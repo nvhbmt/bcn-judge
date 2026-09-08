@@ -16,7 +16,7 @@ import type { LbEntry } from './types'
 const CAP: Record<number, string> = { 1: 'bg-brass', 2: 'bg-ink-4', 3: 'bg-earth' }
 const AWARD: Record<number, string> = { 1: '🏆', 2: '🥈', 3: '🥉' }
 
-function Block({ row }: { row: LbEntry }) {
+function Block({ row, split }: { row: LbEntry; split: boolean }) {
   const first = row.rank === 1
   return (
     <div
@@ -47,18 +47,24 @@ function Block({ row }: { row: LbEntry }) {
         <div className="num mt-1 font-mono text-[12px] text-ink-5">
           {row.acCount} bài · <span className="text-ink-3">{row.totalPoints}đ</span>
         </div>
+        {/* Hai vế của tổng — chỉ khi đang xem Tổng hợp và server có tách. */}
+        {split && row.practicePoints !== null && row.contestPoints !== null ? (
+          <div className="num font-mono text-[11px] text-ink-6">
+            luyện {row.practicePoints} · contest {row.contestPoints}
+          </div>
+        ) : null}
       </div>
     </div>
   )
 }
 
-export function Podium({ rows }: { rows: LbEntry[] }) {
+export function Podium({ rows, split = false }: { rows: LbEntry[]; split?: boolean }) {
   const top = rows.slice(0, 3)
   if (top.length === 0) return null
   return (
     <div className="grid grid-cols-3 items-end gap-2 sm:gap-3">
       {top.map((r) => (
-        <Block key={r.key} row={r} />
+        <Block key={r.key} row={r} split={split} />
       ))}
     </div>
   )

@@ -11,7 +11,7 @@ describe('toEntries', () => {
       { rank: 1, userId: 'u1', displayName: 'An', acCount: 5, totalPoints: 500, isMe: true },
     ]
     expect(toEntries('individual', rows)).toEqual([
-      { rank: 1, key: 'u1', name: 'An', acCount: 5, totalPoints: 500, meta: null, isMe: true },
+      { rank: 1, key: 'u1', name: 'An', acCount: 5, totalPoints: 500, practicePoints: null, contestPoints: null, meta: null, isMe: true },
     ])
   })
 
@@ -20,7 +20,14 @@ describe('toEntries', () => {
       { rank: 2, id: 't1', name: 'Alpha', acCount: 12, totalPoints: 1200, memberCount: 4, isMine: true },
     ]
     expect(toEntries('team', rows)).toEqual([
-      { rank: 2, key: 't1', name: 'Alpha', acCount: 12, totalPoints: 1200, meta: '4 người', isMe: true },
+      { rank: 2, key: 't1', name: 'Alpha', acCount: 12, totalPoints: 1200, practicePoints: null, contestPoints: null, meta: '4 người', isMe: true },
     ])
+  })
+
+  it('server tách hai vế thì giữ lại cho bảng Tổng hợp', () => {
+    const rows: IndividualRow[] = [
+      { rank: 1, userId: 'u1', displayName: 'An', acCount: 5, totalPoints: 800, practicePoints: 500, contestPoints: 300, isMe: false },
+    ]
+    expect(toEntries('individual', rows)[0]).toMatchObject({ practicePoints: 500, contestPoints: 300 })
   })
 })

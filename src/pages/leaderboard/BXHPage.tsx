@@ -6,8 +6,9 @@
  * thời gian, tính theo lịch giờ VN — server làm mốc). Top-3 lên bục vinh danh, phần
  * còn lại xuống bảng; dòng của mình luôn nổi bằng moss.
  *
- * Điểm cộng từ bài luyện của khoá (item), cùng công thức với BXH khoá/team — KHÔNG
- * trộn điểm contest (contest có standings riêng), để con số một nghĩa ở mọi nơi.
+ * Trục thứ ba (v0.8): NGUỒN ĐIỂM — Bài luyện (công thức của BXH khoá/team) · Contest
+ * (tổng điểm standings của từng contest, tôn trọng đóng băng) · Tổng hợp (mặc định,
+ * cộng cả hai). Ở Tổng hợp, bảng và bục tách hai vế để con số vẫn đọc ra được từ đâu.
  */
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -20,6 +21,7 @@ import {
   toEntries,
   type IndividualRow,
   type LbScope,
+  type LbSource,
   type LbWindow,
   type TeamRow,
 } from "./types";
@@ -32,6 +34,11 @@ const WINDOWS: { value: LbWindow; label: string }[] = [
   { value: "week", label: "Tuần này" },
   { value: "month", label: "Tháng này" },
   { value: "all", label: "Toàn thời gian" },
+];
+const SOURCES: { value: LbSource; label: string }[] = [
+  { value: "total", label: "Tổng hợp" },
+  { value: "practice", label: "Bài luyện" },
+  { value: "contest", label: "Contest" },
 ];
 
 function TabBar<T extends string>({
@@ -71,12 +78,13 @@ function TabBar<T extends string>({
 export function BXHPage() {
   const [scope, setScope] = useState<LbScope>("individual");
   const [win, setWin] = useState<LbWindow>("week");
+  const [source, setSource] = useState<LbSource>("total");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["leaderboard-global", scope, win],
+    queryKey: ["leaderboard-global", scope, win, source],
     queryFn: () =>
       api.get<IndividualRow[] | TeamRow[]>(
-        `/api/member/leaderboard?scope=${scope}&window=${win}`,
+        `/api/member/leaderboard?scope=${scope}&window=${win}&source=${source}`,
       ),
     refetchInterval: 30_000,
   });
@@ -89,8 +97,9 @@ export function BXHPage() {
         Bảng xếp hạng
       </h1>
       <p className="mb-6 text-[15px] text-ink-4">
-        Cộng điểm từ bài luyện của mọi khoá — bài khó đáng nhiều điểm hơn. Đầu tuần
-        (thứ Hai) và đầu tháng làm mới cuộc đua.
+        Cộng điểm bài luyện của mọi khoá và điểm contest — bài khó đáng nhiều điểm
+        hơn. Đầu tuần (thứ Hai) và đầu tháng làm mới cuộc đua; contest thuộc về kỳ
+        mà nó kết thúc.
       </p>
 
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -105,6 +114,14 @@ export function BXHPage() {
           value={win}
           onChange={setWin}
           options={WINDOWS}
+        />
+      </div>
+      <div className="mb-5">
+        <TabBar
+          label="Nguồn điểm"
+          value={source}
+          onChange={setSource}
+          options={SOURCES}
         />
       </div>
 
@@ -123,8 +140,8 @@ export function BXHPage() {
         />
       ) : (
         <div className="flex flex-col gap-6">
-          <Podium rows={entries} />
-          <LeaderboardTable rows={entries.slice(3)} />
+          <Podium rows={entries} split={source === "total"} />
+          <LeaderboardTable rows={entries.slice(3)} split={source === "total"} />
         </div>
       )}
     </main>

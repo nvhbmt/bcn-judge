@@ -7,6 +7,8 @@
  */
 export type LbScope = 'individual' | 'team'
 export type LbWindow = 'week' | 'month' | 'all'
+/** Nguồn điểm (v0.8): bài luyện, contest, hay cộng cả hai. */
+export type LbSource = 'practice' | 'contest' | 'total'
 
 export interface IndividualRow {
   rank: number
@@ -14,6 +16,9 @@ export interface IndividualRow {
   displayName: string
   acCount: number
   totalPoints: number
+  /** Hai vế của tổng — server cũ chưa trả thì undefined. */
+  practicePoints?: number
+  contestPoints?: number
   isMe: boolean
 }
 
@@ -23,6 +28,8 @@ export interface TeamRow {
   name: string
   acCount: number
   totalPoints: number
+  practicePoints?: number
+  contestPoints?: number
   memberCount: number
   isMine: boolean
 }
@@ -34,6 +41,9 @@ export interface LbEntry {
   name: string
   acCount: number
   totalPoints: number
+  /** Vế bài luyện / contest của tổng; null khi server không tách. */
+  practicePoints: number | null
+  contestPoints: number | null
   /** Dòng phụ dưới tên (chỉ team: "5 người"); null với cá nhân. */
   meta: string | null
   isMe: boolean
@@ -47,6 +57,8 @@ export function toEntries(scope: LbScope, rows: IndividualRow[] | TeamRow[]): Lb
       name: r.name,
       acCount: r.acCount,
       totalPoints: r.totalPoints,
+      practicePoints: r.practicePoints ?? null,
+      contestPoints: r.contestPoints ?? null,
       meta: `${r.memberCount} người`,
       isMe: r.isMine,
     }))
@@ -57,6 +69,8 @@ export function toEntries(scope: LbScope, rows: IndividualRow[] | TeamRow[]): Lb
     name: r.displayName,
     acCount: r.acCount,
     totalPoints: r.totalPoints,
+    practicePoints: r.practicePoints ?? null,
+    contestPoints: r.contestPoints ?? null,
     meta: null,
     isMe: r.isMe,
   }))

@@ -18,6 +18,8 @@ const INDIV = Array.from({ length: 5 }, (_, i) => ({
   displayName: `Người ${i + 1}`,
   acCount: 10 - i,
   totalPoints: (10 - i) * 100,
+  practicePoints: (10 - i) * 70,
+  contestPoints: (10 - i) * 30,
   isMe: i === 4, // tôi đứng hạng 5 (ngoài bục)
 }))
 
@@ -72,6 +74,41 @@ describe('BXHPage', () => {
     expect(
       (vi.mocked(globalThis.fetch).mock.calls as unknown[][]).some((c) => String(c[0]).includes('scope=team')),
     ).toBe(true)
+  })
+
+  it('mặc định là Tổng hợp: gọi API source=total, bảng tách cột Luyện · Contest · Tổng, bục ghi hai vế', async () => {
+    mockApi()
+    draw()
+    await waitFor(() => expect(screen.getByText('Người 1')).toBeInTheDocument())
+    expect(
+      (vi.mocked(globalThis.fetch).mock.calls as unknown[][]).some((c) => String(c[0]).includes('source=total')),
+    ).toBe(true)
+    const table = screen.getByRole('table')
+    expect(within(table).getByRole('columnheader', { name: 'Luyện' })).toBeInTheDocument()
+    expect(within(table).getByRole('columnheader', { name: 'Contest' })).toBeInTheDocument()
+    expect(within(table).getByRole('columnheader', { name: 'Tổng' })).toBeInTheDocument()
+    // Hạng 5 (tôi): 6 × 70 = 420 luyện, 6 × 30 = 180 contest.
+    expect(within(table).getByText('420')).toBeInTheDocument()
+    expect(within(table).getByText('180')).toBeInTheDocument()
+    // Bục hạng nhất: luyện 700 · contest 300.
+    expect(screen.getByText('luyện 700 · contest 300')).toBeInTheDocument()
+  })
+
+  it('chọn Bài luyện thì gọi source=practice và bảng về một cột Điểm', async () => {
+    mockApi()
+    draw()
+    await waitFor(() => expect(screen.getByText('Người 1')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('tab', { name: 'Bài luyện' }))
+    await waitFor(() =>
+      expect(
+        (vi.mocked(globalThis.fetch).mock.calls as unknown[][]).some((c) => String(c[0]).includes('source=practice')),
+      ).toBe(true),
+    )
+    // Đổi nguồn là một query MỚI: bảng biến mất một nhịp trong lúc tải rồi dựng lại.
+    await waitFor(() => expect(screen.getByRole('table')).toBeInTheDocument())
+    const table = screen.getByRole('table')
+    expect(within(table).queryByRole('columnheader', { name: 'Luyện' })).toBeNull()
+    expect(within(table).getByRole('columnheader', { name: 'Điểm' })).toBeInTheDocument()
   })
 
   it('rỗng thì hiện trạng thái rỗng, không dựng bục/bảng', async () => {

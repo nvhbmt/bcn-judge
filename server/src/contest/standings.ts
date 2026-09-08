@@ -8,8 +8,53 @@
  * NFR-5: mốc thời gian là `received_at` (lúc NHẬN), không phải lúc chấm xong —
  * bài gửi 19:59:58 chấm xong 20:00:10 vẫn tính.
  */
-import { sql } from 'drizzle-orm'
+import { sql, type SQL } from 'drizzle-orm'
 import { q } from '@/db/pool'
+
+/**
+ * Bài nộp TỐT NHẤT của mỗi (người, bài contest), điểm = tỉ lệ × max_score của bài
+ * trong contest — MỘT công thức cho standings từng contest và cho BXH toàn ban gộp
+ * contest (routes/member/leaderboard.ts), nên hai nơi không bao giờ nói hai con số.
+ *
+ * `cutoff` là biểu thức SQL được tham chiếu tới `win` (dòng contest): standings truyền
+ * một mốc cụ thể; BXH toàn ban truyền `memberCutoffSql` để mỗi contest tự áp mốc đóng
+ * băng của nó. `contestId = null` = mọi contest đã xuất bản, đã bắt đầu; `since` lọc
+ * theo `end_at` — contest thuộc về kỳ mà nó KẾT THÚC (contest đang chạy cũng tính).
+ */
+export function scoredContestSubmissions(opts: { contestId: string | null; cutoff: SQL; since?: SQL | null }): SQL {
+  const since = opts.since ?? null
+  return sql`
+    WITH win AS (
+      SELECT ct.id, ct.start_at, ct.end_at, ct.freeze_minutes FROM contests ct
+      WHERE ${opts.contestId === null ? sql`ct.status = 'published' AND ct.deleted_at IS NULL AND ct.start_at <= now()` : sql`ct.id = ${opts.contestId}`}
+        ${since === null ? sql`` : sql`AND ct.end_at >= ${since}`}
+    )
+    SELECT DISTINCT ON (s.user_id, s.contest_problem_id)
+           s.user_id, s.contest_id, s.contest_problem_id, s.verdict, s.received_at,
+           ROUND(s.passed_weight::numeric / NULLIF(s.total_weight, 0) * cp.max_score, 2) AS points
+    FROM submissions s
+    JOIN win ON win.id = s.contest_id
+    JOIN contest_problems cp ON cp.id = s.contest_problem_id
+    WHERE s.kind = 'submit' AND s.status = 'done'
+      AND s.verdict NOT IN ('CE', 'IE')
+      -- Chỉ bài nộp TRONG cửa sổ mới tính (FR-I4) và trước mốc đóng băng (FR-I10).
+      AND s.received_at >= win.start_at AND s.received_at < win.end_at
+      AND s.received_at < ${opts.cutoff}
+    ORDER BY s.user_id, s.contest_problem_id,
+             (s.passed_weight::numeric / NULLIF(s.total_weight, 0)) DESC NULLS LAST,
+             s.received_at ASC
+  `
+}
+
+/**
+ * Mốc cắt phía MEMBER của từng contest, viết bằng SQL để dùng trong `scoredContestSubmissions`
+ * khi gộp nhiều contest: đang đóng băng thì cắt ở `end_at − freeze`, còn lại vô cực.
+ * Cùng luật với `cutoffFor` (bản TypeScript, cho một contest).
+ */
+export const memberCutoffSql: SQL = sql`
+  CASE WHEN win.freeze_minutes > 0 AND now() < win.end_at
+       THEN win.end_at - make_interval(mins => win.freeze_minutes)
+       ELSE 'infinity'::timestamptz END`
 
 export interface StandingRow {
   rank: number
@@ -40,26 +85,7 @@ export async function computeStandings(contestId: string, opts: StandingsOptions
     attempts: number
     gainedAt: string | null
   }>(sql`
-    WITH win AS (
-      SELECT ct.id, ct.start_at, ct.end_at FROM contests ct WHERE ct.id = ${contestId}
-    ),
-    scored AS (
-      SELECT DISTINCT ON (s.user_id, s.contest_problem_id)
-             s.user_id, s.contest_problem_id, s.verdict, s.received_at,
-             ROUND(s.passed_weight::numeric / NULLIF(s.total_weight, 0) * cp.max_score, 2) AS points
-      FROM submissions s
-      JOIN win ON true
-      JOIN contest_problems cp ON cp.id = s.contest_problem_id
-      WHERE s.contest_id = ${contestId}
-        AND s.kind = 'submit' AND s.status = 'done'
-        AND s.verdict NOT IN ('CE', 'IE')
-        -- Chỉ bài nộp TRONG cửa sổ mới tính (FR-I4) và trước mốc đóng băng (FR-I10).
-        AND s.received_at >= win.start_at AND s.received_at < win.end_at
-        AND s.received_at < ${cutoff}
-      ORDER BY s.user_id, s.contest_problem_id,
-               (s.passed_weight::numeric / NULLIF(s.total_weight, 0)) DESC NULLS LAST,
-               s.received_at ASC
-    )
+    WITH scored AS (${scoredContestSubmissions({ contestId, cutoff })})
     SELECT u.id AS "userId", u.display_name AS "displayName",
            scored.contest_problem_id AS "contestProblemId",
            COALESCE(scored.points, 0) AS points, scored.verdict,

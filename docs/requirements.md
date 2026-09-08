@@ -175,7 +175,7 @@ Mức ưu tiên: **M** = bắt buộc trong v1 · **S** = nên có trong v1 nế
 | FR-G3 | M | Mentor xem mọi bài nộp trong khoá / contest, lọc theo member / bài / verdict / ngôn ngữ / thời gian; mở source. |
 | FR-G4 | M | Bảng tiến độ khoá: ma trận member × bài tập với trạng thái tốt nhất và số lần nộp; xuất CSV (S). |
 | FR-G5 | S | Mentor để lại nhận xét trên một bài nộp; member thấy thông báo trong app. |
-| FR-G6 | M | **Bảng xếp hạng khoá học** (mục *Bảng xếp hạng* trên thanh icon): xếp member theo **tổng điểm tích luỹ** trong khoá (tổng điểm bài tốt nhất mỗi bài theo FR-F2 v0.8), hoà thì số bài AC, rồi ai đạt sớm hơn — **v0.8 đổi từ "AC trước" sang "điểm trước"**, vì bài khó đáng nhiều điểm hơn mà xếp AC trước thì hệ số vô nghĩa; BXH toàn ban và team cùng thứ tự; cập nhật khi có verdict mới. Contest dùng bảng xếp hạng riêng theo FR-I5. |
+| FR-G6 | M | **Bảng xếp hạng khoá học** (mục *Bảng xếp hạng* trên thanh icon): xếp member theo **tổng điểm tích luỹ** trong khoá (tổng điểm bài tốt nhất mỗi bài theo FR-F2 v0.8), hoà thì số bài AC, rồi ai đạt sớm hơn — **v0.8 đổi từ "AC trước" sang "điểm trước"**, vì bài khó đáng nhiều điểm hơn mà xếp AC trước thì hệ số vô nghĩa; BXH toàn ban và team cùng thứ tự; cập nhật khi có verdict mới. **BXH toàn ban (trang riêng) có ba nguồn điểm**: *Bài luyện* · *Contest* (tổng điểm standings của từng contest, tôn trọng đóng băng; contest thuộc về kỳ mà nó kết thúc) · *Tổng hợp* (mặc định, cộng cả hai, hiện tách hai vế). Contest dùng bảng xếp hạng riêng theo FR-I5. |
 | FR-G7 | C | Phát hiện trùng code cơ bản giữa các member trong cùng bài. |
 
 ### FR-H · Quản trị hệ thống

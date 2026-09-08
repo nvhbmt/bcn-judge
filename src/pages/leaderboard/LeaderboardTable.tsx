@@ -8,7 +8,12 @@
 import { cn } from '@/lib/cn'
 import type { LbEntry } from './types'
 
-export function LeaderboardTable({ rows }: { rows: LbEntry[] }) {
+/**
+ * `split` (nguồn Tổng hợp): thêm hai cột Luyện · Contest trước cột Tổng — một con số
+ * 1 120 không nói được là cày bài hay thi giỏi, mà đó là điều người ta muốn biết khi
+ * xem bảng gộp.
+ */
+export function LeaderboardTable({ rows, split = false }: { rows: LbEntry[]; split?: boolean }) {
   if (rows.length === 0) return null
   return (
     <table className="w-full table-fixed border-collapse">
@@ -16,7 +21,9 @@ export function LeaderboardTable({ rows }: { rows: LbEntry[] }) {
       <colgroup>
         <col className="w-12" />
         <col />
-        <col className="w-20" />
+        <col className="w-16" />
+        {split ? <col className="w-20" /> : null}
+        {split ? <col className="w-20" /> : null}
         <col className="w-20" />
       </colgroup>
       <thead>
@@ -24,7 +31,9 @@ export function LeaderboardTable({ rows }: { rows: LbEntry[] }) {
           <th className="px-3 py-2 font-normal">#</th>
           <th className="py-2 font-normal">Tên</th>
           <th className="px-3 py-2 text-right font-normal">Bài</th>
-          <th className="px-3 py-2 text-right font-normal">Điểm</th>
+          {split ? <th className="px-3 py-2 text-right font-normal">Luyện</th> : null}
+          {split ? <th className="px-3 py-2 text-right font-normal">Contest</th> : null}
+          <th className="px-3 py-2 text-right font-normal">{split ? 'Tổng' : 'Điểm'}</th>
         </tr>
       </thead>
       <tbody>
@@ -44,6 +53,12 @@ export function LeaderboardTable({ rows }: { rows: LbEntry[] }) {
               {row.meta ? <span className="num ml-1.5 font-mono text-[12px] text-ink-6">{row.meta}</span> : null}
             </td>
             <td className="num px-3 py-2.5 text-right font-mono text-[14px] text-ink-3">{row.acCount}</td>
+            {split ? (
+              <td className="num px-3 py-2.5 text-right font-mono text-[13px] text-ink-5">{row.practicePoints ?? '—'}</td>
+            ) : null}
+            {split ? (
+              <td className="num px-3 py-2.5 text-right font-mono text-[13px] text-ink-5">{row.contestPoints ?? '—'}</td>
+            ) : null}
             <td className={cn('num px-3 py-2.5 text-right font-mono text-[14px]', row.isMe ? 'text-ink-1' : 'text-ink-4')}>
               {row.totalPoints}
             </td>

@@ -284,3 +284,134 @@ describe.skipIf(!INTEGRATION)('điểm theo độ khó', () => {
     expect(res.body.data[0].score).toBe(50)
   })
 })
+
+/**
+ * BXH toàn ban gộp contest (v0.8): ba nguồn điểm, contest thuộc kỳ theo `end_at`, mốc
+ * đóng băng được tôn trọng, contest nháp/ngoài cửa sổ không tính, và `source=practice`
+ * phải trả ĐÚNG con số của bản trước — đó là lưới hồi quy cho phần gộp.
+ */
+describe.skipIf(!INTEGRATION)('BXH toàn ban gộp contest', () => {
+  let admin: TestUser
+  let u1: TestUser
+  let u2: TestUser
+  let courseId: string
+  let p1: string
+  let item1: string
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    admin = await makeUser('admin')
+    u1 = await makeUser('member')
+    u2 = await makeUser('member')
+    const course = await makeCourse(admin.id, { status: 'open' })
+    courseId = course.id
+    for (const u of [u1, u2]) await enroll(courseId, u.id)
+    p1 = await makeProblem(admin.id, { scopeCourseId: courseId, difficulty: 'easy' })
+    await addTestcases(p1, [{ input: '1', expected: '1' }])
+    item1 = await makeItem(courseId, p1)
+  })
+
+  /** Contest toàn ban (course_id NULL) với một bài 100 điểm; mốc tính bằng phút so với now(). */
+  async function makeContest(o: { startMin: number; endMin: number; status?: string; freezeMinutes?: number; maxScore?: number }) {
+    const [row] = await q<{ id: string }>(sql`
+      INSERT INTO contests (title, course_id, start_at, end_at, status, freeze_minutes)
+      VALUES ('Contest', NULL, now() + make_interval(mins => ${o.startMin}), now() + make_interval(mins => ${o.endMin}),
+              ${o.status ?? 'published'}, ${o.freezeMinutes ?? 0})
+      RETURNING id
+    `)
+    const [cp] = await q<{ id: string }>(sql`
+      INSERT INTO contest_problems (contest_id, problem_id, position, label, max_score)
+      VALUES (${row!.id}, ${p1}, 1, 'A', ${o.maxScore ?? 100}) RETURNING id
+    `)
+    return { contestId: row!.id, cpId: cp!.id }
+  }
+
+  async function contestSubmit(u: TestUser, c: { contestId: string; cpId: string }, o: { verdict: string; passed: number; total: number; minutesAgo: number }) {
+    await q(sql`
+      INSERT INTO submissions (kind, user_id, problem_id, contest_id, contest_problem_id, language_id, source, source_bytes,
+                               status, verdict, passed_weight, total_weight, attempt, received_at)
+      VALUES ('submit', ${u.id}, ${p1}, ${c.contestId}, ${c.cpId}, 'c11', 'x', 1, 'done', ${o.verdict}, ${o.passed}, ${o.total}, 1,
+              now() - make_interval(mins => ${o.minutesAgo}))
+    `)
+  }
+
+  const board = async (qs: string, as = admin) => (await call(`/api/member/leaderboard?${qs}`, { as })).body.data
+  const rowOf = (rows: { userId: string }[], u: TestUser) => rows.find((r) => r.userId === u.id)
+
+  it('ba nguồn: Tổng hợp = luyện + contest; Bài luyện trả đúng con số cũ; Contest chỉ contest', async () => {
+    const c = await makeContest({ startMin: -120, endMin: -60 })
+    await submit(u1.id, item1, p1, { verdict: 'AC', passed: 2, total: 2 }) // luyện 100
+    await contestSubmit(u1, c, { verdict: 'WA', passed: 1, total: 2, minutesAgo: 90 }) // contest 50
+    await contestSubmit(u2, c, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 80 }) // contest 100, không luyện
+
+    const total = await board('scope=individual&window=all&source=total')
+    expect(rowOf(total, u1)).toMatchObject({ totalPoints: 150, acCount: 1, practicePoints: 100, contestPoints: 50 })
+    expect(rowOf(total, u2)).toMatchObject({ totalPoints: 100, acCount: 1, practicePoints: 0, contestPoints: 100 })
+    expect(total.map((r: { userId: string }) => r.userId)).toEqual([u1.id, u2.id])
+
+    // Mặc định = Tổng hợp.
+    expect(await board('scope=individual&window=all')).toEqual(total)
+
+    const practice = await board('scope=individual&window=all&source=practice')
+    expect(practice).toHaveLength(1)
+    expect(rowOf(practice, u1)).toMatchObject({ totalPoints: 100, acCount: 1 })
+
+    const contest = await board('scope=individual&window=all&source=contest')
+    expect(contest.map((r: { userId: string }) => r.userId)).toEqual([u2.id, u1.id])
+    expect(rowOf(contest, u1)).toMatchObject({ totalPoints: 50, acCount: 0 })
+  })
+
+  it('contest thuộc kỳ mà nó KẾT THÚC: xong 10 ngày trước → không vào tuần, vào tháng/toàn thời gian', async () => {
+    const cu = await makeContest({ startMin: -20 * 24 * 60, endMin: -10 * 24 * 60 })
+    await contestSubmit(u1, cu, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 15 * 24 * 60 })
+    // Lịch VN: đầu tháng có thể chỉ cách nay vài ngày → "tháng này" không chắc chứa mốc
+    // 10 ngày trước; toàn thời gian thì luôn chứa.
+    expect(rowOf(await board('window=week&source=contest'), u1)).toBeUndefined()
+    expect(rowOf(await board('window=all&source=contest'), u1)).toMatchObject({ totalPoints: 100 })
+
+    // Contest ĐANG chạy (end_at ở tương lai) tính vào kỳ hiện tại.
+    const dang = await makeContest({ startMin: -60, endMin: 60 })
+    await contestSubmit(u2, dang, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 30 })
+    expect(rowOf(await board('window=week&source=contest'), u2)).toMatchObject({ totalPoints: 100 })
+  })
+
+  it('đóng băng được tôn trọng: bài nộp sau mốc băng của contest đang chạy chưa tính, kể cả với admin', async () => {
+    const c = await makeContest({ startMin: -120, endMin: 60, freezeMinutes: 90 }) // băng từ 30 phút trước
+    await contestSubmit(u1, c, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 10 }) // trong lúc băng
+    await contestSubmit(u2, c, { verdict: 'WA', passed: 1, total: 2, minutesAgo: 60 }) // trước băng: 50
+
+    const rows = await board('window=all&source=contest', admin)
+    expect(rowOf(rows, u1)).toBeUndefined()
+    expect(rowOf(rows, u2)).toMatchObject({ totalPoints: 50 })
+  })
+
+  it('contest nháp, contest chưa bắt đầu, và bài nộp ngoài cửa sổ không tính', async () => {
+    const nhap = await makeContest({ startMin: -120, endMin: -60, status: 'draft' })
+    await contestSubmit(u1, nhap, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 90 })
+    const c = await makeContest({ startMin: -120, endMin: -60 })
+    await contestSubmit(u2, c, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 30 }) // sau end_at → luyện tập, không tính
+    expect(await board('window=all&source=contest')).toHaveLength(0)
+  })
+
+  it('team: cộng cả hai nguồn của mọi thành viên; team chưa có gì vẫn hiện 0', async () => {
+    const alpha = (await call('/api/admin/teams', { as: admin, body: { name: 'Alpha', leaderId: u1.id } })).body.data.id
+    const beta = (await call('/api/admin/teams', { as: admin, body: { name: 'Beta', leaderId: u2.id } })).body.data.id
+    const c = await makeContest({ startMin: -120, endMin: -60 })
+    await submit(u1.id, item1, p1, { verdict: 'AC', passed: 2, total: 2 })
+    await contestSubmit(u1, c, { verdict: 'AC', passed: 2, total: 2, minutesAgo: 90 })
+
+    const rows = await board('scope=team&window=all&source=total', u1)
+    const a = rows.find((r: { id: string }) => r.id === alpha)
+    const b = rows.find((r: { id: string }) => r.id === beta)
+    expect(a).toMatchObject({ rank: 1, totalPoints: 200, practicePoints: 100, contestPoints: 100, acCount: 2, isMine: true })
+    expect(b).toMatchObject({ rank: 2, totalPoints: 0, acCount: 0, memberCount: 1 })
+
+    // Nguồn Bài luyện: Alpha 100, không mang điểm contest sang.
+    const luyen = await board('scope=team&window=all&source=practice', u1)
+    expect(luyen.find((r: { id: string }) => r.id === alpha)).toMatchObject({ totalPoints: 100, acCount: 1 })
+  })
+})
