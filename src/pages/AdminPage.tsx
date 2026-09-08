@@ -17,6 +17,7 @@ import { Row, RowGroup, StatStrip } from "@/components/ui/patterns";
 import { api } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from '@/lib/cn'
+import { DiscordSweepCard, type DiscordSweepStatus } from "./admin/DiscordSweepCard";
 
 interface JudgeStatus {
   queue: {
@@ -35,6 +36,7 @@ interface JudgeStatus {
   }[];
   ieSubmissions: { id: string; ieReason: string | null; receivedAt: string }[];
   judgePaused: boolean;
+  discordSweep?: DiscordSweepStatus;
   health: {
     submitBacklogAlarm: boolean;
     runBacklogWarning: boolean;
@@ -217,6 +219,8 @@ export function AdminPage() {
           {data.judgePaused ? "Mở nhận bài trở lại" : "Tạm dừng nhận bài"}
         </Button>
       </section>
+
+      <DiscordSweepCard status={data.discordSweep} />
     </>
   );
 }

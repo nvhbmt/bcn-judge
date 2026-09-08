@@ -213,6 +213,19 @@ describe.skipIf(!INTEGRATION)('ma trận quyền — API', () => {
       const list = await call(`/api/admin/courses/${courseA.id}/enrollments`, { as: admin })
       expect(list.body.data.some((r: { id: string }) => r.id === member.id)).toBe(true)
     })
+
+    it('khoá tay ghi lý do "admin" kèm mốc giờ; mở khoá thì xoá cả hai', async () => {
+      // Lý do phân biệt với 'discord_kick' của bộ quét: khoá tay thì Discord không được tự mở.
+      await call(`/api/admin/users/${member.id}`, { as: admin, method: 'PATCH', body: { disabled: true } })
+      let row = (await call('/api/admin/users', { as: admin })).body.data.find((r: { id: string }) => r.id === member.id)
+      expect(row.disabledReason).toBe('admin')
+      expect(row.disabledAt).not.toBeNull()
+
+      await call(`/api/admin/users/${member.id}`, { as: admin, method: 'PATCH', body: { disabled: false } })
+      row = (await call('/api/admin/users', { as: admin })).body.data.find((r: { id: string }) => r.id === member.id)
+      expect(row.disabledReason).toBeNull()
+      expect(row.disabledAt).toBeNull()
+    })
   })
 })
 

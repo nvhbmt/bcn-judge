@@ -23,6 +23,12 @@ export interface JudgeSettings {
    * thông báo; đây là khoá cài đặt DUY NHẤT mang chữ, mọi khoá còn lại là số hoặc cờ.
    */
   announcement: string
+  /**
+   * Bộ quét Discord (auth/discordSweep.ts) mặc định chỉ khoá tài khoản do cổng guild
+   * sinh ra (không mật khẩu). Bật cờ này thì tài khoản admin cấp tay có gắn Discord
+   * cũng bị khoá khi rời server — mentor rời server là mất luôn đường vào, nên tắt sẵn.
+   */
+  discord_kick_locks_password_accounts: boolean
 }
 
 /**
@@ -48,6 +54,7 @@ export const DEFAULTS: JudgeSettings = {
   tle_skip_threshold: 0,
   judge_paused: false,
   announcement: '',
+  discord_kick_locks_password_accounts: false,
 }
 
 let cache: { at: number; value: JudgeSettings } | null = null

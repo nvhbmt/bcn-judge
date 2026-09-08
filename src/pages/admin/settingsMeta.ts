@@ -59,6 +59,11 @@ export const SETTING_META: Record<string, SettingMeta> = {
     label: 'Tạm dừng nhận bài nộp',
     hint: 'Bật thì member vẫn đọc đề và lưu nháp, chỉ không nộp được. Cũng bật/tắt được ở trang Tình trạng chấm.',
   },
+  discord_kick_locks_password_accounts: {
+    label: 'Rời server Discord thì khoá cả tài khoản admin cấp',
+    hint:
+      'Mặc định bộ quét Discord chỉ khoá tài khoản do cổng Discord sinh ra (không mật khẩu). Bật thì tài khoản có mật khẩu đã gắn Discord cũng bị khoá khi rời server — mentor rời server là mất đường vào.',
+  },
 }
 
 interface Group {
@@ -85,7 +90,7 @@ const GROUPS: Group[] = [
   // bảng này nên rơi vào nhóm "Khác" ở tận cuối trang — cùng chỗ với khoá server thêm
   // mà FE chưa biết, tức là chỗ nói "không rõ cái này là gì". Nó thuộc về vận hành,
   // đứng cạnh công tắc tạm dừng chấm.
-  { title: 'Vận hành', keys: ['announcement', 'judge_paused'] },
+  { title: 'Vận hành', keys: ['announcement', 'judge_paused', 'discord_kick_locks_password_accounts'] },
 ]
 
 export interface RenderedGroup {

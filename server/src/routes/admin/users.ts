@@ -1,5 +1,5 @@
 /** FR-A2/A3/A4: admin cấp tài khoản (đơn lẻ + CSV), đặt lại mật khẩu, khoá/mở. */
-import { and, asc, eq, ilike, isNull, or } from 'drizzle-orm'
+import { and, asc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { generatePassword, hashPassword } from '@/auth/hash'
@@ -26,6 +26,8 @@ adminUserRoutes.get('/', async (c) => {
       displayName: users.displayName,
       role: users.role,
       disabled: users.disabled,
+      disabledReason: users.disabledReason,
+      disabledAt: users.disabledAt,
       mustChangePassword: users.mustChangePassword,
       lastLogin: users.lastLogin,
       createdAt: users.createdAt,
@@ -155,9 +157,17 @@ adminUserRoutes.patch('/:id', async (c) => {
     return errors.conflict(c, 'cannot_demote_self', 'Không thể tự hạ quyền admin của chính mình.')
   }
 
+  // Khoá tay ghi lý do 'admin' để bộ quét Discord (auth/discordSweep.ts) và cú đăng nhập
+  // Discord sau này không tự mở nhầm; mở khoá thì xoá cả lý do lẫn mốc giờ.
+  const patch =
+    body.data.disabled === undefined
+      ? body.data
+      : body.data.disabled
+        ? { ...body.data, disabledReason: 'admin', disabledAt: sql`now()` }
+        : { ...body.data, disabledReason: null, disabledAt: null }
   const [row] = await db
     .update(users)
-    .set(body.data)
+    .set(patch)
     .where(and(eq(users.id, id), isNull(users.deletedAt)))
     .returning({ id: users.id, role: users.role, disabled: users.disabled })
   if (!row) return errors.notFound(c, 'Không tìm thấy tài khoản.')

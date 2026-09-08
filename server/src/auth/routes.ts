@@ -54,7 +54,14 @@ authRoutes.post('/login', async (c) => {
   if (!user || !passOk || user.deletedAt) {
     return errors.badRequest(c, 'Email hoặc mật khẩu không đúng.')
   }
-  if (user.disabled) return errors.forbidden(c, 'Tài khoản đã bị khoá.')
+  if (user.disabled) {
+    return errors.forbidden(
+      c,
+      user.disabledReason === 'discord_kick'
+        ? 'Tài khoản bị khoá vì bạn đã rời server Discord của ban. Vào lại server rồi đăng nhập bằng Discord.'
+        : 'Tài khoản đã bị khoá.',
+    )
+  }
 
   const session = await createSession(user.id, ip, c.req.header('user-agent') ?? null)
   setSessionCookie(c, session.token, session.maxAgeSec)

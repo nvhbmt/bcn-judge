@@ -59,6 +59,9 @@ export const users = pgTable(
     discordAvatar: text('discord_avatar'),
     discordLinkedAt: timestamp('discord_linked_at', { withTimezone: true }),
     disabled: boolean('disabled').notNull().default(false),
+    /** 'admin' = khoá tay, 'discord_kick' = bộ quét khoá vì rời server — xem drizzle/0008. */
+    disabledReason: text('disabled_reason'),
+    disabledAt: timestamp('disabled_at', { withTimezone: true }),
     createdAt: createdAt(),
     lastLogin: timestamp('last_login', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),

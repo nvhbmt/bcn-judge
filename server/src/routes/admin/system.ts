@@ -2,6 +2,7 @@
 import { sql } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
+import { SWEEP_LAST_KEY, sweepEnabled } from '@/auth/discordSweep'
 import { q } from '@/db/pool'
 import { queueStats, retryIeSubmissions } from '@/judge/queue'
 import { errors, ok } from '@/lib/apiResponse'
@@ -105,12 +106,16 @@ adminSystemRoutes.get('/judge', async (c) => {
     ORDER BY s.seq DESC LIMIT 50
   `)
   const s = await getSettings()
+  // Kết quả lượt quét Discord gần nhất: ghi ở settings dưới khoá riêng, KHÔNG nằm trong
+  // JudgeSettings — nó là trạng thái máy ghi, không phải thứ admin đặt.
+  const [sweepRow] = await q<{ value: unknown }>(sql`SELECT value FROM settings WHERE key = ${SWEEP_LAST_KEY}`)
 
   return ok(c, {
     queue: stats,
     workers,
     ieSubmissions: ie,
     judgePaused: s.judge_paused,
+    discordSweep: { enabled: sweepEnabled(), last: sweepRow?.value ?? null },
     // §9: hai băng tách bạch — backlog chạy thử KHÔNG được kéo chuông như backlog nộp bài.
     health: {
       submitBacklogAlarm: (stats.oldestPendingSubmitSec ?? 0) > 120,

@@ -51,6 +51,7 @@ type Reason =
   | 'chua_gan'
   | 'gan_nguoi_khac'
   | 'bi_khoa'
+  | 'roi_server'
   | 'da_gan'
   | 'ngoai_server'
   | 'thieu_vai_tro'
@@ -189,9 +190,14 @@ async function doLogin(
    * đứng ra bảo lãnh rồi — chuyện họ có ở trong server Discord hay không là việc
    * khác. Không thì một mentor rời server Discord sẽ mất luôn nút đăng nhập.
    */
-  if (guildGateOn() && (!user || !user.hasPassword)) {
+  // Tài khoản bị bộ quét khoá vì rời server (kể cả loại có mật khẩu, khi admin bật cờ
+  // mở rộng) cũng phải qua cổng: đó là cách duy nhất biết họ đã vào lại server.
+  const biQuetKhoa = user?.disabled === true && user.disabledReason === 'discord_kick'
+  let daQuaCong = false
+  if (guildGateOn() && (!user || !user.hasPassword || biQuetKhoa)) {
     const chan = await quaCongGuild(accessToken)
-    if (chan) return back(c, '/dang-nhap', chan)
+    if (chan) return back(c, '/dang-nhap', biQuetKhoa && chan !== 'khong_kiem_duoc' ? 'roi_server' : chan)
+    daQuaCong = true
   }
 
   if (!user) {
@@ -199,7 +205,16 @@ async function doLogin(
     if (!guildGateOn()) return back(c, '/dang-nhap', 'chua_gan')
     return await taoTaiKhoanTuGuild(c, profile)
   }
-  if (user.disabled) return back(c, '/dang-nhap', 'bi_khoa')
+  if (user.disabled) {
+    // Tự mở CHỈ khi (a) chính bộ quét đã khoá và (b) cổng vừa xác nhận họ ở trong server
+    // trở lại. Admin khoá tay thì admin mở — Discord không nói gì về chuyện đó.
+    if (!(biQuetKhoa && daQuaCong)) return back(c, '/dang-nhap', biQuetKhoa ? 'roi_server' : 'bi_khoa')
+    await db
+      .update(users)
+      .set({ disabled: false, disabledReason: null, disabledAt: null })
+      .where(eq(users.id, user.id))
+    await audit(user.id, 'user.auto_unlock', 'user', user.id, null, { discordId: profile.id, guildId: config.discordGuildId })
+  }
 
   // Gắn luôn ở lần khớp email đầu tiên: lần sau đăng nhập bằng discord_id, không
   // còn phụ thuộc vào việc email hai bên có còn trùng nữa.
@@ -235,6 +250,7 @@ async function findLive(where: Parameters<typeof and>[0]) {
     .select({
       id: users.id,
       disabled: users.disabled,
+      disabledReason: users.disabledReason,
       discordUsername: users.discordUsername,
       discordAvatar: users.discordAvatar,
       passwordHash: users.passwordHash,

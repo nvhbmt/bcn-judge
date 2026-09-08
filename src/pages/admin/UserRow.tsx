@@ -69,9 +69,19 @@ export function UserRow({ user, onSecret }: { user: AdminUser; onSecret: (s: One
         </td>
         <td className="px-2 py-2 text-xs">
           {user.disabled ? (
-            <span className="bg-(--tint-clay) px-1.5 py-0.5 font-medium text-clay">
-              Đã khoá
-            </span>
+            <>
+              <span className="bg-(--tint-clay) px-1.5 py-0.5 font-medium text-clay">
+                {user.disabledReason === 'discord_kick' ? 'Khoá tự động' : 'Đã khoá'}
+              </span>
+              {/* Lý do và mốc giờ: "khoá vì rời Discord lúc 14:10" là câu admin cần khi
+                  có người hỏi "sao em không vào được" — không phải chỉ "đã khoá". */}
+              {user.disabledReason === 'discord_kick' || user.disabledAt ? (
+                <span className="mt-1 block text-ink-5">
+                  {user.disabledReason === 'discord_kick' ? 'rời Discord' : 'admin khoá'}
+                  {user.disabledAt ? ` · ${new Date(user.disabledAt).toLocaleString('vi-VN')}` : ''}
+                </span>
+              ) : null}
+            </>
           ) : (
             <span className="bg-surface-sel px-1.5 py-0.5 font-medium text-moss">
               Hoạt động

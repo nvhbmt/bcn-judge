@@ -51,6 +51,15 @@ export const config = {
   discordGuildId: process.env.DISCORD_GUILD_ID ?? '',
   discordRoleId: process.env.DISCORD_ROLE_ID ?? '',
 
+  /**
+   * Quét nền khoá tài khoản khi rời server Discord (auth/discordSweep.ts). Cần BOT token
+   * chứ không phải OAuth: token OAuth của người dùng không được lưu, nên sau đăng nhập
+   * hệ thống không hỏi lại Discord được. Rỗng = không quét; chỉ có nghĩa khi cổng
+   * guild (DISCORD_GUILD_ID) đang bật.
+   */
+  discordBotToken: process.env.DISCORD_BOT_TOKEN ?? '',
+  discordKickSweepMinutes: int('DISCORD_KICK_SWEEP_MINUTES', 10),
+
   /** Tài khoản admin khởi tạo cho seed. */
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL ?? 'admin@bcn.local',
   seedAdminPassword: process.env.SEED_ADMIN_PASSWORD ?? 'bcnjudge',

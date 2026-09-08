@@ -14,6 +14,9 @@ export const DISCORD_REASON: Record<string, string> = {
     'Tài khoản Discord này chưa gắn với tài khoản nào ở đây. Đăng nhập bằng mật khẩu rồi vào trang Tài khoản để gắn, hoặc liên hệ mentor.',
   gan_nguoi_khac: 'Tài khoản Discord này đã gắn với một tài khoản khác.',
   bi_khoa: 'Tài khoản đã bị khoá.',
+  // Khác 'bi_khoa': đây là khoá TỰ ĐỘNG và người dùng tự mở được — vào lại server.
+  roi_server:
+    'Tài khoản bị khoá vì bạn đã rời server Discord của ban. Vào lại server rồi đăng nhập bằng Discord là mở lại.',
   da_gan: 'Đã gắn Discord vào tài khoản.',
   ngoai_server:
     'Tài khoản Discord này không ở trong server Discord của CLB. Vào server rồi thử lại, hoặc liên hệ mentor.',

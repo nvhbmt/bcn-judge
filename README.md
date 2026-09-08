@@ -136,12 +136,43 @@ Cổng áp cho ai:
 
 | Tài khoản | Rời server Discord thì sao |
 |---|---|
-| Do cổng sinh ra (không mật khẩu) | Mất quyền vào — đúng ý "server là danh sách thành viên" |
-| Admin cấp tay (có mật khẩu) | Không ảnh hưởng — admin đã bảo lãnh khi tạo |
+| Do cổng sinh ra (không mật khẩu) | Mất quyền vào ở lần đăng nhập Discord kế — và bị **khoá trong ≤ 10 phút** nếu bật bộ quét bên dưới |
+| Admin cấp tay (có mật khẩu) | Không ảnh hưởng — admin đã bảo lãnh khi tạo (đổi được bằng cờ ở Cài đặt) |
 
 Hỏi Discord không được (mạng hỏng, token sai) thì **chặn**, và báo bằng một mã
 riêng chứ không gộp vào "ngoài server": gộp thành cho-qua là một sự cố mạng mở toang
 cổng, gộp thành ngoài-server là báo oan người đang ở trong server.
+
+### Rời server thì khoá ngay, không chờ hết phiên (tuỳ chọn)
+
+Cổng chỉ kiểm được **lúc đăng nhập**, bằng token OAuth của chính người đó — token
+không được lưu lại. Phiên sống 30 ngày, nên người bị kick vẫn vào được cho tới khi
+đăng xuất hay hết hạn. Muốn khoá ngay thì khai thêm vào `.env.api`:
+
+```bash
+DISCORD_BOT_TOKEN=...            # token BOT của cùng Application
+DISCORD_KICK_SWEEP_MINUTES=10    # mặc định 10; 0 = tắt
+```
+
+API (không phải worker — `DISCORD_*` chỉ nằm ở `.env.api`) hỏi Discord "server có
+những ai" mỗi 10 phút; hai bản blue/green giành advisory lock nên không quét đôi. Ai
+rời server, hoặc mất role khi có `DISCORD_ROLE_ID`, thì tài khoản do cổng sinh ra bị
+**khoá**, mọi phiên bị cắt, và nhật ký ghi `user.auto_lock`. **Vào lại server rồi đăng
+nhập bằng Discord là tự mở** — khác khoá tay của admin (lý do `admin` trong
+`users.disabled_reason`), thứ chỉ admin mở được.
+
+Tạo bot: Developer Portal → cùng Application → tab **Bot** → *Reset Token* → bật
+**Server Members Intent** (bot dưới 100 server không cần Discord duyệt) → mời vào server
+bằng URL OAuth2 với scope `bot` và **không tick quyền nào** — bot chỉ đọc danh sách thành
+viên. Thiếu intent thì Discord trả 403 và bộ quét bỏ lượt, hiện lý do ở trang *Tình trạng
+chấm*.
+
+Bốn lan can, cùng triết lý với cổng: hỏi Discord không được → **bỏ lượt, không khoá
+ai**; danh sách rỗng → coi là lỗi; một lượt định khoá **quá nửa** số tài khoản thuộc
+diện (và hơn hai người) → huỷ, vì danh sách thiếu trang trông y hệt "cả server bỏ đi";
+không bao giờ xoá, chỉ `disabled` — bài nộp và tiến độ giữ nguyên. Cờ *Rời server
+Discord thì khoá cả tài khoản admin cấp* ở Cài đặt mở rộng sang tài khoản có mật khẩu
+(mặc định tắt: mentor rời server là mất đường vào).
 
 ### Ảnh đại diện
 

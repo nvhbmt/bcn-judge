@@ -14,6 +14,9 @@ export interface AdminUser {
   displayName: string
   role: Role
   disabled: boolean
+  /** 'admin' = khoá tay; 'discord_kick' = bộ quét khoá vì rời server; null = khoá cũ hoặc đang mở. */
+  disabledReason: string | null
+  disabledAt: string | null
   mustChangePassword: boolean
   lastLogin: string | null
   createdAt: string

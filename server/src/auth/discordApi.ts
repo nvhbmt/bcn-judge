@@ -138,6 +138,54 @@ export async function fetchGuildMember(
   }
 }
 
+export interface GuildMemberLite {
+  id: string
+  roles: string[]
+}
+
+/**
+ * Danh sách thành viên guild bằng BOT token — cho bộ quét nền (discordSweep.ts).
+ *
+ * Khác `fetchGuildMember` (token OAuth của chính người dùng, chỉ hỏi được về họ), bot
+ * hỏi được cả server nhưng cần bật **Server Members Intent** trong Developer Portal;
+ * thiếu thì Discord trả 403. Phân trang bằng `after` = id lớn nhất của trang trước
+ * (Discord trả theo id tăng dần), tối đa 1000 người mỗi trang.
+ *
+ * Trả `'loi'` cho MỌI thất bại (mạng, 401/403/429, body lạ): người gọi bỏ lượt, không
+ * khoá ai — một nửa danh sách nguy hiểm hơn không có danh sách.
+ */
+export async function fetchGuildMembers(botToken: string, guildId: string): Promise<GuildMemberLite[] | 'loi'> {
+  const out: GuildMemberLite[] = []
+  let after = '0'
+  // 20 trang × 1000 = 20 000 người — gấp trăm lần một ban; vòng lặp có trần để không
+  // quay vô hạn nếu Discord trả cùng một trang mãi.
+  for (let page = 0; page < 20; page++) {
+    let body: unknown
+    try {
+      const res = await fetch(
+        `https://discord.com/api/guilds/${encodeURIComponent(guildId)}/members?limit=1000&after=${encodeURIComponent(after)}`,
+        { headers: { authorization: `Bot ${botToken}` } },
+      )
+      if (!res.ok) return 'loi'
+      body = await res.json()
+    } catch {
+      return 'loi'
+    }
+    if (!Array.isArray(body)) return 'loi'
+    const batch: GuildMemberLite[] = []
+    for (const item of body) {
+      const user = (item as { user?: { id?: unknown } }).user
+      const roles = (item as { roles?: unknown }).roles
+      if (!user || typeof user.id !== 'string') continue
+      batch.push({ id: user.id, roles: Array.isArray(roles) ? roles.filter((r): r is string => typeof r === 'string') : [] })
+    }
+    out.push(...batch)
+    if (body.length < 1000 || batch.length === 0) break
+    after = batch[batch.length - 1]!.id
+  }
+  return out
+}
+
 /**
  * URL ảnh đại diện trên CDN của Discord.
  *

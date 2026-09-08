@@ -219,4 +219,76 @@ describe.skipIf(!INTEGRATION)('cổng theo server Discord', () => {
       expect(coPhien(res)).toBe(false)
     })
   })
+
+  describe('bị bộ quét khoá vì rời server (auth/discordSweep.ts)', () => {
+    const khoaBoiQuet = (id: string) =>
+      db
+        .update(users)
+        .set({ disabled: true, disabledReason: 'discord_kick', disabledAt: sql`now()` })
+        .where(sql`id = ${id}`)
+    const trangThai = async (id: string) =>
+      (await q<{ d: boolean; r: string | null }>(sql`SELECT disabled AS d, disabled_reason AS r FROM users WHERE id = ${id}`))[0]!
+
+    it('vào lại server rồi đăng nhập Discord → tự mở khoá, có phiên, ghi audit', async () => {
+      await dangNhap(NGUOI_LA, TRONG_GUILD)
+      vi.restoreAllMocks()
+      const [u] = await q<{ id: string }>(sql`SELECT id FROM users WHERE discord_id = '77'`)
+      await khoaBoiQuet(u!.id)
+
+      const res = await dangNhap(NGUOI_LA, TRONG_GUILD)
+      expect(dich(res).pathname).toBe('/')
+      expect(coPhien(res)).toBe(true)
+      expect(await trangThai(u!.id)).toEqual({ d: false, r: null })
+      const [a] = await q(sql`SELECT 1 FROM audit_log WHERE action = 'user.auto_unlock' AND entity_id = ${u!.id}`)
+      expect(a).toBeDefined()
+    })
+
+    it('vẫn ngoài server → chặn với lý do RỜI SERVER, không phải "bị khoá" chung chung', async () => {
+      await dangNhap(NGUOI_LA, TRONG_GUILD)
+      vi.restoreAllMocks()
+      const [u] = await q<{ id: string }>(sql`SELECT id FROM users WHERE discord_id = '77'`)
+      await khoaBoiQuet(u!.id)
+
+      const res = await dangNhap(NGUOI_LA, 404)
+      expect(lyDo(res)).toBe('roi_server')
+      expect(coPhien(res)).toBe(false)
+      expect((await trangThai(u!.id)).d).toBe(true)
+    })
+
+    it('tài khoản CÓ mật khẩu bị quét khoá (cờ mở rộng) cũng phải qua cổng mới được mở', async () => {
+      await db.update(users).set({ discordId: '42' }).where(sql`id = ${member.id}`)
+      await khoaBoiQuet(member.id)
+
+      // Chưa vào lại server: dù có mật khẩu — thứ bình thường miễn cổng — vẫn bị chặn.
+      const chan = await dangNhap({ id: '42', username: 'x', email: null, verified: false }, 404)
+      expect(lyDo(chan)).toBe('roi_server')
+      expect((await trangThai(member.id)).d).toBe(true)
+
+      vi.restoreAllMocks()
+      const mo = await dangNhap({ id: '42', username: 'x', email: null, verified: false }, TRONG_GUILD)
+      expect(coPhien(mo)).toBe(true)
+      expect((await trangThai(member.id)).d).toBe(false)
+    })
+
+    it('admin khoá TAY thì Discord không mở, dù đang ở trong server', async () => {
+      await db
+        .update(users)
+        .set({ discordId: '42', disabled: true, disabledReason: 'admin', disabledAt: sql`now()` })
+        .where(sql`id = ${member.id}`)
+      const res = await dangNhap({ id: '42', username: 'x', email: null, verified: false }, TRONG_GUILD)
+      expect(lyDo(res)).toBe('bi_khoa')
+      expect(coPhien(res)).toBe(false)
+      expect((await trangThai(member.id)).d).toBe(true)
+    })
+
+    it('hỏi Discord không được thì giữ nguyên khoá và nói "chưa kiểm được"', async () => {
+      await dangNhap(NGUOI_LA, TRONG_GUILD)
+      vi.restoreAllMocks()
+      const [u] = await q<{ id: string }>(sql`SELECT id FROM users WHERE discord_id = '77'`)
+      await khoaBoiQuet(u!.id)
+      const res = await dangNhap(NGUOI_LA, 'loi')
+      expect(lyDo(res)).toBe('khong_kiem_duoc')
+      expect((await trangThai(u!.id)).d).toBe(true)
+    })
+  })
 })
