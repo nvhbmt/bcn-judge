@@ -253,6 +253,11 @@ Năm việc từ lượt rà thắc mắc của BCN, mỗi việc một commit, 
 - **Mục Lời giải** (FR-K): xem và so sánh bài AC của người khác, lời giải mẫu của mentor
   (FR-D7 nay mới thật sự tới member), cấm vận khi bài đang trong contest mở — áp cả cho
   Thảo luận, công tắc chia sẻ ở trang Tài khoản (mặc định bật).
+- **FR-F8 tự lành thật** — nợ ghi từ 01.09: `retryIeSubmissions` tồn tại nhưng chỉ admin
+  bấm tay, nên một bài IE nằm IE vĩnh viễn nếu không ai để ý. Nay worker xếp lại IE khi
+  khởi động (`healIeOnStartup`) và mỗi 5 phút (`healIePeriodic`, tối đa 3 lần rồi hạ
+  `ie_retry` chờ admin); `attempt` không về 0 vì PK của `submission_results` — xem chú
+  thích trong `judge/queue.ts`.
 
 ## Bài dạng function (kiểu LeetCode) — FR-D10
 

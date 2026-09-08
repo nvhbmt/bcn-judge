@@ -15,6 +15,8 @@ import {
   claimRejudge,
   finish,
   finishRejudge,
+  healIeOnStartup,
+  healIePeriodic,
   heartbeat,
   purgeOld,
   reapRejudge,
@@ -524,6 +526,16 @@ export async function startWorker(): Promise<void> {
   }
   if (process.env.SKIP_LANGUAGE_PROBE !== '1') await probeLanguages()
 
+  // FR-F8: judge vừa sống lại → IE do hạ tầng được xếp lại hàng đợi ngay (design §3.5).
+  // Trước đây hàm này chỉ có admin gọi bằng tay, nên một IE nằm IE vĩnh viễn nếu không ai
+  // để ý — đúng thứ FR-F8 (mức M) nói không được xảy ra.
+  try {
+    const healed = await healIeOnStartup()
+    if (healed) console.log(`[worker] xếp lại ${healed} bài IE để chấm lại (FR-F8)`)
+  } catch (err) {
+    console.error('[worker] xếp lại bài IE hỏng:', err)
+  }
+
   const beat = setInterval(() => {
     // KHÔNG viết `void touchWorker()` cho câu drizzle: builder của drizzle là
     // thenable LƯỜI, chỉ gửi câu lệnh khi có ai gọi `.then()`. `void` vứt object
@@ -555,6 +567,19 @@ export async function startWorker(): Promise<void> {
       .catch((err) => console.error('[worker] quét pool hỏng:', err))
   }, 60_000)
 
+  // FR-F8 ở trạng thái ổn định: IE lẻ tẻ dưới tải (một lần trong ~40 bài trên máy dev) được
+  // chấm lại sau 2 phút, tối đa 3 lần; quá đó là nghi poison và nằm chờ admin.
+  const ieHeal = setInterval(() => {
+    healIePeriodic()
+      .then((r) => {
+        if (r.requeued || r.demoted) {
+          console.log(`[worker] IE: xếp lại ${r.requeued}, dừng tự chấm lại ${r.demoted} (FR-F8)`)
+        }
+        if (r.requeued) wakeAll()
+      })
+      .catch((err) => console.error('[worker] tự lành IE hỏng:', err))
+  }, 300_000)
+
   // Nối chuông "có việc mới" trước khi mở slot: nối sau thì những lượt nộp trong khoảng
   // đó không đánh thức được ai và phải chờ hết một nhịp poll.
   const unwake = await startJobWake()
@@ -568,6 +593,7 @@ export async function startWorker(): Promise<void> {
       console.log(`[worker] ${signal} — chấm nốt testcase hiện tại rồi thoát`)
       clearInterval(beat)
       clearInterval(hourly)
+      clearInterval(ieHeal)
       clearInterval(poolSweep)
       // Đánh thức mọi slot đang ngủ để chúng thấy `stopping` ngay, thay vì nằm chờ hết
       // nhịp poll rồi mới chịu thoát.
@@ -579,6 +605,7 @@ export async function startWorker(): Promise<void> {
   await Promise.all(slots)
   clearInterval(beat)
   clearInterval(hourly)
+  clearInterval(ieHeal)
   clearInterval(poolSweep)
   unwake()
   // Huỷ container ấm TRƯỚC khi đóng pool DB: bỏ qua bước này là mỗi lần tắt để lại một

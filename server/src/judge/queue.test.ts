@@ -3,6 +3,7 @@
  *
  * Các ca chạy container thật cần cả INTEGRATION=1 lẫn DOCKER=1.
  */
+import { readFileSync } from 'node:fs'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { q } from '@/db/pool'
@@ -28,12 +29,15 @@ import {
   enqueueRejudgeForProblem,
   finish,
   finishRejudge,
+  healIeOnStartup,
+  healIePeriodic,
   heartbeat,
   purgeOld,
   queueStats,
   reapRejudge,
   reapStale,
   rejudgeQueueDepth,
+  retryIeSubmissions,
 } from './queue'
 
 const DOCKER = process.env.DOCKER === '1'
@@ -376,5 +380,153 @@ describe.skipIf(!INTEGRATION)('hàng đợi chấm bài', () => {
       `)
       expect(row?.validated_testcase_rev).toBe(row?.testcase_rev)
     })
+  })
+})
+
+/**
+ * FR-F8 — IE tự chấm lại. Nợ ghi từ 01.09: `retryIeSubmissions` có mà không ai gọi ngoài
+ * nút admin, nên một bài IE nằm IE vĩnh viễn nếu không ai để ý. Bộ này canh cả ba đường
+ * (khởi động / định kỳ / admin) VÀ canh việc worker thật sự gọi chúng — chính lớp lỗi
+ * "hàm tồn tại nhưng không ai gọi" là thứ đã xảy ra.
+ */
+describe('FR-F8 — worker phải gọi bộ tự lành', () => {
+  it('startWorker gọi healIeOnStartup lúc khởi động và healIePeriodic theo nhịp', () => {
+    const src = readFileSync(new URL('../worker.ts', import.meta.url), 'utf8')
+    expect(src).toContain('await healIeOnStartup()')
+    expect(src).toContain('healIePeriodic()')
+  })
+})
+
+describe.skipIf(!INTEGRATION)('FR-F8 — IE tự chấm lại', () => {
+  let member: TestUser
+  let problemId: string
+  let itemId: string
+
+  beforeAll(async () => {
+    await setupDb()
+  })
+
+  beforeEach(async () => {
+    await resetDb()
+    const mentor = await makeUser('mentor')
+    member = await makeUser('member')
+    const course = await makeCourse(mentor.id)
+    await enroll(course.id, member.id)
+    problemId = await makeProblem(mentor.id)
+    await addTestcases(problemId, [{ input: '1 2\n', expected: '3\n', kind: 'sample' }])
+    itemId = await makeItem(course.id, problemId)
+  })
+
+  /** Một bài đã IE với attempt/lý do/mốc giờ cho trước. */
+  async function ie(o: {
+    attempt?: number
+    retry?: boolean
+    reason?: string
+    finishedAgo?: string
+    receivedAgo?: string
+  } = {}): Promise<string> {
+    const r = await enqueue({ kind: 'submit', userId: member.id, problemId, itemId, languageId: 'c11', source: AC_SOURCE })
+    if (!r.ok) throw new Error(r.code)
+    await q(sql`
+      UPDATE submissions
+      SET status = 'done', verdict = 'IE', ie_reason = ${o.reason ?? 'no_meta'}, ie_retry = ${o.retry ?? true},
+          attempt = ${o.attempt ?? 1},
+          finished_at = now() - ${o.finishedAgo ?? '10 minutes'}::interval,
+          received_at = now() - ${o.receivedAgo ?? '10 minutes'}::interval
+      WHERE id = ${r.id}`)
+    return r.id
+  }
+  const st = async (id: string) =>
+    (
+      await q<{ status: string; verdict: string | null; attempt: number; retry: boolean; reason: string | null }>(
+        sql`SELECT status, verdict, attempt, ie_retry AS retry, ie_reason AS reason FROM submissions WHERE id = ${id}`,
+      )
+    )[0]!
+
+  it('khởi động: xếp lại mọi IE còn ie_retry trong 24 h — kể cả stale_heartbeat attempt ≥ 3 — và GIỮ attempt', async () => {
+    const stale = await ie({ attempt: 3, reason: 'stale_heartbeat' })
+    const flake = await ie({ attempt: 1 })
+    const poison = await ie({ retry: false, attempt: 3 })
+    const cu = await ie({ receivedAgo: '30 hours' })
+
+    expect(await healIeOnStartup()).toBe(2)
+    expect(await st(stale)).toMatchObject({ status: 'pending', verdict: null, reason: null, attempt: 3 })
+    expect(await st(flake)).toMatchObject({ status: 'pending', verdict: null, attempt: 1 })
+    expect(await st(poison)).toMatchObject({ status: 'done', verdict: 'IE' })
+    expect(await st(cu)).toMatchObject({ status: 'done', verdict: 'IE' })
+  })
+
+  it('định kỳ: chỉ bài xong hơn 2 phút với attempt < 3; attempt ≥ 3 không phải stale thì hạ ie_retry', async () => {
+    const vuaXong = await ie({ attempt: 1, finishedAgo: '30 seconds' })
+    const flake = await ie({ attempt: 2 })
+    const poison = await ie({ attempt: 3, reason: 'exec_failed' })
+    const stale = await ie({ attempt: 3, reason: 'stale_heartbeat' })
+
+    expect(await healIePeriodic()).toEqual({ requeued: 1, demoted: 1 })
+    expect(await st(flake)).toMatchObject({ status: 'pending', attempt: 2 })
+    // Vừa IE xong: chưa bắt lại — chờ đủ 2 phút.
+    expect(await st(vuaXong)).toMatchObject({ status: 'done', verdict: 'IE', retry: true })
+    // Poison: nằm yên, hết tự chấm lại, chờ admin.
+    expect(await st(poison)).toMatchObject({ status: 'done', verdict: 'IE', retry: false })
+    // Worker chết giữa chừng thì không phải lỗi của bài — giữ ie_retry cho lần khởi động sau.
+    expect(await st(stale)).toMatchObject({ status: 'done', verdict: 'IE', retry: true })
+    expect(await healIeOnStartup()).toBe(2) // stale + vuaXong; poison đã bị hạ
+    expect(await st(stale)).toMatchObject({ status: 'pending' })
+    expect(await st(poison)).toMatchObject({ status: 'done' })
+
+    // Chạy lại lần nữa không có gì để làm — idempotent.
+    expect(await healIePeriodic()).toEqual({ requeued: 0, demoted: 0 })
+  })
+
+  it('bị hạ ie_retry ba lần liên tiếp là ngưỡng: lần chấm thứ tư chỉ đến từ nút admin', async () => {
+    const poison = await ie({ attempt: 3 })
+    await healIePeriodic()
+    expect((await st(poison)).retry).toBe(false)
+    expect(await healIeOnStartup()).toBe(0)
+    expect(await retryIeSubmissions(48)).toBe(1)
+    expect(await st(poison)).toMatchObject({ status: 'pending', attempt: 3 })
+    // Bài quá cửa sổ giờ của nút thì không.
+    const cu = await ie({ retry: false, receivedAgo: '60 hours' })
+    expect(await retryIeSubmissions(48)).toBe(0)
+    expect((await st(cu)).status).toBe('done')
+  })
+
+  it('bài xếp lại được claim với attempt TĂNG TIẾP — kết quả cũ trong submission_results không bị nuốt', async () => {
+    const id = await ie({ attempt: 2 })
+    // Kết quả của lần chấm cũ (attempt 2) nằm sẵn trong bảng — về attempt 0 rồi claim thành
+    // 1, 2 là INSERT mới đụng PK và bị DO NOTHING nuốt mất.
+    await q(sql`
+      INSERT INTO submission_results (submission_id, attempt, position, is_sample, verdict)
+      VALUES (${id}, 2, 1, true, 'IE')`)
+    await healIeOnStartup()
+    const job = await claimNext('w-test', 0)
+    expect(job?.id).toBe(id)
+    expect(job?.attempt).toBe(3)
+    const ok = await finish(id, 'w-test', 3, {
+      verdict: 'AC',
+      passedWeight: 1,
+      totalWeight: 1,
+      timeMsMax: 5,
+      memoryKbMax: 100,
+      compileOutput: '',
+      judgeMs: 5,
+      ieReason: null,
+      testcaseRev: null,
+      results: [
+        {
+          position: 1, testcaseId: null, isSample: true, verdict: 'AC', timeMs: 5, memoryKb: 100,
+          exitCode: 0, termSignal: null, detail: null, stdout: '3', stderr: null, mentorStdout: null, firstDiffLine: null,
+        },
+      ],
+    })
+    expect(ok).toBe(true)
+    const rows = await q<{ attempt: number; verdict: string }>(
+      sql`SELECT attempt, verdict FROM submission_results WHERE submission_id = ${id} ORDER BY attempt`,
+    )
+    expect(rows).toEqual([
+      { attempt: 2, verdict: 'IE' },
+      { attempt: 3, verdict: 'AC' },
+    ])
+    expect(await st(id)).toMatchObject({ status: 'done', verdict: 'AC', reason: null })
   })
 })

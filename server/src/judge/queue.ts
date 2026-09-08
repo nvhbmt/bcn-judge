@@ -318,17 +318,59 @@ export async function reapStale(): Promise<{ requeued: number; failed: number }>
   return { requeued: requeued.length, failed: failed.length }
 }
 
-/** FR-F8: IE do sự cố hạ tầng được chấm lại khi judge sống lại. */
-export async function retryIeSubmissions(withinHours = 24): Promise<number> {
+/**
+ * FR-F8 — IE là lỗi hệ thống, không phải của member, nên phải TỰ chấm lại. Ba đường,
+ * một câu UPDATE chung (`requeueIe`):
+ *
+ *   - `healIeOnStartup` — mỗi lần worker khởi động: mọi IE còn `ie_retry` trong 24 h,
+ *     không cần biết attempt. Đây là lúc hạ tầng vừa hồi phục (design §3.5), kể cả IE
+ *     `stale_heartbeat` do chính worker này chết giữa chừng.
+ *   - `healIePeriodic` — mỗi 5 phút khi worker đang sống: IE còn `ie_retry`, đã xong hơn
+ *     2 phút (không bắt lại bài vừa IE trong tích tắc) và `attempt < 3`. Bài đã bị chấm
+ *     3 lần bởi worker đang khoẻ mà vẫn IE (không phải stale_heartbeat) là nghi poison
+ *     thật → hạ `ie_retry = false` để nó nằm yên ở danh sách FR-H3 chờ admin, thay vì
+ *     quay vòng mỗi 5 phút vô hạn.
+ *   - `retryIeSubmissions` — nút của admin ("tình huống mù"): cả bài đã bị hạ `ie_retry`.
+ *
+ * KHÔNG đưa `attempt` về 0 dù design §3.5 viết vậy: `submission_results` có PK
+ * `(submission_id, attempt, position)` và INSERT của lần chấm mới là `ON CONFLICT DO
+ * NOTHING` — về 0 rồi claim thành attempt 1 thì kết quả từng test của lần chấm mới bị
+ * nuốt lặng lẽ, màn hình hiện verdict mới trên bảng test cũ. Giữ attempt tăng dần là
+ * mỗi lần chấm một số, không va ai.
+ */
+async function requeueIe(where: ReturnType<typeof sql>): Promise<number> {
   const rows = await q<{ id: string }>(sql`
     UPDATE submissions
     SET status = 'pending', verdict = NULL, ie_reason = NULL, worker_id = NULL,
         heartbeat_at = NULL, started_at = NULL, finished_at = NULL
-    WHERE status = 'done' AND verdict = 'IE' AND ie_retry = true
-      AND received_at > now() - make_interval(hours => ${withinHours})
+    WHERE status = 'done' AND verdict = 'IE' AND ${where}
     RETURNING id
   `)
   return rows.length
+}
+
+export async function healIeOnStartup(withinHours = 24): Promise<number> {
+  return requeueIe(sql`ie_retry = true AND received_at > now() - make_interval(hours => ${withinHours})`)
+}
+
+export async function healIePeriodic(): Promise<{ requeued: number; demoted: number }> {
+  const demoted = await q<{ id: string }>(sql`
+    UPDATE submissions
+    SET ie_retry = false
+    WHERE status = 'done' AND verdict = 'IE' AND ie_retry = true
+      AND attempt >= 3 AND COALESCE(ie_reason, '') <> 'stale_heartbeat'
+    RETURNING id
+  `)
+  const requeued = await requeueIe(sql`
+    ie_retry = true AND attempt < 3
+    AND finished_at < now() - interval '120 seconds'
+    AND received_at > now() - interval '24 hours'`)
+  return { requeued, demoted: demoted.length }
+}
+
+/** Nút admin: chấm lại mọi IE trong N giờ, kể cả bài đã bị hạ `ie_retry` (nghi poison). */
+export async function retryIeSubmissions(withinHours = 24): Promise<number> {
+  return requeueIe(sql`received_at > now() - make_interval(hours => ${withinHours})`)
 }
 
 /** Vệ sinh mỗi giờ (§3): run cũ hơn 24 h, contest_events cũ hơn 7 ngày. */

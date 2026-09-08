@@ -90,7 +90,7 @@ export function AdminPage() {
   });
   const retryIe = useMutation({
     mutationFn: () =>
-      api.post("/api/admin/judge/retry-ie", { withinHours: 24 }),
+      api.post("/api/admin/judge/retry-ie", { withinHours: 48 }),
     onSuccess: () => client.invalidateQueries({ queryKey: ["admin", "judge"] }),
   });
   const togglePause = useMutation({
@@ -193,7 +193,9 @@ export function AdminPage() {
           meta={`${data.ieSubmissions.length} bài`}
         />
         <p className="mt-3 mb-3 text-[13px] text-ink-5">
-          IE không tính vào lượt của member và được chấm lại.
+          IE không tính vào lượt của member. Worker tự chấm lại khi khởi động và mỗi 5 phút;
+          bài IE ba lần liên tiếp thì dừng tự chấm lại và nằm ở đây — nút dưới chấm lại cả
+          những bài đó.
         </p>
         <Button
           onClick={() => retryIe.mutate()}
@@ -201,7 +203,7 @@ export function AdminPage() {
         >
           {retryIe.isPending
             ? "Đang xếp lại…"
-            : "Chấm lại toàn bộ IE trong 24 giờ"}
+            : "Chấm lại toàn bộ IE trong 48 giờ"}
         </Button>
       </section>
 

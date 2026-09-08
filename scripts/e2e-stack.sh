@@ -51,6 +51,26 @@ for port in "${VITE_PORT}" "${PORT}"; do
   fi
 done
 
+# Container bể ấm MỒ CÔI của worker lần chạy trước. Playwright dọn stack bằng SIGKILL cả
+# process group, nên handler SIGTERM của worker (xả bể — drainPool) không bao giờ chạy và
+# mỗi lượt e2e để lại một container `sleep infinity`. Ở production worker mới dọn lúc khởi
+# động (reap.ts); ở máy dev không ai dọn, và bộ judge Docker đếm "không sót container" thì
+# đỏ oan (đã xảy ra 08.09.2026). Chỉ dọn container mang nhãn worker của MÁY NÀY mà tiến
+# trình chủ đã chết — container của worker dev đang sống không bị đụng.
+host="$(hostname)"
+docker ps -a --filter label=bcnjudge.sandbox=1 --format '{{.ID}}|{{.Label "bcnjudge.worker"}}' 2>/dev/null |
+  while IFS='|' read -r cid owner; do
+    case "$owner" in
+      "$host"-*)
+        pid="${owner##*-}"
+        if ! kill -0 "$pid" 2>/dev/null; then
+          echo "[e2e] dọn container mồ côi $cid (worker $owner đã chết)"
+          docker rm -f "$cid" >/dev/null 2>&1 || true
+        fi
+        ;;
+    esac
+  done
+
 echo "[e2e] dựng database $DB"
 # Ngắt mọi kết nối còn sót TRƯỚC khi DROP. Vòng chờ ở trên lo các tiến trình mình biết,
 # nhưng một tiến trình bị SIGKILL có thể để lại backend Postgres còn treo vài giây —
